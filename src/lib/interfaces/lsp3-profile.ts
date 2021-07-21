@@ -9,20 +9,20 @@ export interface LSP3ProfileJSON {
 export interface LSP3Profile {
     name:            string;
     description:     string;
-    profileImage:    Image[];
-    backgroundImage: Image[];
+    profileImage:    LSP3ProfileImage[];
+    backgroundImage: LSP3ProfileImage[];
     tags:            string[];
-    links:           Link[];
+    links:           LSP3ProfileLink[];
 }
 
 // prettier-ignore
-export interface Link {
+export interface LSP3ProfileLink {
     title:          string;
     url:            string;
 }
 
 // prettier-ignore
-export interface Image {
+export interface LSP3ProfileImage {
     width:        number;
     height:       number;
     hashFunction: string;

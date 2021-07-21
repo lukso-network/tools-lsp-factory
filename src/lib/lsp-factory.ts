@@ -7,7 +7,7 @@ import {
   ERC725Account,
   ERC725Account__factory,
   UniversalReceiverAddressStore__factory,
-} from '../types/ethers-contracts';
+} from '../types/ethers-v5';
 
 import { getERC725 } from './helpers/erc725';
 import { LSP3ProfileJSON } from './interfaces/lsp3-profile';

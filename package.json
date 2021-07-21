@@ -19,7 +19,7 @@
     "test:node": "hardhat node",
     "test:unit": "run-p test:unit:*",
     "test:unit:chain": "hardhat node",
-    "test:unit:ava": "wait-on http://127.0.0.1:8545/ && nyc ava",
+    "test:unit:ava": "wait-on http://127.0.0.1:8545/ && nyc --silent ava",
     "check-cli": "run-s test diff-integration-tests check-integration-tests",
     "check-integration-tests": "run-s check-integration-test:*",
     "diff-integration-tests": "mkdir -p diff && rm -rf diff/test && cp -r test diff/test && rm -rf diff/test/test-*/.git && cd diff && git init --quiet && git add -A && git commit --quiet --no-verify --allow-empty -m 'WIP' && echo '\\n\\nCommitted most recent integration test output in the \"diff\" directory. Review the changes with \"cd diff && git diff HEAD\" or your preferred git diff viewer.'",
@@ -31,12 +31,14 @@
     "cov:send": "run-s cov:lcov && codecov",
     "cov:check": "nyc report && nyc check-coverage --lines 100 --functions 100 --branches 100",
     "doc": "run-s doc:html && open-cli build/docs/index.html",
-    "doc:html": "typedoc src/ --exclude **/*.spec.ts --target ES6 --mode file --out build/docs",
-    "doc:json": "typedoc src/ --exclude **/*.spec.ts --target ES6 --mode file --json build/docs/typedoc.json",
+    "doc:html": "typedoc src/ --exclude 'src/types/**/*.ts' --exclude '**/*+(index|.spec|.e2e).ts' --out build/docs",
+    "doc:json": "typedoc src/ --exclude 'src/types/**/*.ts' --exclude '**/*+(index|.spec|.e2e).ts' --json build/docs/typedoc.json",
     "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d build/docs",
     "version": "standard-version",
     "reset-hard": "git clean -dfx && git reset --hard && npm i",
-    "prepare-release": "run-s reset-hard test cov:check doc:html version doc:publish"
+    "prepare-release": "run-s reset-hard test cov:check doc:html version doc:publish",
+    "generate-types": "typechain --target ethers-v5 --out-dir 'src/types/ethers-v5' './node_modules/universalprofile-smart-contracts/build/contracts/*.json'",
+    "postinstall": "npm run generate-types"
   },
   "engines": {
     "node": ">=10"
@@ -72,6 +74,8 @@
     "standard-version": "^9.0.0",
     "ts-node": "^10.1.0",
     "typedoc": "^0.21.4",
+    "typechain": "5.1.2",
+    "@typechain/ethers-v5": "7.0.1",
     "typescript": "^4.3.5",
     "web3": "^1.4.0"
   },
