@@ -9,7 +9,7 @@ const provider = new providers.JsonRpcProvider('HTTP://127.0.0.1:8545');
 const myLSPFactory = new LSPFactory('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266', provider);
 
 test('deploy LSP3UniversalProfile', async (t) => {
-  const { erc725Account, basicKeyManager } = await myLSPFactory.createLSP3UniversalProfile({
+  const { erc725Account, basicKeyManager } = await myLSPFactory.LSP3UniversalProfile.deploy({
     controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
     lsp3ProfileJson,
   });
