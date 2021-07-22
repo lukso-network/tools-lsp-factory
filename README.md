@@ -15,12 +15,6 @@ npm run generate-types
 
 In the [package.json](package.json) file under `scripts` there is a `post-install` hook, which also runs `generate-types` every time you install a package.
 
-##
-
-# universalprofile-smart-contracts
-
-The reference implementation for universal profiles smart contracts.
-
 ## Development
 
 ```bash
