@@ -28,8 +28,8 @@
     "cov:send": "run-s cov:lcov && codecov",
     "cov:check": "nyc report && nyc check-coverage --lines 100 --functions 100 --branches 100",
     "doc": "run-s doc:html && open-cli build/docs/index.html",
-    "doc:html": "typedoc src/ --exclude 'src/types/**/*.ts' --exclude '**/*+(index|.spec|.e2e).ts' --highlightTheme github-light --out build/docs",
-    "doc:json": "typedoc src/ --exclude 'src/types/**/*.ts' --exclude '**/*+(index|.spec|.e2e).ts' --highlightTheme github-light --json build/docs/typedoc.json",
+    "doc:html": "typedoc --out build/docs",
+    "doc:json": "typedoc --json build/docs/typedoc.json",
     "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d build/docs",
     "version": "standard-version",
     "reset-hard": "git clean -dfx && git reset --hard && npm i",
@@ -45,7 +45,8 @@
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "erc725.js": "^0.5.7",
     "ethers": "5.4.1",
-    "graphql": "^15.5.1"
+    "graphql": "^15.5.1",
+    "typedoc-neo-theme": "^1.1.1"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",
