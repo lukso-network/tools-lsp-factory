@@ -23,7 +23,9 @@
         "mkdir",
         "prettierignore",
         "sandboxed",
+        "submodules",
         "transpiled",
+        "Typechain",
         "typedoc",
         "untracked"
     ],

@@ -16,7 +16,7 @@
     "fix:prettier": "prettier \"src/**/*.ts\" --write",
     "fix:lint": "eslint src --ext .ts --fix",
     "test": "run-s build test:unit",
-    "test:unit": "hardhat test",
+    "test:unit": "nyc hardhat test",
     "check-cli": "run-s test diff-integration-tests check-integration-tests",
     "check-integration-tests": "run-s check-integration-test:*",
     "diff-integration-tests": "mkdir -p diff && rm -rf diff/test && cp -r test diff/test && rm -rf diff/test/test-*/.git && cd diff && git init --quiet && git add -A && git commit --quiet --no-verify --allow-empty -m 'WIP' && echo '\\n\\nCommitted most recent integration test output in the \"diff\" directory. Review the changes with \"cd diff && git diff HEAD\" or your preferred git diff viewer.'",
@@ -34,7 +34,7 @@
     "version": "standard-version",
     "reset-hard": "git clean -dfx && git reset --hard && npm i",
     "prepare-release": "run-s reset-hard test cov:check doc:html version doc:publish",
-    "generate-types": "typechain --target ethers-v5 --out-dir 'src/types/ethers-v5' './node_modules/universalprofile-smart-contracts/build/contracts/*.json'",
+    "generate-types": "typechain --target ethers-v5 --out-dir 'src/types/ethers-v5' './submodules/universalprofile-smart-contracts/build/contracts/*.json'",
     "postinstall": "npm run generate-types"
   },
   "engines": {
@@ -45,8 +45,7 @@
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "erc725.js": "^0.5.7",
     "ethers": "5.4.1",
-    "graphql": "^15.5.1",
-    "universalprofile-smart-contracts": "file:../universalprofile-smart-contracts/universalprofile-smart-contracts-1.0.0.tgz"
+    "graphql": "^15.5.1"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",

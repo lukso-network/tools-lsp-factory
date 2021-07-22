@@ -13,6 +13,7 @@ import {
   LSP3ProfileJSON,
   ProfileDeploymentOptions,
 } from '../interfaces';
+
 export class LSP3UniversalProfile {
   options: any;
   signer: Wallet;
