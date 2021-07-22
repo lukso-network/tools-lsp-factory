@@ -34,3 +34,5 @@ jobs:
       - run: npm run cov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
+        with:
+          directory: './coverage/'
