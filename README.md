@@ -1,5 +1,8 @@
 # lsp-factory.js
 
+> **⚠ WARNING: WIP **  
+> not yet published and not yet usable.
+
 Helper Library to allow simple deployments of LSP3UniversalProfiles and LSP4DigitalCertificates
 
 # Types / Typechain
