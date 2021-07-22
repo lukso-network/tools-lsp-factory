@@ -1,0 +1,12 @@
+{
+  "LSP3UniversalProfile": {
+    "0.0.1": {
+      "ERC725Account": "0x...",
+      "KeyManager": "0x...",
+      "UniversalReceiverDelegate": "0x..."
+    }
+  },
+  "LSP4DigitalCertificate": {
+    "0.0.1": {}
+  }
+}

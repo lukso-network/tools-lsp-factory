@@ -1,5 +1,8 @@
-interface LSPFactoryOptions {
-  deployFrom: string;
+/**
+ * TDB
+ */
+export interface LSPFactoryOptions {
+  deployKey: string;
   provider: any;
   chainId: number;
 }
