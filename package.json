@@ -34,7 +34,7 @@
     "version": "standard-version",
     "reset-hard": "git clean -dfx && git reset --hard && npm i",
     "prepare-release": "run-s reset-hard test cov:check doc:html version doc:publish",
-    "generate-types": "typechain --target ethers-v5 --out-dir 'src/types/ethers-v5' './node_modules/@lukso/universalprofile-smart-contracts/build/contracts/*.json'",
+    "generate-types": "typechain --target ethers-v5 --out-dir 'types/ethers-v5' './node_modules/@lukso/universalprofile-smart-contracts/build/contracts/*.json'",
     "postinstall": "npm run generate-types"
   },
   "engines": {

@@ -1,16 +1,17 @@
 import { ethers, Wallet } from 'ethers';
+
 import {
   ERC725Account,
-  UniversalReceiverAddressStore__factory,
   ERC725Account__factory,
-  KeyManager__factory,
   KeyManager,
-} from '../../types/ethers-v5';
+  KeyManager__factory,
+  UniversalReceiverAddressStore__factory,
+} from '../../../types/ethers-v5';
 import { encodeLSP3Profile } from '../helpers/erc725';
 import {
-  LSPFactoryOptions,
   ContractOptions,
   LSP3ProfileJSON,
+  LSPFactoryOptions,
   ProfileDeploymentOptions,
 } from '../interfaces';
 

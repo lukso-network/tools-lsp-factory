@@ -1,5 +1,6 @@
 import { ERC725, Erc725Schema } from 'erc725.js';
 import { solidityKeccak256 } from 'ethers/lib/utils';
+
 import { LSP3ProfileJSON } from '../interfaces';
 
 export function getERC725(address?: string, provider?: any) {
