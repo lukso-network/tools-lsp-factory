@@ -1,2 +1,10 @@
 build/module/types
 src/types
+test
+
+.nycrc.json
+.prettierignore
+hardhat.config.ts
+tsconfig.json
+tsconfig.module.json
+typedoc.json
