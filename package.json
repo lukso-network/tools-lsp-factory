@@ -1,5 +1,5 @@
 {
-  "name": "lsp-factory.js",
+  "name": "@lukso/lsp-factory.js",
   "version": "1.0.1",
   "description": "Helper Library to allow simple deployments of LSP3UniversalProfiles and LSP4DigitalCertificates",
   "main": "build/main/index.js",
@@ -34,7 +34,7 @@
     "version": "standard-version",
     "reset-hard": "git clean -dfx && git reset --hard && npm i",
     "prepare-release": "run-s reset-hard test cov:check doc:html version doc:publish",
-    "generate-types": "typechain --target ethers-v5 --out-dir 'src/types/ethers-v5' './submodules/universalprofile-smart-contracts/build/contracts/*.json'",
+    "generate-types": "typechain --target ethers-v5 --out-dir 'types/ethers-v5' './node_modules/@lukso/universalprofile-smart-contracts/build/contracts/*.json'",
     "postinstall": "npm run generate-types"
   },
   "engines": {
@@ -78,7 +78,8 @@
     "typedoc": "^0.21.4",
     "typescript": "^4.3.5",
     "wait-on": "6.0.0",
-    "web3": "^1.4.0"
+    "web3": "^1.4.0",
+    "@lukso/universalprofile-smart-contracts": "0.1.1"
   },
   "files": [
     "build/main",

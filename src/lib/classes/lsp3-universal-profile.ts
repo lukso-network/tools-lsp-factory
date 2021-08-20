@@ -1,16 +1,17 @@
 import { ethers, Wallet } from 'ethers';
+
 import {
   ERC725Account,
-  UniversalReceiverAddressStore__factory,
-  BasicKeyManager,
-  BasicKeyManager__factory,
   ERC725Account__factory,
-} from '../../types/ethers-v5';
+  KeyManager,
+  KeyManager__factory,
+  UniversalReceiverAddressStore__factory,
+} from '../../../types/ethers-v5';
 import { encodeLSP3Profile } from '../helpers/erc725';
 import {
-  LSPFactoryOptions,
   ContractOptions,
   LSP3ProfileJSON,
+  LSPFactoryOptions,
   ProfileDeploymentOptions,
 } from '../interfaces';
 
@@ -28,7 +29,7 @@ export class LSP3UniversalProfile {
     const erc725Account = await this.deployERC725Account(profileDeployment.controllerAddresses[0]);
 
     // 2 > deploys KeyManager
-    const basicKeyManager = await this.deployKeyManager(erc725Account.address);
+    const keyManager = await this.deployKeyManager(erc725Account.address);
 
     // 3 > deploys UniversalReceiverDelegate
     const universalReceiverAddressStore = await this.deployUniversalReceiverAddressStore(
@@ -44,9 +45,9 @@ export class LSP3UniversalProfile {
     }
 
     // 5 > transfersOwnership to KeyManager
-    await this.transferOwnership(erc725Account, basicKeyManager);
+    await this.transferOwnership(erc725Account, keyManager);
 
-    return { erc725Account, basicKeyManager, universalReceiverAddressStore };
+    return { erc725Account, basicKeyManager: keyManager, universalReceiverAddressStore };
   }
 
   /**
@@ -74,10 +75,10 @@ export class LSP3UniversalProfile {
     return universalReceiverAddressStore;
   }
 
-  private async transferOwnership(erc725Account: ERC725Account, basicKeyManager: BasicKeyManager) {
+  private async transferOwnership(erc725Account: ERC725Account, keyManager: KeyManager) {
     try {
       const transferOwnershipTransaction = await erc725Account.transferOwnership(
-        basicKeyManager.address,
+        keyManager.address,
         { from: this.options.deployFrom, gasPrice: 80, gasLimit: 6_721_975 }
       );
       return await transferOwnershipTransaction.wait();
@@ -110,23 +111,23 @@ export class LSP3UniversalProfile {
 
   private async deployKeyManager(address: string) {
     try {
-      const basicKeyManagerFactory = new BasicKeyManager__factory(this.signer);
-      const basicKeyManager = await basicKeyManagerFactory.deploy(address, {
+      const keyManagerFactory = new KeyManager__factory(this.signer);
+      const keyManager = await keyManagerFactory.deploy(address, {
         gasPrice: 80,
         gasLimit: 6_721_975,
       });
-      await basicKeyManager.deployed();
-      return basicKeyManager;
+      await keyManager.deployed();
+      return keyManager;
     } catch (error) {
       console.error('Error when deploying KeyManager', error);
       throw error;
     }
   }
 
-  private async deployERC725Account(owner: string) {
+  private async deployERC725Account(ownerAddress: string) {
     try {
       const erc725AccountFactory = new ERC725Account__factory(this.signer);
-      const erc725Account = await erc725AccountFactory.deploy(owner, {
+      const erc725Account = await erc725AccountFactory.deploy(ownerAddress, {
         gasPrice: 80,
         gasLimit: 6_721_975,
       });
