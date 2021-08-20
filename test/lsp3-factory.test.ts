@@ -4,6 +4,7 @@ import { ethers } from 'hardhat';
 import { getERC725 } from '../src/lib/helpers/erc725';
 import { lsp3ProfileJson } from '../src/lib/helpers/sample-lsp3-profile';
 import { LSPFactory } from '../src/lib/lsp-factory';
+import { ERC725Account__factory } from '../src/types/ethers-v5';
 
 describe('LSP3UniversalProfile', async () => {
   it('should deploy and set LSP3Profile data', async () => {

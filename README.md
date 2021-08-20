@@ -14,18 +14,3 @@ npm run generate-types
 ```
 
 In the [package.json](package.json) file under `scripts` there is a `post-install` hook, which also runs `generate-types` every time you install a package.
-
-## Development
-
-```bash
-git submodule update --init --recursive
-
-# run npm install
-npm install && cd submodules/universalprofile-smart-contracts && npm install && cd submodules/ERC725/implementations && npm install
-
-# go to submodules/universalprofile-smart-contracts
-cd ../../../
-
-# build the contracts with truffle
-npx truffle build
-```

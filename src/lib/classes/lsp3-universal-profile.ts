@@ -123,10 +123,10 @@ export class LSP3UniversalProfile {
     }
   }
 
-  private async deployERC725Account(owner: string) {
+  private async deployERC725Account(ownerAddress: string) {
     try {
       const erc725AccountFactory = new ERC725Account__factory(this.signer);
-      const erc725Account = await erc725AccountFactory.deploy(owner, {
+      const erc725Account = await erc725AccountFactory.deploy(ownerAddress, {
         gasPrice: 80,
         gasLimit: 6_721_975,
       });
