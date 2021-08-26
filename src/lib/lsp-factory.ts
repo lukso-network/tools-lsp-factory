@@ -15,7 +15,7 @@ export class LSPFactory {
    * import { LSPFactory} from 'lspFactory.js';
    *
    * const myLSPFactory = new LSPFactory('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266', provider);
-   * const { erc725Account, basicKeyManager } = await myLSPFactory.createLSP3UniversalProfile({
+   * const { erc725Account, keyManager } = await myLSPFactory.createLSP3UniversalProfile({
    *    controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
    *    lsp3ProfileJson
    * });
@@ -27,7 +27,7 @@ export class LSPFactory {
    * import { LSPFactory} from 'lspFactory.js';
    *
    * const myLSPFactory = new LSPFactory('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266', provider);
-   * const { erc725Account, basicKeyManager } = await myLSPFactory.createLSP3UniversalProfile({
+   * const { erc725Account, keyManager } = await myLSPFactory.createLSP3UniversalProfile({
    *    controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
    *    lsp3ProfileJson
    * });

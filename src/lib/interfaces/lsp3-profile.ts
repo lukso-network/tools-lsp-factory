@@ -23,3 +23,12 @@ export interface LSP3ProfileImage {
   hash: string;
   url: string;
 }
+
+export interface ProfileDataBeforeUpload {
+  profileImage?: File;
+  backgroundImage?: File;
+  name: string;
+  description: string;
+  links?: LSP3ProfileLink[];
+  tags?: string[];
+}
