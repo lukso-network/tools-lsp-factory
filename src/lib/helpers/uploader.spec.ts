@@ -31,10 +31,15 @@ describe('#ipfsUpload', () => {
 describe('#imageUpload', () => {
   it('should throw an error on invalid input', async () => {
     await expect(
-      imageUpload({} as File, {
-        ipfsClientOptions: {},
-      })
-    ).rejects.toThrowError('File provided is not an image.');
+      imageUpload(
+        new File(['sdfasdf'], 'file-name', {
+          type: 'zip',
+        }),
+        {
+          ipfsClientOptions: {},
+        }
+      )
+    ).rejects.toThrowError('File provided is of type "zip".');
   });
 
   it('should pin files when using IPFS', async () => {

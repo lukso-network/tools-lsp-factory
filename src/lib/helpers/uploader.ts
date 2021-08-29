@@ -14,7 +14,7 @@ export async function imageUpload(
 ): Promise<LSP3ProfileImage[]> {
   const isImage = givenFile.type?.substr(0, 6) === 'image/';
   if (!isImage) {
-    throw new Error('File provided is not an image.');
+    throw new Error(`File provided is of type "${givenFile.type}".`);
   }
 
   return Promise.all(
