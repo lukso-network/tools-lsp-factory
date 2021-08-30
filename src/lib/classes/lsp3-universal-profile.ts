@@ -98,11 +98,14 @@ export class LSP3UniversalProfile {
     };
 
     // TODO: allow simple http upload too
-    const url = await ipfsUpload(JSON.stringify(profile), uploadOptions.ipfsClientOptions);
+    const uploadResponse = await ipfsUpload(
+      JSON.stringify(profile),
+      uploadOptions.ipfsClientOptions
+    );
 
     return {
       profile,
-      url: url.cid ? 'ipfs://' + url.cid : 'https upload TBD',
+      url: uploadResponse.cid ? 'ipfs://' + uploadResponse.cid : 'https upload TBD',
     };
   }
 
