@@ -8,4 +8,4 @@ coverage
 *.log
 yarn.lock
 types
-.cspell
+.cspell.json
