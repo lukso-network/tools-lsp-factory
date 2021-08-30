@@ -12,7 +12,7 @@ jobs:
       matrix:
         include:
           - registry-url: 'https://registry.npmjs.org'
-            command: npm publish --access public
+            command: npm publish --access public --tag alpha
             token: NPM_TOKEN
           # - registry-url: 'https://npm.pkg.github.com'
           #   command: npm publish
