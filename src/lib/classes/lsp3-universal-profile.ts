@@ -7,16 +7,19 @@ import {
   KeyManager__factory,
   UniversalReceiverAddressStore__factory,
 } from '../../../types/ethers-v5';
+import { defaultUploadOptions } from '../helpers/config';
 import { encodeLSP3Profile } from '../helpers/erc725';
+import { imageUpload, ipfsUpload } from '../helpers/uploader';
 import {
-  ContractOptions,
   LSP3ProfileJSON,
   LSPFactoryOptions,
+  ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
 } from '../interfaces';
+import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
 
 export class LSP3UniversalProfile {
-  options: any;
+  options: LSPFactoryOptions;
   signer: Wallet;
 
   constructor(options: LSPFactoryOptions) {
@@ -24,7 +27,7 @@ export class LSP3UniversalProfile {
     this.signer = new ethers.Wallet(this.options.deployKey, this.options.provider);
   }
 
-  async deploy(profileDeployment: ProfileDeploymentOptions, _contractOptions?: ContractOptions) {
+  async deploy(profileDeployment: ProfileDeploymentOptions) {
     // 1 > deploys ERC725Account
     const erc725Account = await this.deployERC725Account(profileDeployment.controllerAddresses[0]);
 
@@ -47,7 +50,11 @@ export class LSP3UniversalProfile {
     // 5 > transfersOwnership to KeyManager
     await this.transferOwnership(erc725Account, keyManager);
 
-    return { erc725Account, basicKeyManager: keyManager, universalReceiverAddressStore };
+    return {
+      erc725Account,
+      keyManager,
+      universalReceiverAddressStore,
+    };
   }
 
   /**
@@ -60,16 +67,54 @@ export class LSP3UniversalProfile {
     console.log(version);
   }
 
+  /**
+   * Uploads the LSP3Profile to the desired endpoint. This can be an `https` URL either pointing to
+   * a public, centralized storage endpoint or an IPFS Node / Cluster
+   *
+   * @param {ProfileDataBeforeUpload} profileData
+   * @return {*}  {(Promise<AddResult | string>)}
+   * @memberof LSP3UniversalProfile
+   */
+  static async uploadProfileData(
+    profileData: ProfileDataBeforeUpload,
+    uploadOptions?: ProfileUploadOptions
+  ): Promise<{ profile: LSP3ProfileJSON; url: string }> {
+    uploadOptions = uploadOptions || defaultUploadOptions;
+
+    const profileImage = profileData.profileImage
+      ? await imageUpload(profileData.profileImage, uploadOptions)
+      : null;
+
+    const backgroundImage = profileData.backgroundImage
+      ? await imageUpload(profileData.backgroundImage, uploadOptions)
+      : null;
+
+    const profile = {
+      LSP3Profile: {
+        ...profileData,
+        profileImage,
+        backgroundImage,
+      },
+    };
+
+    // TODO: allow simple http upload too
+    const uploadResponse = await ipfsUpload(
+      JSON.stringify(profile),
+      uploadOptions.ipfsClientOptions
+    );
+
+    return {
+      profile,
+      url: uploadResponse.cid ? 'ipfs://' + uploadResponse.cid : 'https upload TBD',
+    };
+  }
+
   private async deployUniversalReceiverAddressStore(erc725Account: ERC725Account) {
     const universalReceiverAddressStoreFactory = new UniversalReceiverAddressStore__factory(
       this.signer
     );
     const universalReceiverAddressStore = await universalReceiverAddressStoreFactory.deploy(
-      erc725Account.address,
-      {
-        gasPrice: 80,
-        gasLimit: 6_721_975,
-      }
+      erc725Account.address
     );
     await universalReceiverAddressStore.deployed();
     return universalReceiverAddressStore;
@@ -79,7 +124,9 @@ export class LSP3UniversalProfile {
     try {
       const transferOwnershipTransaction = await erc725Account.transferOwnership(
         keyManager.address,
-        { from: this.options.deployFrom, gasPrice: 80, gasLimit: 6_721_975 }
+        {
+          from: this.signer.address,
+        }
       );
       return await transferOwnershipTransaction.wait();
     } catch (error) {
@@ -90,17 +137,14 @@ export class LSP3UniversalProfile {
 
   private async setLSP3Profile(
     erc725Account: ERC725Account,
-    lsp3ProfileJson: LSP3ProfileJSON,
+    lsp3ProfileData: LSP3ProfileJSON,
     url: string
   ) {
     try {
+      const encodedData = encodeLSP3Profile(lsp3ProfileData, url);
       const transaction = await erc725Account.setData(
-        '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5', // LSP3Profile
-        encodeLSP3Profile(lsp3ProfileJson, url),
-        {
-          gasPrice: 80,
-          gasLimit: 6_721_975,
-        }
+        encodedData.LSP3Profile.key,
+        encodedData.LSP3Profile.value
       );
       return await transaction.wait();
     } catch (error) {
@@ -112,10 +156,7 @@ export class LSP3UniversalProfile {
   private async deployKeyManager(address: string) {
     try {
       const keyManagerFactory = new KeyManager__factory(this.signer);
-      const keyManager = await keyManagerFactory.deploy(address, {
-        gasPrice: 80,
-        gasLimit: 6_721_975,
-      });
+      const keyManager = await keyManagerFactory.deploy(address);
       await keyManager.deployed();
       return keyManager;
     } catch (error) {
@@ -127,10 +168,7 @@ export class LSP3UniversalProfile {
   private async deployERC725Account(ownerAddress: string) {
     try {
       const erc725AccountFactory = new ERC725Account__factory(this.signer);
-      const erc725Account = await erc725AccountFactory.deploy(ownerAddress, {
-        gasPrice: 80,
-        gasLimit: 6_721_975,
-      });
+      const erc725Account = await erc725AccountFactory.deploy(ownerAddress);
       await erc725Account.deployed();
 
       return erc725Account;
