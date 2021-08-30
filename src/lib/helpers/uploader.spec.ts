@@ -43,11 +43,17 @@ describe('#imageUpload', () => {
   });
 
   it('should pin files when using IPFS', async () => {
-    const { file, addMock, drawFileInCanvasSpy } = mockDependencies();
+    const { file, addMock } = mockDependencies();
+    await imageUpload(file, { ipfsClientOptions: {} });
+
+    expect(addMock).toHaveBeenCalledWith(file, { pin: true });
+  });
+
+  it('should resize images', async () => {
+    const { file, drawFileInCanvasSpy } = mockDependencies();
     await imageUpload(file, { ipfsClientOptions: {} });
 
     expect(imageCompression).toHaveBeenCalledTimes(5);
-    expect(addMock).toHaveBeenCalledWith(file, { pin: true });
     expect(drawFileInCanvasSpy).toBeCalledTimes(5);
   });
 });

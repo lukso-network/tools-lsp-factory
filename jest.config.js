@@ -35,6 +35,7 @@ module.exports = async () => {
     },
     logHeapUsage: true,
     testEnvironment: 'node',
+    resetMocks: true,
     setupFilesAfterEnv: ['./jest.setup.ts'],
     maxWorkers: '50%',
     maxConcurrency: 10,
