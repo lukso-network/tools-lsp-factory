@@ -1,6 +1,8 @@
-build/module/types
-src/types
-test
+types/
+test/
+
+cache
+coverage
 
 .nycrc.json
 .prettierignore
