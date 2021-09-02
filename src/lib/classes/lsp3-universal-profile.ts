@@ -1,60 +1,159 @@
-import { ethers, Wallet } from 'ethers';
+import { Signer } from 'ethers';
+import { combineLatest, concat, defer, Observable } from 'rxjs';
+import { concatAll, scan, shareReplay, switchMap, take } from 'rxjs/operators';
 
+import { KeyManager, LSP3Account, UniversalReceiverAddressStore } from '../../../types/ethers-v5';
 import {
-  ERC725Account,
-  ERC725Account__factory,
-  KeyManager,
-  KeyManager__factory,
-  UniversalReceiverAddressStore__factory,
-} from '../../../types/ethers-v5';
-import { defaultUploadOptions } from '../helpers/config';
-import { encodeLSP3Profile } from '../helpers/erc725';
-import { imageUpload, ipfsUpload } from '../helpers/uploader';
+  ALL_PERMISSIONS,
+  defaultUploadOptions,
+  LSP3_UP_KEYS,
+  PREFIX_PERMISSIONS,
+} from '../helpers/config.helper';
+import {
+  deployKeyManager,
+  deployLSP3Account,
+  deployUniversalReceiverAddressStore,
+  waitForReceipt,
+} from '../helpers/deployment.helper';
+import { encodeLSP3Profile } from '../helpers/erc725.helper';
+import { imageUpload, ipfsUpload } from '../helpers/uploader.helper';
 import {
   LSP3ProfileJSON,
   LSPFactoryOptions,
   ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
 } from '../interfaces';
+import {
+  DEPLOYMENT_EVENT,
+  DeploymentEventContract,
+} from '../interfaces/profile-deployment-options';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
 
+/**
+ * TODO: docs
+ */
 export class LSP3UniversalProfile {
   options: LSPFactoryOptions;
-  signer: Wallet;
-
+  signer: Signer;
   constructor(options: LSPFactoryOptions) {
     this.options = options;
-    this.signer = new ethers.Wallet(this.options.deployKey, this.options.provider);
+    this.signer = this.options.provider.getSigner();
   }
 
-  async deploy(profileDeployment: ProfileDeploymentOptions) {
+  /**
+   * TODO: docs
+   */
+  deploy(profileDeploymentOptions: ProfileDeploymentOptions) {
     // 1 > deploys ERC725Account
-    const erc725Account = await this.deployERC725Account(profileDeployment.controllerAddresses[0]);
+    const accountDeployment$ = this.getAccountDeploymentObservable();
 
     // 2 > deploys KeyManager
-    const keyManager = await this.deployKeyManager(erc725Account.address);
+    const keyManagerDeployment$ = this.getKeyManagerDeployment$(accountDeployment$);
 
     // 3 > deploys UniversalReceiverDelegate
-    const universalReceiverAddressStore = await this.deployUniversalReceiverAddressStore(
-      erc725Account
+    const universalReceiverAddressStoreDeployment$ =
+      this.getUniversalReceiverAddressStoreDeployment$(accountDeployment$);
+
+    // 4 > set permissions
+    const setData$ = this.getSetDataTransaction$(
+      accountDeployment$,
+      universalReceiverAddressStoreDeployment$,
+      profileDeploymentOptions
     );
 
-    // 4 > sets LSP3Profile data
-    if (profileDeployment.lsp3ProfileJson) {
-      // TODO: upload json somewhere
-      const url = 'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D';
+    // // 5 > transfersOwnership to KeyManager
+    const transferOwnership$ = this.getTransferOwnershipTransaction$(
+      accountDeployment$,
+      keyManagerDeployment$
+    );
 
-      await this.setLSP3Profile(erc725Account, profileDeployment.lsp3ProfileJson, url);
-    }
+    return concat([
+      accountDeployment$,
+      keyManagerDeployment$,
+      universalReceiverAddressStoreDeployment$,
+      setData$,
+      transferOwnership$,
+    ]).pipe(
+      concatAll(),
+      scan((accumulator, deploymentEvent: any) => {
+        console.log('deploymentEvent');
+        console.log(deploymentEvent);
+        accumulator[deploymentEvent.name] = deploymentEvent;
+        return accumulator;
+      }, {}),
+      take(12)
+    );
+  }
 
-    // 5 > transfersOwnership to KeyManager
-    await this.transferOwnership(erc725Account, keyManager);
+  private getTransferOwnershipTransaction$(
+    accountDeployment$: Observable<any>,
+    keyManagerDeployment$: Observable<any>
+  ) {
+    const transaction$ = combineLatest([accountDeployment$, keyManagerDeployment$]).pipe(
+      switchMap(([{ contract: lsp3AccountContract }, { contract: keyManagerContract }]) => {
+        return this.transferOwnership(lsp3AccountContract, keyManagerContract);
+      })
+    );
 
-    return {
-      erc725Account,
-      keyManager,
-      universalReceiverAddressStore,
-    };
+    return waitForReceipt(transaction$);
+  }
+
+  private getSetDataTransaction$(
+    accountDeployment$: Observable<any>,
+    universalReceiverAddressStoreDeployment$: Observable<any>,
+    profileDeploymentOptions: ProfileDeploymentOptions
+  ) {
+    const setDataTransaction$ = combineLatest([
+      accountDeployment$,
+      universalReceiverAddressStoreDeployment$,
+    ]).pipe(
+      switchMap(
+        ([{ contract: lsp3AccountContract }, { contract: universalReceiverAddressStore }]) => {
+          return this.setData(
+            lsp3AccountContract,
+            universalReceiverAddressStore,
+            profileDeploymentOptions.lsp3Profile
+          );
+        }
+      )
+    );
+
+    return waitForReceipt(setDataTransaction$);
+  }
+
+  private getUniversalReceiverAddressStoreDeployment$(accountDeployment$: Observable<any>) {
+    const deployment$ = accountDeployment$.pipe(
+      switchMap(({ contract: lsp3AccountContract }) => {
+        return deployUniversalReceiverAddressStore(this.signer, lsp3AccountContract.address);
+      })
+    );
+
+    return waitForReceipt(deployment$);
+  }
+
+  private getKeyManagerDeployment$(
+    accountDeployment$: Observable<DeploymentEventContract<LSP3Account>>
+  ) {
+    const keyManagerDeployment$ = accountDeployment$.pipe(
+      switchMap(({ contract: lsp3AccountContract }) => {
+        return deployKeyManager(this.signer, lsp3AccountContract.address);
+      })
+    );
+
+    const keyManagerReceipt$ = waitForReceipt(keyManagerDeployment$);
+    return concat(keyManagerDeployment$, keyManagerReceipt$).pipe(shareReplay());
+  }
+
+  /**
+   * TODO: docs
+   */
+  private getAccountDeploymentObservable() {
+    const accountDeployment$ = defer(() =>
+      deployLSP3Account(this.signer, '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266')
+    );
+
+    const accountDeploymentReceipt$ = waitForReceipt(accountDeployment$);
+    return concat(accountDeployment$, accountDeploymentReceipt$).pipe(shareReplay());
   }
 
   /**
@@ -109,72 +208,71 @@ export class LSP3UniversalProfile {
     };
   }
 
-  private async deployUniversalReceiverAddressStore(erc725Account: ERC725Account) {
-    const universalReceiverAddressStoreFactory = new UniversalReceiverAddressStore__factory(
-      this.signer
+  /**
+   * TODO: docs
+   */
+  private async setData(
+    erc725Account: LSP3Account,
+    universalReceiverAddressStoreContract: UniversalReceiverAddressStore,
+    profileData: { json: LSP3ProfileJSON; url: string }
+  ) {
+    const encodedData = encodeLSP3Profile(profileData.json, profileData.url);
+    const signerAddress = await this.signer.getAddress();
+
+    const transaction = await erc725Account.setDataMultiple(
+      [
+        LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
+        LSP3_UP_KEYS.LSP3_PROFILE,
+        PREFIX_PERMISSIONS + signerAddress.substr(2),
+      ],
+      [universalReceiverAddressStoreContract.address, encodedData.LSP3Profile, ALL_PERMISSIONS]
     );
-    const universalReceiverAddressStore = await universalReceiverAddressStoreFactory.deploy(
-      erc725Account.address
-    );
-    await universalReceiverAddressStore.deployed();
-    return universalReceiverAddressStore;
+
+    return {
+      type: DEPLOYMENT_EVENT.TRANSACTION,
+      name: 'SET_DATA',
+      transaction,
+    };
   }
 
-  private async transferOwnership(erc725Account: ERC725Account, keyManager: KeyManager) {
+  /**
+   * TODO: docs
+   */
+  private async transferOwnership(lsp3Account: LSP3Account, keyManager: KeyManager) {
     try {
-      const transferOwnershipTransaction = await erc725Account.transferOwnership(
-        keyManager.address,
-        {
-          from: this.signer.address,
-        }
-      );
-      return await transferOwnershipTransaction.wait();
+      const transferOwnershipTransaction = await lsp3Account.transferOwnership(keyManager.address, {
+        from: await this.signer.getAddress(),
+      });
+      return {
+        type: DEPLOYMENT_EVENT.TRANSACTION,
+        name: 'TRANSFER_OWNERSHIP',
+        receipt: await transferOwnershipTransaction.wait(),
+      };
     } catch (error) {
       console.error('Error when transferring Ownership', error);
       throw error;
     }
   }
 
-  private async setLSP3Profile(
-    erc725Account: ERC725Account,
-    lsp3ProfileData: LSP3ProfileJSON,
-    url: string
-  ) {
-    try {
-      const encodedData = encodeLSP3Profile(lsp3ProfileData, url);
-      const transaction = await erc725Account.setData(
-        encodedData.LSP3Profile.key,
-        encodedData.LSP3Profile.value
-      );
-      return await transaction.wait();
-    } catch (error) {
-      console.error('Error when setting LSP3Profile', error);
-      throw error;
-    }
-  }
-
-  private async deployKeyManager(address: string) {
-    try {
-      const keyManagerFactory = new KeyManager__factory(this.signer);
-      const keyManager = await keyManagerFactory.deploy(address);
-      await keyManager.deployed();
-      return keyManager;
-    } catch (error) {
-      console.error('Error when deploying KeyManager', error);
-      throw error;
-    }
-  }
-
-  private async deployERC725Account(ownerAddress: string) {
-    try {
-      const erc725AccountFactory = new ERC725Account__factory(this.signer);
-      const erc725Account = await erc725AccountFactory.deploy(ownerAddress);
-      await erc725Account.deployed();
-
-      return erc725Account;
-    } catch (error) {
-      console.error('Error when deploying ERC725Account', error);
-      throw error;
-    }
-  }
+  // private async setLSP3Profile(
+  //   lsp3Account: LSP3Account,
+  //   lsp3ProfileData: LSP3ProfileJSON,
+  //   url: string
+  // ) {
+  //   try {
+  //     const encodedData = encodeLSP3Profile(lsp3ProfileData, url);
+  //     const transaction = await lsp3Account.setData(
+  //       encodedData.LSP3Profile.key,
+  //       encodedData.LSP3Profile.value
+  //     );
+  //     return {
+  //       type: DEPLOYMENT_EVENT_TYPE.TRANSACTION,
+  //       name: 'SET_LSP3PROFILE',
+  //       transaction,
+  //     };
+  //   } catch (error) {
+  //     console.error('Error when setting LSP3Profile', error);
+  //     throw error;
+  //   }
+  // }
 }

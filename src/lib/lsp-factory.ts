@@ -1,3 +1,5 @@
+import { providers, Signer } from 'ethers';
+
 import { LSP3UniversalProfile } from './classes/lsp3-universal-profile';
 import { LSPFactoryOptions } from './interfaces';
 
@@ -14,9 +16,9 @@ export class LSPFactory {
    * @param {provider} provider
    * @param {number} [chainId=22] Lukso Testnet - 22 (0x16)
    */
-  constructor(deployKey: string, provider: any, chainId = 22) {
+  constructor(deployer: Signer, provider: providers.Web3Provider, chainId = 22) {
     this.options = {
-      deployKey,
+      deployer,
       provider,
       chainId,
     };

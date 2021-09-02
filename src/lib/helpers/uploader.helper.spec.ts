@@ -7,7 +7,7 @@
 import imageCompression from 'browser-image-compression';
 import { create } from 'ipfs-http-client';
 
-import { imageUpload, ipfsUpload } from './uploader';
+import { imageUpload, ipfsUpload } from './uploader.helper';
 
 jest.mock('ipfs-http-client');
 jest.mock('browser-image-compression');
