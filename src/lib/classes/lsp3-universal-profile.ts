@@ -1,8 +1,8 @@
 import { Signer } from 'ethers';
 import { combineLatest, concat, defer, Observable } from 'rxjs';
-import { concatAll, scan, shareReplay, switchMap, take } from 'rxjs/operators';
+import { concatAll, scan, shareReplay, switchMap, take, withLatestFrom } from 'rxjs/operators';
 
-import { KeyManager, LSP3Account, UniversalReceiverAddressStore } from '../../../types/ethers-v5';
+import { KeyManager, LSP3Account } from '../../../types/ethers-v5';
 import {
   ALL_PERMISSIONS,
   defaultUploadOptions,
@@ -45,39 +45,41 @@ export class LSP3UniversalProfile {
    */
   deploy(profileDeploymentOptions: ProfileDeploymentOptions) {
     // 1 > deploys ERC725Account
-    const accountDeployment$ = this.getAccountDeploymentObservable();
+    const { accountDeployment$, accountDeploymentReceipt$ } = this.getAccountDeploymentObservable();
 
     // 2 > deploys KeyManager
-    const keyManagerDeployment$ = this.getKeyManagerDeployment$(accountDeployment$);
+    const { keyManagerDeployment$, keyManagerReceipt$ } =
+      this.getKeyManagerDeployment$(accountDeployment$);
 
-    // 3 > deploys UniversalReceiverDelegate
-    const universalReceiverAddressStoreDeployment$ =
+    // // 3 > deploys UniversalReceiverDelegate
+    const { universalReceiverAddressStoreDeployment$, universalReceiverAddressStoreReceipt$ } =
       this.getUniversalReceiverAddressStoreDeployment$(accountDeployment$);
 
-    // 4 > set permissions
-    const setData$ = this.getSetDataTransaction$(
+    // // 4 > set permissions
+    const { setDataTransaction$, setDataReceipt$ } = this.getSetDataTransaction$(
       accountDeployment$,
       universalReceiverAddressStoreDeployment$,
       profileDeploymentOptions
     );
 
-    // // 5 > transfersOwnership to KeyManager
-    const transferOwnership$ = this.getTransferOwnershipTransaction$(
-      accountDeployment$,
-      keyManagerDeployment$
-    );
+    // // // 5 > transfersOwnership to KeyManager
+    const { transferOwnershipTransaction$, transferOwnershipReceipt$ } =
+      this.getTransferOwnershipTransaction$(accountDeployment$, keyManagerDeployment$);
 
     return concat([
       accountDeployment$,
+      accountDeploymentReceipt$,
       keyManagerDeployment$,
+      keyManagerReceipt$,
       universalReceiverAddressStoreDeployment$,
-      setData$,
-      transferOwnership$,
+      universalReceiverAddressStoreReceipt$,
+      setDataTransaction$,
+      setDataReceipt$,
+      transferOwnershipTransaction$,
+      transferOwnershipReceipt$,
     ]).pipe(
       concatAll(),
       scan((accumulator, deploymentEvent: any) => {
-        console.log('deploymentEvent');
-        console.log(deploymentEvent);
         accumulator[deploymentEvent.name] = deploymentEvent;
         return accumulator;
       }, {}),
@@ -89,13 +91,17 @@ export class LSP3UniversalProfile {
     accountDeployment$: Observable<any>,
     keyManagerDeployment$: Observable<any>
   ) {
-    const transaction$ = combineLatest([accountDeployment$, keyManagerDeployment$]).pipe(
+    const transferOwnershipTransaction$ = combineLatest([
+      accountDeployment$,
+      keyManagerDeployment$,
+    ]).pipe(
       switchMap(([{ contract: lsp3AccountContract }, { contract: keyManagerContract }]) => {
         return this.transferOwnership(lsp3AccountContract, keyManagerContract);
-      })
+      }),
+      shareReplay()
     );
-
-    return waitForReceipt(transaction$);
+    const transferOwnershipReceipt$ = waitForReceipt(transferOwnershipTransaction$);
+    return { transferOwnershipTransaction$, transferOwnershipReceipt$ };
   }
 
   private getSetDataTransaction$(
@@ -103,32 +109,36 @@ export class LSP3UniversalProfile {
     universalReceiverAddressStoreDeployment$: Observable<any>,
     profileDeploymentOptions: ProfileDeploymentOptions
   ) {
-    const setDataTransaction$ = combineLatest([
-      accountDeployment$,
-      universalReceiverAddressStoreDeployment$,
-    ]).pipe(
+    const setDataTransaction$ = accountDeployment$.pipe(
+      withLatestFrom(universalReceiverAddressStoreDeployment$),
       switchMap(
         ([{ contract: lsp3AccountContract }, { contract: universalReceiverAddressStore }]) => {
           return this.setData(
             lsp3AccountContract,
-            universalReceiverAddressStore,
+            universalReceiverAddressStore.address,
             profileDeploymentOptions.lsp3Profile
           );
         }
-      )
+      ),
+      shareReplay()
     );
 
-    return waitForReceipt(setDataTransaction$);
+    const setDataReceipt$ = waitForReceipt(setDataTransaction$);
+    return { setDataTransaction$, setDataReceipt$ };
   }
 
   private getUniversalReceiverAddressStoreDeployment$(accountDeployment$: Observable<any>) {
-    const deployment$ = accountDeployment$.pipe(
+    const universalReceiverAddressStoreDeployment$ = accountDeployment$.pipe(
       switchMap(({ contract: lsp3AccountContract }) => {
         return deployUniversalReceiverAddressStore(this.signer, lsp3AccountContract.address);
-      })
+      }),
+      shareReplay()
     );
 
-    return waitForReceipt(deployment$);
+    const universalReceiverAddressStoreReceipt$ = waitForReceipt(
+      universalReceiverAddressStoreDeployment$
+    );
+    return { universalReceiverAddressStoreDeployment$, universalReceiverAddressStoreReceipt$ };
   }
 
   private getKeyManagerDeployment$(
@@ -137,11 +147,12 @@ export class LSP3UniversalProfile {
     const keyManagerDeployment$ = accountDeployment$.pipe(
       switchMap(({ contract: lsp3AccountContract }) => {
         return deployKeyManager(this.signer, lsp3AccountContract.address);
-      })
+      }),
+      shareReplay()
     );
 
     const keyManagerReceipt$ = waitForReceipt(keyManagerDeployment$);
-    return concat(keyManagerDeployment$, keyManagerReceipt$).pipe(shareReplay());
+    return { keyManagerDeployment$, keyManagerReceipt$ };
   }
 
   /**
@@ -150,10 +161,10 @@ export class LSP3UniversalProfile {
   private getAccountDeploymentObservable() {
     const accountDeployment$ = defer(() =>
       deployLSP3Account(this.signer, '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266')
-    );
+    ).pipe(shareReplay());
 
     const accountDeploymentReceipt$ = waitForReceipt(accountDeployment$);
-    return concat(accountDeployment$, accountDeploymentReceipt$).pipe(shareReplay());
+    return { accountDeployment$, accountDeploymentReceipt$ };
   }
 
   /**
@@ -213,10 +224,10 @@ export class LSP3UniversalProfile {
    */
   private async setData(
     erc725Account: LSP3Account,
-    universalReceiverAddressStoreContract: UniversalReceiverAddressStore,
+    universalReceiverAddressStoreContractAddress: string,
     profileData: { json: LSP3ProfileJSON; url: string }
   ) {
-    const encodedData = encodeLSP3Profile(profileData.json, profileData.url);
+    const encodedData = encodeLSP3Profile({ ...profileData.json }, profileData.url);
     const signerAddress = await this.signer.getAddress();
 
     const transaction = await erc725Account.setDataMultiple(
@@ -225,7 +236,7 @@ export class LSP3UniversalProfile {
         LSP3_UP_KEYS.LSP3_PROFILE,
         PREFIX_PERMISSIONS + signerAddress.substr(2),
       ],
-      [universalReceiverAddressStoreContract.address, encodedData.LSP3Profile, ALL_PERMISSIONS]
+      [universalReceiverAddressStoreContractAddress, encodedData.LSP3Profile.value, ALL_PERMISSIONS]
     );
 
     return {
@@ -243,36 +254,15 @@ export class LSP3UniversalProfile {
       const transferOwnershipTransaction = await lsp3Account.transferOwnership(keyManager.address, {
         from: await this.signer.getAddress(),
       });
+
       return {
         type: DEPLOYMENT_EVENT.TRANSACTION,
         name: 'TRANSFER_OWNERSHIP',
-        receipt: await transferOwnershipTransaction.wait(),
+        transaction: transferOwnershipTransaction,
       };
     } catch (error) {
       console.error('Error when transferring Ownership', error);
       throw error;
     }
   }
-
-  // private async setLSP3Profile(
-  //   lsp3Account: LSP3Account,
-  //   lsp3ProfileData: LSP3ProfileJSON,
-  //   url: string
-  // ) {
-  //   try {
-  //     const encodedData = encodeLSP3Profile(lsp3ProfileData, url);
-  //     const transaction = await lsp3Account.setData(
-  //       encodedData.LSP3Profile.key,
-  //       encodedData.LSP3Profile.value
-  //     );
-  //     return {
-  //       type: DEPLOYMENT_EVENT_TYPE.TRANSACTION,
-  //       name: 'SET_LSP3PROFILE',
-  //       transaction,
-  //     };
-  //   } catch (error) {
-  //     console.error('Error when setting LSP3Profile', error);
-  //     throw error;
-  //   }
-  // }
 }

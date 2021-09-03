@@ -1,6 +1,6 @@
 import { Signer } from 'ethers';
-import { concat, Observable } from 'rxjs';
-import { shareReplay, switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 import {
   KeyManager,
@@ -30,8 +30,7 @@ export function waitForReceipt(deploymentEvent$: Observable<any>) {
     })
   );
 
-  shareReplay();
-  return concat(deploymentEvent$, receipt$).pipe(shareReplay());
+  return receipt$;
 }
 /**
  * TODO: docs
