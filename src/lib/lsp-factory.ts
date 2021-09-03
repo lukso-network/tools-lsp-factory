@@ -16,7 +16,11 @@ export class LSPFactory {
    * @param {provider} provider
    * @param {number} [chainId=22] Lukso Testnet - 22 (0x16)
    */
-  constructor(deployer: Signer, provider: providers.Web3Provider, chainId = 22) {
+  constructor(
+    deployer: Signer,
+    provider: providers.Web3Provider | providers.JsonRpcProvider,
+    chainId = 22
+  ) {
     this.options = {
       deployer,
       provider,

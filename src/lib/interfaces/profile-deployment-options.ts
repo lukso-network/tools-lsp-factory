@@ -1,5 +1,6 @@
 import { TransactionReceipt } from '@ethersproject/abstract-provider';
 import { ContractTransaction } from 'ethers';
+import { Observable } from 'rxjs';
 
 import { LSP3ProfileJSON } from './lsp3-profile';
 
@@ -37,3 +38,4 @@ export interface DeploymentEventTransaction extends DeploymentEventBase {
 }
 
 export type DeploymentEvent<T> = DeploymentEventContract<T> | DeploymentEventTransaction;
+export type DeploymentEvent$<T> = Observable<DeploymentEvent<T>>;

@@ -2,7 +2,7 @@ import { Signer } from 'ethers';
 import { combineLatest, concat, defer, Observable } from 'rxjs';
 import { concatAll, scan, shareReplay, switchMap, take, withLatestFrom } from 'rxjs/operators';
 
-import { KeyManager, LSP3Account } from '../../../types/ethers-v5';
+import { KeyManager, LSP3Account, UniversalReceiverAddressStore } from '../../../types/ethers-v5';
 import {
   ALL_PERMISSIONS,
   defaultUploadOptions,
@@ -25,6 +25,7 @@ import {
 } from '../interfaces';
 import {
   DEPLOYMENT_EVENT,
+  DeploymentEvent$,
   DeploymentEventContract,
 } from '../interfaces/profile-deployment-options';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
@@ -88,8 +89,8 @@ export class LSP3UniversalProfile {
   }
 
   private getTransferOwnershipTransaction$(
-    accountDeployment$: Observable<any>,
-    keyManagerDeployment$: Observable<any>
+    accountDeployment$: DeploymentEvent$<LSP3Account>,
+    keyManagerDeployment$: DeploymentEvent$<KeyManager>
   ) {
     const transferOwnershipTransaction$ = combineLatest([
       accountDeployment$,
@@ -105,8 +106,8 @@ export class LSP3UniversalProfile {
   }
 
   private getSetDataTransaction$(
-    accountDeployment$: Observable<any>,
-    universalReceiverAddressStoreDeployment$: Observable<any>,
+    accountDeployment$: DeploymentEvent$<LSP3Account>,
+    universalReceiverAddressStoreDeployment$: DeploymentEvent$<UniversalReceiverAddressStore>,
     profileDeploymentOptions: ProfileDeploymentOptions
   ) {
     const setDataTransaction$ = accountDeployment$.pipe(
@@ -115,8 +116,8 @@ export class LSP3UniversalProfile {
         ([{ contract: lsp3AccountContract }, { contract: universalReceiverAddressStore }]) => {
           return this.setData(
             lsp3AccountContract,
-            universalReceiverAddressStore.address,
-            profileDeploymentOptions.lsp3Profile
+            universalReceiverAddressStore,
+            profileDeploymentOptions
           );
         }
       ),
@@ -127,7 +128,9 @@ export class LSP3UniversalProfile {
     return { setDataTransaction$, setDataReceipt$ };
   }
 
-  private getUniversalReceiverAddressStoreDeployment$(accountDeployment$: Observable<any>) {
+  private getUniversalReceiverAddressStoreDeployment$(
+    accountDeployment$: Observable<DeploymentEventContract<LSP3Account>>
+  ) {
     const universalReceiverAddressStoreDeployment$ = accountDeployment$.pipe(
       switchMap(({ contract: lsp3AccountContract }) => {
         return deployUniversalReceiverAddressStore(this.signer, lsp3AccountContract.address);
@@ -224,19 +227,18 @@ export class LSP3UniversalProfile {
    */
   private async setData(
     erc725Account: LSP3Account,
-    universalReceiverAddressStoreContractAddress: string,
-    profileData: { json: LSP3ProfileJSON; url: string }
+    universalReceiverAddressStore: UniversalReceiverAddressStore,
+    profileDeploymentOptions: ProfileDeploymentOptions
   ) {
-    const encodedData = encodeLSP3Profile({ ...profileData.json }, profileData.url);
-    const signerAddress = await this.signer.getAddress();
-
+    const { json, url } = profileDeploymentOptions.lsp3Profile;
+    const encodedData = encodeLSP3Profile({ ...json }, url);
     const transaction = await erc725Account.setDataMultiple(
       [
         LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
         LSP3_UP_KEYS.LSP3_PROFILE,
-        PREFIX_PERMISSIONS + signerAddress.substr(2),
+        PREFIX_PERMISSIONS + profileDeploymentOptions.controllerAddresses[0].substr(2), // TODO: handle multiple addresses
       ],
-      [universalReceiverAddressStoreContractAddress, encodedData.LSP3Profile.value, ALL_PERMISSIONS]
+      [universalReceiverAddressStore.address, encodedData.LSP3Profile.value, ALL_PERMISSIONS]
     );
 
     return {

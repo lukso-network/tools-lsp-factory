@@ -4,6 +4,6 @@ import { providers, Signer } from 'ethers';
  */
 export interface LSPFactoryOptions {
   deployer: Signer;
-  provider: providers.Web3Provider;
+  provider: providers.Web3Provider | providers.JsonRpcProvider;
   chainId: number;
 }
