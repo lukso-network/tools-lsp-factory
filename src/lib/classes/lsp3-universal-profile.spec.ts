@@ -6,7 +6,7 @@ import { LSPFactory } from '../lsp-factory';
 import { ProxyDeployer } from './proxy-deployer';
 
 describe('LSP3UniversalProfile', () => {
-  let masterContracts;
+  let baseContracts;
   let proxyDeployer: ProxyDeployer;
   let signer: SignerWithAddress;
   let provider: any;
@@ -15,7 +15,7 @@ describe('LSP3UniversalProfile', () => {
     const provider = ethers.provider;
     signer = provider.getSigner();
     proxyDeployer = new ProxyDeployer(signer);
-    masterContracts = await proxyDeployer.deployMasterContracts();
+    baseContracts = await proxyDeployer.deployBaseContracts();
   });
   it.skip('should deploy and set LSP3Profile data', (done) => {
     const myLSPFactory = new LSPFactory(signer, provider);
@@ -30,8 +30,8 @@ describe('LSP3UniversalProfile', () => {
       },
       {
         libAddresses: {
-          lsp3AccountInit: masterContracts.lsp3Account.address,
-          universalReceiverAddressStoreInit: masterContracts.universalReceiverAddressStore.address,
+          lsp3AccountInit: baseContracts.lsp3Account.address,
+          universalReceiverAddressStoreInit: baseContracts.universalReceiverAddressStore.address,
         },
       }
     );

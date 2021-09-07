@@ -13,12 +13,12 @@ export type KeyManagerDeploymentEvent = DeploymentEventContract<KeyManager>;
 export function keyManagerDeployment$(
   signer: Signer,
   accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
-  masterContractAddress: string
+  baseContractAddress: string
 ) {
   const keyManagerDeployment$ = accountDeployment$.pipe(
     takeLast(1),
     switchMap(({ contract: lsp3AccountContract }) => {
-      return deployKeyManager(signer, lsp3AccountContract.address, masterContractAddress);
+      return deployKeyManager(signer, lsp3AccountContract.address, baseContractAddress);
     }),
     shareReplay()
   );
@@ -27,9 +27,9 @@ export function keyManagerDeployment$(
     keyManagerDeployment$
   ).pipe(shareReplay());
 
-  if (masterContractAddress) {
+  if (baseContractAddress) {
     throw new Error('Not yet implemented');
-    // const keyManagerDeploymentInitialize$ = masterContractAddress
+    // const keyManagerDeploymentInitialize$ = baseContractAddress
     // ? initializeProxy(
     //     signer,
     //     keyManagerDeploymentReceipt$ as Observable<DeploymentEventProxyContract<KeyManagerInit>>
@@ -51,7 +51,7 @@ export function keyManagerDeployment$(
 export async function deployKeyManager(
   signer: Signer,
   lsp3AccountAddress: string,
-  masterContractAddress: string
+  baseContractAddress: string
 ) {
   const deploymentFunction = async () => {
     return await new KeyManager__factory(signer).deploy(lsp3AccountAddress, {
@@ -59,7 +59,7 @@ export async function deployKeyManager(
     });
   };
 
-  if (masterContractAddress) {
+  if (baseContractAddress) {
     throw new Error('Not yet implemented');
   }
 

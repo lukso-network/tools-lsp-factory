@@ -17,31 +17,31 @@ import { UniversalReceiverAddressStoreInit } from '../../tmp/UniversalReceiverAd
 // };
 
 const runtimeCodeTemplate =
-  '0x3d602d80600a3d3981f3363d3d373d3d3d363d73MASTER_CONTRACT_ADDRESS5af43d82803e903d91602b57fd5bf3';
+  '0x3d602d80600a3d3981f3363d3d373d3d3d363d73BASE_CONTRACT_ADDRESS5af43d82803e903d91602b57fd5bf3';
 
 export class ProxyDeployer {
   signer: Signer;
-  masterContracts: {
+  baseContracts: {
     lsp3Account: LSP3AccountInit;
     universalReceiverAddressStore: UniversalReceiverAddressStoreInit;
   };
   constructor(signer: Signer) {
     this.signer = signer;
   }
-  // masterContracts$: Observable<any>;
-  async deployMasterContracts() {
+  // baseContracts$: Observable<any>;
+  async deployBaseContracts() {
     const lsp3Account = await new LSP3AccountInit__factory(this.signer).deploy();
     const universalReceiverAddressStore = await new UniversalReceiverAddressStoreInit__factory(
       this.signer
     ).deploy();
 
-    this.masterContracts = {
+    this.baseContracts = {
       lsp3Account,
       universalReceiverAddressStore,
     };
 
-    return this.masterContracts;
-    // const deployedContracts = Object.entries(this.masterContracts).reduce(
+    return this.baseContracts;
+    // const deployedContracts = Object.entries(this.baseContracts).reduce(
     //   this.deployProxyContract.bind(this),
     //   {} as {
     //     lsp3Account: LSP3AccountInit;
@@ -53,7 +53,7 @@ export class ProxyDeployer {
 
   async deployProxyContract<T extends Contract>(contract: T) {
     const byteCode = runtimeCodeTemplate.replace(
-      'MASTER_CONTRACT_ADDRESS',
+      'BASE_CONTRACT_ADDRESS',
       contract.address.substr(2)
     );
     const proxyTx = await this.signer.sendTransaction({

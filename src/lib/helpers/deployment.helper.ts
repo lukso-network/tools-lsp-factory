@@ -12,7 +12,7 @@ import {
 } from '../interfaces/profile-deployment';
 
 const runtimeCodeTemplate =
-  '0x3d602d80600a3d3981f3363d3d373d3d3d363d73MASTER_CONTRACT_ADDRESS5af43d82803e903d91602b57fd5bf3';
+  '0x3d602d80600a3d3981f3363d3d373d3d3d363d73BASE_CONTRACT_ADDRESS5af43d82803e903d91602b57fd5bf3';
 
 export function waitForReceipt<T>(deploymentEvent$): Observable<T> {
   const receipt$ = deploymentEvent$.pipe(
@@ -101,7 +101,7 @@ export async function deployProxyContract<T extends Contract>(
     const contract: T = await deployContractFunction();
 
     const byteCode = runtimeCodeTemplate.replace(
-      'MASTER_CONTRACT_ADDRESS',
+      'BASE_CONTRACT_ADDRESS',
       contract.address.substr(2)
     );
     const transaction = await signer.sendTransaction({
@@ -121,6 +121,6 @@ export async function deployProxyContract<T extends Contract>(
   }
 }
 
-export function getMasterContractAddresses(contractDeploymentOptions: ContractDeploymentOptions) {
+export function getBaseContractAddresses(contractDeploymentOptions: ContractDeploymentOptions) {
   return contractDeploymentOptions.libAddresses;
 }

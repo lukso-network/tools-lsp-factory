@@ -39,17 +39,17 @@ export type LSP3AccountDeploymentEvent =
 export function accountDeployment$(
   signer: Signer,
   controllerAddresses: string[],
-  masterContractAddress: string
+  baseContractAddress: string
 ): Observable<LSP3AccountDeploymentEvent> {
   const accountDeployment$ = defer(() =>
-    deployLSP3Account(signer, controllerAddresses, masterContractAddress)
+    deployLSP3Account(signer, controllerAddresses, baseContractAddress)
   ).pipe(shareReplay());
 
   const accountDeploymentReceipt$ = waitForReceipt<LSP3AccountDeploymentEvent>(
     accountDeployment$
   ).pipe(shareReplay());
 
-  const accountDeploymentInitialize$ = masterContractAddress
+  const accountDeploymentInitialize$ = baseContractAddress
     ? initializeProxy(
         signer,
         accountDeploymentReceipt$ as Observable<DeploymentEventProxyContract<LSP3AccountInit>>
@@ -62,14 +62,14 @@ export function accountDeployment$(
 async function deployLSP3Account(
   signer: Signer,
   ownerAddresses: string[],
-  masterContractAddress: string
+  baseContractAddress: string
 ): Promise<LSP3AccountDeploymentEvent> {
   const deploymentFunction = async () => {
-    return masterContractAddress
-      ? new LSP3AccountInit__factory(signer).attach(masterContractAddress)
+    return baseContractAddress
+      ? new LSP3AccountInit__factory(signer).attach(baseContractAddress)
       : await new LSP3Account__factory(signer).deploy(ownerAddresses[0]);
   };
-  return masterContractAddress
+  return baseContractAddress
     ? deployProxyContract<LSP3AccountInit>(deploymentFunction, 'LSP3Account', signer, [
         ownerAddresses[0],
       ])

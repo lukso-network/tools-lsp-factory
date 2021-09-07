@@ -27,7 +27,7 @@ export type UniversalReveiverDeploymentEvent =
 export function universalReceiverAddressStoreDeployment$(
   signer: Signer,
   accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
-  masterContractAddress: string
+  baseContractAddress: string
 ): Observable<UniversalReveiverDeploymentEvent> {
   const universalReceiverAddressStoreDeployment$ = accountDeployment$.pipe(
     takeLast(1),
@@ -35,7 +35,7 @@ export function universalReceiverAddressStoreDeployment$(
       return deployUniversalReceiverAddressStore(
         signer,
         result.contract.address,
-        masterContractAddress
+        baseContractAddress
       );
     }),
     shareReplay()
@@ -45,7 +45,7 @@ export function universalReceiverAddressStoreDeployment$(
     universalReceiverAddressStoreDeployment$
   );
 
-  const universalReceiverAddressStoreInitialize$ = masterContractAddress
+  const universalReceiverAddressStoreInitialize$ = baseContractAddress
     ? initializeProxy(
         signer,
         universalReceiverAddressStoreReceipt$ as Observable<
@@ -67,17 +67,17 @@ export function universalReceiverAddressStoreDeployment$(
 export async function deployUniversalReceiverAddressStore(
   signer: Signer,
   lsp3AccountAddress: string,
-  masterContractAddress: string
+  baseContractAddress: string
 ) {
   const deploymentFunction = async () => {
-    return masterContractAddress
-      ? new UniversalReceiverAddressStoreInit__factory(signer).attach(masterContractAddress)
+    return baseContractAddress
+      ? new UniversalReceiverAddressStoreInit__factory(signer).attach(baseContractAddress)
       : await new UniversalReceiverAddressStore__factory(signer).deploy(lsp3AccountAddress, {
           gasLimit: 3_000_000,
         });
   };
 
-  return masterContractAddress
+  return baseContractAddress
     ? deployProxyContract<UniversalReceiverAddressStoreInit>(
         deploymentFunction,
         'UniversalReceiverAddressStore',

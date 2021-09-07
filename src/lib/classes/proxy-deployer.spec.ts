@@ -3,7 +3,7 @@ import { ethers, SignerWithAddress } from 'hardhat';
 import { ProxyDeployer } from './proxy-deployer';
 
 describe('LSP3UniversalProfile', () => {
-  let masterContracts;
+  let baseContracts;
   let proxyDeployer;
   let signer: SignerWithAddress;
 
@@ -11,17 +11,17 @@ describe('LSP3UniversalProfile', () => {
     const provider = ethers.provider;
     signer = provider.getSigner();
     proxyDeployer = new ProxyDeployer(signer);
-    masterContracts = await proxyDeployer.deployMasterContracts();
+    baseContracts = await proxyDeployer.deployBaseContracts();
   });
 
   it('should deploy the LSP3Account proxy and setData', async () => {
     // LSPAccount
-    const lsp3AccountProxy = await proxyDeployer.deployProxyContract(masterContracts.lsp3Account);
+    const lsp3AccountProxy = await proxyDeployer.deployProxyContract(baseContracts.lsp3Account);
     await lsp3AccountProxy.initialize(await signer.getAddress());
 
     // UniversalReceiverAddressStore
     const universalReceiverAddressStoreProxy = await proxyDeployer.deployProxyContract(
-      masterContracts.universalReceiverAddressStore
+      baseContracts.universalReceiverAddressStore
     );
     await universalReceiverAddressStoreProxy.initialize(lsp3AccountProxy.address);
 

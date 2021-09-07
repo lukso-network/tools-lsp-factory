@@ -25,7 +25,7 @@ export interface ProfileDeploymentOptions {
     json: LSP3ProfileJSON;
     url: string;
   };
-  masterContractAddresses?: {
+  baseContractAddresses?: {
     lsp3Account?: string;
     universalReceiverAddressStore?: string;
     keyManager?: string;
