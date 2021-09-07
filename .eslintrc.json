@@ -2,7 +2,7 @@
   "root": true,
   "parser": "@typescript-eslint/parser",
   "env": { "es6": true },
-  "ignorePatterns": ["node_modules", "build", "coverage", "test", "jest.config.js"],
+  "ignorePatterns": ["node_modules", "build", "coverage", "test", "jest.config.js", "tmp"],
   "plugins": ["import", "eslint-comments"],
   "extends": [
     "eslint:recommended",
