@@ -107,7 +107,7 @@ export function setDataTransaction$(
     shareReplay()
   );
 
-  const setDataReceipt$ = waitForReceipt(setDataTransaction$);
+  const setDataReceipt$ = waitForReceipt<DeploymentEventTransaction>(setDataTransaction$);
   return concat(setDataTransaction$, setDataReceipt$);
 }
 
@@ -150,7 +150,9 @@ export function getTransferOwnershipTransaction$(
     }),
     shareReplay()
   );
-  const transferOwnershipReceipt$ = waitForReceipt(transferOwnershipTransaction$);
+  const transferOwnershipReceipt$ = waitForReceipt<DeploymentEventTransaction>(
+    transferOwnershipTransaction$
+  );
   return concat(transferOwnershipTransaction$, transferOwnershipReceipt$);
 }
 

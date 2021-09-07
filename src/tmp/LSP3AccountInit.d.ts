@@ -14,135 +14,84 @@ import {
   Overrides,
   PayableOverrides,
   CallOverrides,
-} from "ethers";
-import { BytesLike } from "@ethersproject/bytes";
-import { Listener, Provider } from "@ethersproject/providers";
-import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
-import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
+} from 'ethers';
+import { BytesLike } from '@ethersproject/bytes';
+import { Listener, Provider } from '@ethersproject/providers';
+import { FunctionFragment, EventFragment, Result } from '@ethersproject/abi';
+import { TypedEventFilter, TypedEvent, TypedListener } from './commons';
 
 interface LSP3AccountInitInterface extends ethers.utils.Interface {
   functions: {
-    "dataKeys(uint256)": FunctionFragment;
-    "execute(uint256,address,uint256,bytes)": FunctionFragment;
-    "getData(bytes32)": FunctionFragment;
-    "isValidSignature(bytes32,bytes)": FunctionFragment;
-    "owner()": FunctionFragment;
-    "renounceOwnership()": FunctionFragment;
-    "supportsInterface(bytes4)": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
-    "initialize(address)": FunctionFragment;
-    "dataCount()": FunctionFragment;
-    "allDataKeys()": FunctionFragment;
-    "setDataMultiple(bytes32[],bytes[])": FunctionFragment;
-    "getDataMultiple(bytes32[])": FunctionFragment;
-    "setData(bytes32,bytes)": FunctionFragment;
-    "universalReceiver(bytes32,bytes)": FunctionFragment;
+    'dataKeys(uint256)': FunctionFragment;
+    'execute(uint256,address,uint256,bytes)': FunctionFragment;
+    'getData(bytes32)': FunctionFragment;
+    'isValidSignature(bytes32,bytes)': FunctionFragment;
+    'owner()': FunctionFragment;
+    'renounceOwnership()': FunctionFragment;
+    'supportsInterface(bytes4)': FunctionFragment;
+    'transferOwnership(address)': FunctionFragment;
+    'initialize(address)': FunctionFragment;
+    'dataCount()': FunctionFragment;
+    'allDataKeys()': FunctionFragment;
+    'setDataMultiple(bytes32[],bytes[])': FunctionFragment;
+    'getDataMultiple(bytes32[])': FunctionFragment;
+    'setData(bytes32,bytes)': FunctionFragment;
+    'universalReceiver(bytes32,bytes)': FunctionFragment;
   };
 
+  encodeFunctionData(functionFragment: 'dataKeys', values: [BigNumberish]): string;
   encodeFunctionData(
-    functionFragment: "dataKeys",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "execute",
+    functionFragment: 'execute',
     values: [BigNumberish, string, BigNumberish, BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "getData", values: [BytesLike]): string;
+  encodeFunctionData(functionFragment: 'getData', values: [BytesLike]): string;
+  encodeFunctionData(functionFragment: 'isValidSignature', values: [BytesLike, BytesLike]): string;
+  encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'renounceOwnership', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'supportsInterface', values: [BytesLike]): string;
+  encodeFunctionData(functionFragment: 'transferOwnership', values: [string]): string;
+  encodeFunctionData(functionFragment: 'initialize', values: [string]): string;
+  encodeFunctionData(functionFragment: 'dataCount', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'allDataKeys', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "isValidSignature",
-    values: [BytesLike, BytesLike]
-  ): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "renounceOwnership",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "supportsInterface",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "transferOwnership",
-    values: [string]
-  ): string;
-  encodeFunctionData(functionFragment: "initialize", values: [string]): string;
-  encodeFunctionData(functionFragment: "dataCount", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "allDataKeys",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setDataMultiple",
+    functionFragment: 'setDataMultiple',
     values: [BytesLike[], BytesLike[]]
   ): string;
-  encodeFunctionData(
-    functionFragment: "getDataMultiple",
-    values: [BytesLike[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setData",
-    values: [BytesLike, BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "universalReceiver",
-    values: [BytesLike, BytesLike]
-  ): string;
+  encodeFunctionData(functionFragment: 'getDataMultiple', values: [BytesLike[]]): string;
+  encodeFunctionData(functionFragment: 'setData', values: [BytesLike, BytesLike]): string;
+  encodeFunctionData(functionFragment: 'universalReceiver', values: [BytesLike, BytesLike]): string;
 
-  decodeFunctionResult(functionFragment: "dataKeys", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "execute", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "getData", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "isValidSignature",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "renounceOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "supportsInterface",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "transferOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "dataCount", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "allDataKeys",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setDataMultiple",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getDataMultiple",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "setData", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "universalReceiver",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: 'dataKeys', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'execute', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getData', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'isValidSignature', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'renounceOwnership', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'supportsInterface', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'transferOwnership', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'initialize', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'dataCount', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'allDataKeys', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'setDataMultiple', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getDataMultiple', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'setData', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'universalReceiver', data: BytesLike): Result;
 
   events: {
-    "ContractCreated(address)": EventFragment;
-    "DataChanged(bytes32,bytes)": EventFragment;
-    "Executed(uint256,address,uint256,bytes)": EventFragment;
-    "OwnershipTransferred(address,address)": EventFragment;
-    "UniversalReceiver(address,bytes32,bytes32,bytes)": EventFragment;
-    "ValueReceived(address,uint256)": EventFragment;
+    'ContractCreated(address)': EventFragment;
+    'DataChanged(bytes32,bytes)': EventFragment;
+    'Executed(uint256,address,uint256,bytes)': EventFragment;
+    'OwnershipTransferred(address,address)': EventFragment;
+    'UniversalReceiver(address,bytes32,bytes32,bytes)': EventFragment;
+    'ValueReceived(address,uint256)': EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "ContractCreated"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "DataChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Executed"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "UniversalReceiver"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ValueReceived"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ContractCreated'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'DataChanged'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Executed'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'UniversalReceiver'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ValueReceived'): EventFragment;
 }
 
 export class LSP3AccountInit extends BaseContract {
@@ -210,10 +159,7 @@ export class LSP3AccountInit extends BaseContract {
      * Gets data at a given `key`
      * @param _key the key which value to retrieve
      */
-    getData(
-      _key: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[string] & { _value: string }>;
+    getData(_key: BytesLike, overrides?: CallOverrides): Promise<[string] & { _value: string }>;
 
     /**
      * Checks if an owner signed `_data`. ERC1271 interface.
@@ -241,10 +187,7 @@ export class LSP3AccountInit extends BaseContract {
     /**
      * See {IERC165-supportsInterface}.
      */
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<[boolean]>;
 
     /**
      * Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.
@@ -273,10 +216,7 @@ export class LSP3AccountInit extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    getDataMultiple(
-      _keys: BytesLike[],
-      overrides?: CallOverrides
-    ): Promise<[string[]]>;
+    getDataMultiple(_keys: BytesLike[], overrides?: CallOverrides): Promise<[string[]]>;
 
     /**
      * Sets data at a given `key`
@@ -350,10 +290,7 @@ export class LSP3AccountInit extends BaseContract {
   /**
    * See {IERC165-supportsInterface}.
    */
-  supportsInterface(
-    interfaceId: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
+  supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
 
   /**
    * Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.
@@ -382,10 +319,7 @@ export class LSP3AccountInit extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  getDataMultiple(
-    _keys: BytesLike[],
-    overrides?: CallOverrides
-  ): Promise<string[]>;
+  getDataMultiple(_keys: BytesLike[], overrides?: CallOverrides): Promise<string[]>;
 
   /**
    * Sets data at a given `key`
@@ -457,18 +391,12 @@ export class LSP3AccountInit extends BaseContract {
     /**
      * See {IERC165-supportsInterface}.
      */
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
 
     /**
      * Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.
      */
-    transferOwnership(
-      newOwner: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    transferOwnership(newOwner: string, overrides?: CallOverrides): Promise<void>;
 
     /**
      * Sets the owner of the contract
@@ -486,21 +414,14 @@ export class LSP3AccountInit extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    getDataMultiple(
-      _keys: BytesLike[],
-      overrides?: CallOverrides
-    ): Promise<string[]>;
+    getDataMultiple(_keys: BytesLike[], overrides?: CallOverrides): Promise<string[]>;
 
     /**
      * Sets data at a given `key`
      * @param _key the key which value to retrieve
      * @param _value the bytes to set.
      */
-    setData(
-      _key: BytesLike,
-      _value: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    setData(_key: BytesLike, _value: BytesLike, overrides?: CallOverrides): Promise<void>;
 
     /**
      * Notify the smart contract about any received asset LSP1 interface
@@ -537,10 +458,7 @@ export class LSP3AccountInit extends BaseContract {
     OwnershipTransferred(
       previousOwner?: string | null,
       newOwner?: string | null
-    ): TypedEventFilter<
-      [string, string],
-      { previousOwner: string; newOwner: string }
-    >;
+    ): TypedEventFilter<[string, string], { previousOwner: string; newOwner: string }>;
 
     UniversalReceiver(
       from?: string | null,
@@ -560,10 +478,7 @@ export class LSP3AccountInit extends BaseContract {
     ValueReceived(
       sender?: string | null,
       value?: BigNumberish | null
-    ): TypedEventFilter<
-      [string, BigNumber],
-      { sender: string; value: BigNumber }
-    >;
+    ): TypedEventFilter<[string, BigNumber], { sender: string; value: BigNumber }>;
   };
 
   estimateGas: {
@@ -616,10 +531,7 @@ export class LSP3AccountInit extends BaseContract {
     /**
      * See {IERC165-supportsInterface}.
      */
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
     /**
      * Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.
@@ -648,10 +560,7 @@ export class LSP3AccountInit extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    getDataMultiple(
-      _keys: BytesLike[],
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    getDataMultiple(_keys: BytesLike[], overrides?: CallOverrides): Promise<BigNumber>;
 
     /**
      * Sets data at a given `key`
@@ -677,10 +586,7 @@ export class LSP3AccountInit extends BaseContract {
   };
 
   populateTransaction: {
-    dataKeys(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    dataKeys(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     /**
      * Executes any other smart contract. Is only callable by the owner.
@@ -701,10 +607,7 @@ export class LSP3AccountInit extends BaseContract {
      * Gets data at a given `key`
      * @param _key the key which value to retrieve
      */
-    getData(
-      _key: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    getData(_key: BytesLike, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     /**
      * Checks if an owner signed `_data`. ERC1271 interface.
@@ -764,10 +667,7 @@ export class LSP3AccountInit extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    getDataMultiple(
-      _keys: BytesLike[],
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    getDataMultiple(_keys: BytesLike[], overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     /**
      * Sets data at a given `key`

@@ -13,84 +13,53 @@ import {
   ContractTransaction,
   Overrides,
   CallOverrides,
-} from "ethers";
-import { BytesLike } from "@ethersproject/bytes";
-import { Listener, Provider } from "@ethersproject/providers";
-import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
-import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
+} from 'ethers';
+import { BytesLike } from '@ethersproject/bytes';
+import { Listener, Provider } from '@ethersproject/providers';
+import { FunctionFragment, EventFragment, Result } from '@ethersproject/abi';
+import { TypedEventFilter, TypedEvent, TypedListener } from './commons';
 
-interface UniversalReceiverAddressStoreInitInterface
-  extends ethers.utils.Interface {
+interface UniversalReceiverAddressStoreInitInterface extends ethers.utils.Interface {
   functions: {
-    "account()": FunctionFragment;
-    "containsAddress(address)": FunctionFragment;
-    "getAddress(uint256)": FunctionFragment;
-    "getAllRawValues()": FunctionFragment;
-    "getIndex(address)": FunctionFragment;
-    "length()": FunctionFragment;
-    "supportsInterface(bytes4)": FunctionFragment;
-    "initialize(address)": FunctionFragment;
-    "addAddress(address)": FunctionFragment;
-    "removeAddress(address)": FunctionFragment;
-    "universalReceiverDelegate(address,bytes32,bytes)": FunctionFragment;
+    'account()': FunctionFragment;
+    'containsAddress(address)': FunctionFragment;
+    'getAddress(uint256)': FunctionFragment;
+    'getAllRawValues()': FunctionFragment;
+    'getIndex(address)': FunctionFragment;
+    'length()': FunctionFragment;
+    'supportsInterface(bytes4)': FunctionFragment;
+    'initialize(address)': FunctionFragment;
+    'addAddress(address)': FunctionFragment;
+    'removeAddress(address)': FunctionFragment;
+    'universalReceiverDelegate(address,bytes32,bytes)': FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: "account", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'account', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'containsAddress', values: [string]): string;
+  encodeFunctionData(functionFragment: 'getAddress', values: [BigNumberish]): string;
+  encodeFunctionData(functionFragment: 'getAllRawValues', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'getIndex', values: [string]): string;
+  encodeFunctionData(functionFragment: 'length', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'supportsInterface', values: [BytesLike]): string;
+  encodeFunctionData(functionFragment: 'initialize', values: [string]): string;
+  encodeFunctionData(functionFragment: 'addAddress', values: [string]): string;
+  encodeFunctionData(functionFragment: 'removeAddress', values: [string]): string;
   encodeFunctionData(
-    functionFragment: "containsAddress",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getAddress",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getAllRawValues",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "getIndex", values: [string]): string;
-  encodeFunctionData(functionFragment: "length", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "supportsInterface",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(functionFragment: "initialize", values: [string]): string;
-  encodeFunctionData(functionFragment: "addAddress", values: [string]): string;
-  encodeFunctionData(
-    functionFragment: "removeAddress",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "universalReceiverDelegate",
+    functionFragment: 'universalReceiverDelegate',
     values: [string, BytesLike, BytesLike]
   ): string;
 
-  decodeFunctionResult(functionFragment: "account", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "containsAddress",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "getAddress", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getAllRawValues",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "getIndex", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "length", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "supportsInterface",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "addAddress", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "removeAddress",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "universalReceiverDelegate",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: 'account', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'containsAddress', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getAddress', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getAllRawValues', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getIndex', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'length', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'supportsInterface', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'initialize', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'addAddress', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'removeAddress', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'universalReceiverDelegate', data: BytesLike): Result;
 
   events: {};
 }
@@ -141,15 +110,9 @@ export class UniversalReceiverAddressStoreInit extends BaseContract {
   functions: {
     account(overrides?: CallOverrides): Promise<[string]>;
 
-    containsAddress(
-      _address: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    containsAddress(_address: string, overrides?: CallOverrides): Promise<[boolean]>;
 
-    getAddress(
-      _index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
+    getAddress(_index: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
 
     getAllRawValues(overrides?: CallOverrides): Promise<[string[]]>;
 
@@ -160,10 +123,7 @@ export class UniversalReceiverAddressStoreInit extends BaseContract {
     /**
      * See {IERC165-supportsInterface}.
      */
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<[boolean]>;
 
     initialize(
       _account: string,
@@ -190,10 +150,7 @@ export class UniversalReceiverAddressStoreInit extends BaseContract {
 
   account(overrides?: CallOverrides): Promise<string>;
 
-  containsAddress(
-    _address: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
+  containsAddress(_address: string, overrides?: CallOverrides): Promise<boolean>;
 
   getAddress(_index: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
@@ -206,10 +163,7 @@ export class UniversalReceiverAddressStoreInit extends BaseContract {
   /**
    * See {IERC165-supportsInterface}.
    */
-  supportsInterface(
-    interfaceId: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
+  supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
 
   initialize(
     _account: string,
@@ -236,15 +190,9 @@ export class UniversalReceiverAddressStoreInit extends BaseContract {
   callStatic: {
     account(overrides?: CallOverrides): Promise<string>;
 
-    containsAddress(
-      _address: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    containsAddress(_address: string, overrides?: CallOverrides): Promise<boolean>;
 
-    getAddress(
-      _index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    getAddress(_index: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
     getAllRawValues(overrides?: CallOverrides): Promise<string[]>;
 
@@ -255,19 +203,13 @@ export class UniversalReceiverAddressStoreInit extends BaseContract {
     /**
      * See {IERC165-supportsInterface}.
      */
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
 
     initialize(_account: string, overrides?: CallOverrides): Promise<void>;
 
     addAddress(_address: string, overrides?: CallOverrides): Promise<boolean>;
 
-    removeAddress(
-      _address: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    removeAddress(_address: string, overrides?: CallOverrides): Promise<boolean>;
 
     universalReceiverDelegate(
       sender: string,
@@ -282,15 +224,9 @@ export class UniversalReceiverAddressStoreInit extends BaseContract {
   estimateGas: {
     account(overrides?: CallOverrides): Promise<BigNumber>;
 
-    containsAddress(
-      _address: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    containsAddress(_address: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    getAddress(
-      _index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    getAddress(_index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
     getAllRawValues(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -301,10 +237,7 @@ export class UniversalReceiverAddressStoreInit extends BaseContract {
     /**
      * See {IERC165-supportsInterface}.
      */
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
     initialize(
       _account: string,
@@ -332,22 +265,13 @@ export class UniversalReceiverAddressStoreInit extends BaseContract {
   populateTransaction: {
     account(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    containsAddress(
-      _address: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    containsAddress(_address: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    getAddress(
-      _index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    getAddress(_index: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getAllRawValues(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    getIndex(
-      _address: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    getIndex(_address: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     length(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

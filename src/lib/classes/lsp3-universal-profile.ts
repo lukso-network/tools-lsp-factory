@@ -77,7 +77,7 @@ export class LSP3UniversalProfile {
       scan((accumulator, deploymentEvent: DeploymentEvent<Contract>) => {
         accumulator[deploymentEvent.name] = deploymentEvent;
         return accumulator;
-      }, {})
+      }, {} as DeploymentEvent<Contract>)
     );
   }
 
