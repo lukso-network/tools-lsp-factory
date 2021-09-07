@@ -1,4 +1,4 @@
-import { getERC725 } from './erc725';
+import { getERC725 } from './erc725.helper';
 
 const randomAddress = '0xc0ffee254729296a45a3885639AC7E10F9d54979';
 describe('erc725.js', () => {

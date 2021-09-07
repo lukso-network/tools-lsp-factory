@@ -1,5 +1,3 @@
-const { ethers } = require('hardhat/register');
-
 module.exports = async () => {
   return {
     roots: ['<rootDir>'],
@@ -13,9 +11,6 @@ module.exports = async () => {
           },
         },
       ],
-    },
-    globals: {
-      ethers,
     },
     collectCoverageFrom: ['src/**/*.ts'],
     coveragePathIgnorePatterns: [
