@@ -7,8 +7,8 @@ import {
   DeploymentEvent,
   DeploymentEventProxyContract,
   DeploymentEventStandardContract,
-  DeploymentEventStatus,
-  DeploymentEventType,
+  DeploymentStatus,
+  DeploymentType,
 } from '../interfaces/profile-deployment';
 
 const BASE_CONTRACT_ADDRESS = '_BASE_CONTRACT_ADDRESS_';
@@ -16,26 +16,31 @@ const proxyRuntimeCodeTemplate = `0x3d602d80600a3d3981f3363d3d373d3d3d363d73${BA
 
 export function waitForReceipt<T>(deploymentEvent$): Observable<T> {
   const receipt$ = deploymentEvent$.pipe(
-    switchMap(async (result: DeploymentEvent<Contract>) => {
-      let receipt, status;
+    switchMap(async (result: DeploymentEvent) => {
+      let receipt, status, functionName;
 
       switch (result.type) {
-        case DeploymentEventType.CONTRACT:
-          receipt = await result.contract.deployTransaction.wait();
-          status = DeploymentEventStatus.SUCCESS;
-          break;
-        case DeploymentEventType.PROXY_CONTRACT:
+        case DeploymentType.CONTRACT:
           receipt = await result.transaction.wait();
-          status = DeploymentEventStatus.INITIALIZING;
+          status = DeploymentStatus.COMPLETE;
           break;
-        case DeploymentEventType.TRANSACTION:
+        case DeploymentType.PROXY:
+          // this is pending because there is an additional step (initialize)
           receipt = await result.transaction.wait();
-          status = DeploymentEventStatus.SUCCESS;
+          status = result.functionName ? DeploymentStatus.COMPLETE : DeploymentStatus.PENDING;
+          functionName = result.functionName;
+          break;
+        case DeploymentType.TRANSACTION:
+          receipt = await result.transaction.wait();
+          status = DeploymentStatus.COMPLETE;
+          functionName = result.functionName;
           break;
       }
 
       return {
-        ...result,
+        type: result.type,
+        contractName: result.contractName,
+        ...(functionName && { functionName }),
         status,
         receipt,
       };
@@ -45,45 +50,45 @@ export function waitForReceipt<T>(deploymentEvent$): Observable<T> {
   return receipt$;
 }
 
-export function initialize<T extends Contract>(
-  deploymentEvent$: Observable<DeploymentEvent<T>>,
+export function initialize(
+  deploymentEvent$: Observable<DeploymentEvent>,
   factory: ContractFactory,
-  initArguments: any
-): Observable<DeploymentEventProxyContract<T>> {
+  initArguments: (result) => unknown[]
+): Observable<DeploymentEventProxyContract> {
   const initialize$ = deploymentEvent$.pipe(
     takeLast(1),
     switchMap(async (result) => {
       const contract = await factory.attach(result.receipt.contractAddress);
       const initializeParams = initArguments(result);
-      const init = await contract.initialize(...initializeParams);
-      const initReceipt = await init.wait();
+      const transaction = await contract.initialize(...initializeParams);
       return {
-        ...result,
-        status: DeploymentEventStatus.SUCCESS,
-        contract,
-        initReceipt,
+        type: result.type,
+        contractName: result.contractName,
+        functionName: 'initialize',
+        status: result.status,
+        transaction,
       };
     }),
     shareReplay()
   );
 
-  return initialize$ as unknown as Observable<DeploymentEventProxyContract<T>>;
+  return initialize$ as unknown as Observable<DeploymentEventProxyContract>;
 }
 /**
  * TODO: docs
  */
-export async function deployContract<T>(
+export async function deployContract(
   deployContractFunction,
   name: string
-): Promise<DeploymentEventStandardContract<T>> {
+): Promise<DeploymentEventStandardContract> {
   try {
-    const contract: T = await deployContractFunction();
+    const contract: Contract = await deployContractFunction();
 
     return {
-      type: DeploymentEventType.CONTRACT,
-      status: DeploymentEventStatus.DEPLOYING,
-      name,
-      contract,
+      type: DeploymentType.CONTRACT,
+      status: DeploymentStatus.PENDING,
+      contractName: name,
+      transaction: contract.deployTransaction,
     };
   } catch (error) {
     console.error(`Error when deploying ${name}`, error);
@@ -94,9 +99,8 @@ export async function deployContract<T>(
 export async function deployProxyContract<T extends Contract>(
   deployContractFunction,
   name: string,
-  signer: Signer,
-  initArguments: unknown[]
-): Promise<DeploymentEventProxyContract<T>> {
+  signer: Signer
+): Promise<DeploymentEventProxyContract> {
   try {
     const contract: T = await deployContractFunction();
 
@@ -109,11 +113,10 @@ export async function deployProxyContract<T extends Contract>(
     });
 
     return {
-      type: DeploymentEventType.PROXY_CONTRACT,
-      status: DeploymentEventStatus.DEPLOYING,
-      name,
+      type: DeploymentType.PROXY,
+      contractName: name,
+      status: DeploymentStatus.PENDING,
       transaction,
-      initArguments,
     };
   } catch (error) {
     console.error(`Error when deploying ${name}`, error);

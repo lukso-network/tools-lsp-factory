@@ -1,27 +1,24 @@
 import { TransactionReceipt } from '@ethersproject/abstract-provider';
-import { Contract, ContractTransaction } from 'ethers';
+import { ContractTransaction } from 'ethers';
 import { Observable } from 'rxjs';
 
 import { LSP3ProfileJSON } from './lsp3-profile';
 
-export enum DeploymentEventType {
-  CONTRACT = 1,
-  TRANSACTION,
-  PROXY_CONTRACT,
+export enum DeploymentType {
+  CONTRACT = 'CONTRACT',
+  TRANSACTION = 'TRANSACTION',
+  PROXY = 'PROXY',
 }
 
-export enum DeploymentEventStatus {
-  DEPLOYING = 1,
-  INITIALIZING,
-  SUCCESS,
+export enum DeploymentStatus {
+  PENDING = 'PENDING',
+  COMPLETE = 'COMPLETE',
 }
 
-export enum DeploymentEventNames {
+export enum ContractNames {
   LSP3_ACCOUNT = 'LSP3Account',
   KEY_MANAGER = 'KeyManager',
   UNIVERSAL_RECEIVER = 'UniversalReceiverAddressStore',
-  SET_DATA = 'setData',
-  TRANSFER_OWNERSHIP = 'transferOwnership',
 }
 
 /**
@@ -41,42 +38,38 @@ export interface ProfileDeploymentOptions {
 }
 
 export interface DeploymentEventBase {
-  type: DeploymentEventType;
-  status: DeploymentEventStatus;
-  name: string;
+  type: DeploymentType;
+  status: DeploymentStatus;
+  contractName: string;
+  transaction?: ContractTransaction;
   receipt?: TransactionReceipt;
-  initArguments?: unknown[]; // TODO: move to DeploymentEventProxyContract
 }
 
-export interface DeploymentEventStandardContract<T> extends DeploymentEventBase {
-  type: DeploymentEventType.CONTRACT;
-  contract: T;
-  transaction?: never;
+export interface DeploymentEventStandardContract extends DeploymentEventBase {
+  type: DeploymentType.CONTRACT;
 }
 
-export interface DeploymentEventProxyContract<T extends Contract> extends DeploymentEventBase {
-  type: DeploymentEventType.PROXY_CONTRACT;
-  transaction: ContractTransaction;
-  contract?: T;
-  initReceipt?: TransactionReceipt;
+export interface DeploymentEventProxyContract extends DeploymentEventBase {
+  type: DeploymentType.PROXY;
+  functionName?: string;
 }
 
-export type DeploymentEventContract<T extends Contract> =
-  | DeploymentEventStandardContract<T>
-  | DeploymentEventProxyContract<T>;
+export type DeploymentEventContract =
+  | DeploymentEventStandardContract
+  | DeploymentEventProxyContract;
 
 export interface DeploymentEventTransaction extends DeploymentEventBase {
-  type: DeploymentEventType.TRANSACTION;
+  type: DeploymentType.TRANSACTION;
+  functionName: string;
   transaction: ContractTransaction;
-  contract?: never;
 }
 
-export type DeploymentEvent<T extends Contract> =
-  | DeploymentEventStandardContract<T>
-  | DeploymentEventProxyContract<T>
+export type DeploymentEvent =
+  | DeploymentEventStandardContract
+  | DeploymentEventProxyContract
   | DeploymentEventTransaction;
 
-export type DeploymentEvent$<T extends Contract> = Observable<DeploymentEvent<T>>;
+export type DeploymentEvent$ = Observable<DeploymentEvent>;
 
 export interface ContractDeploymentOptions {
   version?: string;

@@ -1,16 +1,11 @@
+import { TransactionReceipt } from '@ethersproject/providers';
 import { Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, Observable } from 'rxjs';
 import { shareReplay, switchMap } from 'rxjs/operators';
 
-import {
-  KeyManager,
-  LSP3Account,
-  LSP3Account__factory,
-  UniversalReceiverAddressStore,
-} from '../..';
+import { LSP3Account__factory } from '../..';
 import { LSP3AccountInit__factory } from '../../tmp/Factories/LSP3AccountInit__factory';
 import { LSP3AccountInit } from '../../tmp/LSP3AccountInit';
-import { UniversalReceiverAddressStoreInit } from '../../tmp/UniversalReceiverAddressStoreInit';
 import { ALL_PERMISSIONS, LSP3_UP_KEYS, PREFIX_PERMISSIONS } from '../helpers/config.helper';
 import {
   deployContract,
@@ -20,22 +15,19 @@ import {
 } from '../helpers/deployment.helper';
 import { encodeLSP3Profile } from '../helpers/erc725.helper';
 import {
-  DeploymentEvent,
+  ContractNames,
   DeploymentEvent$,
   DeploymentEventContract,
-  DeploymentEventNames,
   DeploymentEventProxyContract,
-  DeploymentEventStatus,
   DeploymentEventTransaction,
-  DeploymentEventType,
+  DeploymentStatus,
+  DeploymentType,
   ProfileDeploymentOptions,
 } from '../interfaces';
 
 import { UniversalReveiverDeploymentEvent } from './universal-receiver.service';
 
-export type LSP3AccountDeploymentEvent =
-  | DeploymentEventContract<LSP3Account>
-  | DeploymentEventProxyContract<LSP3AccountInit>;
+export type LSP3AccountDeploymentEvent = DeploymentEventContract | DeploymentEventProxyContract;
 
 export function accountDeployment$(
   signer: Signer,
@@ -53,11 +45,21 @@ export function accountDeployment$(
   const accountDeploymentInitialize$ = baseContractAddress
     ? initializeProxy(
         signer,
-        accountDeploymentReceipt$ as Observable<DeploymentEventProxyContract<LSP3AccountInit>>
+        accountDeploymentReceipt$ as Observable<DeploymentEventProxyContract>,
+        controllerAddresses
       )
     : EMPTY;
 
-  return concat(accountDeployment$, accountDeploymentReceipt$, accountDeploymentInitialize$);
+  const accountDeploymentInitializeReceipt$ = waitForReceipt<LSP3AccountDeploymentEvent>(
+    accountDeploymentInitialize$
+  ).pipe(shareReplay());
+
+  return concat(
+    accountDeployment$,
+    accountDeploymentReceipt$,
+    accountDeploymentInitialize$,
+    accountDeploymentInitializeReceipt$
+  );
 }
 
 async function deployLSP3Account(
@@ -71,39 +73,34 @@ async function deployLSP3Account(
       : await new LSP3Account__factory(signer).deploy(ownerAddresses[0]);
   };
   return baseContractAddress
-    ? deployProxyContract<LSP3AccountInit>(
-        deploymentFunction,
-        DeploymentEventNames.LSP3_ACCOUNT,
-        signer,
-        [ownerAddresses[0]]
-      )
-    : deployContract<LSP3Account>(deploymentFunction, DeploymentEventNames.LSP3_ACCOUNT);
+    ? deployProxyContract<LSP3AccountInit>(deploymentFunction, ContractNames.LSP3_ACCOUNT, signer)
+    : deployContract(deploymentFunction, ContractNames.LSP3_ACCOUNT);
 }
 
 function initializeProxy(
   signer: Signer,
-  accountDeploymentReceipt$: Observable<DeploymentEventProxyContract<LSP3AccountInit>>
+  accountDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
+  controllerAddresses: string[]
 ) {
-  return initialize<LSP3AccountInit>(
-    accountDeploymentReceipt$,
-    new LSP3AccountInit__factory(signer),
-    (result: DeploymentEvent<LSP3AccountInit>) => {
-      return result.initArguments;
-    }
-  ).pipe(shareReplay());
+  return initialize(accountDeploymentReceipt$, new LSP3AccountInit__factory(signer), () => {
+    return [controllerAddresses[0]];
+  }).pipe(shareReplay());
 }
 
 export function setDataTransaction$(
+  signer: Signer,
   account$: Observable<LSP3AccountDeploymentEvent>,
   universalReceiver$: Observable<UniversalReveiverDeploymentEvent>,
   profileDeploymentOptions: ProfileDeploymentOptions
 ) {
   const setDataTransaction$ = forkJoin([account$, universalReceiver$]).pipe(
     switchMap(
-      ([{ contract: lsp3AccountContract }, { contract: universalReceiverAddressStore }]) => {
+      ([{ receipt: lsp3AccountReceipt }, { receipt: universalReceiverAddressStoreReceipt }]) => {
         return setData(
-          lsp3AccountContract,
-          universalReceiverAddressStore,
+          signer,
+          lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to,
+          universalReceiverAddressStoreReceipt.contractAddress ||
+            universalReceiverAddressStoreReceipt.to,
           profileDeploymentOptions
         );
       }
@@ -119,37 +116,40 @@ export function setDataTransaction$(
  * TODO: docs
  */
 export async function setData(
-  erc725Account: LSP3Account | LSP3AccountInit,
-  universalReceiverAddressStore: UniversalReceiverAddressStore | UniversalReceiverAddressStoreInit,
+  signer: Signer,
+  erc725AccountAddress: string,
+  universalReceiverAddressStoreAddress: string,
   profileDeploymentOptions: ProfileDeploymentOptions
 ): Promise<DeploymentEventTransaction> {
   const { json, url } = profileDeploymentOptions.lsp3Profile;
   const encodedData = encodeLSP3Profile({ ...json }, url);
+  const erc725Account = new LSP3Account__factory(signer).attach(erc725AccountAddress);
   const transaction = await erc725Account.setDataMultiple(
     [
       LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
       LSP3_UP_KEYS.LSP3_PROFILE,
       PREFIX_PERMISSIONS + profileDeploymentOptions.controllerAddresses[0].substr(2), // TODO: handle multiple addresses
     ],
-    [universalReceiverAddressStore.address, encodedData.LSP3Profile.value, ALL_PERMISSIONS]
+    [universalReceiverAddressStoreAddress, encodedData.LSP3Profile.value, ALL_PERMISSIONS]
   );
 
   return {
-    type: DeploymentEventType.TRANSACTION,
-    status: DeploymentEventStatus.DEPLOYING,
-    name: DeploymentEventNames.SET_DATA,
+    type: DeploymentType.TRANSACTION,
+    contractName: ContractNames.LSP3_ACCOUNT,
+    functionName: 'setDataMultiple',
+    status: DeploymentStatus.PENDING,
     transaction,
   };
 }
 
 export function getTransferOwnershipTransaction$(
   signer: Signer,
-  accountDeployment$: DeploymentEvent$<LSP3AccountInit | LSP3Account>,
-  keyManagerDeployment$: DeploymentEvent$<KeyManager>
+  accountDeployment$: DeploymentEvent$,
+  keyManagerDeployment$: DeploymentEvent$
 ) {
   const transferOwnershipTransaction$ = forkJoin([accountDeployment$, keyManagerDeployment$]).pipe(
-    switchMap(([{ contract: lsp3AccountContract }, { contract: keyManagerContract }]) => {
-      return transferOwnership(signer, lsp3AccountContract, keyManagerContract);
+    switchMap(([{ receipt: lsp3AccountReceipt }, { receipt: keyManagerContract }]) => {
+      return transferOwnership(signer, lsp3AccountReceipt, keyManagerContract);
     }),
     shareReplay()
   );
@@ -164,19 +164,26 @@ export function getTransferOwnershipTransaction$(
  */
 export async function transferOwnership(
   signer: Signer,
-  lsp3Account: LSP3Account | LSP3AccountInit,
-  keyManager: KeyManager
+  lsp3AccountReceipt: TransactionReceipt,
+  keyManagerReceipt: TransactionReceipt
 ): Promise<DeploymentEventTransaction> {
   try {
     const signerAddress = await signer.getAddress();
-    const transaction = await lsp3Account.transferOwnership(keyManager.address, {
-      from: signerAddress,
-    });
+    const contract = new LSP3Account__factory(signer).attach(
+      lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to
+    );
+    const transaction = await contract.transferOwnership(
+      keyManagerReceipt.contractAddress || keyManagerReceipt.to,
+      {
+        from: signerAddress,
+      }
+    );
 
     return {
-      type: DeploymentEventType.TRANSACTION,
-      status: DeploymentEventStatus.DEPLOYING,
-      name: DeploymentEventNames.TRANSFER_OWNERSHIP,
+      type: DeploymentType.TRANSACTION,
+      status: DeploymentStatus.PENDING,
+      contractName: ContractNames.LSP3_ACCOUNT,
+      functionName: 'transferOwnership',
       transaction,
     };
   } catch (error) {

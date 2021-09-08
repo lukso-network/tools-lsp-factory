@@ -6,7 +6,6 @@ import {
   DeploymentEvent,
   DeploymentEventContract,
   DeploymentEventProxyContract,
-  UniversalReceiverAddressStore,
   UniversalReceiverAddressStore__factory,
 } from '../..';
 import { UniversalReceiverAddressStoreInit__factory } from '../../tmp/Factories/UniversalReceiverAddressStoreInit__factory';
@@ -17,13 +16,13 @@ import {
   initialize,
   waitForReceipt,
 } from '../helpers/deployment.helper';
-import { DeploymentEventNames } from '../interfaces';
+import { ContractNames } from '../interfaces';
 
 import { LSP3AccountDeploymentEvent } from './lsp3-account.service';
 
 export type UniversalReveiverDeploymentEvent =
-  | DeploymentEventContract<UniversalReceiverAddressStore>
-  | DeploymentEventProxyContract<UniversalReceiverAddressStoreInit>;
+  | DeploymentEventContract
+  | DeploymentEventProxyContract;
 
 export function universalReceiverAddressStoreDeployment$(
   signer: Signer,
@@ -35,7 +34,7 @@ export function universalReceiverAddressStoreDeployment$(
     switchMap((result) => {
       return deployUniversalReceiverAddressStore(
         signer,
-        result.contract.address,
+        result.receipt.contractAddress,
         baseContractAddress
       );
     }),
@@ -49,16 +48,18 @@ export function universalReceiverAddressStoreDeployment$(
   const universalReceiverAddressStoreInitialize$ = baseContractAddress
     ? initializeProxy(
         signer,
-        universalReceiverAddressStoreReceipt$ as Observable<
-          DeploymentEventProxyContract<UniversalReceiverAddressStoreInit>
-        >
+        universalReceiverAddressStoreReceipt$ as Observable<DeploymentEventProxyContract>
       )
     : EMPTY;
+
+  const universalReceiverAddressStoreInitializeReceipt$ =
+    waitForReceipt<UniversalReveiverDeploymentEvent>(universalReceiverAddressStoreInitialize$);
 
   return concat(
     universalReceiverAddressStoreDeployment$,
     universalReceiverAddressStoreReceipt$,
-    universalReceiverAddressStoreInitialize$
+    universalReceiverAddressStoreInitialize$,
+    universalReceiverAddressStoreInitializeReceipt$
   );
 }
 
@@ -81,27 +82,21 @@ export async function deployUniversalReceiverAddressStore(
   return baseContractAddress
     ? deployProxyContract<UniversalReceiverAddressStoreInit>(
         deploymentFunction,
-        DeploymentEventNames.UNIVERSAL_RECEIVER,
-        signer,
-        [lsp3AccountAddress]
+        ContractNames.UNIVERSAL_RECEIVER,
+        signer
       )
-    : deployContract<UniversalReceiverAddressStore>(
-        deploymentFunction,
-        DeploymentEventNames.UNIVERSAL_RECEIVER
-      );
+    : deployContract(deploymentFunction, ContractNames.UNIVERSAL_RECEIVER);
 }
 
 function initializeProxy(
   signer: Signer,
-  universalReceiverAddressStoreReceipt$: Observable<
-    DeploymentEventProxyContract<UniversalReceiverAddressStoreInit>
-  >
+  universalReceiverAddressStoreReceipt$: Observable<DeploymentEventProxyContract>
 ) {
-  return initialize<UniversalReceiverAddressStoreInit>(
+  return initialize(
     universalReceiverAddressStoreReceipt$,
     new UniversalReceiverAddressStoreInit__factory(signer),
-    (result: DeploymentEvent<UniversalReceiverAddressStoreInit>) => {
-      return result.initArguments;
+    (result: DeploymentEvent) => {
+      return [result.receipt.contractAddress];
     }
   );
 }

@@ -2,13 +2,13 @@ import { Signer } from 'ethers';
 import { concat, EMPTY, Observable } from 'rxjs';
 import { shareReplay, switchMap, takeLast } from 'rxjs/operators';
 
-import { KeyManager, KeyManager__factory } from '../..';
+import { KeyManager__factory } from '../..';
 import { deployContract, waitForReceipt } from '../helpers/deployment.helper';
-import { DeploymentEventContract, DeploymentEventNames } from '../interfaces';
+import { ContractNames, DeploymentEventContract } from '../interfaces';
 
 import { LSP3AccountDeploymentEvent } from './lsp3-account.service';
 
-export type KeyManagerDeploymentEvent = DeploymentEventContract<KeyManager>;
+export type KeyManagerDeploymentEvent = DeploymentEventContract;
 
 export function keyManagerDeployment$(
   signer: Signer,
@@ -17,8 +17,9 @@ export function keyManagerDeployment$(
 ) {
   const keyManagerDeployment$ = accountDeployment$.pipe(
     takeLast(1),
-    switchMap(({ contract: lsp3AccountContract }) => {
-      return deployKeyManager(signer, lsp3AccountContract.address, baseContractAddress);
+    switchMap(({ receipt }) => {
+      const erc725AccountAddress = receipt.contractAddress || receipt.to;
+      return deployKeyManager(signer, erc725AccountAddress, baseContractAddress);
     }),
     shareReplay()
   );
@@ -63,7 +64,7 @@ export async function deployKeyManager(
     throw new Error('Not yet implemented');
   }
 
-  return deployContract<KeyManager>(deploymentFunction, DeploymentEventNames.KEY_MANAGER);
+  return deployContract(deploymentFunction, ContractNames.KEY_MANAGER);
 }
 
 // function initializeProxy(

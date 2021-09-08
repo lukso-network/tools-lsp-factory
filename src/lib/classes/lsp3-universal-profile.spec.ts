@@ -1,4 +1,4 @@
-import { Contract, providers } from 'ethers';
+import { providers } from 'ethers';
 import { ethers, SignerWithAddress } from 'hardhat';
 
 import { LSPFactory } from '../lsp-factory';
@@ -40,7 +40,7 @@ describe('LSP3UniversalProfile', () => {
     let events;
 
     deployments$.subscribe({
-      next: (deploymentEvents: DeploymentEvent<Contract>) => {
+      next: (deploymentEvents: DeploymentEvent) => {
         events = deploymentEvents;
       },
       error: (error) => {

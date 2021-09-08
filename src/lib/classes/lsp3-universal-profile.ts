@@ -62,7 +62,12 @@ export class LSP3UniversalProfile {
     );
 
     // // 4 > set permissions, profile and universal
-    const setData$ = setDataTransaction$(account$, universalReceiver$, profileDeploymentOptions);
+    const setData$ = setDataTransaction$(
+      this.signer,
+      account$,
+      universalReceiver$,
+      profileDeploymentOptions
+    );
 
     // 5 > transfersOwnership to KeyManager
     const transferOwnership$ = getTransferOwnershipTransaction$(this.signer, account$, keyManager$);
