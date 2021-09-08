@@ -95,7 +95,7 @@ export async function deployProxyContract<T extends Contract>(
   deployContractFunction,
   name: string,
   signer: Signer,
-  initArguments: any[]
+  initArguments: unknown[]
 ): Promise<DeploymentEventProxyContract<T>> {
   try {
     const contract: T = await deployContractFunction();

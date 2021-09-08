@@ -1,15 +1,16 @@
+import { Contract, providers } from 'ethers';
 import { ethers, SignerWithAddress } from 'hardhat';
 
-import { lsp3ProfileJson } from '../helpers/sample-lsp3-profile';
 import { LSPFactory } from '../lsp-factory';
 
+import { lsp3ProfileJson } from './../../../test/lsp3-profile.mock';
+import { DeploymentEvent } from './../interfaces';
 import { ProxyDeployer } from './proxy-deployer';
-
 describe('LSP3UniversalProfile', () => {
   let baseContracts;
   let proxyDeployer: ProxyDeployer;
   let signer: SignerWithAddress;
-  let provider: any;
+  let provider: providers.Web3Provider;
 
   beforeAll(async () => {
     const provider = ethers.provider;
@@ -39,7 +40,7 @@ describe('LSP3UniversalProfile', () => {
     let events;
 
     deployments$.subscribe({
-      next: (deploymentEvents: any) => {
+      next: (deploymentEvents: DeploymentEvent<Contract>) => {
         events = deploymentEvents;
       },
       error: (error) => {

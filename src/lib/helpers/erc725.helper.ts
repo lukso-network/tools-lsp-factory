@@ -1,4 +1,5 @@
 import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
+import { providers } from 'ethers';
 
 import { LSP3ProfileJSON } from '../interfaces';
 
@@ -12,7 +13,7 @@ export const schema: ERC725JSONSchema[] = [
   },
 ];
 
-export function getERC725(address?: string, provider?: any) {
+export function getERC725(address?: string, provider?: providers.Web3Provider) {
   if (address) {
     return new ERC725(schema, address, provider);
   }
