@@ -23,6 +23,7 @@ import {
   DeploymentEvent,
   DeploymentEvent$,
   DeploymentEventContract,
+  DeploymentEventNames,
   DeploymentEventProxyContract,
   DeploymentEventStatus,
   DeploymentEventTransaction,
@@ -70,10 +71,13 @@ async function deployLSP3Account(
       : await new LSP3Account__factory(signer).deploy(ownerAddresses[0]);
   };
   return baseContractAddress
-    ? deployProxyContract<LSP3AccountInit>(deploymentFunction, 'LSP3Account', signer, [
-        ownerAddresses[0],
-      ])
-    : deployContract<LSP3Account>(deploymentFunction, 'LSP3Account');
+    ? deployProxyContract<LSP3AccountInit>(
+        deploymentFunction,
+        DeploymentEventNames.LSP3_ACCOUNT,
+        signer,
+        [ownerAddresses[0]]
+      )
+    : deployContract<LSP3Account>(deploymentFunction, DeploymentEventNames.LSP3_ACCOUNT);
 }
 
 function initializeProxy(
@@ -133,7 +137,7 @@ export async function setData(
   return {
     type: DeploymentEventType.TRANSACTION,
     status: DeploymentEventStatus.DEPLOYING,
-    name: 'SET_DATA',
+    name: DeploymentEventNames.SET_DATA,
     transaction,
   };
 }
@@ -145,7 +149,6 @@ export function getTransferOwnershipTransaction$(
 ) {
   const transferOwnershipTransaction$ = forkJoin([accountDeployment$, keyManagerDeployment$]).pipe(
     switchMap(([{ contract: lsp3AccountContract }, { contract: keyManagerContract }]) => {
-      console.count('transferOwnership');
       return transferOwnership(signer, lsp3AccountContract, keyManagerContract);
     }),
     shareReplay()
@@ -166,9 +169,6 @@ export async function transferOwnership(
 ): Promise<DeploymentEventTransaction> {
   try {
     const signerAddress = await signer.getAddress();
-    const owner = await lsp3Account.owner();
-
-    console.log(owner, signerAddress);
     const transaction = await lsp3Account.transferOwnership(keyManager.address, {
       from: signerAddress,
     });
@@ -176,7 +176,7 @@ export async function transferOwnership(
     return {
       type: DeploymentEventType.TRANSACTION,
       status: DeploymentEventStatus.DEPLOYING,
-      name: 'TRANSFER_OWNERSHIP',
+      name: DeploymentEventNames.TRANSFER_OWNERSHIP,
       transaction,
     };
   } catch (error) {

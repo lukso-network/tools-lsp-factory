@@ -4,7 +4,7 @@ import { shareReplay, switchMap, takeLast } from 'rxjs/operators';
 
 import { KeyManager, KeyManager__factory } from '../..';
 import { deployContract, waitForReceipt } from '../helpers/deployment.helper';
-import { DeploymentEventContract } from '../interfaces';
+import { DeploymentEventContract, DeploymentEventNames } from '../interfaces';
 
 import { LSP3AccountDeploymentEvent } from './lsp3-account.service';
 
@@ -63,7 +63,7 @@ export async function deployKeyManager(
     throw new Error('Not yet implemented');
   }
 
-  return deployContract<KeyManager>(deploymentFunction, 'KeyManager');
+  return deployContract<KeyManager>(deploymentFunction, DeploymentEventNames.KEY_MANAGER);
 }
 
 // function initializeProxy(

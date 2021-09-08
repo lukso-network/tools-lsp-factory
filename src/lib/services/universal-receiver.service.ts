@@ -17,6 +17,7 @@ import {
   initialize,
   waitForReceipt,
 } from '../helpers/deployment.helper';
+import { DeploymentEventNames } from '../interfaces';
 
 import { LSP3AccountDeploymentEvent } from './lsp3-account.service';
 
@@ -80,13 +81,13 @@ export async function deployUniversalReceiverAddressStore(
   return baseContractAddress
     ? deployProxyContract<UniversalReceiverAddressStoreInit>(
         deploymentFunction,
-        'UniversalReceiverAddressStore',
+        DeploymentEventNames.UNIVERSAL_RECEIVER,
         signer,
         [lsp3AccountAddress]
       )
     : deployContract<UniversalReceiverAddressStore>(
         deploymentFunction,
-        'UniversalReceiverAddressStore'
+        DeploymentEventNames.UNIVERSAL_RECEIVER
       );
 }
 
@@ -100,8 +101,6 @@ function initializeProxy(
     universalReceiverAddressStoreReceipt$,
     new UniversalReceiverAddressStoreInit__factory(signer),
     (result: DeploymentEvent<UniversalReceiverAddressStoreInit>) => {
-      console.log('result.contract.address 2');
-      console.log(result);
       return result.initArguments;
     }
   );

@@ -16,6 +16,14 @@ export enum DeploymentEventStatus {
   SUCCESS,
 }
 
+export enum DeploymentEventNames {
+  LSP3_ACCOUNT = 'LSP3Account',
+  KEY_MANAGER = 'KeyManager',
+  UNIVERSAL_RECEIVER = 'UniversalReceiverAddressStore',
+  SET_DATA = 'setData',
+  TRANSFER_OWNERSHIP = 'transferOwnership',
+}
+
 /**
  * TBD
  */

@@ -1,7 +1,7 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { Contract, Signer } from 'ethers';
+import { Signer } from 'ethers';
 import { concat, merge } from 'rxjs';
-import { concatAll, scan } from 'rxjs/operators';
+import { concatAll } from 'rxjs/operators';
 
 import { defaultUploadOptions } from '../helpers/config.helper';
 import { imageUpload, ipfsUpload } from '../helpers/uploader.helper';
@@ -11,7 +11,7 @@ import {
   ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
 } from '../interfaces';
-import { ContractDeploymentOptions, DeploymentEvent } from '../interfaces/profile-deployment';
+import { ContractDeploymentOptions } from '../interfaces/profile-deployment';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
 import { keyManagerDeployment$ } from '../services/key-manager.service';
 
@@ -73,11 +73,11 @@ export class LSP3UniversalProfile {
       setData$,
       transferOwnership$,
     ]).pipe(
-      concatAll(),
-      scan((accumulator, deploymentEvent: DeploymentEvent<Contract>) => {
-        accumulator[deploymentEvent.name] = deploymentEvent;
-        return accumulator;
-      }, {} as DeploymentEvent<Contract>)
+      concatAll()
+      // scan((accumulator, deploymentEvent: DeploymentEvent<Contract>) => {
+      //   accumulator[deploymentEvent.name] = deploymentEvent;
+      //   return accumulator;
+      // }, {} as DeploymentEvent<Contract>)
     );
   }
 
