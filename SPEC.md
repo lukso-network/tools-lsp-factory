@@ -20,23 +20,23 @@ lspFactory.LSP3UniversalProfile
 ```typescript
 // prettier-ignore
 [
-  { type: 'CONTRACT_PROXY',  name: 'ERC725Account',        function: 'DEPLOY',            status: 'PENDING',  transaction:  {} },
-  { type: "CONTRACT_PROXY",  name: 'ERC725Account',        function: 'DEPLOY',            status: 'PENDING',  receipt:      {} },
-  { type: "CONTRACT_PROXY",  name: 'ERC725Account',        function: 'initialize',        status: 'PENDING',  transaction:  {} },
-  { type: "CONTRACT_PROXY",  name: 'ERC725Account',        function: 'initialize',        status: 'COMPLETE', receipt:      {} },
+  { type: 'CONTRACT_PROXY',  contractName: 'ERC725Account',        functionName: 'DEPLOY',            status: 'PENDING',  transaction:  {} },
+  { type: "CONTRACT_PROXY",  contractName: 'ERC725Account',        functionName: 'DEPLOY',            status: 'PENDING',  receipt:      {} },
+  { type: "CONTRACT_PROXY",  contractName: 'ERC725Account',        functionName: 'initialize',        status: 'PENDING',  transaction:  {} },
+  { type: "CONTRACT_PROXY",  contractName: 'ERC725Account',        functionName: 'initialize',        status: 'COMPLETE', receipt:      {} },
 
-  { type: 'CONTRACT',        name: 'KeyManager',           function: 'DEPLOY',            status: 'PENDING',  transaction:  {} },
-  { type: "CONTRACT_PROXY",  name: 'UniversalReceiver...', function: 'DEPLOY',            status: 'PENDING',  transaction:  {} },
-  { type: 'CONTRACT',        name: 'KeyManager',           function: 'DEPLOY',            status: 'COMPLETE', receipt:      {} },
-  { type: "CONTRACT_PROXY",  name: 'UniversalReceiver...', function: 'DEPLOY',            status: 'PENDING',  receipt:      {} },
-  { type: "CONTRACT_PROXY",  name: 'UniversalReceiver...', function: 'initialize',        status: 'PENDING',  transaction:  {} },
-  { type: "CONTRACT_PROXY",  name: 'UniversalReceiver...', function: 'initialize',        status: 'COMPLETE', receipt:      {} },
+  { type: 'CONTRACT',        contractName: 'KeyManager',           functionName: 'DEPLOY',            status: 'PENDING',  transaction:  {} },
+  { type: "CONTRACT_PROXY",  contractName: 'UniversalReceiver...', functionName: 'DEPLOY',            status: 'PENDING',  transaction:  {} },
+  { type: 'CONTRACT',        contractName: 'KeyManager',           functionName: 'DEPLOY',            status: 'COMPLETE', receipt:      {} },
+  { type: "CONTRACT_PROXY",  contractName: 'UniversalReceiver...', functionName: 'DEPLOY',            status: 'PENDING',  receipt:      {} },
+  { type: "CONTRACT_PROXY",  contractName: 'UniversalReceiver...', functionName: 'initialize',        status: 'PENDING',  transaction:  {} },
+  { type: "CONTRACT_PROXY",  contractName: 'UniversalReceiver...', functionName: 'initialize',        status: 'COMPLETE', receipt:      {} },
 
-  { type: 'TRANSACTION',     name: 'ERC725Account',        function: 'setDataMultiple',   status: 'PENDING',  transaction:  {} },
-  { type: 'TRANSACTION',     name: 'ERC725Account',        function: 'setDataMultiple',   status: 'COMPLETE', receipt:      {} },
+  { type: 'TRANSACTION',     contractName: 'ERC725Account',        functionName: 'setDataMultiple',   status: 'PENDING',  transaction:  {} },
+  { type: 'TRANSACTION',     contractName: 'ERC725Account',        functionName: 'setDataMultiple',   status: 'COMPLETE', receipt:      {} },
 
-  { type: 'TRANSACTION',     name: 'ERC725Account',        function: 'transferOwnership', status: 'PENDING',  transaction:  {} },
-  { type: 'TRANSACTION',     name: 'ERC725Account',        function: 'transferOwnership', status: 'COMPLETE', receipt:      {} },
+  { type: 'TRANSACTION',     contractName: 'ERC725Account',        functionName: 'transferOwnership', status: 'PENDING',  transaction:  {} },
+  { type: 'TRANSACTION',     contractName: 'ERC725Account',        functionName: 'transferOwnership', status: 'COMPLETE', receipt:      {} },
 ];
 ```
 
@@ -53,11 +53,23 @@ lspFactory.LSP3UniversalProfile
   - return the address explicitly
 
   ```typescript
-     { type: "CONTRACT_PROXY",  name: 'ERC725Account',        function: 'initialize',         receipt:      {} , address:  {} },
+     {
+       type:          "CONTRACT_PROXY",
+       contractName:  "ERC725Account",
+       functionName:  "initialize",
+       receipt:       {} ,
+       address:       {} // <----
+     },
   ```
 
   - return a fully working (**ethers.js**) `Contract` object.
 
   ```typescript
-    { type: "CONTRACT_PROXY",  name: 'ERC725Account',        function: 'initialize',         receipt:      {} , contract:  {} },
+     {
+       type:          "CONTRACT_PROXY",
+       contractName:  "ERC725Account",
+       functionName:  "initialize",
+       receipt:       {} ,
+       contract:      {} // <----
+     },
   ```
