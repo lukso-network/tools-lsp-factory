@@ -58,7 +58,7 @@ lspFactory.LSP3UniversalProfile
        contractName:  "ERC725Account",
        functionName:  "initialize",
        receipt:       {} ,
-       address:       {} // <----
+       address:       "0x..." // <----
      },
   ```
 
