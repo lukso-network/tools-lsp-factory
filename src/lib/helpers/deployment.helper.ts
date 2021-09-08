@@ -11,8 +11,8 @@ import {
   DeploymentEventType,
 } from '../interfaces/profile-deployment';
 
-const runtimeCodeTemplate =
-  '0x3d602d80600a3d3981f3363d3d373d3d3d363d73BASE_CONTRACT_ADDRESS5af43d82803e903d91602b57fd5bf3';
+const BASE_CONTRACT_ADDRESS = '_BASE_CONTRACT_ADDRESS_';
+const proxyRuntimeCodeTemplate = `0x3d602d80600a3d3981f3363d3d373d3d3d363d73${BASE_CONTRACT_ADDRESS}5af43d82803e903d91602b57fd5bf3`;
 
 export function waitForReceipt<T>(deploymentEvent$): Observable<T> {
   const receipt$ = deploymentEvent$.pipe(
@@ -100,8 +100,8 @@ export async function deployProxyContract<T extends Contract>(
   try {
     const contract: T = await deployContractFunction();
 
-    const byteCode = runtimeCodeTemplate.replace(
-      'BASE_CONTRACT_ADDRESS',
+    const byteCode = proxyRuntimeCodeTemplate.replace(
+      BASE_CONTRACT_ADDRESS,
       contract.address.substr(2)
     );
     const transaction = await signer.sendTransaction({

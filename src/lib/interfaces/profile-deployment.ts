@@ -37,7 +37,7 @@ export interface DeploymentEventBase {
   status: DeploymentEventStatus;
   name: string;
   receipt?: TransactionReceipt;
-  initArguments?: any[];
+  initArguments?: unknown[]; // TODO: move to DeploymentEventProxyContract
 }
 
 export interface DeploymentEventStandardContract<T> extends DeploymentEventBase {
