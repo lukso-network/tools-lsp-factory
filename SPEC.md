@@ -20,23 +20,23 @@ lspFactory.LSP3UniversalProfile
 ```typescript
 // prettier-ignore
 [
-  { type: 'CONTRACT_PROXY',  contractName: 'ERC725Account',                                           status: 'PENDING',  transaction:  {} },
-  { type: "CONTRACT_PROXY",  contractName: 'ERC725Account',                                           status: 'PENDING',  receipt:      {} },
-  { type: "CONTRACT_PROXY",  contractName: 'ERC725Account',        functionName: 'initialize',        status: 'PENDING',  transaction:  {} },
-  { type: "CONTRACT_PROXY",  contractName: 'ERC725Account',        functionName: 'initialize',        status: 'COMPLETE', receipt:      {} },
+  { type: 'PROXY',        contractName: 'ERC725Account',                                              status: 'PENDING',  transaction:  {} },
+  { type: "PROXY",        contractName: 'ERC725Account',                                              status: 'PENDING',  receipt:      {} },
+  { type: "PROXY",        contractName: 'ERC725Account',           functionName: 'initialize',        status: 'PENDING',  transaction:  {} },
+  { type: "PROXY",        contractName: 'ERC725Account',           functionName: 'initialize',        status: 'COMPLETE', receipt:      {} },
 
-  { type: 'CONTRACT',        contractName: 'KeyManager',                                              status: 'PENDING',  transaction:  {} },
-  { type: "CONTRACT_PROXY",  contractName: 'UniversalReceiver...',                                    status: 'PENDING',  transaction:  {} },
-  { type: 'CONTRACT',        contractName: 'KeyManager',                                              status: 'COMPLETE', receipt:      {} },
-  { type: "CONTRACT_PROXY",  contractName: 'UniversalReceiver...',                                    status: 'PENDING',  receipt:      {} },
-  { type: "CONTRACT_PROXY",  contractName: 'UniversalReceiver...', functionName: 'initialize',        status: 'PENDING',  transaction:  {} },
-  { type: "CONTRACT_PROXY",  contractName: 'UniversalReceiver...', functionName: 'initialize',        status: 'COMPLETE', receipt:      {} },
+  { type: 'CONTRACT',     contractName: 'KeyManager',                                                 status: 'PENDING',  transaction:  {} },
+  { type: "PROXY",        contractName: 'UniversalReceiver...',                                       status: 'PENDING',  transaction:  {} },
+  { type: 'CONTRACT',     contractName: 'KeyManager',                                                 status: 'COMPLETE', receipt:      {} },
+  { type: "PROXY",        contractName: 'UniversalReceiver...',                                       status: 'PENDING',  receipt:      {} },
+  { type: "PROXY",        contractName: 'UniversalReceiver...',    functionName: 'initialize',        status: 'PENDING',  transaction:  {} },
+  { type: "PROXY",        contractName: 'UniversalReceiver...',    functionName: 'initialize',        status: 'COMPLETE', receipt:      {} },
 
-  { type: 'TRANSACTION',     contractName: 'ERC725Account',        functionName: 'setDataMultiple',   status: 'PENDING',  transaction:  {} },
-  { type: 'TRANSACTION',     contractName: 'ERC725Account',        functionName: 'setDataMultiple',   status: 'COMPLETE', receipt:      {} },
+  { type: 'TRANSACTION',  contractName: 'ERC725Account',           functionName: 'setDataMultiple',   status: 'PENDING',  transaction:  {} },
+  { type: 'TRANSACTION',  contractName: 'ERC725Account',           functionName: 'setDataMultiple',   status: 'COMPLETE', receipt:      {} },
 
-  { type: 'TRANSACTION',     contractName: 'ERC725Account',        functionName: 'transferOwnership', status: 'PENDING',  transaction:  {} },
-  { type: 'TRANSACTION',     contractName: 'ERC725Account',        functionName: 'transferOwnership', status: 'COMPLETE', receipt:      {} },
+  { type: 'TRANSACTION',  contractName: 'ERC725Account',           functionName: 'transferOwnership', status: 'PENDING',  transaction:  {} },
+  { type: 'TRANSACTION',  contractName: 'ERC725Account',           functionName: 'transferOwnership', status: 'COMPLETE', receipt:      {} },
 ];
 ```
 
