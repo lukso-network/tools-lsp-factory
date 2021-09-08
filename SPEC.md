@@ -57,6 +57,7 @@ lspFactory.LSP3UniversalProfile
        type:          "CONTRACT_PROXY",
        contractName:  "ERC725Account",
        functionName:  "initialize",
+       status:        'COMPLETE'
        receipt:       {} ,
        address:       "0x..." // <----
      },
@@ -69,6 +70,7 @@ lspFactory.LSP3UniversalProfile
        type:          "CONTRACT_PROXY",
        contractName:  "ERC725Account",
        functionName:  "initialize",
+       status:        'COMPLETE'
        receipt:       {} ,
        contract:      {} // <----
      },
