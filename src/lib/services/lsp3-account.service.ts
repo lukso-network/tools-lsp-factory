@@ -5,7 +5,6 @@ import { shareReplay, switchMap } from 'rxjs/operators';
 
 import { LSP3Account__factory } from '../..';
 import { LSP3AccountInit__factory } from '../../tmp/Factories/LSP3AccountInit__factory';
-import { LSP3AccountInit } from '../../tmp/LSP3AccountInit';
 import { ALL_PERMISSIONS, LSP3_UP_KEYS, PREFIX_PERMISSIONS } from '../helpers/config.helper';
 import {
   deployContract,
@@ -73,7 +72,7 @@ async function deployLSP3Account(
       : await new LSP3Account__factory(signer).deploy(ownerAddresses[0]);
   };
   return baseContractAddress
-    ? deployProxyContract<LSP3AccountInit>(deploymentFunction, ContractNames.LSP3_ACCOUNT, signer)
+    ? deployProxyContract(deploymentFunction, ContractNames.LSP3_ACCOUNT, signer)
     : deployContract(deploymentFunction, ContractNames.LSP3_ACCOUNT);
 }
 

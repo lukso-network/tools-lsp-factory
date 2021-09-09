@@ -9,7 +9,6 @@ import {
   UniversalReceiverAddressStore__factory,
 } from '../..';
 import { UniversalReceiverAddressStoreInit__factory } from '../../tmp/Factories/UniversalReceiverAddressStoreInit__factory';
-import { UniversalReceiverAddressStoreInit } from '../../tmp/UniversalReceiverAddressStoreInit';
 import {
   deployContract,
   deployProxyContract,
@@ -80,11 +79,7 @@ export async function deployUniversalReceiverAddressStore(
   };
 
   return baseContractAddress
-    ? deployProxyContract<UniversalReceiverAddressStoreInit>(
-        deploymentFunction,
-        ContractNames.UNIVERSAL_RECEIVER,
-        signer
-      )
+    ? deployProxyContract(deploymentFunction, ContractNames.UNIVERSAL_RECEIVER, signer)
     : deployContract(deploymentFunction, ContractNames.UNIVERSAL_RECEIVER);
 }
 
