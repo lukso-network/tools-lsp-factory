@@ -1,60 +1,83 @@
-import { ethers, Wallet } from 'ethers';
+import { NonceManager } from '@ethersproject/experimental';
+import { Signer } from 'ethers';
+import { concat, merge } from 'rxjs';
+import { concatAll } from 'rxjs/operators';
 
-import {
-  ERC725Account,
-  ERC725Account__factory,
-  KeyManager,
-  KeyManager__factory,
-  UniversalReceiverAddressStore__factory,
-} from '../../../types/ethers-v5';
-import { defaultUploadOptions } from '../helpers/config';
-import { encodeLSP3Profile } from '../helpers/erc725';
-import { imageUpload, ipfsUpload } from '../helpers/uploader';
+import { defaultUploadOptions } from '../helpers/config.helper';
+import { imageUpload, ipfsUpload } from '../helpers/uploader.helper';
 import {
   LSP3ProfileJSON,
   LSPFactoryOptions,
   ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
 } from '../interfaces';
+import { ContractDeploymentOptions } from '../interfaces/profile-deployment';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
+import { keyManagerDeployment$ } from '../services/key-manager.service';
 
+import {
+  accountDeployment$,
+  getTransferOwnershipTransaction$,
+  setDataTransaction$,
+} from './../services/lsp3-account.service';
+import { universalReceiverAddressStoreDeployment$ } from './../services/universal-receiver.service';
+
+/**
+ * TODO: docs
+ */
 export class LSP3UniversalProfile {
   options: LSPFactoryOptions;
-  signer: Wallet;
-
+  signer: Signer;
   constructor(options: LSPFactoryOptions) {
     this.options = options;
-    this.signer = new ethers.Wallet(this.options.deployKey, this.options.provider);
+    this.signer = new NonceManager(options.signer);
   }
 
-  async deploy(profileDeployment: ProfileDeploymentOptions) {
+  /**
+   * TODO: docs
+   */
+  deploy(
+    profileDeploymentOptions: ProfileDeploymentOptions,
+    contractDeploymentOptions?: ContractDeploymentOptions
+  ) {
     // 1 > deploys ERC725Account
-    const erc725Account = await this.deployERC725Account(profileDeployment.controllerAddresses[0]);
-
-    // 2 > deploys KeyManager
-    const keyManager = await this.deployKeyManager(erc725Account.address);
-
-    // 3 > deploys UniversalReceiverDelegate
-    const universalReceiverAddressStore = await this.deployUniversalReceiverAddressStore(
-      erc725Account
+    const account$ = accountDeployment$(
+      this.signer,
+      profileDeploymentOptions.controllerAddresses,
+      contractDeploymentOptions?.libAddresses?.lsp3AccountInit
     );
 
-    // 4 > sets LSP3Profile data
-    if (profileDeployment.lsp3ProfileJson) {
-      // TODO: upload json somewhere
-      const url = 'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D';
+    // 2 > deploys KeyManager
+    const keyManager$ = keyManagerDeployment$(
+      this.signer,
+      account$,
+      contractDeploymentOptions?.libAddresses?.keyManagerInit
+    );
 
-      await this.setLSP3Profile(erc725Account, profileDeployment.lsp3ProfileJson, url);
-    }
+    // 3 > deploys UniversalReceiverDelegate
+    const universalReceiver$ = universalReceiverAddressStoreDeployment$(
+      this.signer,
+      account$,
+      contractDeploymentOptions?.libAddresses?.universalReceiverAddressStoreInit
+    );
+
+    // // 4 > set permissions, profile and universal
+    const setData$ = setDataTransaction$(
+      this.signer,
+      account$,
+      universalReceiver$,
+      profileDeploymentOptions
+    );
 
     // 5 > transfersOwnership to KeyManager
-    await this.transferOwnership(erc725Account, keyManager);
+    const transferOwnership$ = getTransferOwnershipTransaction$(this.signer, account$, keyManager$);
 
-    return {
-      erc725Account,
-      keyManager,
-      universalReceiverAddressStore,
-    };
+    return concat([
+      account$,
+      merge(universalReceiver$, keyManager$),
+      setData$,
+      transferOwnership$,
+    ]).pipe(concatAll());
   }
 
   /**
@@ -107,74 +130,5 @@ export class LSP3UniversalProfile {
       profile,
       url: uploadResponse.cid ? 'ipfs://' + uploadResponse.cid : 'https upload TBD',
     };
-  }
-
-  private async deployUniversalReceiverAddressStore(erc725Account: ERC725Account) {
-    const universalReceiverAddressStoreFactory = new UniversalReceiverAddressStore__factory(
-      this.signer
-    );
-    const universalReceiverAddressStore = await universalReceiverAddressStoreFactory.deploy(
-      erc725Account.address
-    );
-    await universalReceiverAddressStore.deployed();
-    return universalReceiverAddressStore;
-  }
-
-  private async transferOwnership(erc725Account: ERC725Account, keyManager: KeyManager) {
-    try {
-      const transferOwnershipTransaction = await erc725Account.transferOwnership(
-        keyManager.address,
-        {
-          from: this.signer.address,
-        }
-      );
-      return await transferOwnershipTransaction.wait();
-    } catch (error) {
-      console.error('Error when transferring Ownership', error);
-      throw error;
-    }
-  }
-
-  private async setLSP3Profile(
-    erc725Account: ERC725Account,
-    lsp3ProfileData: LSP3ProfileJSON,
-    url: string
-  ) {
-    try {
-      const encodedData = encodeLSP3Profile(lsp3ProfileData, url);
-      const transaction = await erc725Account.setData(
-        encodedData.LSP3Profile.key,
-        encodedData.LSP3Profile.value
-      );
-      return await transaction.wait();
-    } catch (error) {
-      console.error('Error when setting LSP3Profile', error);
-      throw error;
-    }
-  }
-
-  private async deployKeyManager(address: string) {
-    try {
-      const keyManagerFactory = new KeyManager__factory(this.signer);
-      const keyManager = await keyManagerFactory.deploy(address);
-      await keyManager.deployed();
-      return keyManager;
-    } catch (error) {
-      console.error('Error when deploying KeyManager', error);
-      throw error;
-    }
-  }
-
-  private async deployERC725Account(ownerAddress: string) {
-    try {
-      const erc725AccountFactory = new ERC725Account__factory(this.signer);
-      const erc725Account = await erc725AccountFactory.deploy(ownerAddress);
-      await erc725Account.deployed();
-
-      return erc725Account;
-    } catch (error) {
-      console.error('Error when deploying ERC725Account', error);
-      throw error;
-    }
   }
 }

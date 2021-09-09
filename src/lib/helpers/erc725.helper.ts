@@ -1,5 +1,5 @@
 import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
-import { keccak256, toUtf8Bytes } from 'ethers/lib/utils';
+import { providers } from 'ethers';
 
 import { LSP3ProfileJSON } from '../interfaces';
 
@@ -13,7 +13,7 @@ export const schema: ERC725JSONSchema[] = [
   },
 ];
 
-export function getERC725(address?: string, provider?: any) {
+export function getERC725(address?: string, provider?: providers.Web3Provider) {
   if (address) {
     return new ERC725(schema, address, provider);
   }
@@ -25,8 +25,7 @@ export function encodeLSP3Profile(lsp3ProfileJson: LSP3ProfileJSON, url: string)
   const myERC725 = getERC725();
   return myERC725.encodeData({
     LSP3Profile: {
-      hashFunction: 'keccak256(utf8)',
-      hash: keccak256(toUtf8Bytes(JSON.stringify(lsp3ProfileJson))),
+      json: lsp3ProfileJson,
       url,
     },
   });

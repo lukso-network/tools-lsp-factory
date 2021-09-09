@@ -2,7 +2,7 @@
   "root": true,
   "parser": "@typescript-eslint/parser",
   "env": { "es6": true },
-  "ignorePatterns": ["node_modules", "build", "coverage", "test", "jest.config.js"],
+  "ignorePatterns": ["node_modules", "build", "coverage", "test", "jest.config.js", "tmp"],
   "plugins": ["import", "eslint-comments"],
   "extends": [
     "eslint:recommended",
@@ -16,6 +16,8 @@
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "eslint-comments/disable-enable-pair": ["error", { "allowWholeFile": true }],
     "eslint-comments/no-unused-disable": "error",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error"],
     "import/order": ["error", { "newlines-between": "always", "alphabetize": { "order": "asc" } }],
     "sort-imports": ["error", { "ignoreDeclarationSort": true, "ignoreCase": true }]
   }

@@ -1,8 +1,9 @@
+import { providers, Signer } from 'ethers';
 /**
  * TDB
  */
 export interface LSPFactoryOptions {
-  deployKey: string;
-  provider: any;
+  signer: Signer;
+  provider: providers.Web3Provider | providers.JsonRpcProvider;
   chainId: number;
 }

@@ -7,4 +7,5 @@ export {
   LSP3ProfileLink,
   ProfileDataBeforeUpload,
 } from './lsp3-profile';
-export { ProfileDeploymentOptions } from './profile-deployment-options';
+
+export * from './profile-deployment';

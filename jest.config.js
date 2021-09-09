@@ -1,5 +1,3 @@
-const { ethers } = require('hardhat/register');
-
 module.exports = async () => {
   return {
     roots: ['<rootDir>'],
@@ -14,9 +12,6 @@ module.exports = async () => {
         },
       ],
     },
-    globals: {
-      ethers,
-    },
     collectCoverageFrom: ['src/**/*.ts'],
     coveragePathIgnorePatterns: [
       'node_modules',
@@ -25,14 +20,15 @@ module.exports = async () => {
       '.mock.ts',
     ],
     coverageDirectory: '<rootDir>/coverage/',
-    coverageThreshold: {
-      global: {
-        branches: 40,
-        functions: 30,
-        lines: 50,
-        statements: 50,
-      },
-    },
+    // ignore coverage for now, enable once the dust has settled
+    // coverageThreshold: {
+    //   global: {
+    //     branches: 40,
+    //     functions: 30,
+    //     lines: 50,
+    //     statements: 50,
+    //   },
+    // },
     logHeapUsage: true,
     testEnvironment: 'node',
     resetMocks: true,
