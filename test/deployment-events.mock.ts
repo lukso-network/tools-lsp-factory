@@ -16,6 +16,12 @@ export const defaultDeploymentEvents = {
       deployment: {
         ...proxyDeploymentEventBase,
       },
+      deploymentReceipt: {
+        ...proxyDeploymentEventBase,
+        receipt: {
+          contractAddress: '0x...',
+        },
+      },
       initialize: {
         ...proxyDeploymentEventBase,
         functionName: 'initialize',

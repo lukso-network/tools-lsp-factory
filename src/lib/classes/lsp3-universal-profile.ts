@@ -77,13 +77,7 @@ export class LSP3UniversalProfile {
       merge(universalReceiver$, keyManager$),
       setData$,
       transferOwnership$,
-    ]).pipe(
-      concatAll()
-      // scan((accumulator, deploymentEvent: DeploymentEvent<Contract>) => {
-      //   accumulator[deploymentEvent.name] = deploymentEvent;
-      //   return accumulator;
-      // }, {} as DeploymentEvent<Contract>)
-    );
+    ]).pipe(concatAll());
   }
 
   /**
