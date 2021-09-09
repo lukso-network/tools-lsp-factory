@@ -5,6 +5,7 @@ import { LSP3AccountInit__factory } from '../../tmp/Factories/LSP3AccountInit__f
 import { UniversalReceiverAddressStoreInit__factory } from '../../tmp/Factories/UniversalReceiverAddressStoreInit__factory';
 import { LSP3AccountInit } from '../../tmp/LSP3AccountInit';
 import { UniversalReceiverAddressStoreInit } from '../../tmp/UniversalReceiverAddressStoreInit';
+import { getProxyByteCode } from '../helpers/deployment.helper';
 
 // interface InitContracts {
 //   LSP3Account: LSP3AccountInit__factory;
@@ -15,9 +16,6 @@ import { UniversalReceiverAddressStoreInit } from '../../tmp/UniversalReceiverAd
 //   LSP3Account: LSP3AccountInit__factory,
 //   UniversalReceiverAddressStore: UniversalReceiverAddressStoreInit__factory,
 // };
-
-const runtimeCodeTemplate =
-  '0x3d602d80600a3d3981f3363d3d373d3d3d363d73BASE_CONTRACT_ADDRESS5af43d82803e903d91602b57fd5bf3';
 
 export class ProxyDeployer {
   signer: Signer;
@@ -52,12 +50,8 @@ export class ProxyDeployer {
   }
 
   async deployProxyContract<T extends Contract>(contract: T) {
-    const byteCode = runtimeCodeTemplate.replace(
-      'BASE_CONTRACT_ADDRESS',
-      contract.address.substr(2)
-    );
     const proxyTx = await this.signer.sendTransaction({
-      data: byteCode,
+      data: getProxyByteCode(contract.address),
     });
 
     const proxyReceipt = await proxyTx.wait();
