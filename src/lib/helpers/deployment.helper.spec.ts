@@ -1,9 +1,14 @@
+import { Observable } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 
 import { defaultDeploymentEvents } from '../../../test/deployment-events.mock';
-import { ContractNames, DeploymentStatus, DeploymentType } from '../interfaces';
+import { LSP3AccountInit__factory } from '../../tmp/Factories/LSP3AccountInit__factory';
+import { LSP3AccountInit } from '../../tmp/LSP3AccountInit';
+import { DeploymentEvent, DeploymentStatus } from '../interfaces';
 
-import { waitForReceipt } from './deployment.helper';
+import { initialize, waitForReceipt } from './deployment.helper';
+
+jest.mock('LSP3AccountInit__factory');
 const testScheduler = new TestScheduler((actual, expected) => {
   expect(actual).toEqual(expected);
 });
@@ -75,6 +80,33 @@ describe('waitForReceipt', () => {
             done();
           },
         });
+      });
+    });
+  });
+});
+
+describe('initialize', () => {
+  it('should initialize the deployed proxy contract', (done) => {
+    const deploymentEvent = defaultDeploymentEvents.PROXY.LSP3Account.deploymentReceipt;
+    testScheduler.run((helpers) => {
+      const { cold } = helpers;
+      const deploymentEvents = {
+        a: deploymentEvent as unknown as DeploymentEvent,
+      };
+      const deploymentEvent$: Observable<DeploymentEvent> = cold('a|', deploymentEvents);
+
+      const factory = new LSP3AccountInit__factory();
+      jest.spyOn(factory, 'attach').mockImplementation(() => {
+        return {} as LSP3AccountInit;
+      });
+      const initialize$ = initialize(deploymentEvent$, factory, () => [false]);
+
+      initialize$.subscribe({
+        next: (deploymentEvent) => {
+          expect(factory.attach).toHaveBeenCalled();
+          expect(deploymentEvent).toEqual(2);
+          done();
+        },
       });
     });
   });
