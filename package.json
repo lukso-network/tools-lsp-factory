@@ -37,7 +37,7 @@
   "dependencies": {
     "@erc725/erc725.js": "^0.6.2-beta.4",
     "@ethersproject/abi": "^5.4.1",
-    "@ethersproject/experimental": "^5.4.0",
+    "@ethersproject/experimental": "5.4.0",
     "browser-image-compression": "^1.0.15",
     "ethers": "5.4.6",
     "ipfs-http-client": "52.0.3",
