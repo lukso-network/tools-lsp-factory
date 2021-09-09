@@ -34,6 +34,7 @@ jobs:
           restore-keys: npm-
       - run: npm config set scripts-prepend-node-path auto
       - run: npm ci
+      - run: npm run build
       - run: npm run generate-types
       - run: npm run fix
       - run: npm run test
