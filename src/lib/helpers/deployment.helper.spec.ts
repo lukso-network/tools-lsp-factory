@@ -25,11 +25,11 @@ describe('waitForReceipt', () => {
     });
 
     it('should return a new deployment event with the receipt, functionName', (done) => {
-      const deploymentEvent = defaultDeploymentEvents.PROXY.LSP3Account.initialize;
-      const deploymentEvent$ = of(deploymentEvent);
-      const receipt$ = waitForReceipt(deploymentEvent$);
+      const expectedDeploymentEvent = defaultDeploymentEvents.PROXY.LSP3Account.initialize;
+      const expectedDeploymentEvent$ = of(expectedDeploymentEvent);
+      const receipt$ = waitForReceipt(expectedDeploymentEvent$);
 
-      const { type, contractName, functionName } = deploymentEvent;
+      const { type, contractName, functionName } = expectedDeploymentEvent;
       receipt$.subscribe((deploymentEvent) => {
         expect(deploymentEvent).toEqual({
           type,
@@ -43,9 +43,8 @@ describe('waitForReceipt', () => {
     });
 
     it('should throw an error incase transaction.wait() fails/errors', (done) => {
-      const deploymentEvent = defaultDeploymentEvents.PROXY.LSP3Account.error;
-      const deploymentEvent$ = of(deploymentEvent);
-      const receipt$ = waitForReceipt(deploymentEvent$);
+      const expectedDeploymentEvent$ = of(defaultDeploymentEvents.PROXY.LSP3Account.error);
+      const receipt$ = waitForReceipt(expectedDeploymentEvent$);
 
       receipt$.subscribe({
         error: (deploymentEvent) => {
