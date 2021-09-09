@@ -3,7 +3,6 @@
 build
 node_modules
 cache
-docs
 coverage
 *.log
 yarn.lock
