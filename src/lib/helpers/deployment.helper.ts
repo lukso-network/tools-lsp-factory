@@ -1,6 +1,6 @@
 import { Contract, ContractFactory, Signer } from 'ethers';
 import { Observable } from 'rxjs';
-import { shareReplay, switchMap, takeLast } from 'rxjs/operators';
+import { catchError, shareReplay, switchMap, takeLast } from 'rxjs/operators';
 
 import {
   ContractDeploymentOptions,
@@ -14,40 +14,44 @@ import {
 const BASE_CONTRACT_ADDRESS = '_BASE_CONTRACT_ADDRESS_';
 const proxyRuntimeCodeTemplate = `0x3d602d80600a3d3981f3363d3d373d3d3d363d73${BASE_CONTRACT_ADDRESS}5af43d82803e903d91602b57fd5bf3`;
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @param {*} deploymentEvent$
+ * @return {*}  {Observable<T>}
+ */
 export function waitForReceipt<T>(deploymentEvent$): Observable<T> {
-  const receipt$ = deploymentEvent$.pipe(
-    switchMap(async (result: DeploymentEvent) => {
-      let receipt, status, functionName;
+  return deploymentEvent$.pipe(
+    switchMap(async (deploymentEvent: DeploymentEvent) => {
+      let status, functionName;
 
-      switch (result.type) {
-        case DeploymentType.CONTRACT:
-          receipt = await result.transaction.wait();
-          status = DeploymentStatus.COMPLETE;
-          break;
+      status = DeploymentStatus.COMPLETE;
+
+      switch (deploymentEvent.type) {
         case DeploymentType.PROXY:
-          // this is pending because there is an additional step (initialize)
-          receipt = await result.transaction.wait();
-          status = result.functionName ? DeploymentStatus.COMPLETE : DeploymentStatus.PENDING;
-          functionName = result.functionName;
+          functionName = deploymentEvent.functionName;
+          status = functionName ? DeploymentStatus.COMPLETE : DeploymentStatus.PENDING;
           break;
         case DeploymentType.TRANSACTION:
-          receipt = await result.transaction.wait();
-          status = DeploymentStatus.COMPLETE;
-          functionName = result.functionName;
+          functionName = deploymentEvent.functionName;
           break;
       }
-
+      const receipt = await deploymentEvent.transaction.wait();
       return {
-        type: result.type,
-        contractName: result.contractName,
+        type: deploymentEvent.type,
+        contractName: deploymentEvent.contractName,
         ...(functionName && { functionName }),
         status,
         receipt,
       };
+    }),
+    catchError((error: Error) => {
+      const message = 'Error when waiting for the transaction receipt: ' + error.message;
+      throw new Error(message);
     })
   );
-
-  return receipt$;
 }
 
 export function initialize(
@@ -74,6 +78,7 @@ export function initialize(
 
   return initialize$ as unknown as Observable<DeploymentEventProxyContract>;
 }
+
 /**
  * TODO: docs
  */
@@ -96,13 +101,13 @@ export async function deployContract(
   }
 }
 
-export async function deployProxyContract<T extends Contract>(
+export async function deployProxyContract(
   deployContractFunction,
   name: string,
   signer: Signer
 ): Promise<DeploymentEventProxyContract> {
   try {
-    const contract: T = await deployContractFunction();
+    const contract: Contract = await deployContractFunction();
 
     const byteCode = proxyRuntimeCodeTemplate.replace(
       BASE_CONTRACT_ADDRESS,
