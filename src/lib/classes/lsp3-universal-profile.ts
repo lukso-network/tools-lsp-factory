@@ -1,5 +1,4 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { Signer } from 'ethers';
 import { concat, merge } from 'rxjs';
 import { concatAll } from 'rxjs/operators';
 
@@ -27,7 +26,7 @@ import { universalReceiverAddressStoreDeployment$ } from './../services/universa
  */
 export class LSP3UniversalProfile {
   options: LSPFactoryOptions;
-  signer: Signer;
+  signer: NonceManager;
   constructor(options: LSPFactoryOptions) {
     this.options = options;
     this.signer = new NonceManager(options.signer);
