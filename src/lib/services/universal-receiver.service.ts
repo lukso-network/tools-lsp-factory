@@ -79,7 +79,12 @@ export async function deployUniversalReceiverAddressStore(
   };
 
   return baseContractAddress
-    ? deployProxyContract(deploymentFunction, ContractNames.UNIVERSAL_RECEIVER, signer)
+    ? deployProxyContract(
+        UniversalReceiverAddressStoreInit__factory.abi,
+        deploymentFunction,
+        ContractNames.UNIVERSAL_RECEIVER,
+        signer
+      )
     : deployContract(deploymentFunction, ContractNames.UNIVERSAL_RECEIVER);
 }
 
@@ -90,7 +95,7 @@ function initializeProxy(
   return initialize(
     universalReceiverAddressStoreReceipt$,
     new UniversalReceiverAddressStoreInit__factory(signer),
-    (result: DeploymentEvent) => {
+    async (result: DeploymentEvent) => {
       return [result.receipt.contractAddress];
     }
   );

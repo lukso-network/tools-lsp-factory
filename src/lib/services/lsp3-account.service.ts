@@ -42,11 +42,7 @@ export function accountDeployment$(
   ).pipe(shareReplay());
 
   const accountDeploymentInitialize$ = baseContractAddress
-    ? initializeProxy(
-        signer,
-        accountDeploymentReceipt$ as Observable<DeploymentEventProxyContract>,
-        controllerAddresses
-      )
+    ? initializeProxy(signer, accountDeploymentReceipt$ as Observable<DeploymentEventProxyContract>)
     : EMPTY;
 
   const accountDeploymentInitializeReceipt$ = waitForReceipt<LSP3AccountDeploymentEvent>(
@@ -72,17 +68,22 @@ async function deployLSP3Account(
       : await new LSP3Account__factory(signer).deploy(ownerAddresses[0]);
   };
   return baseContractAddress
-    ? deployProxyContract(deploymentFunction, ContractNames.LSP3_ACCOUNT, signer)
+    ? deployProxyContract(
+        LSP3AccountInit__factory.abi,
+        deploymentFunction,
+        ContractNames.LSP3_ACCOUNT,
+        signer
+      )
     : deployContract(deploymentFunction, ContractNames.LSP3_ACCOUNT);
 }
 
 function initializeProxy(
   signer: Signer,
-  accountDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
-  controllerAddresses: string[]
+  accountDeploymentReceipt$: Observable<DeploymentEventProxyContract>
 ) {
-  return initialize(accountDeploymentReceipt$, new LSP3AccountInit__factory(signer), () => {
-    return [controllerAddresses[0]];
+  return initialize(accountDeploymentReceipt$, new LSP3AccountInit__factory(signer), async () => {
+    const signerAddress = await signer.getAddress();
+    return [signerAddress];
   }).pipe(shareReplay());
 }
 
@@ -175,6 +176,7 @@ export async function transferOwnership(
       keyManagerReceipt.contractAddress || keyManagerReceipt.to,
       {
         from: signerAddress,
+        gasLimit: 500_000,
       }
     );
 

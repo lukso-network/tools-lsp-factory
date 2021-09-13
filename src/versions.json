@@ -1,1 +1,15 @@
-{"31337":{"0.1.3":{"LSP3UniversalProfile":{"LSP3Account":"0x5FbDB2315678afecb367f032d93F642f64180aa3","UniversalReceiverAddressStoreInit":"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"}}},"L14":{"LSP3UniversalProfile":{"0.0.1":{"ERC725Account":"0x...","KeyManager":"","UniversalReceiverDelegate":"0x..."}}}}
+{
+  "22": {
+    "name": "Lukso L14",
+    "chainId": 22,
+    "networkId": 22,
+    "baseContracts": {
+      "LSP3Account": {
+        "0.0.1": "0xf5059a5D33d5853360D16C683c16e67980206f36"
+      },
+      "UniversalReceiverAddressStore": {
+        "0.0.1": "0x9d4454B023096f34B160D6B654540c56A1F81688"
+      }
+    }
+  }
+}

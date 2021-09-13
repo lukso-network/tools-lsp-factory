@@ -54,14 +54,14 @@ export function waitForReceipt<T>(deploymentEvent$): Observable<T> {
 export function initialize(
   deploymentEvent$: Observable<DeploymentEvent>,
   factory: ContractFactory,
-  initArguments: (result) => unknown[]
+  initArguments: (result) => Promise<unknown[]>
 ): Observable<DeploymentEventProxyContract> {
   const initialize$ = deploymentEvent$.pipe(
     takeLast(1),
     switchMap(async (result) => {
       const contract = await factory.attach(result.receipt.contractAddress);
-      const initializeParams = initArguments(result);
-      const transaction = await contract.initialize(...initializeParams);
+      const initializeParams = await initArguments(result);
+      const transaction = await contract.initialize(...initializeParams, { gasLimit: 3_000_000 });
       return {
         type: result.type,
         contractName: result.contractName,
@@ -99,15 +99,16 @@ export async function deployContract(
 }
 
 export async function deployProxyContract(
+  abi: any,
   deployContractFunction,
   name: string,
   signer: Signer
 ): Promise<DeploymentEventProxyContract> {
   try {
     const contract: Contract = await deployContractFunction();
-    const transaction = await signer.sendTransaction({
-      data: getProxyByteCode(contract.address),
-    });
+    const factory = new ContractFactory(abi, getProxyByteCode(contract.address), signer);
+    const deployedProxy = await factory.deploy();
+    const transaction = deployedProxy.deployTransaction;
 
     return {
       type: DeploymentType.PROXY,
