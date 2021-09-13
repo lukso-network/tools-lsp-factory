@@ -1,4 +1,4 @@
-import { Contract, ContractFactory, Signer } from 'ethers';
+import { Contract, ContractFactory, ContractInterface, Signer } from 'ethers';
 import { Observable } from 'rxjs';
 import { catchError, shareReplay, switchMap, takeLast } from 'rxjs/operators';
 
@@ -99,7 +99,7 @@ export async function deployContract(
 }
 
 export async function deployProxyContract(
-  abi: any,
+  abi: ContractInterface,
   deployContractFunction,
   name: string,
   signer: Signer
