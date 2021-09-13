@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.2-alpha.5](https://github.com/lukso-network/tools-lspFactory/compare/v1.0.2-alpha.4...1.0.2-alpha.5) (2021-09-13)
+
+### Bug Fixes
+
+- **profile-deployment:** fix proxy initialization ([699417a](https://github.com/lukso-network/tools-lspFactory/commit/699417ae5e9c5cd6fca8d11561b0887fe7e82f70))
+
 ## 1.0.2-alpha.3 (2021-09-09)
 
 ### Features
