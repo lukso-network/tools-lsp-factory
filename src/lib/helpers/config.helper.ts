@@ -16,7 +16,7 @@ export const defaultUploadOptions: ProfileUploadOptions = {
 
 export const LSP3_UP_KEYS = {
   UNIVERSAL_RECEIVER_DELEGATE_KEY: keccak256(toUtf8Bytes('LSP1UniversalReceiverDelegate')),
-  LSP3_PROFILE: keccak256(toUtf8Bytes('LSP1UniversalReceiverDelegate')),
+  LSP3_PROFILE: keccak256(toUtf8Bytes('LSP3Profile')),
 };
 
 export const PREFIX_PERMISSIONS = '0x4b80742d0000000082ac0000';
