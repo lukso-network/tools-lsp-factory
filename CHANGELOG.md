@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.2-alpha.6](https://github.com/lukso-network/tools-lspFactory/compare/1.0.2-alpha.5...1.0.2-alpha.6) (2021-09-13)
+
+### Bug Fixes
+
+- **config-helper:** use the correct keys ([47ea967](https://github.com/lukso-network/tools-lspFactory/commit/47ea967ac94f53869dcdd8b64b5d5897bd42d521))
+
 ### [1.0.2-alpha.5](https://github.com/lukso-network/tools-lspFactory/compare/v1.0.2-alpha.4...1.0.2-alpha.5) (2021-09-13)
 
 ### Bug Fixes
