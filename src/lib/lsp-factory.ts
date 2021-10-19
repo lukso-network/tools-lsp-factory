@@ -1,4 +1,4 @@
-import { providers, Signer } from 'ethers';
+import { ethers, providers, Signer } from 'ethers';
 
 import { LSP3UniversalProfile } from './classes/lsp3-universal-profile';
 import { ProxyDeployer } from './classes/proxy-deployer';
@@ -15,14 +15,32 @@ export class LSPFactory {
    * TBD
    *
    * @param {string} deployKey
-   * @param {provider} provider
+   * @param {provider} rpcUrlOrProvider
    * @param {number} [chainId=22] Lukso Testnet - 22 (0x16)
    */
   constructor(
-    signer: Signer,
-    provider: providers.Web3Provider | providers.JsonRpcProvider,
+    privateKeyOrSigner: string | Signer,
+    rpcUrlOrProvider: string | providers.Web3Provider | providers.JsonRpcProvider,
     chainId = 22
   ) {
+    let signer: Signer;
+    let provider: providers.Web3Provider | providers.JsonRpcProvider;
+
+    if (
+      rpcUrlOrProvider instanceof providers.Web3Provider ||
+      rpcUrlOrProvider instanceof providers.JsonRpcProvider
+    ) {
+      provider = rpcUrlOrProvider;
+    } else {
+      provider = new ethers.providers.JsonRpcProvider(rpcUrlOrProvider);
+    }
+
+    if (privateKeyOrSigner instanceof Signer) {
+      signer = privateKeyOrSigner;
+    } else {
+      signer = new ethers.Wallet(privateKeyOrSigner, provider);
+    }
+
     this.options = {
       signer,
       provider,
