@@ -19,8 +19,8 @@ export class LSPFactory {
    * @param {number} [chainId=22] Lukso Testnet - 22 (0x16)
    */
   constructor(
-    privateKeyOrSigner: string | Signer,
     rpcUrlOrProvider: string | providers.Web3Provider | providers.JsonRpcProvider,
+    privateKeyOrSigner: string | Signer,
     chainId = 22
   ) {
     let signer: Signer;
