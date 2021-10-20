@@ -1,6 +1,6 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, merge } from 'rxjs';
-import { concatAll } from 'rxjs/operators';
+import { concat, lastValueFrom, merge } from 'rxjs';
+import { concatAll, scan } from 'rxjs/operators';
 
 import { defaultUploadOptions } from '../helpers/config.helper';
 import { imageUpload, ipfsUpload } from '../helpers/uploader.helper';
@@ -10,7 +10,11 @@ import {
   ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
 } from '../interfaces';
-import { ContractDeploymentOptions } from '../interfaces/profile-deployment';
+import {
+  ContractDeploymentOptions,
+  DeployedContracts,
+  DeploymentEvent,
+} from '../interfaces/profile-deployment';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
 import { keyManagerDeployment$ } from '../services/key-manager.service';
 
@@ -35,7 +39,7 @@ export class LSP3UniversalProfile {
   /**
    * TODO: docs
    */
-  deploy(
+  deployReactive(
     profileDeploymentOptions: ProfileDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
@@ -60,7 +64,7 @@ export class LSP3UniversalProfile {
       contractDeploymentOptions?.libAddresses?.universalReceiverAddressStoreInit
     );
 
-    // // 4 > set permissions, profile and universal
+    // 4 > set permissions, profile and universal receiver
     const setData$ = setDataTransaction$(
       this.signer,
       account$,
@@ -77,6 +81,33 @@ export class LSP3UniversalProfile {
       setData$,
       transferOwnership$,
     ]).pipe(concatAll());
+  }
+
+  /**
+   * TODO: docs
+   */
+  deploy(
+    profileDeploymentOptions: ProfileDeploymentOptions,
+    contractDeploymentOptions?: ContractDeploymentOptions
+  ) {
+    const deployments$ = this.deployReactive(
+      profileDeploymentOptions,
+      contractDeploymentOptions
+    ).pipe(
+      scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
+        console.log(deploymentEvent);
+        if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
+          accumulator[deploymentEvent.contractName] = {
+            address: deploymentEvent.receipt.contractAddress,
+            receipt: deploymentEvent.receipt,
+          };
+        }
+
+        return accumulator;
+      }, {})
+    );
+
+    return lastValueFrom(deployments$);
   }
 
   /**
