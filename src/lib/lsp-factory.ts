@@ -3,6 +3,7 @@ import { ethers, providers, Signer } from 'ethers';
 import { LSP3UniversalProfile } from './classes/lsp3-universal-profile';
 import { ProxyDeployer } from './classes/proxy-deployer';
 import { LSPFactoryOptions } from './interfaces';
+import { SignerOptions } from './interfaces/lsp-factory-options';
 
 /**
  * Factory for creating LSP3UniversalProfiles / LSP4DigitalCertificates
@@ -20,7 +21,7 @@ export class LSPFactory {
    */
   constructor(
     rpcUrlOrProvider: string | providers.Web3Provider | providers.JsonRpcProvider,
-    privateKeyOrSigner: string | Signer,
+    privateKeyOrSigner: string | Signer | SignerOptions,
     chainId = 22
   ) {
     let signer: Signer;
@@ -37,8 +38,10 @@ export class LSPFactory {
 
     if (privateKeyOrSigner instanceof Signer) {
       signer = privateKeyOrSigner;
-    } else {
+    } else if (typeof privateKeyOrSigner === 'string') {
       signer = new ethers.Wallet(privateKeyOrSigner, provider);
+    } else {
+      signer = new ethers.Wallet(privateKeyOrSigner.address, provider);
     }
 
     this.options = {
