@@ -46,6 +46,8 @@ export class LSP3UniversalProfile {
   ) {
     // TODO: Use base contract bytecode if passed
 
+    // TODO: If base contract addresses are passed use those instead
+
     // 0 > Check for existing base contracts and deploy
     const lsp3BaseContractCode$ = forkJoin([
       this.getDeployedCode(contractDeploymentOptions.libAddresses.lsp3AccountInit),
@@ -54,6 +56,8 @@ export class LSP3UniversalProfile {
       ),
       // TODO: Add KeyManager Base Contract
     ]);
+
+    // Use observable to store base contract addresses?
 
     const baseContracts$ = baseContractsDeployment$(
       this.signer,
@@ -87,7 +91,8 @@ export class LSP3UniversalProfile {
       this.signer,
       account$,
       universalReceiver$,
-      profileDeploymentOptions
+      profileDeploymentOptions,
+      this.options.signerPermissions
     );
 
     // 5 > transfersOwnership to KeyManager

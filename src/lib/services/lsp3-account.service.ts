@@ -91,7 +91,8 @@ export function setDataTransaction$(
   signer: Signer,
   account$: Observable<LSP3AccountDeploymentEvent>,
   universalReceiver$: Observable<UniversalReveiverDeploymentEvent>,
-  profileDeploymentOptions: ProfileDeploymentOptions
+  profileDeploymentOptions: ProfileDeploymentOptions,
+  signerPermissions?: string
 ) {
   const setDataTransaction$ = forkJoin([account$, universalReceiver$]).pipe(
     switchMap(
@@ -101,7 +102,8 @@ export function setDataTransaction$(
           lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to,
           universalReceiverAddressStoreReceipt.contractAddress ||
             universalReceiverAddressStoreReceipt.to,
-          profileDeploymentOptions
+          profileDeploymentOptions,
+          signerPermissions
         );
       }
     ),
@@ -119,7 +121,8 @@ export async function setData(
   signer: Signer,
   erc725AccountAddress: string,
   universalReceiverAddressStoreAddress: string,
-  profileDeploymentOptions: ProfileDeploymentOptions
+  profileDeploymentOptions: ProfileDeploymentOptions,
+  signerPermissions?: string
 ): Promise<DeploymentEventTransaction> {
   const { json, url } = profileDeploymentOptions.lsp3Profile;
   const encodedData = encodeLSP3Profile({ ...json }, url);
@@ -130,7 +133,11 @@ export async function setData(
       LSP3_UP_KEYS.LSP3_PROFILE,
       PREFIX_PERMISSIONS + profileDeploymentOptions.controllerAddresses[0].substr(2), // TODO: handle multiple addresses
     ],
-    [universalReceiverAddressStoreAddress, encodedData.LSP3Profile.value, ALL_PERMISSIONS] // TODO: Set permissions according to permissions passed as LSPFactory constructor
+    [
+      universalReceiverAddressStoreAddress,
+      encodedData.LSP3Profile.value,
+      signerPermissions ?? ALL_PERMISSIONS,
+    ] // TODO: Set permissions according to permissions passed as LSPFactory constructor
   );
 
   return {
