@@ -130,7 +130,7 @@ export async function setData(
       LSP3_UP_KEYS.LSP3_PROFILE,
       PREFIX_PERMISSIONS + profileDeploymentOptions.controllerAddresses[0].substr(2), // TODO: handle multiple addresses
     ],
-    [universalReceiverAddressStoreAddress, encodedData.LSP3Profile.value, ALL_PERMISSIONS]
+    [universalReceiverAddressStoreAddress, encodedData.LSP3Profile.value, ALL_PERMISSIONS] // TODO: Set permissions according to permissions passed as LSPFactory constructor
   );
 
   return {

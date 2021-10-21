@@ -1,5 +1,5 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, lastValueFrom, merge } from 'rxjs';
+import { concat, forkJoin, lastValueFrom, merge } from 'rxjs';
 import { concatAll, scan } from 'rxjs/operators';
 
 import { defaultUploadOptions } from '../helpers/config.helper';
@@ -16,6 +16,7 @@ import {
   DeploymentEvent,
 } from '../interfaces/profile-deployment';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
+import { baseContractsDeployment$ } from '../services/base-contract.service';
 import { keyManagerDeployment$ } from '../services/key-manager.service';
 
 import {
@@ -43,6 +44,23 @@ export class LSP3UniversalProfile {
     profileDeploymentOptions: ProfileDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
+    // TODO: Use base contract bytecode if passed
+
+    // 0 > Check for existing base contracts and deploy
+    const lsp3BaseContractCode$ = forkJoin([
+      this.getDeployedCode(contractDeploymentOptions.libAddresses.lsp3AccountInit),
+      this.getDeployedCode(
+        contractDeploymentOptions.libAddresses.universalReceiverAddressStoreInit
+      ),
+      // TODO: Add KeyManager Base Contract
+    ]);
+
+    const baseContracts$ = baseContractsDeployment$(
+      this.signer,
+      this.options.chainId,
+      lsp3BaseContractCode$
+    );
+
     // 1 > deploys ERC725Account
     const account$ = accountDeployment$(
       this.signer,
@@ -64,7 +82,7 @@ export class LSP3UniversalProfile {
       contractDeploymentOptions?.libAddresses?.universalReceiverAddressStoreInit
     );
 
-    // 4 > set permissions, profile and universal receiver
+    // 4 > set permissions, profile and universal
     const setData$ = setDataTransaction$(
       this.signer,
       account$,
@@ -76,6 +94,7 @@ export class LSP3UniversalProfile {
     const transferOwnership$ = getTransferOwnershipTransaction$(this.signer, account$, keyManager$);
 
     return concat([
+      baseContracts$,
       account$,
       merge(universalReceiver$, keyManager$),
       setData$,
@@ -108,6 +127,10 @@ export class LSP3UniversalProfile {
     );
 
     return lastValueFrom(deployments$);
+  }
+
+  async getDeployedCode(contractAddress: string) {
+    return this.options.provider.getCode(contractAddress);
   }
 
   /**
