@@ -19,15 +19,12 @@ describe('LSP3UniversalProfile', () => {
     baseContracts = await proxyDeployer.deployBaseContracts();
   });
   it.skip('should deploy and set LSP3Profile data', (done) => {
-    const myLSPFactory = new LSPFactory(signer, provider);
+    const myLSPFactory = new LSPFactory(provider, signer);
 
-    const deployments$ = myLSPFactory.LSP3UniversalProfile.deploy(
+    const deployments$ = myLSPFactory.LSP3UniversalProfile.deployReactive(
       {
         controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
-        lsp3Profile: {
-          json: lsp3ProfileJson,
-          url: 'fake',
-        },
+        lsp3Profile: lsp3ProfileJson,
       },
       {
         libAddresses: {

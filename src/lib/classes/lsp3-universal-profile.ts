@@ -21,6 +21,7 @@ import { keyManagerDeployment$ } from '../services/key-manager.service';
 
 import {
   accountDeployment$,
+  getLsp3ProfileDataUrl,
   getTransferOwnershipTransaction$,
   setDataTransaction$,
 } from './../services/lsp3-account.service';
@@ -44,17 +45,19 @@ export class LSP3UniversalProfile {
     profileDeploymentOptions: ProfileDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
-    // TODO: Use base contract bytecode if passed
-
-    // TODO: If base contract addresses are passed use those instead
+    // -1 > Run IPFS upload process in parallel with contract deployment
+    const lsp3Profile = getLsp3ProfileDataUrl(profileDeploymentOptions.lsp3Profile);
 
     // 0 > Check for existing base contracts and deploy
+
+    // TODO: Use base contract bytecode if passed
+    // TODO: If base contract addresses are passed use those instead
+    // TODO: Add KeyManager Base Contract
     const lsp3BaseContractCode$ = forkJoin([
       this.getDeployedCode(contractDeploymentOptions.libAddresses.lsp3AccountInit),
       this.getDeployedCode(
         contractDeploymentOptions.libAddresses.universalReceiverAddressStoreInit
       ),
-      // TODO: Add KeyManager Base Contract
     ]);
 
     // Use observable to store base contract addresses?
@@ -91,7 +94,8 @@ export class LSP3UniversalProfile {
       this.signer,
       account$,
       universalReceiver$,
-      profileDeploymentOptions,
+      profileDeploymentOptions.controllerAddresses,
+      lsp3Profile,
       this.options.signerPermissions
     );
 

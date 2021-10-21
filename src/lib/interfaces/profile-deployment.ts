@@ -6,7 +6,7 @@ import { KeyManager, UniversalReceiverAddressStore } from '../..';
 import { LSP3Account } from '../../../types/ethers-v5';
 import { ERC725Account } from '../../../types/ethers-v5/ERC725Account';
 
-import { LSP3ProfileJSON } from './lsp3-profile';
+import { ProfileDataBeforeUpload } from './lsp3-profile';
 
 export enum DeploymentType {
   CONTRACT = 'CONTRACT',
@@ -30,10 +30,7 @@ export enum ContractNames {
  */
 export interface ProfileDeploymentOptions {
   controllerAddresses: string[];
-  lsp3Profile: {
-    json: LSP3ProfileJSON;
-    url: string;
-  };
+  lsp3Profile: ProfileDataBeforeUpload | string;
   baseContractAddresses?: {
     lsp3Account?: string;
     universalReceiverAddressStore?: string;

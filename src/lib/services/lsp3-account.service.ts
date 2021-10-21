@@ -1,9 +1,10 @@
 import { TransactionReceipt } from '@ethersproject/providers';
+import axios from 'axios';
 import { Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, Observable } from 'rxjs';
 import { shareReplay, switchMap } from 'rxjs/operators';
 
-import { LSP3Account__factory } from '../..';
+import { LSP3Account__factory, LSP3UniversalProfile } from '../..';
 import { LSP3AccountInit__factory } from '../../tmp/Factories/LSP3AccountInit__factory';
 import { ALL_PERMISSIONS, LSP3_UP_KEYS, PREFIX_PERMISSIONS } from '../helpers/config.helper';
 import {
@@ -21,7 +22,8 @@ import {
   DeploymentEventTransaction,
   DeploymentStatus,
   DeploymentType,
-  ProfileDeploymentOptions,
+  LSP3ProfileJSON,
+  ProfileDataBeforeUpload,
 } from '../interfaces';
 
 import { UniversalReveiverDeploymentEvent } from './universal-receiver.service';
@@ -91,7 +93,11 @@ export function setDataTransaction$(
   signer: Signer,
   account$: Observable<LSP3AccountDeploymentEvent>,
   universalReceiver$: Observable<UniversalReveiverDeploymentEvent>,
-  profileDeploymentOptions: ProfileDeploymentOptions,
+  controllerAddresses: string[],
+  lsp3ProfileData: Promise<{
+    profile: LSP3ProfileJSON;
+    url: string;
+  }>,
   signerPermissions?: string
 ) {
   const setDataTransaction$ = forkJoin([account$, universalReceiver$]).pipe(
@@ -102,7 +108,8 @@ export function setDataTransaction$(
           lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to,
           universalReceiverAddressStoreReceipt.contractAddress ||
             universalReceiverAddressStoreReceipt.to,
-          profileDeploymentOptions,
+          controllerAddresses,
+          lsp3ProfileData,
           signerPermissions
         );
       }
@@ -114,6 +121,28 @@ export function setDataTransaction$(
   return concat(setDataTransaction$, setDataReceipt$);
 }
 
+export async function getLsp3ProfileDataUrl(lsp3Profile: ProfileDataBeforeUpload | string) {
+  let lsp3ProfileData: {
+    profile: LSP3ProfileJSON;
+    url: string;
+  };
+
+  if (typeof lsp3Profile === 'string') {
+    const lsp3JsonUrl = lsp3Profile;
+    const ipfsResponse = await axios.get(lsp3JsonUrl);
+    const lsp3ProfileJson = ipfsResponse.data;
+
+    lsp3ProfileData = {
+      url: lsp3Profile,
+      profile: lsp3ProfileJson as LSP3ProfileJSON,
+    };
+  } else {
+    lsp3ProfileData = await LSP3UniversalProfile.uploadProfileData(lsp3Profile);
+  }
+
+  return lsp3ProfileData;
+}
+
 /**
  * TODO: docs
  */
@@ -121,17 +150,22 @@ export async function setData(
   signer: Signer,
   erc725AccountAddress: string,
   universalReceiverAddressStoreAddress: string,
-  profileDeploymentOptions: ProfileDeploymentOptions,
+  controllerAddresses: string[],
+  lsp3ProfileDataPromise: Promise<{
+    profile: LSP3ProfileJSON;
+    url: string;
+  }>,
   signerPermissions?: string
 ): Promise<DeploymentEventTransaction> {
-  const { json, url } = profileDeploymentOptions.lsp3Profile;
-  const encodedData = encodeLSP3Profile({ ...json }, url);
+  const lsp3ProfileData = await lsp3ProfileDataPromise;
+
+  const encodedData = encodeLSP3Profile(lsp3ProfileData.profile, lsp3ProfileData.url);
   const erc725Account = new LSP3Account__factory(signer).attach(erc725AccountAddress);
   const transaction = await erc725Account.setDataMultiple(
     [
       LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
       LSP3_UP_KEYS.LSP3_PROFILE,
-      PREFIX_PERMISSIONS + profileDeploymentOptions.controllerAddresses[0].substr(2), // TODO: handle multiple addresses
+      PREFIX_PERMISSIONS + controllerAddresses[0].substr(2), // TODO: handle multiple addresses
     ],
     [
       universalReceiverAddressStoreAddress,
