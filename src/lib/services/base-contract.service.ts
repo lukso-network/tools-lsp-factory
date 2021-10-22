@@ -2,7 +2,8 @@ import { Signer } from '@ethersproject/abstract-signer';
 import { defer, EMPTY, merge, Observable } from 'rxjs';
 import { shareReplay, switchMap, tap } from 'rxjs/operators';
 
-import { ContractNames, DeploymentEventContract, LSP3AccountInit__factory } from '../..';
+import { ContractNames, DeploymentEventContract } from '../..';
+import { LSP3AccountInit__factory } from '../../tmp/Factories/LSP3AccountInit__factory';
 import { UniversalReceiverAddressStoreInit__factory } from '../../tmp/Factories/UniversalReceiverAddressStoreInit__factory';
 import { deployContract, waitForReceipt } from '../helpers/deployment.helper';
 

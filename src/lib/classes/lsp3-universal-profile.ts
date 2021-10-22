@@ -5,11 +5,11 @@ import { concatAll, scan } from 'rxjs/operators';
 import { defaultUploadOptions } from '../helpers/config.helper';
 import { imageUpload, ipfsUpload } from '../helpers/uploader.helper';
 import {
-  LSP3ProfileJSON,
   LSPFactoryOptions,
   ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
 } from '../interfaces';
+import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import {
   ContractDeploymentOptions,
   DeployedContracts,
@@ -46,7 +46,9 @@ export class LSP3UniversalProfile {
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
     // -1 > Run IPFS upload process in parallel with contract deployment
-    const lsp3Profile = getLsp3ProfileDataUrl(profileDeploymentOptions.lsp3Profile);
+    const lsp3Profile = profileDeploymentOptions.lsp3Profile
+      ? getLsp3ProfileDataUrl(profileDeploymentOptions.lsp3Profile)
+      : null;
 
     // 0 > Check for existing base contracts and deploy
 
@@ -163,7 +165,7 @@ export class LSP3UniversalProfile {
   static async uploadProfileData(
     profileData: ProfileDataBeforeUpload,
     uploadOptions?: ProfileUploadOptions
-  ): Promise<{ profile: LSP3ProfileJSON; url: string }> {
+  ): Promise<LSP3ProfileDataForEncoding> {
     uploadOptions = uploadOptions || defaultUploadOptions;
 
     const profileImage = profileData.profileImage

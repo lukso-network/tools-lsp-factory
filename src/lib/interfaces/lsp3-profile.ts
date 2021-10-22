@@ -32,3 +32,8 @@ export interface ProfileDataBeforeUpload {
   links?: LSP3ProfileLink[];
   tags?: string[];
 }
+
+export interface LSP3ProfileDataForEncoding {
+  profile: LSP3ProfileJSON;
+  url: string;
+}

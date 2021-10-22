@@ -30,7 +30,7 @@ export enum ContractNames {
  */
 export interface ProfileDeploymentOptions {
   controllerAddresses: string[];
-  lsp3Profile: ProfileDataBeforeUpload | string;
+  lsp3Profile?: ProfileDataBeforeUpload | string;
   baseContractAddresses?: {
     lsp3Account?: string;
     universalReceiverAddressStore?: string;
