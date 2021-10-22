@@ -5,7 +5,7 @@ import { shareReplay, switchMap, tap } from 'rxjs/operators';
 import { ContractNames, DeploymentEventContract } from '../..';
 import { LSP3AccountInit__factory } from '../../tmp/Factories/LSP3AccountInit__factory';
 import { UniversalReceiverAddressStoreInit__factory } from '../../tmp/Factories/UniversalReceiverAddressStoreInit__factory';
-import { deployContract, waitForReceipt } from '../helpers/deployment.helper';
+import { deployBaseContract, waitForReceipt } from '../helpers/deployment.helper';
 
 import { LSP3AccountDeploymentEvent } from './lsp3-account.service';
 
@@ -45,11 +45,11 @@ export function baseContractsDeployment$(
 }
 
 function deployBaseContract$(contractName: ContractNames, chainId: number, deployContractFunction) {
-  const deployBaseContract = () => {
-    return deployContract(deployContractFunction, contractName);
+  const deployContract = () => {
+    return deployBaseContract(deployContractFunction, contractName);
   };
 
-  const baseContractDeployment$ = defer(() => deployBaseContract()).pipe(shareReplay());
+  const baseContractDeployment$ = defer(() => deployContract()).pipe(shareReplay());
 
   const baseContractDeploymentReceipt$ = waitForReceipt<DeploymentEventContract>(
     baseContractDeployment$

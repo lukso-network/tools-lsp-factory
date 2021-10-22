@@ -12,6 +12,7 @@ export enum DeploymentType {
   CONTRACT = 'CONTRACT',
   TRANSACTION = 'TRANSACTION',
   PROXY = 'PROXY',
+  BASE_CONTRACT = 'BASE_CONTRACT',
 }
 
 export enum DeploymentStatus {
@@ -48,6 +49,9 @@ export interface DeploymentEventBase {
 
 export interface DeploymentEventStandardContract extends DeploymentEventBase {
   type: DeploymentType.CONTRACT;
+}
+export interface DeploymentEventBaseContract extends DeploymentEventBase {
+  type: DeploymentType.BASE_CONTRACT;
 }
 
 export interface DeploymentEventProxyContract extends DeploymentEventBase {
