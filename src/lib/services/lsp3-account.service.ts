@@ -16,6 +16,7 @@ import {
 import { encodeLSP3Profile } from '../helpers/erc725.helper';
 import {
   ContractNames,
+  ControllerOptions,
   DeploymentEvent$,
   DeploymentEventContract,
   DeploymentEventProxyContract,
@@ -94,9 +95,8 @@ export function setDataTransaction$(
   signer: Signer,
   account$: Observable<LSP3AccountDeploymentEvent>,
   universalReceiver$: Observable<UniversalReveiverDeploymentEvent>,
-  controllerAddresses: string[],
-  lsp3ProfileData?: Promise<LSP3ProfileDataForEncoding>,
-  signerPermissions?: string
+  controllerAddresses: (string | ControllerOptions)[],
+  lsp3ProfileData?: Promise<LSP3ProfileDataForEncoding>
 ) {
   const setDataTransaction$ = forkJoin([account$, universalReceiver$]).pipe(
     switchMap(
@@ -107,8 +107,7 @@ export function setDataTransaction$(
           universalReceiverAddressStoreReceipt.contractAddress ||
             universalReceiverAddressStoreReceipt.to,
           controllerAddresses,
-          lsp3ProfileData,
-          signerPermissions
+          lsp3ProfileData
         );
       }
     ),
@@ -150,9 +149,8 @@ export async function setData(
   signer: Signer,
   erc725AccountAddress: string,
   universalReceiverAddressStoreAddress: string,
-  controllerAddresses: string[],
-  lsp3ProfileDataPromise?: Promise<LSP3ProfileDataForEncoding>,
-  signerPermissions?: string
+  controllerAddresses: (string | ControllerOptions)[],
+  lsp3ProfileDataPromise?: Promise<LSP3ProfileDataForEncoding>
 ): Promise<DeploymentEventTransaction> {
   const lsp3ProfileData = lsp3ProfileDataPromise ? await lsp3ProfileDataPromise : null;
 
@@ -162,9 +160,19 @@ export async function setData(
 
   const erc725Account = new LSP3Account__factory(signer).attach(erc725AccountAddress);
 
+  let controllerAddress: string;
+  let signerPermissions: string;
+
+  if (typeof controllerAddresses[0] === 'string') {
+    controllerAddress = controllerAddresses[0];
+  } else {
+    controllerAddress = controllerAddresses[0].address;
+    signerPermissions = controllerAddresses[0].permissions;
+  }
+
   const keysToSet = [
     LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
-    PREFIX_PERMISSIONS + controllerAddresses[0].substr(2), // TODO: handle multiple addresses
+    PREFIX_PERMISSIONS + controllerAddress.substr(2), // TODO: handle multiple addresses
   ];
 
   const valuesToSet = [universalReceiverAddressStoreAddress, signerPermissions ?? ALL_PERMISSIONS];

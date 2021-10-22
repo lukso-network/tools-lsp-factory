@@ -26,7 +26,6 @@ export class LSPFactory {
   ) {
     let signer: Signer;
     let provider: providers.Web3Provider | providers.JsonRpcProvider;
-    let signerPermissions: string | undefined;
 
     if (
       rpcUrlOrProvider instanceof providers.Web3Provider ||
@@ -42,15 +41,13 @@ export class LSPFactory {
     } else if (typeof privateKeyOrSigner === 'string') {
       signer = new ethers.Wallet(privateKeyOrSigner, provider);
     } else {
-      signer = new ethers.Wallet(privateKeyOrSigner.address, provider);
-      signerPermissions = privateKeyOrSigner.permissions;
+      signer = new ethers.Wallet(privateKeyOrSigner.deployKey, provider);
     }
 
     this.options = {
       signer,
       provider,
       chainId,
-      signerPermissions,
     };
 
     this.LSP3UniversalProfile = new LSP3UniversalProfile(this.options);

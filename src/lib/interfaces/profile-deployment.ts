@@ -26,11 +26,16 @@ export enum ContractNames {
   UNIVERSAL_RECEIVER = 'UniversalReceiverAddressStore',
 }
 
+export interface ControllerOptions {
+  address: string;
+  permissions?: string;
+}
+
 /**
  * TBD
  */
 export interface ProfileDeploymentOptions {
-  controllerAddresses: string[];
+  controllingAccounts: (string | ControllerOptions)[];
   lsp3Profile?: ProfileDataBeforeUpload | string;
   baseContractAddresses?: {
     lsp3Account?: string;

@@ -51,7 +51,6 @@ export class LSP3UniversalProfile {
       : null;
 
     // 0 > Check for existing base contracts and deploy
-
     // TODO: Use base contract bytecode if passed
     // TODO: If base contract addresses are passed use those instead
     // TODO: Add KeyManager Base Contract
@@ -62,18 +61,20 @@ export class LSP3UniversalProfile {
       ),
     ]);
 
-    // Use observable to store base contract addresses?
-
     const baseContracts$ = baseContractsDeployment$(
       this.signer,
       this.options.chainId,
       lsp3BaseContractByteCode$
     );
 
+    const controllerAddresses = profileDeploymentOptions.controllingAccounts.map((controller) => {
+      return typeof controller === 'string' ? controller : controller.address;
+    });
+
     // 1 > deploys ERC725Account
     const account$ = accountDeployment$(
       this.signer,
-      profileDeploymentOptions.controllerAddresses,
+      controllerAddresses,
       contractDeploymentOptions?.libAddresses?.lsp3AccountInit
     );
 
@@ -96,9 +97,8 @@ export class LSP3UniversalProfile {
       this.signer,
       account$,
       universalReceiver$,
-      profileDeploymentOptions.controllerAddresses,
-      lsp3Profile,
-      this.options.signerPermissions
+      profileDeploymentOptions.controllingAccounts,
+      lsp3Profile
     );
 
     // 5 > transfersOwnership to KeyManager
@@ -125,6 +125,7 @@ export class LSP3UniversalProfile {
       contractDeploymentOptions
     ).pipe(
       scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
+        console.log(deploymentEvent);
         if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
           accumulator[deploymentEvent.contractName] = {
             address: deploymentEvent.receipt.contractAddress,
