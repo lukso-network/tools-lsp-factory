@@ -3,7 +3,7 @@ import { concat, forkJoin, lastValueFrom, merge } from 'rxjs';
 import { concatAll, scan } from 'rxjs/operators';
 
 import { defaultUploadOptions } from '../helpers/config.helper';
-import { imageUpload, ipfsUpload } from '../helpers/uploader.helper';
+import { ipfsUpload, prepareImageForLSP3 } from '../helpers/uploader.helper';
 import {
   LSPFactoryOptions,
   ProfileDataBeforeUpload,
@@ -167,13 +167,10 @@ export class LSP3UniversalProfile {
   ): Promise<LSP3ProfileDataForEncoding> {
     uploadOptions = uploadOptions || defaultUploadOptions;
 
-    const profileImage = profileData.profileImage
-      ? await imageUpload(profileData.profileImage, uploadOptions)
-      : null;
-
-    const backgroundImage = profileData.backgroundImage
-      ? await imageUpload(profileData.backgroundImage, uploadOptions)
-      : null;
+    const [profileImage, backgroundImage] = await Promise.all([
+      prepareImageForLSP3(uploadOptions, profileData.profileImage),
+      prepareImageForLSP3(uploadOptions, profileData.backgroundImage),
+    ]);
 
     const profile = {
       LSP3Profile: {

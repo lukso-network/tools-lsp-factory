@@ -25,8 +25,8 @@ export interface LSP3ProfileImage {
 }
 
 export interface ProfileDataBeforeUpload {
-  profileImage?: File;
-  backgroundImage?: File;
+  profileImage?: File | LSP3ProfileImage[];
+  backgroundImage?: File | LSP3ProfileImage[];
   name: string;
   description: string;
   links?: LSP3ProfileLink[];

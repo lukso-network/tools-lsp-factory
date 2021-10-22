@@ -45,3 +45,18 @@ export async function ipfsUpload(file: ImportCandidate, options: Options): Promi
     pin: true,
   });
 }
+
+export async function prepareImageForLSP3(
+  uploadOptions?: ProfileUploadOptions,
+  image?: File | LSP3ProfileImage[]
+): Promise<LSP3ProfileImage[]> | null {
+  let lsp3Image: LSP3ProfileImage[] | null;
+
+  if (image instanceof File) {
+    lsp3Image = await imageUpload(image, uploadOptions);
+  } else {
+    lsp3Image = image ?? null;
+  }
+
+  return lsp3Image;
+}
