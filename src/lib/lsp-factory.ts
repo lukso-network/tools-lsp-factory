@@ -15,8 +15,8 @@ export class LSPFactory {
   /**
    * TBD
    *
-   * @param {string} deployKey
-   * @param {provider} rpcUrlOrProvider
+   * @param {string | providers.Web3Provider | providers.JsonRpcProvider} rpcUrlOrProvider
+   * @param {string | Signer | SignerOptions} privateKeyOrSigner
    * @param {number} [chainId=22] Lukso Testnet - 22 (0x16)
    */
   constructor(

@@ -12,7 +12,7 @@ import { LSP3AccountDeploymentEvent } from './lsp3-account.service';
 export function baseContractsDeployment$(
   signer: Signer,
   chainId: number,
-  baseContractCode$: Observable<[string, string]>
+  baseContractByteCode$: Observable<[string, string]>
 ): Observable<LSP3AccountDeploymentEvent> {
   const lsp3AccountBaseContractDeploymentReceipt$ = deployBaseContract$(
     ContractNames.LSP3_ACCOUNT,
@@ -30,11 +30,11 @@ export function baseContractsDeployment$(
     }
   );
 
-  const baseContractDeployment$ = baseContractCode$.pipe(
-    switchMap(([lsp3BaseContractCode, universalReceiverBaseContractCode]) => {
+  const baseContractDeployment$ = baseContractByteCode$.pipe(
+    switchMap(([lsp3BaseContractByteCode, universalReceiverBaseContractByteCode]) => {
       return merge(
-        lsp3BaseContractCode !== '0x' ? EMPTY : lsp3AccountBaseContractDeploymentReceipt$,
-        universalReceiverBaseContractCode !== '0x'
+        lsp3BaseContractByteCode !== '0x' ? EMPTY : lsp3AccountBaseContractDeploymentReceipt$,
+        universalReceiverBaseContractByteCode !== '0x'
           ? EMPTY
           : universalReceiverBaseContractDeploymentReceipt$
       );

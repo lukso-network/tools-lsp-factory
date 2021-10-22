@@ -55,9 +55,9 @@ export class LSP3UniversalProfile {
     // TODO: Use base contract bytecode if passed
     // TODO: If base contract addresses are passed use those instead
     // TODO: Add KeyManager Base Contract
-    const lsp3BaseContractCode$ = forkJoin([
-      this.getDeployedCode(contractDeploymentOptions.libAddresses.lsp3AccountInit),
-      this.getDeployedCode(
+    const lsp3BaseContractByteCode$ = forkJoin([
+      this.getDeployedByteCode(contractDeploymentOptions.libAddresses.lsp3AccountInit),
+      this.getDeployedByteCode(
         contractDeploymentOptions.libAddresses.universalReceiverAddressStoreInit
       ),
     ]);
@@ -67,7 +67,7 @@ export class LSP3UniversalProfile {
     const baseContracts$ = baseContractsDeployment$(
       this.signer,
       this.options.chainId,
-      lsp3BaseContractCode$
+      lsp3BaseContractByteCode$
     );
 
     // 1 > deploys ERC725Account
@@ -125,7 +125,6 @@ export class LSP3UniversalProfile {
       contractDeploymentOptions
     ).pipe(
       scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
-        console.log(deploymentEvent);
         if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
           accumulator[deploymentEvent.contractName] = {
             address: deploymentEvent.receipt.contractAddress,
@@ -140,7 +139,7 @@ export class LSP3UniversalProfile {
     return lastValueFrom(deployments$);
   }
 
-  async getDeployedCode(contractAddress: string) {
+  async getDeployedByteCode(contractAddress: string) {
     return this.options.provider.getCode(contractAddress);
   }
 
