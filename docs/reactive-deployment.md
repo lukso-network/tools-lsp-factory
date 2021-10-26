@@ -1,10 +1,18 @@
-# Deployment Events
+---
+sidebar_position: 1.3
+---
+
+# Reactive Deployment
+
+LSPFactory uses [`rxjs`](https://github.com/ReactiveX/rxjs) to deploy Universal Profiles. This can be leveraged to achieve reactive deployment of Universal Profiles.
+
+Use the `deployReactive` function with `subscribe` to listen for deployment events.
 
 ```typescript
 let deploymentEvents = [];
 
 lspFactory.LSP3UniversalProfile
-  .deploy(// ... omitted for brevity)
+  .deployReactive(// ... omitted for brevity)
   .subscribe({
     next: (deploymentEvent: DeploymentEvent<any>) => {
       deploymenLogs.push(deploymentEvent);
@@ -15,10 +23,12 @@ lspFactory.LSP3UniversalProfile
   });
 ```
 
-**console.log output**
+The function defined in `next` will be called whenever a new deployment event is created. In this case we are simply pushing every deployment event into a `deploymentEvents` array.
 
-```typescript
-// prettier-ignore
+The function defined in `complete` will be called once after deployment is finished. Here we log the `deploymentEvents` array.
+
+
+```typescript title="console.log output"
 [
   { type: 'PROXY',        contractName: 'ERC725Account',                                              status: 'PENDING',  transaction:  {} },
   { type: "PROXY",        contractName: 'ERC725Account',                                              status: 'PENDING',  receipt:      {} },
@@ -40,38 +50,5 @@ lspFactory.LSP3UniversalProfile
 ];
 ```
 
-## Questions
-
-- When is a contract considered "deployed"?
-
-  - `CONTRACT`: when receiving the `DEPLOY` receipt
-  - `CONTRACT_PROXY`: when receiving the `initialize` receipt
-
-- Once a contract is deployed, we can:
-
-  - let people extract the contract address from the receipt
-  - return the address explicitly
-
-  ```typescript
-     {
-       type:          "CONTRACT_PROXY",
-       contractName:  "ERC725Account",
-       functionName:  "initialize",
-       status:        'COMPLETE'
-       receipt:       {} ,
-       address:       "0x..." // <----
-     },
-  ```
-
-  - return a fully working (**ethers.js**) `Contract` object.
-
-  ```typescript
-     {
-       type:          "CONTRACT_PROXY",
-       contractName:  "ERC725Account",
-       functionName:  "initialize",
-       status:        'COMPLETE'
-       receipt:       {} ,
-       contract:      {} // <----
-     },
-  ```
+## Use cases
+Reactive Deployment may be useful for certain front end behaviours to give better feedback to users when they trigger a UP deployment from a user interface. For example you may want to implement a loading bar to tell users how deployment is progressing, or display details and addresses of the contracts as they are deployed.
