@@ -25,6 +25,7 @@
     "doc": "run-s doc:html && open-cli build/docs/index.html",
     "doc:html": "typedoc --out build/docs",
     "doc:json": "typedoc --json build/docs/typedoc.json",
+    "docs:generate:markdown": "typedoc --options typedoc.json --out testdocs",
     "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d build/docs",
     "version": "standard-version",
     "reset-hard": "git clean -dfx && git reset --hard && npm i",
@@ -71,8 +72,9 @@
     "standard-version": "^9.3.1",
     "ts-node": "^10.2.1",
     "typechain": "5.1.2",
-    "typedoc": "^0.21.9",
+    "typedoc": "^0.22.7",
     "typedoc-neo-theme": "^1.1.1",
+    "typedoc-plugin-markdown": "^3.11.3",
     "typescript": "^4.3.5",
     "wait-on": "6.0.0",
     "web3": "^1.5.2"
