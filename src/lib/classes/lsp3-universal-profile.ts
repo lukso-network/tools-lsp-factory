@@ -1,7 +1,8 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, forkJoin, lastValueFrom, merge } from 'rxjs';
+import { concat, forkJoin, lastValueFrom, merge, of } from 'rxjs';
 import { concatAll, scan } from 'rxjs/operators';
 
+import contractVersions from '../../versions.json';
 import { defaultUploadOptions } from '../helpers/config.helper';
 import { ipfsUpload, prepareImageForLSP3 } from '../helpers/uploader.helper';
 import {
@@ -52,20 +53,31 @@ export class LSP3UniversalProfile {
 
     // 0 > Check for existing base contracts and deploy
     // TODO: Use base contract bytecode if passed
-    // TODO: If base contract addresses are passed use those instead
-    // TODO: Add KeyManager Base Contract
-    const lsp3BaseContractByteCode$ = forkJoin([
-      this.getDeployedByteCode(contractDeploymentOptions.libAddresses.lsp3AccountInit),
+    let defaultLSP3BaseContractAddress: string;
+    let defaultUniversalreceiverBaseContractAddress: string;
+
+    if (contractDeploymentOptions.version) {
+      defaultLSP3BaseContractAddress =
+        contractVersions[this.options.chainId].baseContracts.LSP3Account[
+          contractDeploymentOptions.version
+        ];
+      defaultUniversalreceiverBaseContractAddress =
+        contractVersions[this.options.chainId].baseContracts.UniversalReceiverAddressStore[
+          contractDeploymentOptions.version
+        ];
+    }
+
+    const baseContractByteCode$ = forkJoin([
       this.getDeployedByteCode(
-        contractDeploymentOptions.libAddresses.universalReceiverAddressStoreInit
+        defaultLSP3BaseContractAddress ?? contractDeploymentOptions.libAddresses.lsp3AccountInit
+      ),
+      this.getDeployedByteCode(
+        defaultUniversalreceiverBaseContractAddress ??
+          contractDeploymentOptions.libAddresses.universalReceiverAddressStoreInit
       ),
     ]);
 
-    const baseContracts$ = baseContractsDeployment$(
-      this.signer,
-      this.options.chainId,
-      lsp3BaseContractByteCode$
-    );
+    const baseContracts$ = baseContractsDeployment$(this.signer, baseContractByteCode$);
 
     const controllerAddresses = profileDeploymentOptions.controllingAccounts.map((controller) => {
       return typeof controller === 'string' ? controller : controller.address;
@@ -75,7 +87,7 @@ export class LSP3UniversalProfile {
     const account$ = accountDeployment$(
       this.signer,
       controllerAddresses,
-      contractDeploymentOptions?.libAddresses?.lsp3AccountInit
+      contractDeploymentOptions?.libAddresses?.lsp3AccountInit ?? defaultLSP3BaseContractAddress
     );
 
     // 2 > deploys KeyManager
@@ -89,7 +101,8 @@ export class LSP3UniversalProfile {
     const universalReceiver$ = universalReceiverAddressStoreDeployment$(
       this.signer,
       account$,
-      contractDeploymentOptions?.libAddresses?.universalReceiverAddressStoreInit
+      contractDeploymentOptions?.libAddresses?.universalReceiverAddressStoreInit ??
+        defaultUniversalreceiverBaseContractAddress
     );
 
     // 4 > set permissions, profile and universal
@@ -140,8 +153,29 @@ export class LSP3UniversalProfile {
     return lastValueFrom(deployments$);
   }
 
-  async getDeployedByteCode(contractAddress: string) {
+  getDeployedByteCode(contractAddress: string) {
     return this.options.provider.getCode(contractAddress);
+  }
+
+  deployBaseContracts() {
+    const baseContractByteCode$ = of(['0x', '0x'] as [string, string]);
+
+    const baseContracts$ = baseContractsDeployment$(this.signer, baseContractByteCode$);
+
+    const deployments$ = baseContracts$.pipe(
+      scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
+        if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
+          accumulator[deploymentEvent.contractName] = {
+            address: deploymentEvent.receipt.contractAddress,
+            receipt: deploymentEvent.receipt,
+          };
+        }
+
+        return accumulator;
+      }, {})
+    );
+
+    return lastValueFrom(deployments$);
   }
 
   /**

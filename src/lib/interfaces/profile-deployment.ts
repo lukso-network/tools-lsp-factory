@@ -85,7 +85,7 @@ export interface DeployedContracts {
   ERC725Account?: ERC725Account;
   LSP3Account?: LSP3Account;
   KeyManager: KeyManager;
-  UniversalReceiverDelegate: UniversalReceiverAddressStore;
+  UniversalReceiverAddressStore: UniversalReceiverAddressStore;
 }
 
 export interface BaseContractAddresses {
