@@ -35,6 +35,26 @@ export type LSP3AccountDeploymentEvent = DeploymentEventContract | DeploymentEve
 export function accountDeployment$(
   signer: Signer,
   controllerAddresses: string[],
+  baseContractAddresses$: Observable<{
+    LSP3Account: string;
+    UniversalReceiverAddressStore: string;
+  }>
+) {
+  return baseContractAddresses$.pipe(
+    switchMap((baseContractAddresses) => {
+      return accountDeploymentWithBaseContractAddress$(
+        signer,
+        controllerAddresses,
+        baseContractAddresses.LSP3Account
+      );
+    }),
+    shareReplay()
+  );
+}
+
+export function accountDeploymentWithBaseContractAddress$(
+  signer: Signer,
+  controllerAddresses: string[],
   baseContractAddress: string
 ): Observable<LSP3AccountDeploymentEvent> {
   const accountDeployment$ = defer(() =>

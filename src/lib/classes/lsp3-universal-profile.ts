@@ -17,7 +17,10 @@ import {
   DeploymentEvent,
 } from '../interfaces/profile-deployment';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
-import { baseContractsDeployment$ } from '../services/base-contract.service';
+import {
+  baseContractsDeployment$,
+  getBaseContractAddresses$,
+} from '../services/base-contract.service';
 import { keyManagerDeployment$ } from '../services/key-manager.service';
 
 import {
@@ -52,43 +55,34 @@ export class LSP3UniversalProfile {
       : null;
 
     // 0 > Check for existing base contracts and deploy
-    // TODO: Use base contract bytecode if passed
-    let defaultLSP3BaseContractAddress: string;
-    let defaultUniversalreceiverBaseContractAddress: string;
+    const defaultLSP3BaseContractAddress =
+      contractVersions[this.options.chainId]?.baseContracts?.LSP3Account['0.0.1'];
+    const defaultUniversalReceiverBaseContractAddress =
+      contractVersions[this.options.chainId]?.baseContracts?.UniversalReceiverAddressStore['0.0.1'];
 
-    if (contractDeploymentOptions.version) {
-      defaultLSP3BaseContractAddress =
-        contractVersions[this.options.chainId].baseContracts.LSP3Account[
-          contractDeploymentOptions.version
-        ];
-      defaultUniversalreceiverBaseContractAddress =
-        contractVersions[this.options.chainId].baseContracts.UniversalReceiverAddressStore[
-          contractDeploymentOptions.version
-        ];
-    }
-
-    const baseContractByteCode$ = forkJoin([
+    const defaultBaseContractByteCode$ = forkJoin([
       this.getDeployedByteCode(
-        defaultLSP3BaseContractAddress ?? contractDeploymentOptions.libAddresses.lsp3AccountInit
+        defaultLSP3BaseContractAddress ?? '0x0000000000000000000000000000000000000000'
       ),
       this.getDeployedByteCode(
-        defaultUniversalreceiverBaseContractAddress ??
-          contractDeploymentOptions.libAddresses.universalReceiverAddressStoreInit
+        defaultUniversalReceiverBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
       ),
     ]);
 
-    const baseContracts$ = baseContractsDeployment$(this.signer, baseContractByteCode$);
+    const baseContractAddresses$ = getBaseContractAddresses$(
+      defaultLSP3BaseContractAddress,
+      defaultUniversalReceiverBaseContractAddress,
+      defaultBaseContractByteCode$,
+      this.signer,
+      contractDeploymentOptions
+    );
 
     const controllerAddresses = profileDeploymentOptions.controllingAccounts.map((controller) => {
       return typeof controller === 'string' ? controller : controller.address;
     });
 
     // 1 > deploys ERC725Account
-    const account$ = accountDeployment$(
-      this.signer,
-      controllerAddresses,
-      contractDeploymentOptions?.libAddresses?.lsp3AccountInit ?? defaultLSP3BaseContractAddress
-    );
+    const account$ = accountDeployment$(this.signer, controllerAddresses, baseContractAddresses$);
 
     // 2 > deploys KeyManager
     const keyManager$ = keyManagerDeployment$(
@@ -96,13 +90,11 @@ export class LSP3UniversalProfile {
       account$,
       contractDeploymentOptions?.libAddresses?.keyManagerInit
     );
-
     // 3 > deploys UniversalReceiverDelegate
     const universalReceiver$ = universalReceiverAddressStoreDeployment$(
       this.signer,
       account$,
-      contractDeploymentOptions?.libAddresses?.universalReceiverAddressStoreInit ??
-        defaultUniversalreceiverBaseContractAddress
+      baseContractAddresses$
     );
 
     // 4 > set permissions, profile and universal
@@ -118,7 +110,6 @@ export class LSP3UniversalProfile {
     const transferOwnership$ = getTransferOwnershipTransaction$(this.signer, account$, keyManager$);
 
     return concat([
-      baseContracts$,
       account$,
       merge(universalReceiver$, keyManager$),
       setData$,
@@ -158,9 +149,9 @@ export class LSP3UniversalProfile {
   }
 
   deployBaseContracts() {
-    const baseContractByteCode$ = of(['0x', '0x'] as [string, string]);
+    const baseContractsToDeploy$ = of([true, true] as [boolean, boolean]);
 
-    const baseContracts$ = baseContractsDeployment$(this.signer, baseContractByteCode$);
+    const baseContracts$ = baseContractsDeployment$(this.signer, baseContractsToDeploy$);
 
     const deployments$ = baseContracts$.pipe(
       scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {

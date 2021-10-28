@@ -1,15 +1,15 @@
 import { Signer } from '@ethersproject/abstract-signer';
-import { defer, EMPTY, merge, Observable } from 'rxjs';
-import { shareReplay, switchMap } from 'rxjs/operators';
+import { defer, EMPTY, merge, Observable, of } from 'rxjs';
+import { defaultIfEmpty, shareReplay, switchMap, tap } from 'rxjs/operators';
 
-import { ContractNames, DeploymentEventContract } from '../..';
+import { ContractDeploymentOptions, ContractNames, DeploymentEventContract } from '../..';
 import { LSP3AccountInit__factory } from '../../tmp/Factories/LSP3AccountInit__factory';
 import { UniversalReceiverAddressStoreInit__factory } from '../../tmp/Factories/UniversalReceiverAddressStoreInit__factory';
 import { deployBaseContract, waitForReceipt } from '../helpers/deployment.helper';
 
 export function baseContractsDeployment$(
   signer: Signer,
-  baseContractByteCode$: Observable<[string, string]>
+  baseContractsToDeploy$: Observable<[boolean, boolean]>
 ): Observable<DeploymentEventContract> {
   const lsp3AccountBaseContractDeploymentReceipt$ = deployBaseContract$(
     ContractNames.LSP3_ACCOUNT,
@@ -25,15 +25,16 @@ export function baseContractsDeployment$(
     }
   );
 
-  const baseContractDeployment$ = baseContractByteCode$.pipe(
-    switchMap(([lsp3BaseContractByteCode, universalReceiverBaseContractByteCode]) => {
+  const baseContractDeployment$ = baseContractsToDeploy$.pipe(
+    switchMap(([shouldDeployLSP3BaseContract, shouldDeployUniversalReceiverBaseContract]) => {
       return merge(
-        lsp3BaseContractByteCode !== '0x' ? EMPTY : lsp3AccountBaseContractDeploymentReceipt$,
-        universalReceiverBaseContractByteCode !== '0x'
-          ? EMPTY
-          : universalReceiverBaseContractDeploymentReceipt$
+        shouldDeployLSP3BaseContract ? lsp3AccountBaseContractDeploymentReceipt$ : EMPTY,
+        shouldDeployUniversalReceiverBaseContract
+          ? universalReceiverBaseContractDeploymentReceipt$
+          : EMPTY
       );
-    })
+    }),
+    shareReplay()
   );
 
   return baseContractDeployment$;
@@ -51,4 +52,51 @@ function deployBaseContract$(contractName: ContractNames, deployContractFunction
   ).pipe(shareReplay());
 
   return baseContractDeploymentReceipt$;
+}
+
+export function getBaseContractAddresses$(
+  defaultLSP3BaseContractAddress: string,
+  defaultUniversalReceiverBaseContractAddress: string,
+  defaultBaseContractByteCode$: Observable<[string, string]>,
+  signer: Signer,
+  contractDeploymentOptions?: ContractDeploymentOptions
+) {
+  const providedLSP3BaseContractAddress = contractDeploymentOptions?.libAddresses?.lsp3AccountInit;
+  const providedUniversalReceiverContractAddress =
+    contractDeploymentOptions?.libAddresses?.universalReceiverAddressStoreInit;
+
+  const baseContractsToDeploy$ = defaultBaseContractByteCode$.pipe(
+    switchMap(([defaultLSP3BaseContractByteCode, defaultUniversalReceiverBaseContractByteCode]) => {
+      const shouldDeployLSP3BaseContract =
+        !providedLSP3BaseContractAddress && defaultLSP3BaseContractByteCode === '0x';
+
+      const shouldDeployUniversalReceiverBaseContract =
+        !providedUniversalReceiverContractAddress &&
+        defaultUniversalReceiverBaseContractByteCode === '0x';
+
+      return of([shouldDeployLSP3BaseContract, shouldDeployUniversalReceiverBaseContract]);
+    })
+  );
+
+  const baseContracts$ = baseContractsDeployment$(
+    signer,
+    baseContractsToDeploy$ as Observable<[boolean, boolean]>
+  );
+
+  const baseContractAddresses = {
+    [ContractNames.LSP3_ACCOUNT]: providedLSP3BaseContractAddress ?? defaultLSP3BaseContractAddress,
+    [ContractNames.UNIVERSAL_RECEIVER]:
+      providedUniversalReceiverContractAddress ?? defaultUniversalReceiverBaseContractAddress,
+  };
+
+  const baseContractAddresses$ = baseContracts$.pipe(
+    tap((deploymentEvent: DeploymentEventContract) => {
+      baseContractAddresses[deploymentEvent.contractName] = deploymentEvent.receipt.contractAddress;
+    }),
+    defaultIfEmpty(of(baseContractAddresses)),
+    switchMap(() => of(baseContractAddresses)),
+    shareReplay()
+  );
+
+  return baseContractAddresses$;
 }
