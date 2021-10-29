@@ -6,13 +6,13 @@ import { KeyManager__factory } from '../..';
 import { deployContract, waitForReceipt } from '../helpers/deployment.helper';
 import { ContractNames, DeploymentEventContract } from '../interfaces';
 
-import { LSP3AccountDeploymentEvent } from './lsp3-account.service';
+import { ERC725AccountDeploymentEvent } from './lsp3-account.service';
 
 export type KeyManagerDeploymentEvent = DeploymentEventContract;
 
 export function keyManagerDeployment$(
   signer: Signer,
-  accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
+  accountDeployment$: Observable<ERC725AccountDeploymentEvent>,
   baseContractAddress: string
 ) {
   const keyManagerDeployment$ = accountDeployment$.pipe(

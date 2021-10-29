@@ -1,12 +1,12 @@
 import { providers } from 'ethers';
 import { ethers, SignerWithAddress } from 'hardhat';
 
+import { lsp3ProfileJson } from '../../../test/lsp3-profile.mock';
+import { DeploymentEvent } from '../interfaces';
 import { LSPFactory } from '../lsp-factory';
 
-import { lsp3ProfileJson } from './../../../test/lsp3-profile.mock';
-import { DeploymentEvent } from './../interfaces';
 import { ProxyDeployer } from './proxy-deployer';
-describe('LSP3UniversalProfile', () => {
+describe('ERC725Account', () => {
   let baseContracts;
   let proxyDeployer: ProxyDeployer;
   let signer: SignerWithAddress;
@@ -21,7 +21,7 @@ describe('LSP3UniversalProfile', () => {
   it.skip('should deploy and set LSP3Profile data', (done) => {
     const myLSPFactory = new LSPFactory(provider, signer);
 
-    const deployments$ = myLSPFactory.LSP3UniversalProfile.deployReactive(
+    const deployments$ = myLSPFactory.ERC725Account.deployReactive(
       {
         controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
         lsp3Profile: lsp3ProfileJson,

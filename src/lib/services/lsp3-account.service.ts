@@ -4,7 +4,7 @@ import { Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, Observable } from 'rxjs';
 import { shareReplay, switchMap } from 'rxjs/operators';
 
-import { LSP3Account__factory, LSP3UniversalProfile } from '../..';
+import { ERC725UniversalProfile, LSP3Account__factory } from '../..';
 import { LSP3AccountInit__factory } from '../../tmp/Factories/LSP3AccountInit__factory';
 import { ALL_PERMISSIONS, LSP3_UP_KEYS, PREFIX_PERMISSIONS } from '../helpers/config.helper';
 import {
@@ -30,13 +30,13 @@ import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 
 import { UniversalReveiverDeploymentEvent } from './universal-receiver.service';
 
-export type LSP3AccountDeploymentEvent = DeploymentEventContract | DeploymentEventProxyContract;
+export type ERC725AccountDeploymentEvent = DeploymentEventContract | DeploymentEventProxyContract;
 
 export function accountDeployment$(
   signer: Signer,
   controllerAddresses: string[],
   baseContractAddresses$: Observable<{
-    LSP3Account: string;
+    ERC725Account: string;
     UniversalReceiverAddressStore: string;
   }>
 ) {
@@ -45,7 +45,7 @@ export function accountDeployment$(
       return accountDeploymentWithBaseContractAddress$(
         signer,
         controllerAddresses,
-        baseContractAddresses.LSP3Account
+        baseContractAddresses.ERC725Account
       );
     }),
     shareReplay()
@@ -56,12 +56,12 @@ export function accountDeploymentWithBaseContractAddress$(
   signer: Signer,
   controllerAddresses: string[],
   baseContractAddress: string
-): Observable<LSP3AccountDeploymentEvent> {
+): Observable<ERC725AccountDeploymentEvent> {
   const accountDeployment$ = defer(() =>
-    deployLSP3Account(signer, controllerAddresses, baseContractAddress)
+    deployERC725Account(signer, controllerAddresses, baseContractAddress)
   ).pipe(shareReplay());
 
-  const accountDeploymentReceipt$ = waitForReceipt<LSP3AccountDeploymentEvent>(
+  const accountDeploymentReceipt$ = waitForReceipt<ERC725AccountDeploymentEvent>(
     accountDeployment$
   ).pipe(shareReplay());
 
@@ -69,7 +69,7 @@ export function accountDeploymentWithBaseContractAddress$(
     ? initializeProxy(signer, accountDeploymentReceipt$ as Observable<DeploymentEventProxyContract>)
     : EMPTY;
 
-  const accountDeploymentInitializeReceipt$ = waitForReceipt<LSP3AccountDeploymentEvent>(
+  const accountDeploymentInitializeReceipt$ = waitForReceipt<ERC725AccountDeploymentEvent>(
     accountDeploymentInitialize$
   ).pipe(shareReplay());
 
@@ -81,11 +81,11 @@ export function accountDeploymentWithBaseContractAddress$(
   );
 }
 
-async function deployLSP3Account(
+async function deployERC725Account(
   signer: Signer,
   ownerAddresses: string[],
   baseContractAddress: string
-): Promise<LSP3AccountDeploymentEvent> {
+): Promise<ERC725AccountDeploymentEvent> {
   const deploymentFunction = async () => {
     return baseContractAddress
       ? new LSP3AccountInit__factory(signer).attach(baseContractAddress)
@@ -95,10 +95,10 @@ async function deployLSP3Account(
     ? deployProxyContract(
         LSP3AccountInit__factory.abi,
         deploymentFunction,
-        ContractNames.LSP3_ACCOUNT,
+        ContractNames.ERC725_ACCOUNT,
         signer
       )
-    : deployContract(deploymentFunction, ContractNames.LSP3_ACCOUNT);
+    : deployContract(deploymentFunction, ContractNames.ERC725_ACCOUNT);
 }
 
 function initializeProxy(
@@ -113,17 +113,17 @@ function initializeProxy(
 
 export function setDataTransaction$(
   signer: Signer,
-  account$: Observable<LSP3AccountDeploymentEvent>,
+  account$: Observable<ERC725AccountDeploymentEvent>,
   universalReceiver$: Observable<UniversalReveiverDeploymentEvent>,
   controllerAddresses: (string | ControllerOptions)[],
   lsp3ProfileData?: Promise<LSP3ProfileDataForEncoding>
 ) {
   const setDataTransaction$ = forkJoin([account$, universalReceiver$]).pipe(
     switchMap(
-      ([{ receipt: lsp3AccountReceipt }, { receipt: universalReceiverAddressStoreReceipt }]) => {
+      ([{ receipt: erc725AccountReceipt }, { receipt: universalReceiverAddressStoreReceipt }]) => {
         return setData(
           signer,
-          lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to,
+          erc725AccountReceipt.contractAddress || erc725AccountReceipt.to,
           universalReceiverAddressStoreReceipt.contractAddress ||
             universalReceiverAddressStoreReceipt.to,
           controllerAddresses,
@@ -156,7 +156,7 @@ export async function getLsp3ProfileDataUrl(
       profile: lsp3ProfileJson as LSP3ProfileJSON,
     };
   } else {
-    lsp3ProfileData = await LSP3UniversalProfile.uploadProfileData(lsp3Profile);
+    lsp3ProfileData = await ERC725UniversalProfile.uploadProfileData(lsp3Profile);
   }
 
   return lsp3ProfileData;
@@ -206,7 +206,7 @@ export async function setData(
 
   return {
     type: DeploymentType.TRANSACTION,
-    contractName: ContractNames.LSP3_ACCOUNT,
+    contractName: ContractNames.ERC725_ACCOUNT,
     functionName: 'setDataMultiple',
     status: DeploymentStatus.PENDING,
     transaction,
@@ -219,8 +219,8 @@ export function getTransferOwnershipTransaction$(
   keyManagerDeployment$: DeploymentEvent$
 ) {
   const transferOwnershipTransaction$ = forkJoin([accountDeployment$, keyManagerDeployment$]).pipe(
-    switchMap(([{ receipt: lsp3AccountReceipt }, { receipt: keyManagerContract }]) => {
-      return transferOwnership(signer, lsp3AccountReceipt, keyManagerContract);
+    switchMap(([{ receipt: erc725AccountReceipt }, { receipt: keyManagerContract }]) => {
+      return transferOwnership(signer, erc725AccountReceipt, keyManagerContract);
     }),
     shareReplay()
   );
@@ -235,13 +235,13 @@ export function getTransferOwnershipTransaction$(
  */
 export async function transferOwnership(
   signer: Signer,
-  lsp3AccountReceipt: TransactionReceipt,
+  erc725AccountReceipt: TransactionReceipt,
   keyManagerReceipt: TransactionReceipt
 ): Promise<DeploymentEventTransaction> {
   try {
     const signerAddress = await signer.getAddress();
     const contract = new LSP3Account__factory(signer).attach(
-      lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to
+      erc725AccountReceipt.contractAddress || erc725AccountReceipt.to
     );
     const transaction = await contract.transferOwnership(
       keyManagerReceipt.contractAddress || keyManagerReceipt.to,
@@ -254,7 +254,7 @@ export async function transferOwnership(
     return {
       type: DeploymentType.TRANSACTION,
       status: DeploymentStatus.PENDING,
-      contractName: ContractNames.LSP3_ACCOUNT,
+      contractName: ContractNames.ERC725_ACCOUNT,
       functionName: 'transferOwnership',
       transaction,
     };

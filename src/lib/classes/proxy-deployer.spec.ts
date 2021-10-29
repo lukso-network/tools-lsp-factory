@@ -2,7 +2,7 @@ import { ethers, SignerWithAddress } from 'hardhat';
 
 import { ProxyDeployer } from './proxy-deployer';
 
-describe('LSP3UniversalProfile', () => {
+describe('ERC725Account', () => {
   let baseContracts;
   let proxyDeployer;
   let signer: SignerWithAddress;

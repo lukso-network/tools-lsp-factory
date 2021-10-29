@@ -4,7 +4,7 @@
         "chainId": 22,
         "networkId": 22,
         "baseContracts": {
-            "LSP3Account": {
+            "ERC725Account": {
                 "0.0.1": "0xf5059a5D33d5853360D16C683c16e67980206f36"
             },
             "UniversalReceiverAddressStore": {

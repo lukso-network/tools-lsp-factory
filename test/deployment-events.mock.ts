@@ -2,7 +2,7 @@ import { ContractNames, DeploymentStatus, DeploymentType } from '../src';
 
 const proxyDeploymentEventBase = {
   type: DeploymentType.PROXY,
-  contractName: ContractNames.LSP3_ACCOUNT,
+  contractName: ContractNames.ERC725_ACCOUNT,
   status: DeploymentStatus.PENDING,
   transaction: {
     wait: async () => {
@@ -12,7 +12,7 @@ const proxyDeploymentEventBase = {
 };
 export const defaultDeploymentEvents = {
   [DeploymentType.PROXY]: {
-    [ContractNames.LSP3_ACCOUNT]: {
+    [ContractNames.ERC725_ACCOUNT]: {
       deployment: {
         ...proxyDeploymentEventBase,
       },

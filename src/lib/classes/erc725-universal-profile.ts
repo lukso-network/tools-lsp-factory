@@ -22,19 +22,18 @@ import {
   getBaseContractAddresses$,
 } from '../services/base-contract.service';
 import { keyManagerDeployment$ } from '../services/key-manager.service';
-
 import {
   accountDeployment$,
   getLsp3ProfileDataUrl,
   getTransferOwnershipTransaction$,
   setDataTransaction$,
-} from './../services/lsp3-account.service';
-import { universalReceiverAddressStoreDeployment$ } from './../services/universal-receiver.service';
+} from '../services/lsp3-account.service';
+import { universalReceiverAddressStoreDeployment$ } from '../services/universal-receiver.service';
 
 /**
  * TODO: docs
  */
-export class LSP3UniversalProfile {
+export class ERC725UniversalProfile {
   options: LSPFactoryOptions;
   signer: NonceManager;
   constructor(options: LSPFactoryOptions) {
@@ -55,14 +54,14 @@ export class LSP3UniversalProfile {
       : null;
 
     // 0 > Check for existing base contracts and deploy
-    const defaultLSP3BaseContractAddress =
-      contractVersions[this.options.chainId]?.baseContracts?.LSP3Account['0.0.1'];
+    const defaultERC725AccountBaseContractAddress =
+      contractVersions[this.options.chainId]?.baseContracts?.ERC725Account['0.0.1'];
     const defaultUniversalReceiverBaseContractAddress =
       contractVersions[this.options.chainId]?.baseContracts?.UniversalReceiverAddressStore['0.0.1'];
 
     const defaultBaseContractByteCode$ = forkJoin([
       this.getDeployedByteCode(
-        defaultLSP3BaseContractAddress ?? '0x0000000000000000000000000000000000000000'
+        defaultERC725AccountBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
       ),
       this.getDeployedByteCode(
         defaultUniversalReceiverBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
@@ -70,7 +69,7 @@ export class LSP3UniversalProfile {
     ]);
 
     const baseContractAddresses$ = getBaseContractAddresses$(
-      defaultLSP3BaseContractAddress,
+      defaultERC725AccountBaseContractAddress,
       defaultUniversalReceiverBaseContractAddress,
       defaultBaseContractByteCode$,
       this.signer,
@@ -129,6 +128,7 @@ export class LSP3UniversalProfile {
       contractDeploymentOptions
     ).pipe(
       scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
+        console.log(deploymentEvent);
         if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
           accumulator[deploymentEvent.contractName] = {
             address: deploymentEvent.receipt.contractAddress,
@@ -169,7 +169,7 @@ export class LSP3UniversalProfile {
   }
 
   /**
-   * Pre-deploys the latest Version of the LSP3UniversalProfile smart-contracts.
+   * Pre-deploys the latest Version of the ERC725Account smart-contracts.
    *
    * @param {'string'} [version] Instead of deploying the latest Version you can also deploy a specific
    *  version of the smart-contracts. A list of all available version is available here.
@@ -179,7 +179,7 @@ export class LSP3UniversalProfile {
   }
 
   /**
-   * Uploads the LSP3Profile to the desired endpoint. This can be an `https` URL either pointing to
+   * Uploads the LSP3UniversalProfile to the desired endpoint. This can be an `https` URL either pointing to
    * a public, centralized storage endpoint or an IPFS Node / Cluster
    *
    * @param {ProfileDataBeforeUpload} profileData

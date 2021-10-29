@@ -21,7 +21,7 @@ export enum DeploymentStatus {
 }
 
 export enum ContractNames {
-  LSP3_ACCOUNT = 'LSP3Account',
+  ERC725_ACCOUNT = 'ERC725Account',
   KEY_MANAGER = 'KeyManager',
   UNIVERSAL_RECEIVER = 'UniversalReceiverAddressStore',
 }
@@ -38,7 +38,7 @@ export interface ProfileDeploymentOptions {
   controllingAccounts: (string | ControllerOptions)[];
   lsp3Profile?: ProfileDataBeforeUpload | string;
   baseContractAddresses?: {
-    lsp3Account?: string;
+    erc725Account?: string;
     universalReceiverAddressStore?: string;
     keyManager?: string;
   };
@@ -97,7 +97,7 @@ export interface BaseContractAddresses {
 export interface ContractDeploymentOptions {
   version?: string;
   byteCode?: {
-    lsp3AccountInit: string;
+    erc725AccountInit: string;
     keyManagerInit: string;
     universalReceiverAddressStoreInit: string;
   };

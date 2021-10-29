@@ -17,7 +17,7 @@ import {
 } from '../helpers/deployment.helper';
 import { ContractNames } from '../interfaces';
 
-import { LSP3AccountDeploymentEvent } from './lsp3-account.service';
+import { ERC725AccountDeploymentEvent } from './lsp3-account.service';
 
 export type UniversalReveiverDeploymentEvent =
   | DeploymentEventContract
@@ -25,9 +25,9 @@ export type UniversalReveiverDeploymentEvent =
 
 export function universalReceiverAddressStoreDeployment$(
   signer: Signer,
-  accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
+  accountDeployment$: Observable<ERC725AccountDeploymentEvent>,
   baseContractDeployment$: Observable<{
-    LSP3Account: string;
+    ERC725Account: string;
     UniversalReceiverAddressStore: string;
   }>
 ) {
@@ -45,7 +45,7 @@ export function universalReceiverAddressStoreDeployment$(
 
 export function universalReceiverAddressStoreDeploymentWithBaseContractAddress$(
   signer: Signer,
-  accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
+  accountDeployment$: Observable<ERC725AccountDeploymentEvent>,
   baseContractAddress: string
 ): Observable<UniversalReveiverDeploymentEvent> {
   const universalReceiverAddressStoreDeployment$ = accountDeployment$.pipe(

@@ -12,7 +12,7 @@ export function baseContractsDeployment$(
   baseContractsToDeploy$: Observable<[boolean, boolean]>
 ): Observable<DeploymentEventContract> {
   const lsp3AccountBaseContractDeploymentReceipt$ = deployBaseContract$(
-    ContractNames.LSP3_ACCOUNT,
+    ContractNames.ERC725_ACCOUNT,
     () => {
       return new LSP3AccountInit__factory(signer).deploy();
     }
@@ -84,7 +84,7 @@ export function getBaseContractAddresses$(
   );
 
   const baseContractAddresses = {
-    [ContractNames.LSP3_ACCOUNT]: providedLSP3BaseContractAddress ?? defaultLSP3BaseContractAddress,
+    [ContractNames.ERC725_ACCOUNT]: providedLSP3BaseContractAddress ?? defaultLSP3BaseContractAddress,
     [ContractNames.UNIVERSAL_RECEIVER]:
       providedUniversalReceiverContractAddress ?? defaultUniversalReceiverBaseContractAddress,
   };
