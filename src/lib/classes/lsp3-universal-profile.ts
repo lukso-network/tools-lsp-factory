@@ -129,7 +129,6 @@ export class LSP3UniversalProfile {
       contractDeploymentOptions
     ).pipe(
       scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
-        console.log(deploymentEvent);
         if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
           accumulator[deploymentEvent.contractName] = {
             address: deploymentEvent.receipt.contractAddress,
