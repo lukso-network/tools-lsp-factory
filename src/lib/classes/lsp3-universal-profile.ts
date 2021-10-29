@@ -6,6 +6,7 @@ import contractVersions from '../../versions.json';
 import { defaultUploadOptions } from '../helpers/config.helper';
 import { ipfsUpload, prepareImageForLSP3 } from '../helpers/uploader.helper';
 import {
+  DeploymentEvent,
   LSPFactoryOptions,
   ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
@@ -14,7 +15,6 @@ import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import {
   ContractDeploymentOptions,
   DeployedContracts,
-  DeploymentEvent,
 } from '../interfaces/profile-deployment';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
 import {

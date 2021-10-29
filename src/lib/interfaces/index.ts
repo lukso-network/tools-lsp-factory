@@ -9,3 +9,4 @@ export {
 } from './lsp3-profile';
 
 export * from './profile-deployment';
+export * from './deployment-events';

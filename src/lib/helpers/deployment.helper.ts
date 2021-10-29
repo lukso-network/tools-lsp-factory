@@ -3,14 +3,14 @@ import { Observable } from 'rxjs';
 import { catchError, shareReplay, switchMap, takeLast } from 'rxjs/operators';
 
 import {
-  ContractDeploymentOptions,
   DeploymentEvent,
   DeploymentEventBaseContract,
   DeploymentEventProxyContract,
   DeploymentEventStandardContract,
   DeploymentStatus,
   DeploymentType,
-} from '../interfaces/profile-deployment';
+} from '../interfaces/deployment-events';
+import { ContractDeploymentOptions } from '../interfaces/profile-deployment';
 
 /**
  *
