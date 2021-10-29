@@ -21,11 +21,11 @@ export class LSPFactory {
    */
   constructor(
     rpcUrlOrProvider: string | providers.Web3Provider | providers.JsonRpcProvider,
-    privateKeyOrSigner: string | Signer | SignerOptions,
-    chainId = 22
+    privateKeyOrSigner: string | Signer | SignerOptions
   ) {
     let signer: Signer;
     let provider: providers.Web3Provider | providers.JsonRpcProvider;
+    let chainId = 22;
 
     if (
       rpcUrlOrProvider instanceof providers.Web3Provider ||
@@ -42,6 +42,7 @@ export class LSPFactory {
       signer = new ethers.Wallet(privateKeyOrSigner, provider);
     } else {
       signer = new ethers.Wallet(privateKeyOrSigner.deployKey, provider);
+      chainId = privateKeyOrSigner.chainId;
     }
 
     this.options = {

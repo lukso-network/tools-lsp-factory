@@ -11,4 +11,5 @@ export interface LSPFactoryOptions {
 export interface SignerOptions {
   deployKey: string;
   uploadGateway?: string; // TODO: implement
+  chainId: number;
 }
