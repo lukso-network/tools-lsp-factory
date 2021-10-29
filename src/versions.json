@@ -1,15 +1,15 @@
 {
-  "22": {
-    "name": "Lukso L14",
-    "chainId": 22,
-    "networkId": 22,
-    "baseContracts": {
-      "LSP3Account": {
-        "0.0.1": "0xf5059a5D33d5853360D16C683c16e67980206f36"
-      },
-      "UniversalReceiverAddressStore": {
-        "0.0.1": "0x9d4454B023096f34B160D6B654540c56A1F81688"
-      }
+    "22": {
+        "name": "LUKSO L14",
+        "chainId": 22,
+        "networkId": 22,
+        "baseContracts": {
+            "LSP3Account": {
+                "0.0.1": "0xf5059a5D33d5853360D16C683c16e67980206f36"
+            },
+            "UniversalReceiverAddressStore": {
+                "0.0.1": "0x9d4454B023096f34B160D6B654540c56A1F81688"
+            }
+        }
     }
-  }
 }

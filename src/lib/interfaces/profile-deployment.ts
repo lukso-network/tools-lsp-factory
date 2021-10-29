@@ -2,12 +2,17 @@ import { TransactionReceipt } from '@ethersproject/abstract-provider';
 import { ContractTransaction } from 'ethers';
 import { Observable } from 'rxjs';
 
-import { LSP3ProfileJSON } from './lsp3-profile';
+import { KeyManager, UniversalReceiverAddressStore } from '../..';
+import { LSP3Account } from '../../../types/ethers-v5';
+import { ERC725Account } from '../../../types/ethers-v5/ERC725Account';
+
+import { ProfileDataBeforeUpload } from './lsp3-profile';
 
 export enum DeploymentType {
   CONTRACT = 'CONTRACT',
   TRANSACTION = 'TRANSACTION',
   PROXY = 'PROXY',
+  BASE_CONTRACT = 'BASE_CONTRACT',
 }
 
 export enum DeploymentStatus {
@@ -21,15 +26,17 @@ export enum ContractNames {
   UNIVERSAL_RECEIVER = 'UniversalReceiverAddressStore',
 }
 
+export interface ControllerOptions {
+  address: string;
+  permissions?: string;
+}
+
 /**
  * TBD
  */
 export interface ProfileDeploymentOptions {
-  controllerAddresses: string[];
-  lsp3Profile: {
-    json: LSP3ProfileJSON;
-    url: string;
-  };
+  controllingAccounts: (string | ControllerOptions)[];
+  lsp3Profile?: ProfileDataBeforeUpload | string;
   baseContractAddresses?: {
     lsp3Account?: string;
     universalReceiverAddressStore?: string;
@@ -47,6 +54,9 @@ export interface DeploymentEventBase {
 
 export interface DeploymentEventStandardContract extends DeploymentEventBase {
   type: DeploymentType.CONTRACT;
+}
+export interface DeploymentEventBaseContract extends DeploymentEventBase {
+  type: DeploymentType.BASE_CONTRACT;
 }
 
 export interface DeploymentEventProxyContract extends DeploymentEventBase {
@@ -71,6 +81,19 @@ export type DeploymentEvent =
 
 export type DeploymentEvent$ = Observable<DeploymentEvent>;
 
+export interface DeployedContracts {
+  ERC725Account?: ERC725Account;
+  LSP3Account?: LSP3Account;
+  KeyManager: KeyManager;
+  UniversalReceiverAddressStore: UniversalReceiverAddressStore;
+}
+
+export interface BaseContractAddresses {
+  lsp3AccountInit?: string;
+  keyManagerInit?: string;
+  universalReceiverAddressStoreInit?: string;
+}
+
 export interface ContractDeploymentOptions {
   version?: string;
   byteCode?: {
@@ -78,9 +101,5 @@ export interface ContractDeploymentOptions {
     keyManagerInit: string;
     universalReceiverAddressStoreInit: string;
   };
-  libAddresses?: {
-    lsp3AccountInit?: string;
-    keyManagerInit?: string;
-    universalReceiverAddressStoreInit?: string;
-  };
+  libAddresses?: BaseContractAddresses;
 }

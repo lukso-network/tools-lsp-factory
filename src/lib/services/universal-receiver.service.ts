@@ -26,6 +26,26 @@ export type UniversalReveiverDeploymentEvent =
 export function universalReceiverAddressStoreDeployment$(
   signer: Signer,
   accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
+  baseContractDeployment$: Observable<{
+    LSP3Account: string;
+    UniversalReceiverAddressStore: string;
+  }>
+) {
+  return baseContractDeployment$.pipe(
+    switchMap((baseContractAddresses) => {
+      return universalReceiverAddressStoreDeploymentWithBaseContractAddress$(
+        signer,
+        accountDeployment$,
+        baseContractAddresses.UniversalReceiverAddressStore
+      );
+    }),
+    shareReplay()
+  );
+}
+
+export function universalReceiverAddressStoreDeploymentWithBaseContractAddress$(
+  signer: Signer,
+  accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
   baseContractAddress: string
 ): Observable<UniversalReveiverDeploymentEvent> {
   const universalReceiverAddressStoreDeployment$ = accountDeployment$.pipe(

@@ -5,6 +5,7 @@ import { catchError, shareReplay, switchMap, takeLast } from 'rxjs/operators';
 import {
   ContractDeploymentOptions,
   DeploymentEvent,
+  DeploymentEventBaseContract,
   DeploymentEventProxyContract,
   DeploymentEventStandardContract,
   DeploymentStatus,
@@ -88,6 +89,25 @@ export async function deployContract(
 
     return {
       type: DeploymentType.CONTRACT,
+      status: DeploymentStatus.PENDING,
+      contractName: name,
+      transaction: contract.deployTransaction,
+    };
+  } catch (error) {
+    console.error(`Error when deploying ${name}`, error);
+    throw error;
+  }
+}
+
+export async function deployBaseContract(
+  deployContractFunction,
+  name: string
+): Promise<DeploymentEventBaseContract> {
+  try {
+    const contract: Contract = await deployContractFunction();
+
+    return {
+      type: DeploymentType.BASE_CONTRACT,
       status: DeploymentStatus.PENDING,
       contractName: name,
       transaction: contract.deployTransaction,

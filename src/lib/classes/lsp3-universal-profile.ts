@@ -1,21 +1,31 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, merge } from 'rxjs';
-import { concatAll } from 'rxjs/operators';
+import { concat, forkJoin, lastValueFrom, merge, of } from 'rxjs';
+import { concatAll, scan } from 'rxjs/operators';
 
+import contractVersions from '../../versions.json';
 import { defaultUploadOptions } from '../helpers/config.helper';
-import { imageUpload, ipfsUpload } from '../helpers/uploader.helper';
+import { ipfsUpload, prepareImageForLSP3 } from '../helpers/uploader.helper';
 import {
-  LSP3ProfileJSON,
   LSPFactoryOptions,
   ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
 } from '../interfaces';
-import { ContractDeploymentOptions } from '../interfaces/profile-deployment';
+import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
+import {
+  ContractDeploymentOptions,
+  DeployedContracts,
+  DeploymentEvent,
+} from '../interfaces/profile-deployment';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
+import {
+  baseContractsDeployment$,
+  getBaseContractAddresses$,
+} from '../services/base-contract.service';
 import { keyManagerDeployment$ } from '../services/key-manager.service';
 
 import {
   accountDeployment$,
+  getLsp3ProfileDataUrl,
   getTransferOwnershipTransaction$,
   setDataTransaction$,
 } from './../services/lsp3-account.service';
@@ -35,16 +45,44 @@ export class LSP3UniversalProfile {
   /**
    * TODO: docs
    */
-  deploy(
+  deployReactive(
     profileDeploymentOptions: ProfileDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
-    // 1 > deploys ERC725Account
-    const account$ = accountDeployment$(
+    // -1 > Run IPFS upload process in parallel with contract deployment
+    const lsp3Profile = profileDeploymentOptions.lsp3Profile
+      ? getLsp3ProfileDataUrl(profileDeploymentOptions.lsp3Profile)
+      : null;
+
+    // 0 > Check for existing base contracts and deploy
+    const defaultLSP3BaseContractAddress =
+      contractVersions[this.options.chainId]?.baseContracts?.LSP3Account['0.0.1'];
+    const defaultUniversalReceiverBaseContractAddress =
+      contractVersions[this.options.chainId]?.baseContracts?.UniversalReceiverAddressStore['0.0.1'];
+
+    const defaultBaseContractByteCode$ = forkJoin([
+      this.getDeployedByteCode(
+        defaultLSP3BaseContractAddress ?? '0x0000000000000000000000000000000000000000'
+      ),
+      this.getDeployedByteCode(
+        defaultUniversalReceiverBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
+      ),
+    ]);
+
+    const baseContractAddresses$ = getBaseContractAddresses$(
+      defaultLSP3BaseContractAddress,
+      defaultUniversalReceiverBaseContractAddress,
+      defaultBaseContractByteCode$,
       this.signer,
-      profileDeploymentOptions.controllerAddresses,
-      contractDeploymentOptions?.libAddresses?.lsp3AccountInit
+      contractDeploymentOptions
     );
+
+    const controllerAddresses = profileDeploymentOptions.controllingAccounts.map((controller) => {
+      return typeof controller === 'string' ? controller : controller.address;
+    });
+
+    // 1 > deploys ERC725Account
+    const account$ = accountDeployment$(this.signer, controllerAddresses, baseContractAddresses$);
 
     // 2 > deploys KeyManager
     const keyManager$ = keyManagerDeployment$(
@@ -52,20 +90,20 @@ export class LSP3UniversalProfile {
       account$,
       contractDeploymentOptions?.libAddresses?.keyManagerInit
     );
-
     // 3 > deploys UniversalReceiverDelegate
     const universalReceiver$ = universalReceiverAddressStoreDeployment$(
       this.signer,
       account$,
-      contractDeploymentOptions?.libAddresses?.universalReceiverAddressStoreInit
+      baseContractAddresses$
     );
 
-    // // 4 > set permissions, profile and universal
+    // 4 > set permissions, profile and universal
     const setData$ = setDataTransaction$(
       this.signer,
       account$,
       universalReceiver$,
-      profileDeploymentOptions
+      profileDeploymentOptions.controllingAccounts,
+      lsp3Profile
     );
 
     // 5 > transfersOwnership to KeyManager
@@ -77,6 +115,57 @@ export class LSP3UniversalProfile {
       setData$,
       transferOwnership$,
     ]).pipe(concatAll());
+  }
+
+  /**
+   * TODO: docs
+   */
+  deploy(
+    profileDeploymentOptions: ProfileDeploymentOptions,
+    contractDeploymentOptions?: ContractDeploymentOptions
+  ) {
+    const deployments$ = this.deployReactive(
+      profileDeploymentOptions,
+      contractDeploymentOptions
+    ).pipe(
+      scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
+        if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
+          accumulator[deploymentEvent.contractName] = {
+            address: deploymentEvent.receipt.contractAddress,
+            receipt: deploymentEvent.receipt,
+          };
+        }
+
+        return accumulator;
+      }, {})
+    );
+
+    return lastValueFrom(deployments$);
+  }
+
+  getDeployedByteCode(contractAddress: string) {
+    return this.options.provider.getCode(contractAddress);
+  }
+
+  deployBaseContracts() {
+    const baseContractsToDeploy$ = of([true, true] as [boolean, boolean]);
+
+    const baseContracts$ = baseContractsDeployment$(this.signer, baseContractsToDeploy$);
+
+    const deployments$ = baseContracts$.pipe(
+      scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
+        if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
+          accumulator[deploymentEvent.contractName] = {
+            address: deploymentEvent.receipt.contractAddress,
+            receipt: deploymentEvent.receipt,
+          };
+        }
+
+        return accumulator;
+      }, {})
+    );
+
+    return lastValueFrom(deployments$);
   }
 
   /**
@@ -100,16 +189,13 @@ export class LSP3UniversalProfile {
   static async uploadProfileData(
     profileData: ProfileDataBeforeUpload,
     uploadOptions?: ProfileUploadOptions
-  ): Promise<{ profile: LSP3ProfileJSON; url: string }> {
+  ): Promise<LSP3ProfileDataForEncoding> {
     uploadOptions = uploadOptions || defaultUploadOptions;
 
-    const profileImage = profileData.profileImage
-      ? await imageUpload(profileData.profileImage, uploadOptions)
-      : null;
-
-    const backgroundImage = profileData.backgroundImage
-      ? await imageUpload(profileData.backgroundImage, uploadOptions)
-      : null;
+    const [profileImage, backgroundImage] = await Promise.all([
+      prepareImageForLSP3(uploadOptions, profileData.profileImage),
+      prepareImageForLSP3(uploadOptions, profileData.backgroundImage),
+    ]);
 
     const profile = {
       LSP3Profile: {
