@@ -54,7 +54,7 @@ export async function prepareImageForLSP3(
 
   if (Array.isArray(image)) {
     lsp3Image = image ?? null;
-  } else {
+  } else if (image) {
     lsp3Image = await imageUpload(image, uploadOptions);
   }
 

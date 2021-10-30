@@ -25,3 +25,9 @@ export interface DeployedContracts {
   LSP7DigitalAsset: LSP7;
   LSP8IdentifiableDigitalAsset: LSP8;
 }
+
+export interface ContractDeploymentOptions {
+  version?: string;
+  byteCode?: string;
+  libAddress?: string;
+}

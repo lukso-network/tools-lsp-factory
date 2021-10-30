@@ -129,7 +129,6 @@ export async function deployProxyContract(
     const factory = new ContractFactory(abi, getProxyByteCode(contract.address), signer);
     const deployedProxy = await factory.deploy();
     const transaction = deployedProxy.deployTransaction;
-
     return {
       type: DeploymentType.PROXY,
       contractName: name,

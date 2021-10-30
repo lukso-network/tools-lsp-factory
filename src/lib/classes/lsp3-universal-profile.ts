@@ -12,10 +12,7 @@ import {
   ProfileDeploymentOptions,
 } from '../interfaces';
 import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
-import {
-  ContractDeploymentOptions,
-  DeployedContracts,
-} from '../interfaces/profile-deployment';
+import { ContractDeploymentOptions, DeployedContracts } from '../interfaces/profile-deployment';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
 import {
   baseContractsDeployment$,

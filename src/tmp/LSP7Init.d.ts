@@ -19,12 +19,13 @@ import { Listener, Provider } from '@ethersproject/providers';
 import { FunctionFragment, EventFragment, Result } from '@ethersproject/abi';
 import { TypedEventFilter, TypedEvent, TypedListener } from './commons';
 
-interface LSP7Interface extends ethers.utils.Interface {
+interface LSP7InitInterface extends ethers.utils.Interface {
   functions: {
     'authorizeOperator(address,uint256)': FunctionFragment;
     'balanceOf(address)': FunctionFragment;
     'decimals()': FunctionFragment;
     'getData(bytes32[])': FunctionFragment;
+    'initialize(string,string,address)': FunctionFragment;
     'isOperatorFor(address,address)': FunctionFragment;
     'owner()': FunctionFragment;
     'renounceOwnership()': FunctionFragment;
@@ -41,6 +42,7 @@ interface LSP7Interface extends ethers.utils.Interface {
   encodeFunctionData(functionFragment: 'balanceOf', values: [string]): string;
   encodeFunctionData(functionFragment: 'decimals', values?: undefined): string;
   encodeFunctionData(functionFragment: 'getData', values: [BytesLike[]]): string;
+  encodeFunctionData(functionFragment: 'initialize', values: [string, string, string]): string;
   encodeFunctionData(functionFragment: 'isOperatorFor', values: [string, string]): string;
   encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
   encodeFunctionData(functionFragment: 'renounceOwnership', values?: undefined): string;
@@ -62,6 +64,7 @@ interface LSP7Interface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'decimals', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'getData', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'initialize', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isOperatorFor', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'renounceOwnership', data: BytesLike): Result;
@@ -88,7 +91,7 @@ interface LSP7Interface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: 'Transfer'): EventFragment;
 }
 
-export class LSP7 extends BaseContract {
+export class LSP7Init extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -129,7 +132,7 @@ export class LSP7 extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
 
-  interface: LSP7Interface;
+  interface: LSP7InitInterface;
 
   functions: {
     authorizeOperator(
@@ -146,6 +149,26 @@ export class LSP7 extends BaseContract {
       _keys: BytesLike[],
       overrides?: CallOverrides
     ): Promise<[string[]] & { values: string[] }>;
+
+    'initialize(string,string,address)'(
+      name_: string,
+      symbol_: string,
+      newOwner_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    'initialize(string,string,address,bool)'(
+      name_: string,
+      symbol_: string,
+      newOwner_: string,
+      isNFT_: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    'initialize(address)'(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     isOperatorFor(
       operator: string,
@@ -210,6 +233,26 @@ export class LSP7 extends BaseContract {
 
   getData(_keys: BytesLike[], overrides?: CallOverrides): Promise<string[]>;
 
+  'initialize(string,string,address)'(
+    name_: string,
+    symbol_: string,
+    newOwner_: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  'initialize(string,string,address,bool)'(
+    name_: string,
+    symbol_: string,
+    newOwner_: string,
+    isNFT_: boolean,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  'initialize(address)'(
+    _newOwner: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   isOperatorFor(
     operator: string,
     tokenOwner: string,
@@ -272,6 +315,23 @@ export class LSP7 extends BaseContract {
     decimals(overrides?: CallOverrides): Promise<BigNumber>;
 
     getData(_keys: BytesLike[], overrides?: CallOverrides): Promise<string[]>;
+
+    'initialize(string,string,address)'(
+      name_: string,
+      symbol_: string,
+      newOwner_: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    'initialize(string,string,address,bool)'(
+      name_: string,
+      symbol_: string,
+      newOwner_: string,
+      isNFT_: boolean,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    'initialize(address)'(_newOwner: string, overrides?: CallOverrides): Promise<void>;
 
     isOperatorFor(
       operator: string,
@@ -370,6 +430,26 @@ export class LSP7 extends BaseContract {
 
     getData(_keys: BytesLike[], overrides?: CallOverrides): Promise<BigNumber>;
 
+    'initialize(string,string,address)'(
+      name_: string,
+      symbol_: string,
+      newOwner_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    'initialize(string,string,address,bool)'(
+      name_: string,
+      symbol_: string,
+      newOwner_: string,
+      isNFT_: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    'initialize(address)'(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     isOperatorFor(
       operator: string,
       tokenOwner: string,
@@ -433,6 +513,26 @@ export class LSP7 extends BaseContract {
     decimals(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getData(_keys: BytesLike[], overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    'initialize(string,string,address)'(
+      name_: string,
+      symbol_: string,
+      newOwner_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    'initialize(string,string,address,bool)'(
+      name_: string,
+      symbol_: string,
+      newOwner_: string,
+      isNFT_: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    'initialize(address)'(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     isOperatorFor(
       operator: string,
