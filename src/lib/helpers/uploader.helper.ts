@@ -52,10 +52,10 @@ export async function prepareImageForLSP3(
 ): Promise<LSP3ProfileImage[]> | null {
   let lsp3Image: LSP3ProfileImage[] | null;
 
-  if (image instanceof File) {
-    lsp3Image = await imageUpload(image, uploadOptions);
-  } else {
+  if (Array.isArray(image)) {
     lsp3Image = image ?? null;
+  } else {
+    lsp3Image = await imageUpload(image, uploadOptions);
   }
 
   return lsp3Image;
