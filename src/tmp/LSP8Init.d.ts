@@ -19,12 +19,13 @@ import { Listener, Provider } from '@ethersproject/providers';
 import { FunctionFragment, EventFragment, Result } from '@ethersproject/abi';
 import { TypedEventFilter, TypedEvent, TypedListener } from './commons';
 
-interface LSP8Interface extends ethers.utils.Interface {
+interface LSP8InitInterface extends ethers.utils.Interface {
   functions: {
     'authorizeOperator(address,bytes32)': FunctionFragment;
     'balanceOf(address)': FunctionFragment;
     'getData(bytes32[])': FunctionFragment;
     'getOperatorsOf(bytes32)': FunctionFragment;
+    'initialize(string,string,address)': FunctionFragment;
     'isOperatorFor(address,bytes32)': FunctionFragment;
     'owner()': FunctionFragment;
     'renounceOwnership()': FunctionFragment;
@@ -43,6 +44,7 @@ interface LSP8Interface extends ethers.utils.Interface {
   encodeFunctionData(functionFragment: 'balanceOf', values: [string]): string;
   encodeFunctionData(functionFragment: 'getData', values: [BytesLike[]]): string;
   encodeFunctionData(functionFragment: 'getOperatorsOf', values: [BytesLike]): string;
+  encodeFunctionData(functionFragment: 'initialize', values: [string, string, string]): string;
   encodeFunctionData(functionFragment: 'isOperatorFor', values: [string, BytesLike]): string;
   encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
   encodeFunctionData(functionFragment: 'renounceOwnership', values?: undefined): string;
@@ -66,6 +68,7 @@ interface LSP8Interface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'getData', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'getOperatorsOf', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'initialize', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isOperatorFor', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'renounceOwnership', data: BytesLike): Result;
@@ -94,7 +97,7 @@ interface LSP8Interface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: 'Transfer'): EventFragment;
 }
 
-export class LSP8 extends BaseContract {
+export class LSP8Init extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -135,7 +138,7 @@ export class LSP8 extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
 
-  interface: LSP8Interface;
+  interface: LSP8InitInterface;
 
   functions: {
     authorizeOperator(
@@ -152,6 +155,18 @@ export class LSP8 extends BaseContract {
     ): Promise<[string[]] & { values: string[] }>;
 
     getOperatorsOf(tokenId: BytesLike, overrides?: CallOverrides): Promise<[string[]]>;
+
+    'initialize(string,string,address)'(
+      name_: string,
+      symbol_: string,
+      newOwner_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    'initialize(address)'(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     isOperatorFor(
       operator: string,
@@ -221,6 +236,18 @@ export class LSP8 extends BaseContract {
 
   getOperatorsOf(tokenId: BytesLike, overrides?: CallOverrides): Promise<string[]>;
 
+  'initialize(string,string,address)'(
+    name_: string,
+    symbol_: string,
+    newOwner_: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  'initialize(address)'(
+    _newOwner: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   isOperatorFor(operator: string, tokenId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
 
   owner(overrides?: CallOverrides): Promise<string>;
@@ -284,6 +311,15 @@ export class LSP8 extends BaseContract {
     getData(_keys: BytesLike[], overrides?: CallOverrides): Promise<string[]>;
 
     getOperatorsOf(tokenId: BytesLike, overrides?: CallOverrides): Promise<string[]>;
+
+    'initialize(string,string,address)'(
+      name_: string,
+      symbol_: string,
+      newOwner_: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    'initialize(address)'(_newOwner: string, overrides?: CallOverrides): Promise<void>;
 
     isOperatorFor(
       operator: string,
@@ -390,6 +426,18 @@ export class LSP8 extends BaseContract {
 
     getOperatorsOf(tokenId: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
+    'initialize(string,string,address)'(
+      name_: string,
+      symbol_: string,
+      newOwner_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    'initialize(address)'(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     isOperatorFor(
       operator: string,
       tokenId: BytesLike,
@@ -458,6 +506,18 @@ export class LSP8 extends BaseContract {
     getData(_keys: BytesLike[], overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getOperatorsOf(tokenId: BytesLike, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    'initialize(string,string,address)'(
+      name_: string,
+      symbol_: string,
+      newOwner_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    'initialize(address)'(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     isOperatorFor(
       operator: string,

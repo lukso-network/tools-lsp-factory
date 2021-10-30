@@ -22,6 +22,8 @@ export class DigitalAsset {
     this.signer = new NonceManager(options.signer);
   }
 
+  // LSP7
+
   deployLSP7DigitalAssetReactive(
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
@@ -58,20 +60,29 @@ export class DigitalAsset {
     return lastValueFrom(deployments$);
   }
 
+  // LSP8
+
   deployLSP8IdentifiableDigitalAssetReactive(
-    digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions
+    digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
+    contractDeploymentOptions?: ContractDeploymentOptions
   ) {
     const digitalAsset$ = lsp8IdentifiableDigitalAssetDeployment$(
       this.signer,
-      digitalAssetDeploymentOptions
+      digitalAssetDeploymentOptions,
+      contractDeploymentOptions?.libAddress ??
+        versions[this.options.chainId]?.baseContracts?.LSP8IdentifiableDigitalAsset['0.0.1']
     );
 
     return digitalAsset$;
   }
 
-  deployLSP8IdentifiableDigitalAsset(digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions) {
+  deployLSP8IdentifiableDigitalAsset(
+    digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
+    ContractDeploymentOptions?: ContractDeploymentOptions
+  ) {
     const deployments$ = this.deployLSP8IdentifiableDigitalAssetReactive(
-      digitalAssetDeploymentOptions
+      digitalAssetDeploymentOptions,
+      ContractDeploymentOptions
     ).pipe(
       scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
         if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
