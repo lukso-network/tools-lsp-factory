@@ -16,11 +16,6 @@ export interface LSP7DigitalAssetDeploymentOptions extends DigitalAssetDeploymen
   isNFT: boolean;
 }
 
-export enum DeploymentStatus {
-  PENDING = 'PENDING',
-  COMPLETE = 'COMPLETE',
-}
-
 export interface DeployedContracts {
   LSP7DigitalAsset: LSP7;
   LSP8IdentifiableDigitalAsset: LSP8;
