@@ -1,11 +1,14 @@
 import { TransactionReceipt } from '@ethersproject/providers';
 import axios from 'axios';
-import { BytesLike, Signer } from 'ethers';
+import { BytesLike, Contract, ContractFactory, Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, Observable } from 'rxjs';
 import { shareReplay, switchMap } from 'rxjs/operators';
 
-import { LSP3Account__factory, LSP3UniversalProfile } from '../..';
-import { LSP3AccountInit__factory } from '../../tmp/Factories/LSP3AccountInit__factory';
+import {
+  LSP3UniversalProfile,
+  UniversalProfile__factory,
+  UniversalProfileInit__factory,
+} from '../..';
 import {
   ADDRESS_PERMISSIONS_ARRAY_KEY,
   ALL_PERMISSIONS,
@@ -15,7 +18,7 @@ import {
 } from '../helpers/config.helper';
 import {
   deployContract,
-  deployProxyContract,
+  getProxyByteCode,
   initialize,
   waitForReceipt,
 } from '../helpers/deployment.helper';
@@ -94,27 +97,52 @@ async function deployLSP3Account(
 ): Promise<LSP3AccountDeploymentEvent> {
   const deploymentFunction = async () => {
     return baseContractAddress
-      ? new LSP3AccountInit__factory(signer).attach(baseContractAddress)
-      : await new LSP3Account__factory(signer).deploy(ownerAddresses[0]);
+      ? new UniversalProfileInit__factory(signer).attach(baseContractAddress)
+      : await new UniversalProfile__factory(signer).deploy(ownerAddresses[0]);
   };
+
   return baseContractAddress
-    ? deployProxyContract(
-        LSP3AccountInit__factory.abi,
-        deploymentFunction,
-        ContractNames.LSP3_ACCOUNT,
-        signer
-      )
+    ? deployProxyContract(deploymentFunction, signer)
     : deployContract(deploymentFunction, ContractNames.LSP3_ACCOUNT);
+}
+
+export async function deployProxyContract(
+  deployContractFunction,
+  signer: Signer
+): Promise<DeploymentEventProxyContract> {
+  try {
+    const contract: Contract = await deployContractFunction();
+    const factory = new ContractFactory(
+      UniversalProfile__factory.abi,
+      getProxyByteCode(contract.address),
+      signer
+    );
+    const deployedProxy = await factory.deploy(signer.getAddress());
+    const transaction = deployedProxy.deployTransaction;
+    return {
+      type: DeploymentType.PROXY,
+      contractName: ContractNames.LSP3_ACCOUNT,
+      status: DeploymentStatus.PENDING,
+      transaction,
+    };
+  } catch (error) {
+    console.error(`Error when deploying ${ContractNames.LSP3_ACCOUNT}`, error);
+    throw error;
+  }
 }
 
 function initializeProxy(
   signer: Signer,
   accountDeploymentReceipt$: Observable<DeploymentEventProxyContract>
 ) {
-  return initialize(accountDeploymentReceipt$, new LSP3AccountInit__factory(signer), async () => {
-    const signerAddress = await signer.getAddress();
-    return [signerAddress];
-  }).pipe(shareReplay());
+  return initialize(
+    accountDeploymentReceipt$,
+    new UniversalProfileInit__factory(signer),
+    async () => {
+      const signerAddress = await signer.getAddress();
+      return [signerAddress];
+    }
+  ).pipe(shareReplay());
 }
 
 export function setDataTransaction$(
@@ -183,7 +211,7 @@ export async function setData(
     ? encodeLSP3Profile(lsp3ProfileData.profile, lsp3ProfileData.url)
     : null;
 
-  const erc725Account = new LSP3Account__factory(signer).attach(erc725AccountAddress);
+  const erc725Account = new UniversalProfile__factory(signer).attach(erc725AccountAddress);
 
   let controllerAddress: string;
   let signerPermissions: string;
@@ -218,12 +246,12 @@ export async function setData(
     valuesToSet.push(encodedData.LSP3Profile.value);
   }
 
-  const transaction = await erc725Account.setDataMultiple(keysToSet, valuesToSet as BytesLike[]);
+  const transaction = await erc725Account.setData(keysToSet, valuesToSet as BytesLike[]);
 
   return {
     type: DeploymentType.TRANSACTION,
     contractName: ContractNames.LSP3_ACCOUNT,
-    functionName: 'setDataMultiple',
+    functionName: 'setData',
     status: DeploymentStatus.PENDING,
     transaction,
   };
@@ -256,7 +284,7 @@ export async function transferOwnership(
 ): Promise<DeploymentEventTransaction> {
   try {
     const signerAddress = await signer.getAddress();
-    const contract = new LSP3Account__factory(signer).attach(
+    const contract = new UniversalProfile__factory(signer).attach(
       lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to
     );
     const transaction = await contract.transferOwnership(

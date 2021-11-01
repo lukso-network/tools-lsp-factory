@@ -2,8 +2,8 @@ import { NonceManager } from '@ethersproject/experimental';
 import { concat, forkJoin, lastValueFrom, merge, of } from 'rxjs';
 import { concatAll, scan } from 'rxjs/operators';
 
-import { DEFAULT_CONTRACT_VERSION } from '../../constants';
 import contractVersions from '../../versions.json';
+import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { defaultUploadOptions } from '../helpers/config.helper';
 import { ipfsUpload, prepareImageForLSP3 } from '../helpers/uploader.helper';
 import {

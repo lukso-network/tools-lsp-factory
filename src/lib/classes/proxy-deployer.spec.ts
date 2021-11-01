@@ -16,7 +16,9 @@ describe('LSP3UniversalProfile', () => {
 
   it('should deploy the LSP3Account proxy and setData', async () => {
     // LSPAccount
-    const lsp3AccountProxy = await proxyDeployer.deployProxyContract(baseContracts.lsp3Account);
+    const lsp3AccountProxy = await proxyDeployer.deployProxyContract(
+      baseContracts.universalProfile
+    );
     await lsp3AccountProxy.initialize(await signer.getAddress());
 
     // UniversalReceiverDelegate
@@ -26,16 +28,16 @@ describe('LSP3UniversalProfile', () => {
     await universalReceiverDelegateProxy.initialize();
 
     await lsp3AccountProxy.setData(
-      '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-      '0xbeefbeef',
+      ['0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'],
+      ['0xbeefbeef'],
       {
         from: await signer.getAddress(),
       }
     );
-    const data = await lsp3AccountProxy.getData(
-      '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'
-    );
+    const data = await lsp3AccountProxy.getData([
+      '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+    ]);
 
-    expect(data).toEqual('0xbeefbeef');
+    expect(data).toEqual(['0xbeefbeef']);
   });
 });

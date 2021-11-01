@@ -2,6 +2,7 @@ import { NonceManager } from '@ethersproject/experimental';
 import { lastValueFrom, scan } from 'rxjs';
 
 import versions from '../../versions.json';
+import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { DeploymentEvent, LSPFactoryOptions } from '../interfaces';
 import {
   ContractDeploymentOptions,
@@ -32,7 +33,7 @@ export class DigitalAsset {
       this.signer,
       digitalAssetDeploymentOptions,
       contractDeploymentOptions?.libAddress ??
-        versions[this.options.chainId]?.baseContracts?.LSP7DigitalAsset['0.0.1']
+        versions[this.options.chainId]?.baseContracts?.LSP7DigitalAsset[DEFAULT_CONTRACT_VERSION]
     );
     return digitalAsset$;
   }
@@ -70,7 +71,9 @@ export class DigitalAsset {
       this.signer,
       digitalAssetDeploymentOptions,
       contractDeploymentOptions?.libAddress ??
-        versions[this.options.chainId]?.baseContracts?.LSP8IdentifiableDigitalAsset['0.0.1']
+        versions[this.options.chainId]?.baseContracts?.LSP8IdentifiableDigitalAsset[
+          DEFAULT_CONTRACT_VERSION
+        ]
     );
 
     return digitalAsset$;

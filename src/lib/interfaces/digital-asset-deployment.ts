@@ -1,5 +1,4 @@
-import { LSP7 } from '../../tmp/LSP7';
-import { LSP8 } from '../../tmp/LSP8';
+import { LSP7, LSP8 } from '../../';
 
 export enum ContractNames {
   LSP7_DIGITAL_ASSET = 'LSP7DigitalAsset',

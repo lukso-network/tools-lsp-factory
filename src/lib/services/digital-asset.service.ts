@@ -1,10 +1,7 @@
 import { Signer } from '@ethersproject/abstract-signer';
 import { concat, EMPTY, from, Observable, shareReplay, switchMap, takeLast } from 'rxjs';
 
-import { LSP7Init__factory } from '../../tmp/Factories/LSP7Init__factory';
-import { LSP7__factory } from '../../tmp/Factories/LSP7__factory';
-import { LSP8Init__factory } from '../../tmp/Factories/LSP8Init__factory';
-import { LSP8__factory } from '../../tmp/Factories/LSP8__factory';
+import { LSP7__factory, LSP7Init__factory, LSP8__factory, LSP8Init__factory } from '../../';
 import { deployContract, deployProxyContract, waitForReceipt } from '../helpers/deployment.helper';
 import { DeploymentEventContract, DeploymentEventProxyContract } from '../interfaces';
 import {

@@ -2,9 +2,13 @@ import { Signer } from '@ethersproject/abstract-signer';
 import { defer, EMPTY, merge, Observable, of } from 'rxjs';
 import { defaultIfEmpty, shareReplay, switchMap, tap } from 'rxjs/operators';
 
-import { ContractDeploymentOptions, ContractNames, DeploymentEventContract } from '../..';
-import { LSP3AccountInit__factory } from '../../tmp/Factories/LSP3AccountInit__factory';
-import { UniversalReceiverDelegateInit__factory } from '../../tmp/Factories/UniversalReceiverDelegateInit__factory';
+import {
+  ContractDeploymentOptions,
+  ContractNames,
+  DeploymentEventContract,
+  UniversalProfileInit__factory,
+  UniversalReceiverDelegateInit__factory,
+} from '../..';
 import { deployBaseContract, waitForReceipt } from '../helpers/deployment.helper';
 
 export function baseContractsDeployment$(
@@ -14,7 +18,7 @@ export function baseContractsDeployment$(
   const lsp3AccountBaseContractDeploymentReceipt$ = deployBaseContract$(
     ContractNames.LSP3_ACCOUNT,
     () => {
-      return new LSP3AccountInit__factory(signer).deploy();
+      return new UniversalProfileInit__factory(signer).deploy();
     }
   );
 
