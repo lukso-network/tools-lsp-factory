@@ -26,3 +26,5 @@ export const PREFIX_PERMISSIONS = '0x4b80742d0000000082ac0000';
 export const ALL_PERMISSIONS = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 export const SET_DATA_PERMISSION =
   '0x0000000000000000000000000000000000000000000000000000000000000004';
+
+export const DEFAULT_CONTRACT_VERSION = '0.0.1';
