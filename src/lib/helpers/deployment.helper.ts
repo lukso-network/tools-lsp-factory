@@ -3,14 +3,14 @@ import { Observable } from 'rxjs';
 import { catchError, shareReplay, switchMap, takeLast } from 'rxjs/operators';
 
 import {
-  ContractDeploymentOptions,
   DeploymentEvent,
   DeploymentEventBaseContract,
   DeploymentEventProxyContract,
   DeploymentEventStandardContract,
   DeploymentStatus,
   DeploymentType,
-} from '../interfaces/profile-deployment';
+} from '../interfaces/deployment-events';
+import { ContractDeploymentOptions } from '../interfaces/profile-deployment';
 
 /**
  *
@@ -129,7 +129,6 @@ export async function deployProxyContract(
     const factory = new ContractFactory(abi, getProxyByteCode(contract.address), signer);
     const deployedProxy = await factory.deploy();
     const transaction = deployedProxy.deployTransaction;
-
     return {
       type: DeploymentType.PROXY,
       contractName: name,

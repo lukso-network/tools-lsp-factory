@@ -1,5 +1,6 @@
 import { ethers, providers, Signer } from 'ethers';
 
+import { DigitalAsset } from './classes/digital-asset';
 import { LSP3UniversalProfile } from './classes/lsp3-universal-profile';
 import { ProxyDeployer } from './classes/proxy-deployer';
 import { LSPFactoryOptions } from './interfaces';
@@ -11,6 +12,7 @@ import { SignerOptions } from './interfaces/lsp-factory-options';
 export class LSPFactory {
   options: LSPFactoryOptions;
   LSP3UniversalProfile: LSP3UniversalProfile;
+  DigitalAsset: DigitalAsset;
   ProxyDeployer: ProxyDeployer;
   /**
    * TBD
@@ -51,6 +53,7 @@ export class LSPFactory {
       chainId,
     };
 
+    this.DigitalAsset = new DigitalAsset(this.options);
     this.LSP3UniversalProfile = new LSP3UniversalProfile(this.options);
     this.ProxyDeployer = new ProxyDeployer(this.options.signer);
   }

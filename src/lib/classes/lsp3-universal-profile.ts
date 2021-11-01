@@ -2,20 +2,18 @@ import { NonceManager } from '@ethersproject/experimental';
 import { concat, forkJoin, lastValueFrom, merge, of } from 'rxjs';
 import { concatAll, scan } from 'rxjs/operators';
 
+import { DEFAULT_CONTRACT_VERSION } from '../../constants';
 import contractVersions from '../../versions.json';
 import { defaultUploadOptions } from '../helpers/config.helper';
 import { ipfsUpload, prepareImageForLSP3 } from '../helpers/uploader.helper';
 import {
+  DeploymentEvent,
   LSPFactoryOptions,
   ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
 } from '../interfaces';
 import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
-import {
-  ContractDeploymentOptions,
-  DeployedContracts,
-  DeploymentEvent,
-} from '../interfaces/profile-deployment';
+import { ContractDeploymentOptions, DeployedContracts } from '../interfaces/profile-deployment';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
 import {
   baseContractsDeployment$,
@@ -56,9 +54,11 @@ export class LSP3UniversalProfile {
 
     // 0 > Check for existing base contracts and deploy
     const defaultLSP3BaseContractAddress =
-      contractVersions[this.options.chainId]?.baseContracts?.LSP3Account['0.0.1'];
+      contractVersions[this.options.chainId]?.baseContracts?.LSP3Account[DEFAULT_CONTRACT_VERSION];
     const defaultUniversalReceiverBaseContractAddress =
-      contractVersions[this.options.chainId]?.baseContracts?.UniversalReceiverAddressStore['0.0.1'];
+      contractVersions[this.options.chainId]?.baseContracts?.UniversalReceiverAddressStore[
+        DEFAULT_CONTRACT_VERSION
+      ];
 
     const defaultBaseContractByteCode$ = forkJoin([
       this.getDeployedByteCode(

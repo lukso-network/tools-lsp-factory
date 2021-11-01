@@ -9,6 +9,12 @@
             },
             "UniversalReceiverAddressStore": {
                 "0.0.1": "0x9d4454B023096f34B160D6B654540c56A1F81688"
+            },
+            "LSP7DigitalAsset": {
+                "0.0.1": "0x3a622DB2db50f463dF562Dc5F341545A64C580fc"
+            },
+            "LSP8IdentifiableDigitalAsset": {
+                "0.0.1": "0x6A47346e722937B60Df7a1149168c0E76DD6520f"
             }
         }
     }
