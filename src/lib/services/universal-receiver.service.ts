@@ -2,9 +2,12 @@ import { Signer } from 'ethers';
 import { concat, EMPTY, Observable } from 'rxjs';
 import { shareReplay, switchMap, takeLast } from 'rxjs/operators';
 
-import { DeploymentEventContract, DeploymentEventProxyContract } from '../..';
-import { UniversalReceiverDelegateInit__factory } from '../../tmp/Factories/UniversalReceiverDelegateInit__factory';
-import { UniversalReceiverDelegate__factory } from '../../tmp/Factories/UniversalReceiverDelegate__factory';
+import {
+  DeploymentEventContract,
+  DeploymentEventProxyContract,
+  UniversalReceiverDelegate__factory,
+  UniversalReceiverDelegateInit__factory,
+} from '../..';
 import {
   deployContract,
   deployProxyContract,
