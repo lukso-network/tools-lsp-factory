@@ -1,6 +1,5 @@
 import { KeyManager } from '../..';
 import { UniversalProfile, UniversalReceiverDelegate } from '../../';
-import { ERC725Account } from '../../../types/ethers-v5/ERC725Account';
 
 import { ProfileDataBeforeUpload } from './lsp3-profile';
 
@@ -28,7 +27,6 @@ export interface ProfileDeploymentOptions {
   };
 }
 export interface DeployedContracts {
-  ERC725Account?: ERC725Account;
   LSP3Account?: UniversalProfile;
   KeyManager: KeyManager;
   UniversalReceiverDelegate: UniversalReceiverDelegate;
