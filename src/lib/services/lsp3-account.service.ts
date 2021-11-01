@@ -1,12 +1,18 @@
 import { TransactionReceipt } from '@ethersproject/providers';
 import axios from 'axios';
-import { Signer } from 'ethers';
+import { BytesLike, Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, Observable } from 'rxjs';
 import { shareReplay, switchMap } from 'rxjs/operators';
 
 import { LSP3Account__factory, LSP3UniversalProfile } from '../..';
 import { LSP3AccountInit__factory } from '../../tmp/Factories/LSP3AccountInit__factory';
-import { ALL_PERMISSIONS, LSP3_UP_KEYS, PREFIX_PERMISSIONS } from '../helpers/config.helper';
+import {
+  ADDRESS_PERMISSIONS_ARRAY_KEY,
+  ALL_PERMISSIONS,
+  LSP3_UP_KEYS,
+  PREFIX_PERMISSIONS,
+  SET_DATA_PERMISSION,
+} from '../helpers/config.helper';
 import {
   deployContract,
   deployProxyContract,
@@ -37,7 +43,7 @@ export function accountDeployment$(
   controllerAddresses: string[],
   baseContractAddresses$: Observable<{
     LSP3Account: string;
-    UniversalReceiverAddressStore: string;
+    UniversalReceiverDelegate: string;
   }>
 ) {
   return baseContractAddresses$.pipe(
@@ -120,12 +126,11 @@ export function setDataTransaction$(
 ) {
   const setDataTransaction$ = forkJoin([account$, universalReceiver$]).pipe(
     switchMap(
-      ([{ receipt: lsp3AccountReceipt }, { receipt: universalReceiverAddressStoreReceipt }]) => {
+      ([{ receipt: lsp3AccountReceipt }, { receipt: universalReceiverDelegateReceipt }]) => {
         return setData(
           signer,
           lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to,
-          universalReceiverAddressStoreReceipt.contractAddress ||
-            universalReceiverAddressStoreReceipt.to,
+          universalReceiverDelegateReceipt.contractAddress || universalReceiverDelegateReceipt.to,
           controllerAddresses,
           lsp3ProfileData
         );
@@ -168,7 +173,7 @@ export async function getLsp3ProfileDataUrl(
 export async function setData(
   signer: Signer,
   erc725AccountAddress: string,
-  universalReceiverAddressStoreAddress: string,
+  universalReceiverDelegateAddress: string,
   controllerAddresses: (string | ControllerOptions)[],
   lsp3ProfileDataPromise?: Promise<LSP3ProfileDataForEncoding>
 ): Promise<DeploymentEventTransaction> {
@@ -192,17 +197,28 @@ export async function setData(
 
   const keysToSet = [
     LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
-    PREFIX_PERMISSIONS + controllerAddress.substr(2), // TODO: handle multiple addresses
+    PREFIX_PERMISSIONS + controllerAddress.substr(2), // TODO: handle multiple addresses,
+    PREFIX_PERMISSIONS + universalReceiverDelegateAddress.substr(2),
+    ADDRESS_PERMISSIONS_ARRAY_KEY,
+    ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) + '00000000000000000000000000000000',
+    ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) + '00000000000000000000000000000001',
   ];
 
-  const valuesToSet = [universalReceiverAddressStoreAddress, signerPermissions ?? ALL_PERMISSIONS];
+  const valuesToSet = [
+    universalReceiverDelegateAddress,
+    signerPermissions ?? ALL_PERMISSIONS,
+    SET_DATA_PERMISSION,
+    2,
+    controllerAddress,
+    universalReceiverDelegateAddress,
+  ];
 
   if (encodedData) {
     keysToSet.push(LSP3_UP_KEYS.LSP3_PROFILE);
     valuesToSet.push(encodedData.LSP3Profile.value);
   }
 
-  const transaction = await erc725Account.setDataMultiple(keysToSet, valuesToSet);
+  const transaction = await erc725Account.setDataMultiple(keysToSet, valuesToSet as BytesLike[]);
 
   return {
     type: DeploymentType.TRANSACTION,

@@ -7,12 +7,12 @@ export interface ContractOptions {
     // use a custom address where the code is deployed, overwrites 'version'
     KeyManager: string;
     ERC725Account: string;
-    UniversalReceiverAddressStore: string;
+    UniversalReceiverDelegate: string;
   };
   byteCode?: {
     // add your own custom bytecode, overwrites 'version' and 'libAddress'
     KeyManager: string;
     ERC725Account: string;
-    UniversalReceiverAddressStore: string;
+    UniversalReceiverDelegate: string;
   };
 }

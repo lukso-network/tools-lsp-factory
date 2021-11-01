@@ -27,7 +27,7 @@ import {
   getTransferOwnershipTransaction$,
   setDataTransaction$,
 } from './../services/lsp3-account.service';
-import { universalReceiverAddressStoreDeployment$ } from './../services/universal-receiver.service';
+import { universalReceiverDelegateDeployment$ } from './../services/universal-receiver.service';
 
 /**
  * TODO: docs
@@ -56,7 +56,7 @@ export class LSP3UniversalProfile {
     const defaultLSP3BaseContractAddress =
       contractVersions[this.options.chainId]?.baseContracts?.LSP3Account[DEFAULT_CONTRACT_VERSION];
     const defaultUniversalReceiverBaseContractAddress =
-      contractVersions[this.options.chainId]?.baseContracts?.UniversalReceiverAddressStore[
+      contractVersions[this.options.chainId]?.baseContracts?.UniversalReceiverDelegate[
         DEFAULT_CONTRACT_VERSION
       ];
 
@@ -91,7 +91,7 @@ export class LSP3UniversalProfile {
       contractDeploymentOptions?.libAddresses?.keyManagerInit
     );
     // 3 > deploys UniversalReceiverDelegate
-    const universalReceiver$ = universalReceiverAddressStoreDeployment$(
+    const universalReceiver$ = universalReceiverDelegateDeployment$(
       this.signer,
       account$,
       baseContractAddresses$

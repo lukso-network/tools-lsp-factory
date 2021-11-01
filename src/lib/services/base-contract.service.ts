@@ -4,7 +4,7 @@ import { defaultIfEmpty, shareReplay, switchMap, tap } from 'rxjs/operators';
 
 import { ContractDeploymentOptions, ContractNames, DeploymentEventContract } from '../..';
 import { LSP3AccountInit__factory } from '../../tmp/Factories/LSP3AccountInit__factory';
-import { UniversalReceiverAddressStoreInit__factory } from '../../tmp/Factories/UniversalReceiverAddressStoreInit__factory';
+import { UniversalReceiverDelegateInit__factory } from '../../tmp/Factories/UniversalReceiverDelegateInit__factory';
 import { deployBaseContract, waitForReceipt } from '../helpers/deployment.helper';
 
 export function baseContractsDeployment$(
@@ -21,7 +21,7 @@ export function baseContractsDeployment$(
   const universalReceiverBaseContractDeploymentReceipt$ = deployBaseContract$(
     ContractNames.UNIVERSAL_RECEIVER,
     () => {
-      return new UniversalReceiverAddressStoreInit__factory(signer).deploy();
+      return new UniversalReceiverDelegateInit__factory(signer).deploy();
     }
   );
 
@@ -63,7 +63,7 @@ export function getBaseContractAddresses$(
 ) {
   const providedLSP3BaseContractAddress = contractDeploymentOptions?.libAddresses?.lsp3AccountInit;
   const providedUniversalReceiverContractAddress =
-    contractDeploymentOptions?.libAddresses?.universalReceiverAddressStoreInit;
+    contractDeploymentOptions?.libAddresses?.universalReceiverDelegateInit;
 
   const baseContractsToDeploy$ = defaultBaseContractByteCode$.pipe(
     switchMap(([defaultLSP3BaseContractByteCode, defaultUniversalReceiverBaseContractByteCode]) => {

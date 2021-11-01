@@ -19,11 +19,11 @@ describe('LSP3UniversalProfile', () => {
     const lsp3AccountProxy = await proxyDeployer.deployProxyContract(baseContracts.lsp3Account);
     await lsp3AccountProxy.initialize(await signer.getAddress());
 
-    // UniversalReceiverAddressStore
-    const universalReceiverAddressStoreProxy = await proxyDeployer.deployProxyContract(
-      baseContracts.universalReceiverAddressStore
+    // UniversalReceiverDelegate
+    const universalReceiverDelegateProxy = await proxyDeployer.deployProxyContract(
+      baseContracts.universalReceiverDelegate
     );
-    await universalReceiverAddressStoreProxy.initialize(lsp3AccountProxy.address);
+    await universalReceiverDelegateProxy.initialize();
 
     await lsp3AccountProxy.setData(
       '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
