@@ -246,7 +246,9 @@ export async function setData(
     valuesToSet.push(encodedData.LSP3Profile.value);
   }
 
-  const transaction = await erc725Account.setData(keysToSet, valuesToSet as BytesLike[]);
+  const transaction = await erc725Account.setData(keysToSet, valuesToSet as BytesLike[], {
+    gasLimit: 500_000,
+  });
 
   return {
     type: DeploymentType.TRANSACTION,

@@ -5,7 +5,7 @@
         "networkId": 22,
         "baseContracts": {
             "LSP3Account": {
-                "0.0.1": "0xf5059a5D33d5853360D16C683c16e67980206f36"
+                "0.0.1": "0x97fd63D049089cd70D9D139ccf9338c81372DE68"
             },
             "UniversalReceiverDelegate": {
                 "0.0.1": "0x6533158b042775e2FdFeF3cA1a782EFDbB8EB9b1"
