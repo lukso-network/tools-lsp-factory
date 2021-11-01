@@ -3,16 +3,16 @@ import { Contract } from '@ethersproject/contracts';
 import { NonceManager } from '@ethersproject/experimental';
 
 import { LSP3AccountInit__factory } from '../../tmp/Factories/LSP3AccountInit__factory';
-import { UniversalReceiverAddressStoreInit__factory } from '../../tmp/Factories/UniversalReceiverAddressStoreInit__factory';
+import { UniversalReceiverDelegateInit__factory } from '../../tmp/Factories/UniversalReceiverDelegateInit__factory';
 import { LSP3AccountInit } from '../../tmp/LSP3AccountInit';
-import { UniversalReceiverAddressStoreInit } from '../../tmp/UniversalReceiverAddressStoreInit';
+import { UniversalReceiverDelegateInit } from '../../tmp/UniversalReceiverDelegateInit';
 import { getProxyByteCode } from '../helpers/deployment.helper';
 
 export class ProxyDeployer {
   signer: Signer;
   baseContracts: {
     lsp3Account: LSP3AccountInit;
-    universalReceiverAddressStore: UniversalReceiverAddressStoreInit;
+    universalReceiverDelegate: UniversalReceiverDelegateInit;
   };
 
   constructor(signer: Signer) {
@@ -21,13 +21,13 @@ export class ProxyDeployer {
 
   async deployBaseContracts() {
     const lsp3Account = await new LSP3AccountInit__factory(this.signer).deploy();
-    const universalReceiverAddressStore = await new UniversalReceiverAddressStoreInit__factory(
+    const universalReceiverDelegate = await new UniversalReceiverDelegateInit__factory(
       this.signer
     ).deploy();
 
     this.baseContracts = {
       lsp3Account,
-      universalReceiverAddressStore,
+      universalReceiverDelegate,
     };
 
     return this.baseContracts;

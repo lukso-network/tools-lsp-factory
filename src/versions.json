@@ -7,8 +7,8 @@
             "LSP3Account": {
                 "0.0.1": "0xf5059a5D33d5853360D16C683c16e67980206f36"
             },
-            "UniversalReceiverAddressStore": {
-                "0.0.1": "0x9d4454B023096f34B160D6B654540c56A1F81688"
+            "UniversalReceiverDelegate": {
+                "0.0.1": "0x6533158b042775e2FdFeF3cA1a782EFDbB8EB9b1"
             },
             "LSP7DigitalAsset": {
                 "0.0.1": "0x3a622DB2db50f463dF562Dc5F341545A64C580fc"

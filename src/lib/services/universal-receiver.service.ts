@@ -2,13 +2,9 @@ import { Signer } from 'ethers';
 import { concat, EMPTY, Observable } from 'rxjs';
 import { shareReplay, switchMap, takeLast } from 'rxjs/operators';
 
-import {
-  DeploymentEvent,
-  DeploymentEventContract,
-  DeploymentEventProxyContract,
-  UniversalReceiverAddressStore__factory,
-} from '../..';
-import { UniversalReceiverAddressStoreInit__factory } from '../../tmp/Factories/UniversalReceiverAddressStoreInit__factory';
+import { DeploymentEventContract, DeploymentEventProxyContract } from '../..';
+import { UniversalReceiverDelegateInit__factory } from '../../tmp/Factories/UniversalReceiverDelegateInit__factory';
+import { UniversalReceiverDelegate__factory } from '../../tmp/Factories/UniversalReceiverDelegate__factory';
 import {
   deployContract,
   deployProxyContract,
@@ -23,35 +19,35 @@ export type UniversalReveiverDeploymentEvent =
   | DeploymentEventContract
   | DeploymentEventProxyContract;
 
-export function universalReceiverAddressStoreDeployment$(
+export function universalReceiverDelegateDeployment$(
   signer: Signer,
   accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
   baseContractDeployment$: Observable<{
     LSP3Account: string;
-    UniversalReceiverAddressStore: string;
+    UniversalReceiverDelegate: string;
   }>
 ) {
   return baseContractDeployment$.pipe(
     switchMap((baseContractAddresses) => {
-      return universalReceiverAddressStoreDeploymentWithBaseContractAddress$(
+      return universalReceiverDelegateDeploymentWithBaseContractAddress$(
         signer,
         accountDeployment$,
-        baseContractAddresses.UniversalReceiverAddressStore
+        baseContractAddresses.UniversalReceiverDelegate
       );
     }),
     shareReplay()
   );
 }
 
-export function universalReceiverAddressStoreDeploymentWithBaseContractAddress$(
+export function universalReceiverDelegateDeploymentWithBaseContractAddress$(
   signer: Signer,
   accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
   baseContractAddress: string
 ): Observable<UniversalReveiverDeploymentEvent> {
-  const universalReceiverAddressStoreDeployment$ = accountDeployment$.pipe(
+  const universalReceiverDelegateDeployment$ = accountDeployment$.pipe(
     takeLast(1),
     switchMap((result) => {
-      return deployUniversalReceiverAddressStore(
+      return deployUniversalReceiverDelegateStore(
         signer,
         result.receipt.contractAddress,
         baseContractAddress
@@ -60,47 +56,48 @@ export function universalReceiverAddressStoreDeploymentWithBaseContractAddress$(
     shareReplay()
   );
 
-  const universalReceiverAddressStoreReceipt$ = waitForReceipt<UniversalReveiverDeploymentEvent>(
-    universalReceiverAddressStoreDeployment$
+  const universalReceiverDelegateStoreReceipt$ = waitForReceipt<UniversalReveiverDeploymentEvent>(
+    universalReceiverDelegateDeployment$
   );
 
-  const universalReceiverAddressStoreInitialize$ = baseContractAddress
+  const universalReceiverDelegateInitialize$ = baseContractAddress
     ? initializeProxy(
         signer,
-        universalReceiverAddressStoreReceipt$ as Observable<DeploymentEventProxyContract>
+        universalReceiverDelegateStoreReceipt$ as Observable<DeploymentEventProxyContract>
       )
     : EMPTY;
 
-  const universalReceiverAddressStoreInitializeReceipt$ =
-    waitForReceipt<UniversalReveiverDeploymentEvent>(universalReceiverAddressStoreInitialize$);
+  const universalReceiverDelegateInitializeReceipt$ =
+    waitForReceipt<UniversalReveiverDeploymentEvent>(universalReceiverDelegateInitialize$);
 
   return concat(
-    universalReceiverAddressStoreDeployment$,
-    universalReceiverAddressStoreReceipt$,
-    universalReceiverAddressStoreInitialize$,
-    universalReceiverAddressStoreInitializeReceipt$
+    universalReceiverDelegateDeployment$,
+    universalReceiverDelegateStoreReceipt$,
+    universalReceiverDelegateInitialize$,
+    universalReceiverDelegateInitializeReceipt$
   );
 }
 
 /**
  * TODO: docs
  */
-export async function deployUniversalReceiverAddressStore(
+export async function deployUniversalReceiverDelegateStore(
   signer: Signer,
   lsp3AccountAddress: string,
   baseContractAddress: string
 ) {
+  lsp3AccountAddress;
   const deploymentFunction = async () => {
     return baseContractAddress
-      ? new UniversalReceiverAddressStoreInit__factory(signer).attach(baseContractAddress)
-      : await new UniversalReceiverAddressStore__factory(signer).deploy(lsp3AccountAddress, {
+      ? new UniversalReceiverDelegateInit__factory(signer).attach(baseContractAddress)
+      : await new UniversalReceiverDelegate__factory(signer).deploy({
           gasLimit: 3_000_000,
         });
   };
 
   return baseContractAddress
     ? deployProxyContract(
-        UniversalReceiverAddressStoreInit__factory.abi,
+        UniversalReceiverDelegateInit__factory.abi,
         deploymentFunction,
         ContractNames.UNIVERSAL_RECEIVER,
         signer
@@ -110,13 +107,13 @@ export async function deployUniversalReceiverAddressStore(
 
 function initializeProxy(
   signer: Signer,
-  universalReceiverAddressStoreReceipt$: Observable<DeploymentEventProxyContract>
+  universalReceiverDelegateReceipt$: Observable<DeploymentEventProxyContract>
 ) {
   return initialize(
-    universalReceiverAddressStoreReceipt$,
-    new UniversalReceiverAddressStoreInit__factory(signer),
-    async (result: DeploymentEvent) => {
-      return [result.receipt.contractAddress];
+    universalReceiverDelegateReceipt$,
+    new UniversalReceiverDelegateInit__factory(signer),
+    async () => {
+      return [];
     }
   );
 }
