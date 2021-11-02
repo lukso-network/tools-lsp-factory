@@ -28,7 +28,7 @@ describe('LSP3UniversalProfile', () => {
       },
       {
         libAddresses: {
-          lsp3AccountInit: baseContracts.lsp3Account.address,
+          erc725AccountInit: baseContracts.universalProfile.address,
           universalReceiverDelegateInit: baseContracts.UniversalReceiverDelegate.address,
         },
       }
@@ -45,18 +45,18 @@ describe('LSP3UniversalProfile', () => {
         done();
       },
       complete: async () => {
-        const ownerAddress = await events.LSP3Account.contract.owner();
+        const ownerAddress = await events.ERC725Account.contract.owner();
         // const keyManagerAddress = await events.KeyManager.contract.address;
         expect(ownerAddress).toEqual('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
 
-        await events.LSP3Account.contract.setData(
+        await events.ERC725Account.contract.setData(
           '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
           '0xbeefbeef',
           {
             from: await signer.getAddress(),
           }
         );
-        const data = await events.LSP3Account.contract.getData(
+        const data = await events.ERC725Account.contract.getData(
           '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'
         );
 

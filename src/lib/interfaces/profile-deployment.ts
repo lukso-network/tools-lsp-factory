@@ -4,7 +4,7 @@ import { UniversalProfile, UniversalReceiverDelegate } from '../../';
 import { ProfileDataBeforeUpload } from './lsp3-profile';
 
 export enum ContractNames {
-  LSP3_ACCOUNT = 'LSP3Account',
+  ERC725_Account = 'ERC725Account',
   KEY_MANAGER = 'KeyManager',
   UNIVERSAL_RECEIVER = 'UniversalReceiverDelegate',
 }
@@ -21,19 +21,19 @@ export interface ProfileDeploymentOptions {
   controllingAccounts: (string | ControllerOptions)[];
   lsp3Profile?: ProfileDataBeforeUpload | string;
   baseContractAddresses?: {
-    lsp3Account?: string;
+    erc725Account?: string;
     universalReceiverDelegate?: string;
     keyManager?: string;
   };
 }
 export interface DeployedContracts {
-  LSP3Account?: UniversalProfile;
+  ERC725Account?: UniversalProfile;
   KeyManager: KeyManager;
   UniversalReceiverDelegate: UniversalReceiverDelegate;
 }
 
 export interface BaseContractAddresses {
-  lsp3AccountInit?: string;
+  erc725AccountInit?: string;
   keyManagerInit?: string;
   universalReceiverDelegateInit?: string;
 }
@@ -41,7 +41,7 @@ export interface BaseContractAddresses {
 export interface ContractDeploymentOptions {
   version?: string;
   byteCode?: {
-    lsp3AccountInit: string;
+    erc725AccountInit: string;
     keyManagerInit: string;
     universalReceiverDelegateInit: string;
   };

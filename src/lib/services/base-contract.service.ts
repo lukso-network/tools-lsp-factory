@@ -15,8 +15,8 @@ export function baseContractsDeployment$(
   signer: Signer,
   baseContractsToDeploy$: Observable<[boolean, boolean]>
 ): Observable<DeploymentEventContract> {
-  const lsp3AccountBaseContractDeploymentReceipt$ = deployBaseContract$(
-    ContractNames.LSP3_ACCOUNT,
+  const erc725AccountBaseContractDeploymentReceipt$ = deployBaseContract$(
+    ContractNames.ERC725_Account,
     () => {
       return new UniversalProfileInit__factory(signer).deploy();
     }
@@ -30,9 +30,9 @@ export function baseContractsDeployment$(
   );
 
   const baseContractDeployment$ = baseContractsToDeploy$.pipe(
-    switchMap(([shouldDeployLSP3BaseContract, shouldDeployUniversalReceiverBaseContract]) => {
+    switchMap(([shouldDeployUPBaseContract, shouldDeployUniversalReceiverBaseContract]) => {
       return merge(
-        shouldDeployLSP3BaseContract ? lsp3AccountBaseContractDeploymentReceipt$ : EMPTY,
+        shouldDeployUPBaseContract ? erc725AccountBaseContractDeploymentReceipt$ : EMPTY,
         shouldDeployUniversalReceiverBaseContract
           ? universalReceiverBaseContractDeploymentReceipt$
           : EMPTY
@@ -59,26 +59,26 @@ function deployBaseContract$(contractName: ContractNames, deployContractFunction
 }
 
 export function getBaseContractAddresses$(
-  defaultLSP3BaseContractAddress: string,
+  defaultUPBaseContractAddress: string,
   defaultUniversalReceiverBaseContractAddress: string,
   defaultBaseContractByteCode$: Observable<[string, string]>,
   signer: Signer,
   contractDeploymentOptions?: ContractDeploymentOptions
 ) {
-  const providedLSP3BaseContractAddress = contractDeploymentOptions?.libAddresses?.lsp3AccountInit;
+  const providedUPBaseContractAddress = contractDeploymentOptions?.libAddresses?.erc725AccountInit;
   const providedUniversalReceiverContractAddress =
     contractDeploymentOptions?.libAddresses?.universalReceiverDelegateInit;
 
   const baseContractsToDeploy$ = defaultBaseContractByteCode$.pipe(
-    switchMap(([defaultLSP3BaseContractByteCode, defaultUniversalReceiverBaseContractByteCode]) => {
-      const shouldDeployLSP3BaseContract =
-        !providedLSP3BaseContractAddress && defaultLSP3BaseContractByteCode === '0x';
+    switchMap(([defaultUPBaseContractByteCode, defaultUniversalReceiverBaseContractByteCode]) => {
+      const shouldDeployUPBaseContract =
+        !providedUPBaseContractAddress && defaultUPBaseContractByteCode === '0x';
 
       const shouldDeployUniversalReceiverBaseContract =
         !providedUniversalReceiverContractAddress &&
         defaultUniversalReceiverBaseContractByteCode === '0x';
 
-      return of([shouldDeployLSP3BaseContract, shouldDeployUniversalReceiverBaseContract]);
+      return of([shouldDeployUPBaseContract, shouldDeployUniversalReceiverBaseContract]);
     })
   );
 
@@ -88,7 +88,7 @@ export function getBaseContractAddresses$(
   );
 
   const baseContractAddresses = {
-    [ContractNames.LSP3_ACCOUNT]: providedLSP3BaseContractAddress ?? defaultLSP3BaseContractAddress,
+    [ContractNames.ERC725_Account]: providedUPBaseContractAddress ?? defaultUPBaseContractAddress,
     [ContractNames.UNIVERSAL_RECEIVER]:
       providedUniversalReceiverContractAddress ?? defaultUniversalReceiverBaseContractAddress,
   };
