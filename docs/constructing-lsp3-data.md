@@ -32,7 +32,7 @@ const myUniversalProfileData = {
         },
     ],
     tags: ['Fashion', 'Design'],
-    links: ['www.my-website.com'],
+    links: [{ title: "My Website", url: "www.my-website.com" }],
 },
 ```
 
@@ -50,7 +50,7 @@ const myUniversalProfileData = {
         profileImage: myLocalFile,
         backgroundImage: myLocalFile,
         tags: ['Fashion', 'Design'],
-        links: ['www.my-website.com'],
+        links: [{ title: "My Website", url: "www.my-website.com" }],
     },
 <script/>
 ```
