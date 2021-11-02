@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.2](https://github.com/lukso-network/tools-lspFactory/compare/v1.0.2-alpha.8...v1.1.2) (2021-11-02)
+
+
+### Bug Fixes
+
+* npm publish add .json file ([#15](https://github.com/lukso-network/tools-lspFactory/issues/15)) ([ab52949](https://github.com/lukso-network/tools-lspFactory/commit/ab529499b231a9fcf6d44edde6c592192832646d))
+* setData tx ([#17](https://github.com/lukso-network/tools-lspFactory/issues/17)) ([b5b7cd7](https://github.com/lukso-network/tools-lspFactory/commit/b5b7cd79d11212bad61b1f8bcda63dec24ea4294))
+
 ### 1.1.1 (2021-11-02)
 
 
