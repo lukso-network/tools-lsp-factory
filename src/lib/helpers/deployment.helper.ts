@@ -62,7 +62,10 @@ export function initialize(
     switchMap(async (result) => {
       const contract = await factory.attach(result.receipt.contractAddress);
       const initializeParams = await initArguments(result);
-      const transaction = await contract.initialize(...initializeParams, { gasLimit: 3_000_000 });
+      const transaction = await contract.initialize(...initializeParams, {
+        gasLimit: 3_000_000,
+        gasPrice: 10_000_000_000,
+      });
       return {
         type: result.type,
         contractName: result.contractName,

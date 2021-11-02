@@ -45,8 +45,8 @@ export function accountDeployment$(
   signer: Signer,
   controllerAddresses: string[],
   baseContractAddresses$: Observable<{
-    LSP3Account: string;
-    UniversalReceiverDelegate: string;
+    [ContractNames.ERC725_Account]: string;
+    [ContractNames.UNIVERSAL_RECEIVER]: string;
   }>
 ) {
   return baseContractAddresses$.pipe(
@@ -54,7 +54,7 @@ export function accountDeployment$(
       return accountDeploymentWithBaseContractAddress$(
         signer,
         controllerAddresses,
-        baseContractAddresses.LSP3Account
+        baseContractAddresses.ERC725Account
       );
     }),
     shareReplay()
@@ -103,7 +103,7 @@ async function deployLSP3Account(
 
   return baseContractAddress
     ? deployProxyContract(deploymentFunction, signer)
-    : deployContract(deploymentFunction, ContractNames.LSP3_ACCOUNT);
+    : deployContract(deploymentFunction, ContractNames.ERC725_Account);
 }
 
 export async function deployProxyContract(
@@ -121,12 +121,12 @@ export async function deployProxyContract(
     const transaction = deployedProxy.deployTransaction;
     return {
       type: DeploymentType.PROXY,
-      contractName: ContractNames.LSP3_ACCOUNT,
+      contractName: ContractNames.ERC725_Account,
       status: DeploymentStatus.PENDING,
       transaction,
     };
   } catch (error) {
-    console.error(`Error when deploying ${ContractNames.LSP3_ACCOUNT}`, error);
+    console.error(`Error when deploying ${ContractNames.ERC725_Account}`, error);
     throw error;
   }
 }
@@ -252,7 +252,7 @@ export async function setData(
 
   return {
     type: DeploymentType.TRANSACTION,
-    contractName: ContractNames.LSP3_ACCOUNT,
+    contractName: ContractNames.ERC725_Account,
     functionName: 'setData',
     status: DeploymentStatus.PENDING,
     transaction,
@@ -300,7 +300,7 @@ export async function transferOwnership(
     return {
       type: DeploymentType.TRANSACTION,
       status: DeploymentStatus.PENDING,
-      contractName: ContractNames.LSP3_ACCOUNT,
+      contractName: ContractNames.ERC725_Account,
       functionName: 'transferOwnership',
       transaction,
     };

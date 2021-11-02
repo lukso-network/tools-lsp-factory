@@ -53,8 +53,10 @@ export class LSP3UniversalProfile {
       : null;
 
     // 0 > Check for existing base contracts and deploy
-    const defaultLSP3BaseContractAddress =
-      contractVersions[this.options.chainId]?.baseContracts?.LSP3Account[DEFAULT_CONTRACT_VERSION];
+    const defaultUPBaseContractAddress =
+      contractVersions[this.options.chainId]?.baseContracts?.ERC725Account[
+        DEFAULT_CONTRACT_VERSION
+      ];
     const defaultUniversalReceiverBaseContractAddress =
       contractVersions[this.options.chainId]?.baseContracts?.UniversalReceiverDelegate[
         DEFAULT_CONTRACT_VERSION
@@ -62,7 +64,7 @@ export class LSP3UniversalProfile {
 
     const defaultBaseContractByteCode$ = forkJoin([
       this.getDeployedByteCode(
-        defaultLSP3BaseContractAddress ?? '0x0000000000000000000000000000000000000000'
+        defaultUPBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
       ),
       this.getDeployedByteCode(
         defaultUniversalReceiverBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
@@ -70,7 +72,7 @@ export class LSP3UniversalProfile {
     ]);
 
     const baseContractAddresses$ = getBaseContractAddresses$(
-      defaultLSP3BaseContractAddress,
+      defaultUPBaseContractAddress,
       defaultUniversalReceiverBaseContractAddress,
       defaultBaseContractByteCode$,
       this.signer,

@@ -26,8 +26,8 @@ export function universalReceiverDelegateDeployment$(
   signer: Signer,
   accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
   baseContractDeployment$: Observable<{
-    LSP3Account: string;
-    UniversalReceiverDelegate: string;
+    [ContractNames.ERC725_Account]: string;
+    [ContractNames.UNIVERSAL_RECEIVER]: string;
   }>
 ) {
   return baseContractDeployment$.pipe(
