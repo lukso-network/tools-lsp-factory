@@ -2,7 +2,7 @@
 
 <p align="center">
  <h2 align="center"><strong>@lukso/lsp-factory.js</strong></h2>
- <p align="center">Helper Library to allow simple deployments of <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-3-UniversalProfile.md">LSP3UniversalProfiles</a> and <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-4-DigitalCertificate.md">LSP4DigitalCertificates</a>.</p>
+ <p align="center">Helper Library to allow simple deployments of <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-0-ERC725Account.md">UniversalProfiles</a> and <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-4-DigitalCertificate.md">LSP7</a> and <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-8-IdentifiableDigitalAsset.md">LSP8 </a>Digital Assets.</p>
 </p>
 
 <p align="center">
@@ -23,20 +23,24 @@ npm install @lukso/lsp-factory.js
 ```javascript
 import { LSPFactory } from "@lukso/lsp-factory.js";
 
-const signer = '0x...' // Private key of the controlling account
-const provider = "https://rpc.l14.lukso.network"
+const deployKey = '0x...' // Private key of the account which will deploy UPs
+const provider = "https://rpc.l14.lukso.network" // RPC url used to connect to the network
+const chainId = 22 // Chain Id of the network you want to connect to
 
-const lspFactory = new LSPFactory(signer, provider);
+const lspFactory = new LSPFactory(provider, {
+  deployKey,
+  chainId
+});
 ```
 
 # Usage
 
-## Deploying an LSP3 Account (Universal Profile)
+## Deploying an ERC725Account (Universal Profile)
 
 ```javascript
 // Deploy LSP3 Account
 const myContracts = await lspFactory.LSP3UniversalProfile.deploy({
-    controllerAddresses: [web3.eth.accounts.wallet[0].address],
+    controllerAddresses: ['0x...'], // Address which will controll the UP
     lsp3Profile: {
       json: {
         LSP3Profile: {
@@ -61,7 +65,7 @@ const myContracts = await lspFactory.LSP3UniversalProfile.deploy({
             },
           ],
           tags: ['Fashion', 'Design'],
-          links: ['www.my-website.com'],
+          links: [{ title: "My Website", url: "www.my-website.com" }],
         },
       },
       url: "",
