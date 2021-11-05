@@ -17,8 +17,10 @@ export function baseContractsDeployment$(
 ): Observable<DeploymentEventContract> {
   const erc725AccountBaseContractDeploymentReceipt$ = deployBaseContract$(
     ContractNames.ERC725_Account,
-    () => {
-      return new UniversalProfileInit__factory(signer).deploy();
+    async () => {
+      const universalProfileInit = await new UniversalProfileInit__factory(signer).deploy();
+      await universalProfileInit.initialize(await signer.getAddress());
+      return universalProfileInit
     }
   );
 
