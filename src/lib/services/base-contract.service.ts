@@ -11,7 +11,7 @@ import {
   UniversalProfileInit__factory,
   UniversalReceiverDelegateInit__factory,
 } from '../..';
-import { GAS_PRICE } from '../helpers/config.helper';
+import { GAS_PRICE, NULL_ADDRESS } from '../helpers/config.helper';
 import { deployBaseContract, waitForReceipt } from '../helpers/deployment.helper';
 import { ContractNames as DigitalAssetContractNames } from '../interfaces/digital-asset-deployment';
 
@@ -25,7 +25,7 @@ export function universalProfileBaseContractsDeployment$(
       const universalProfileInit = await new UniversalProfileInit__factory(signer).deploy({
         gasPrice: GAS_PRICE,
       });
-      await universalProfileInit.initialize(await signer.getAddress());
+      await universalProfileInit.initialize(NULL_ADDRESS);
       return universalProfileInit;
     }
   );
@@ -60,7 +60,7 @@ export function digitalAssetBaseContractsDeployment$(
     DigitalAssetContractNames.LSP7_DIGITAL_ASSET,
     async () => {
       const lsp7Init = await new LSP7Init__factory(signer).deploy({ gasPrice: GAS_PRICE });
-      await lsp7Init['initialize(address)'](await signer.getAddress());
+      await lsp7Init['initialize(address)'](NULL_ADDRESS);
       return lsp7Init;
     }
   );
@@ -69,7 +69,7 @@ export function digitalAssetBaseContractsDeployment$(
     DigitalAssetContractNames.LSP8_DIGITAL_ASSET,
     async () => {
       const lsp8Init = await new LSP8Init__factory(signer).deploy({ gasPrice: GAS_PRICE });
-      await lsp8Init['initialize(address)'](await signer.getAddress());
+      await lsp8Init['initialize(address)'](NULL_ADDRESS);
       return lsp8Init;
     }
   );

@@ -5,16 +5,16 @@
         "networkId": 22,
         "baseContracts": {
             "ERC725Account": {
-                "0.0.1": "0x0EC6e61596E364f564c9629Cf1e694b624C92fCF"
+                "0.0.1": "0xe6009BCbC6cb1046E72db3b50Ff0b9F3C94Db2fB"
             },
             "UniversalReceiverDelegate": {
                 "0.0.1": "0x6533158b042775e2FdFeF3cA1a782EFDbB8EB9b1"
             },
             "LSP7DigitalAsset": {
-                "0.0.1": "0xcC2DBd7ff82203C300927bF637899AAFDc1cECD3"
+                "0.0.1": "0xaF9a777A58ed25F15e96C93A96fe0dA924af8E6C"
             },
             "LSP8IdentifiableDigitalAsset": {
-                "0.0.1": "0xe645970268793B3E272D323c719BF8c11bf9076d"
+                "0.0.1": "0x8b08e6F3349ABF23F180DfAE72A3F2B5Ec7Df767"
             }
         }
     }
