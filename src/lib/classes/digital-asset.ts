@@ -1,5 +1,5 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { lastValueFrom, scan } from 'rxjs';
+import { lastValueFrom, of, scan } from 'rxjs';
 
 import versions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
@@ -10,6 +10,7 @@ import {
   DigitalAssetDeploymentOptions,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
+import { digitalAssetBaseContractsDeployment$ } from '../services/base-contract.service';
 import {
   lsp7DigitalAssetDeployment$,
   lsp8IdentifiableDigitalAssetDeployment$,
@@ -87,6 +88,30 @@ export class DigitalAsset {
       digitalAssetDeploymentOptions,
       ContractDeploymentOptions
     ).pipe(
+      scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
+        if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
+          accumulator[deploymentEvent.contractName] = {
+            address: deploymentEvent.receipt.contractAddress,
+            receipt: deploymentEvent.receipt,
+          };
+        }
+
+        return accumulator;
+      }, {})
+    );
+
+    return lastValueFrom(deployments$);
+  }
+
+  deployBaseContracts() {
+    const baseContractsToDeploy$ = of([true, true] as [boolean, boolean]);
+
+    const baseContracts$ = digitalAssetBaseContractsDeployment$(
+      this.signer,
+      baseContractsToDeploy$
+    );
+
+    const deployments$ = baseContracts$.pipe(
       scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
         if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
           accumulator[deploymentEvent.contractName] = {

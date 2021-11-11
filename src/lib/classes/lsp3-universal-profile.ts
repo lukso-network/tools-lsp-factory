@@ -16,8 +16,8 @@ import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import { ContractDeploymentOptions, DeployedContracts } from '../interfaces/profile-deployment';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
 import {
-  baseContractsDeployment$,
-  getBaseContractAddresses$,
+  getUniversalProfileBaseContractAddresses$,
+  universalProfileBaseContractsDeployment$,
 } from '../services/base-contract.service';
 import { keyManagerDeployment$ } from '../services/key-manager.service';
 
@@ -71,7 +71,7 @@ export class LSP3UniversalProfile {
       ),
     ]);
 
-    const baseContractAddresses$ = getBaseContractAddresses$(
+    const baseContractAddresses$ = getUniversalProfileBaseContractAddresses$(
       defaultUPBaseContractAddress,
       defaultUniversalReceiverBaseContractAddress,
       defaultBaseContractByteCode$,
@@ -152,7 +152,10 @@ export class LSP3UniversalProfile {
   deployBaseContracts() {
     const baseContractsToDeploy$ = of([true, true] as [boolean, boolean]);
 
-    const baseContracts$ = baseContractsDeployment$(this.signer, baseContractsToDeploy$);
+    const baseContracts$ = universalProfileBaseContractsDeployment$(
+      this.signer,
+      baseContractsToDeploy$
+    );
 
     const deployments$ = baseContracts$.pipe(
       scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
