@@ -4,28 +4,36 @@ import { defaultIfEmpty, shareReplay, switchMap, tap } from 'rxjs/operators';
 
 import {
   ContractDeploymentOptions,
-  ContractNames,
   DeploymentEventContract,
+  LSP7Init__factory,
+  LSP8Init__factory,
+  ContractNames as UniversalProfileContractNames,
   UniversalProfileInit__factory,
   UniversalReceiverDelegateInit__factory,
 } from '../..';
+import { GAS_PRICE, NULL_ADDRESS } from '../helpers/config.helper';
 import { deployBaseContract, waitForReceipt } from '../helpers/deployment.helper';
+import { ContractNames as DigitalAssetContractNames } from '../interfaces/digital-asset-deployment';
 
-export function baseContractsDeployment$(
+export function universalProfileBaseContractsDeployment$(
   signer: Signer,
   baseContractsToDeploy$: Observable<[boolean, boolean]>
 ): Observable<DeploymentEventContract> {
   const erc725AccountBaseContractDeploymentReceipt$ = deployBaseContract$(
-    ContractNames.ERC725_Account,
-    () => {
-      return new UniversalProfileInit__factory(signer).deploy();
+    UniversalProfileContractNames.ERC725_Account,
+    async () => {
+      const universalProfileInit = await new UniversalProfileInit__factory(signer).deploy({
+        gasPrice: GAS_PRICE,
+      });
+      await universalProfileInit.initialize(NULL_ADDRESS);
+      return universalProfileInit;
     }
   );
 
   const universalReceiverBaseContractDeploymentReceipt$ = deployBaseContract$(
-    ContractNames.UNIVERSAL_RECEIVER,
+    UniversalProfileContractNames.UNIVERSAL_RECEIVER,
     () => {
-      return new UniversalReceiverDelegateInit__factory(signer).deploy();
+      return new UniversalReceiverDelegateInit__factory(signer).deploy({ gasPrice: GAS_PRICE });
     }
   );
 
@@ -44,7 +52,45 @@ export function baseContractsDeployment$(
   return baseContractDeployment$;
 }
 
-function deployBaseContract$(contractName: ContractNames, deployContractFunction) {
+export function digitalAssetBaseContractsDeployment$(
+  signer: Signer,
+  baseContractsToDeploy$: Observable<[boolean, boolean]>
+): Observable<DeploymentEventContract> {
+  const lsp7DigitalAssetBaseContractReceipt$ = deployBaseContract$(
+    DigitalAssetContractNames.LSP7_DIGITAL_ASSET,
+    async () => {
+      const lsp7Init = await new LSP7Init__factory(signer).deploy({ gasPrice: GAS_PRICE });
+      await lsp7Init['initialize(address)'](NULL_ADDRESS);
+      return lsp7Init;
+    }
+  );
+
+  const lsp8IdentifiableDigitalAssetReceipt$ = deployBaseContract$(
+    DigitalAssetContractNames.LSP8_DIGITAL_ASSET,
+    async () => {
+      const lsp8Init = await new LSP8Init__factory(signer).deploy({ gasPrice: GAS_PRICE });
+      await lsp8Init['initialize(address)'](NULL_ADDRESS);
+      return lsp8Init;
+    }
+  );
+
+  const baseContractDeployment$ = baseContractsToDeploy$.pipe(
+    switchMap(([shouldDeployLSP7, shouldDeployLSP8]) => {
+      return merge(
+        shouldDeployLSP7 ? lsp7DigitalAssetBaseContractReceipt$ : EMPTY,
+        shouldDeployLSP8 ? lsp8IdentifiableDigitalAssetReceipt$ : EMPTY
+      );
+    }),
+    shareReplay()
+  );
+
+  return baseContractDeployment$;
+}
+
+function deployBaseContract$(
+  contractName: UniversalProfileContractNames | DigitalAssetContractNames,
+  deployContractFunction
+) {
   const deployContract = () => {
     return deployBaseContract(deployContractFunction, contractName);
   };
@@ -58,7 +104,7 @@ function deployBaseContract$(contractName: ContractNames, deployContractFunction
   return baseContractDeploymentReceipt$;
 }
 
-export function getBaseContractAddresses$(
+export function getUniversalProfileBaseContractAddresses$(
   defaultUPBaseContractAddress: string,
   defaultUniversalReceiverBaseContractAddress: string,
   defaultBaseContractByteCode$: Observable<[string, string]>,
@@ -82,14 +128,15 @@ export function getBaseContractAddresses$(
     })
   );
 
-  const baseContracts$ = baseContractsDeployment$(
+  const baseContracts$ = universalProfileBaseContractsDeployment$(
     signer,
     baseContractsToDeploy$ as Observable<[boolean, boolean]>
   );
 
   const baseContractAddresses = {
-    [ContractNames.ERC725_Account]: providedUPBaseContractAddress ?? defaultUPBaseContractAddress,
-    [ContractNames.UNIVERSAL_RECEIVER]:
+    [UniversalProfileContractNames.ERC725_Account]:
+      providedUPBaseContractAddress ?? defaultUPBaseContractAddress,
+    [UniversalProfileContractNames.UNIVERSAL_RECEIVER]:
       providedUniversalReceiverContractAddress ?? defaultUniversalReceiverBaseContractAddress,
   };
 
