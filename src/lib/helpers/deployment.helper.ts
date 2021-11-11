@@ -12,6 +12,8 @@ import {
 } from '../interfaces/deployment-events';
 import { ContractDeploymentOptions } from '../interfaces/profile-deployment';
 
+import { GAS_PRICE } from './config.helper';
+
 /**
  *
  *
@@ -64,7 +66,7 @@ export function initialize(
       const initializeParams = await initArguments(result);
       const transaction = await contract.initialize(...initializeParams, {
         gasLimit: 3_000_000,
-        gasPrice: 10_000_000_000,
+        gasPrice: GAS_PRICE,
       });
       return {
         type: result.type,
