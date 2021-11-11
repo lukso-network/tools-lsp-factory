@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/lukso-network/tools-lsp-factory/compare/v1.0.2-alpha.8...v1.2.0) (2021-11-11)
+
+
+### Features
+
+* init base contracts on deploy ([#24](https://github.com/lukso-network/tools-lsp-factory/issues/24)) ([63821da](https://github.com/lukso-network/tools-lsp-factory/commit/63821da95684c68555075004754ffdde1a3da4b4))
+
+
+### Bug Fixes
+
+* add missing types files in build ([#25](https://github.com/lukso-network/tools-lsp-factory/issues/25)) ([01eb05d](https://github.com/lukso-network/tools-lsp-factory/commit/01eb05d724ea48729646cf165efa01812cc77016)), closes [/github.com/dethcrypto/TypeChain/issues/430#issuecomment-964314162](https://github.com/lukso-network//github.com/dethcrypto/TypeChain/issues/430/issues/issuecomment-964314162)
+* npm publish add .json file ([#15](https://github.com/lukso-network/tools-lsp-factory/issues/15)) ([ab52949](https://github.com/lukso-network/tools-lsp-factory/commit/ab529499b231a9fcf6d44edde6c592192832646d))
+* setData tx ([#17](https://github.com/lukso-network/tools-lsp-factory/issues/17)) ([b5b7cd7](https://github.com/lukso-network/tools-lsp-factory/commit/b5b7cd79d11212bad61b1f8bcda63dec24ea4294))
+
 ### [1.1.2](https://github.com/lukso-network/tools-lspFactory/compare/v1.0.2-alpha.8...v1.1.2) (2021-11-02)
 
 
