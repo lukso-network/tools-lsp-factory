@@ -25,6 +25,7 @@ import {
   accountDeployment$,
   getLsp3ProfileDataUrl,
   getTransferOwnershipTransaction$,
+  isLSP3ProfileDataEncoded,
   setDataTransaction$,
 } from './../services/lsp3-account.service';
 import { universalReceiverDelegateDeployment$ } from './../services/universal-receiver.service';
@@ -48,9 +49,12 @@ export class LSP3UniversalProfile {
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
     // -1 > Run IPFS upload process in parallel with contract deployment
-    const lsp3Profile = profileDeploymentOptions.lsp3Profile
-      ? getLsp3ProfileDataUrl(profileDeploymentOptions.lsp3Profile)
-      : null;
+    let lsp3Profile: string | ProfileDataBeforeUpload | Promise<LSP3ProfileDataForEncoding> =
+      profileDeploymentOptions.lsp3Profile;
+
+    if (typeof lsp3Profile !== 'string' || !isLSP3ProfileDataEncoded(lsp3Profile)) {
+      lsp3Profile = getLsp3ProfileDataUrl(lsp3Profile);
+    }
 
     // 0 > Check for existing base contracts and deploy
     const defaultUPBaseContractAddress =
