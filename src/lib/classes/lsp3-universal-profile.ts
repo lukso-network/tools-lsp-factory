@@ -77,7 +77,7 @@ export class LSP3UniversalProfile {
       contractDeploymentOptions
     );
 
-    const controllerAddresses = profileDeploymentOptions.controllingAccounts.map((controller) => {
+    const controllerAddresses = profileDeploymentOptions.controllerAddresses.map((controller) => {
       return typeof controller === 'string' ? controller : controller.address;
     });
 
@@ -102,7 +102,7 @@ export class LSP3UniversalProfile {
       this.signer,
       account$,
       universalReceiver$,
-      profileDeploymentOptions.controllingAccounts,
+      profileDeploymentOptions.controllerAddresses,
       lsp3Profile$
     );
 

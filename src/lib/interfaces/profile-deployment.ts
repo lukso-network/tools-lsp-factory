@@ -18,7 +18,7 @@ export interface ControllerOptions {
  * TBD
  */
 export interface ProfileDeploymentOptions {
-  controllingAccounts: (string | ControllerOptions)[];
+  controllerAddresses: (string | ControllerOptions)[];
   lsp3Profile?: ProfileDataBeforeUpload | string;
   baseContractAddresses?: {
     erc725Account?: string;
