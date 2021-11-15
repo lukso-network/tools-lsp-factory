@@ -53,7 +53,7 @@ async function deployLSP7DigitalAsset(
       : await new LSP7__factory(signer).deploy(
           digitalAssetDeploymentOptions.name,
           digitalAssetDeploymentOptions.symbol,
-          digitalAssetDeploymentOptions.ownerAddress,
+          digitalAssetDeploymentOptions.controllerAddress,
           digitalAssetDeploymentOptions.isNFT
         );
   };
@@ -73,7 +73,7 @@ function initializeLSP7Proxy(
   digitalAssetDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
   digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions
 ) {
-  const { name, symbol, ownerAddress, isNFT } = digitalAssetDeploymentOptions;
+  const { name, symbol, controllerAddress, isNFT } = digitalAssetDeploymentOptions;
 
   const initialize$ = digitalAssetDeploymentReceipt$.pipe(
     takeLast(1),
@@ -82,7 +82,7 @@ function initializeLSP7Proxy(
       const transaction = await contract[`initialize(string,string,address,bool)`](
         name,
         symbol,
-        ownerAddress,
+        controllerAddress,
         isNFT,
         {
           gasLimit: 3_000_000,
@@ -141,7 +141,7 @@ async function deployLSP8IdentifiableDigitalAsset(
       : await new LSP8__factory(signer).deploy(
           digitalAssetDeploymentOptions.name,
           digitalAssetDeploymentOptions.symbol,
-          digitalAssetDeploymentOptions.ownerAddress
+          digitalAssetDeploymentOptions.controllerAddress
         );
   };
 
@@ -160,7 +160,7 @@ function initializeLSP8Proxy(
   digitalAssetDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions
 ) {
-  const { name, symbol, ownerAddress } = digitalAssetDeploymentOptions;
+  const { name, symbol, controllerAddress } = digitalAssetDeploymentOptions;
 
   const initialize$ = digitalAssetDeploymentReceipt$.pipe(
     takeLast(1),
@@ -169,7 +169,7 @@ function initializeLSP8Proxy(
       const transaction = await contract[`initialize(string,string,address)`](
         name,
         symbol,
-        ownerAddress,
+        controllerAddress,
         {
           gasLimit: 3_000_000,
         }

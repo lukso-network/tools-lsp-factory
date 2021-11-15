@@ -6,7 +6,7 @@ export enum ContractNames {
 }
 
 export interface DigitalAssetDeploymentOptions {
-  ownerAddress: string;
+  controllerAddress: string;
   name: string;
   symbol: string;
 }
