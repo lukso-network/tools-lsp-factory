@@ -1,7 +1,7 @@
 import { TransactionReceipt } from '@ethersproject/providers';
 import axios from 'axios';
 import { BytesLike, Contract, ContractFactory, Signer } from 'ethers';
-import { concat, defer, EMPTY, forkJoin, Observable } from 'rxjs';
+import { concat, defer, EMPTY, forkJoin, from, Observable, of } from 'rxjs';
 import { shareReplay, switchMap } from 'rxjs/operators';
 
 import {
@@ -150,11 +150,15 @@ export function setDataTransaction$(
   account$: Observable<LSP3AccountDeploymentEvent>,
   universalReceiver$: Observable<UniversalReveiverDeploymentEvent>,
   controllerAddresses: (string | ControllerOptions)[],
-  lsp3ProfileData?: Promise<LSP3ProfileDataForEncoding> | string
+  lsp3ProfileData$: Observable<LSP3ProfileDataForEncoding | string | null>
 ) {
-  const setDataTransaction$ = forkJoin([account$, universalReceiver$]).pipe(
+  const setDataTransaction$ = forkJoin([account$, universalReceiver$, lsp3ProfileData$]).pipe(
     switchMap(
-      ([{ receipt: lsp3AccountReceipt }, { receipt: universalReceiverDelegateReceipt }]) => {
+      ([
+        { receipt: lsp3AccountReceipt },
+        { receipt: universalReceiverDelegateReceipt },
+        lsp3ProfileData,
+      ]) => {
         return setData(
           signer,
           lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to,
@@ -181,9 +185,9 @@ export async function getLsp3ProfileDataUrl(
 
   if (typeof lsp3Profile === 'string') {
     let lsp3JsonUrl = lsp3Profile;
-    const isGenericIPFSUrl = lsp3Profile.startsWith('ipfs://');
+    const isIPFSUrl = lsp3Profile.startsWith('ipfs://');
 
-    if (isGenericIPFSUrl) {
+    if (isIPFSUrl) {
       lsp3JsonUrl = 'https://ipfs.lukso.network/ipfs/' + lsp3Profile.split('/').at(-1); // TODO: Allow custom IPFS upload location
     }
 
@@ -209,6 +213,18 @@ export function isLSP3ProfileDataEncoded(lsp3Profile: string): boolean {
   return false;
 }
 
+export function lsp3ProfileUpload$(lsp3Profile: ProfileDataBeforeUpload | string) {
+  let lsp3Profile$: Observable<LSP3ProfileDataForEncoding | string>;
+
+  if (typeof lsp3Profile !== 'string' || !isLSP3ProfileDataEncoded(lsp3Profile)) {
+    lsp3Profile$ = lsp3Profile ? from(getLsp3ProfileDataUrl(lsp3Profile)) : of(null);
+  } else {
+    lsp3Profile$ = of(lsp3Profile);
+  }
+
+  return lsp3Profile$;
+}
+
 /**
  * TODO: docs
  */
@@ -217,13 +233,11 @@ export async function setData(
   erc725AccountAddress: string,
   universalReceiverDelegateAddress: string,
   controllerAddresses: (string | ControllerOptions)[],
-  lsp3ProfileData?: Promise<LSP3ProfileDataForEncoding> | string
+  lsp3Profile?: LSP3ProfileDataForEncoding | string
 ): Promise<DeploymentEventTransaction> {
-  const lsp3Profile = await lsp3ProfileData;
-
   let encodedLSP3Profile;
-  if (typeof lsp3Profile !== 'string') {
-    const encodedDataResult = lsp3ProfileData
+  if (lsp3Profile && typeof lsp3Profile !== 'string') {
+    const encodedDataResult = lsp3Profile
       ? encodeLSP3Profile(lsp3Profile.profile, lsp3Profile.url)
       : null;
 
