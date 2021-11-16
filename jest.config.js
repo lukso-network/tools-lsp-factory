@@ -6,9 +6,6 @@ module.exports = async () => {
         'esbuild-jest',
         {
           sourcemap: true,
-          loaders: {
-            '.spec.ts': 'ts',
-          },
         },
       ],
     },

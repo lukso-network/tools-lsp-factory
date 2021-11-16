@@ -23,8 +23,8 @@ import { keyManagerDeployment$ } from '../services/key-manager.service';
 
 import {
   accountDeployment$,
-  getLsp3ProfileDataUrl,
   getTransferOwnershipTransaction$,
+  lsp3ProfileUpload$,
   setDataTransaction$,
 } from './../services/lsp3-account.service';
 import { universalReceiverDelegateDeployment$ } from './../services/universal-receiver.service';
@@ -48,9 +48,7 @@ export class LSP3UniversalProfile {
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
     // -1 > Run IPFS upload process in parallel with contract deployment
-    const lsp3Profile = profileDeploymentOptions.lsp3Profile
-      ? getLsp3ProfileDataUrl(profileDeploymentOptions.lsp3Profile)
-      : null;
+    const lsp3Profile$ = lsp3ProfileUpload$(profileDeploymentOptions.lsp3Profile);
 
     // 0 > Check for existing base contracts and deploy
     const defaultUPBaseContractAddress =
@@ -105,7 +103,7 @@ export class LSP3UniversalProfile {
       account$,
       universalReceiver$,
       profileDeploymentOptions.controllingAccounts,
-      lsp3Profile
+      lsp3Profile$
     );
 
     // 5 > transfersOwnership to KeyManager
@@ -131,6 +129,7 @@ export class LSP3UniversalProfile {
       contractDeploymentOptions
     ).pipe(
       scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
+        console.log(deploymentEvent);
         if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
           accumulator[deploymentEvent.contractName] = {
             address: deploymentEvent.receipt.contractAddress,
