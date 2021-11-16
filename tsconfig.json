@@ -41,7 +41,7 @@
     "types": ["node", "jest"],
     "typeRoots": ["node_modules/@types", "types"]
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "types/ethers-v5/**/*.ts"],
   "exclude": ["node_modules/**", "**/*.spec.ts"],
   "compileOnSave": false
 }

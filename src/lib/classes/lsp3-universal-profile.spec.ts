@@ -65,4 +65,32 @@ describe('LSP3UniversalProfile', () => {
       },
     });
   });
+  it.skip('should deploy and set LSP3Profile data', async () => {
+    const myLSPFactory = new LSPFactory(
+      provider,
+      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+    );
+
+    const contracts = await myLSPFactory.LSP3UniversalProfile.deploy(
+      {
+        controllingAccounts: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
+        lsp3Profile: lsp3ProfileJson,
+      },
+      {
+        libAddresses: {
+          erc725AccountInit: baseContracts.universalProfile.address,
+          universalReceiverDelegateInit: baseContracts.UniversalReceiverDelegate?.address,
+        },
+      }
+    );
+
+    const ownerAddress = await contracts.ERC725Account.owner();
+    expect(ownerAddress).toEqual('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
+
+    const data = await contracts.ERC725Account.getData([
+      '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+    ]);
+
+    expect(data[0].startsWith('0x6f357c6a')).toBe(true);
+  });
 });
