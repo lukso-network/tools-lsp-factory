@@ -3,10 +3,10 @@ import { Contract } from '@ethersproject/contracts';
 import { NonceManager } from '@ethersproject/experimental';
 
 import {
+  LSP1UniversalReceiverDelegateInit,
+  LSP1UniversalReceiverDelegateInit__factory,
   UniversalProfileInit,
   UniversalProfileInit__factory,
-  UniversalReceiverDelegateInit,
-  UniversalReceiverDelegateInit__factory,
 } from '../../';
 import { getProxyByteCode } from '../helpers/deployment.helper';
 
@@ -14,7 +14,7 @@ export class ProxyDeployer {
   signer: Signer;
   baseContracts: {
     universalProfile: UniversalProfileInit;
-    universalReceiverDelegate: UniversalReceiverDelegateInit;
+    universalReceiverDelegate: LSP1UniversalReceiverDelegateInit;
   };
 
   constructor(signer: Signer) {
@@ -23,7 +23,7 @@ export class ProxyDeployer {
 
   async deployBaseContracts() {
     const universalProfile = await new UniversalProfileInit__factory(this.signer).deploy();
-    const universalReceiverDelegate = await new UniversalReceiverDelegateInit__factory(
+    const universalReceiverDelegate = await new LSP1UniversalReceiverDelegateInit__factory(
       this.signer
     ).deploy();
 

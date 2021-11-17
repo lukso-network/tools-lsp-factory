@@ -2,7 +2,7 @@ import { Signer } from 'ethers';
 import { concat, EMPTY, Observable } from 'rxjs';
 import { shareReplay, switchMap, takeLast } from 'rxjs/operators';
 
-import { KeyManager__factory } from '../..';
+import { LSP6KeyManager__factory } from '../..';
 import { deployContract, waitForReceipt } from '../helpers/deployment.helper';
 import { ContractNames, DeploymentEventContract } from '../interfaces';
 
@@ -55,7 +55,7 @@ export async function deployKeyManager(
   baseContractAddress: string
 ) {
   const deploymentFunction = async () => {
-    return await new KeyManager__factory(signer).deploy(lsp3AccountAddress, {
+    return await new LSP6KeyManager__factory(signer).deploy(lsp3AccountAddress, {
       gasLimit: 3_000_000,
     });
   };
