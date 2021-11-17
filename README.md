@@ -1,4 +1,4 @@
-# lsp-factory.js &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![npm version](https://img.shields.io/npm/v/@lukso/lsp-factory.js.svg?style=flat)](https://www.npmjs.com/package/@lukso/lsp-factory.js) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/lukso-network/tools-lsp-factory/pulls)
+# lsp-factory.js &middot; [![GitHub license](https://img.shields.io/badge/license-Apache-blue.svg)](./LICENSE) [![npm version](https://img.shields.io/npm/v/@lukso/lsp-factory.js.svg?style=flat)](https://www.npmjs.com/package/@lukso/lsp-factory.js) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/lukso-network/tools-lsp-factory/pulls)
 
 <p align="center">
  <h2 align="center"><strong>@lukso/lsp-factory.js</strong></h2>
@@ -97,4 +97,4 @@ Please check [CONTRIBUTING](./CONTRIBUTING.md).
 
 ### License
 
-lsp-factory.js is [MIT licensed](./LICENSE).
+lsp-factory.js is [Apache 2.0 licensed](./LICENSE).
