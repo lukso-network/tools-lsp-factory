@@ -1,5 +1,5 @@
-import { KeyManager } from '../..';
-import { UniversalProfile, UniversalReceiverDelegate } from '../../';
+import { LSP6KeyManager } from '../..';
+import { LSP1UniversalReceiverDelegate, UniversalProfile } from '../../';
 
 import { ProfileDataBeforeUpload } from './lsp3-profile';
 
@@ -28,8 +28,8 @@ export interface ProfileDeploymentOptions {
 }
 export interface DeployedContracts {
   ERC725Account?: UniversalProfile;
-  KeyManager: KeyManager;
-  UniversalReceiverDelegate: UniversalReceiverDelegate;
+  KeyManager: LSP6KeyManager;
+  UniversalReceiverDelegate: LSP1UniversalReceiverDelegate;
 }
 
 export interface BaseContractAddresses {

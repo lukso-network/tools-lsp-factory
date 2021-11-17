@@ -5,11 +5,11 @@ import { defaultIfEmpty, shareReplay, switchMap, tap } from 'rxjs/operators';
 import {
   ContractDeploymentOptions,
   DeploymentEventContract,
-  LSP7Init__factory,
-  LSP8Init__factory,
+  LSP1UniversalReceiverDelegateInit__factory,
+  LSP7DigitalAssetInit__factory,
+  LSP8IdentifiableDigitalAssetInit__factory,
   ContractNames as UniversalProfileContractNames,
   UniversalProfileInit__factory,
-  UniversalReceiverDelegateInit__factory,
 } from '../..';
 import { GAS_PRICE, NULL_ADDRESS } from '../helpers/config.helper';
 import { deployBaseContract, waitForReceipt } from '../helpers/deployment.helper';
@@ -33,7 +33,7 @@ export function universalProfileBaseContractsDeployment$(
   const universalReceiverBaseContractDeploymentReceipt$ = deployBaseContract$(
     UniversalProfileContractNames.UNIVERSAL_RECEIVER,
     () => {
-      return new UniversalReceiverDelegateInit__factory(signer).deploy({ gasPrice: GAS_PRICE });
+      return new LSP1UniversalReceiverDelegateInit__factory(signer).deploy({ gasPrice: GAS_PRICE });
     }
   );
 
@@ -59,7 +59,9 @@ export function digitalAssetBaseContractsDeployment$(
   const lsp7DigitalAssetBaseContractReceipt$ = deployBaseContract$(
     DigitalAssetContractNames.LSP7_DIGITAL_ASSET,
     async () => {
-      const lsp7Init = await new LSP7Init__factory(signer).deploy({ gasPrice: GAS_PRICE });
+      const lsp7Init = await new LSP7DigitalAssetInit__factory(signer).deploy({
+        gasPrice: GAS_PRICE,
+      });
       await lsp7Init['initialize(address)'](NULL_ADDRESS);
       return lsp7Init;
     }
@@ -68,7 +70,9 @@ export function digitalAssetBaseContractsDeployment$(
   const lsp8IdentifiableDigitalAssetReceipt$ = deployBaseContract$(
     DigitalAssetContractNames.LSP8_DIGITAL_ASSET,
     async () => {
-      const lsp8Init = await new LSP8Init__factory(signer).deploy({ gasPrice: GAS_PRICE });
+      const lsp8Init = await new LSP8IdentifiableDigitalAssetInit__factory(signer).deploy({
+        gasPrice: GAS_PRICE,
+      });
       await lsp8Init['initialize(address)'](NULL_ADDRESS);
       return lsp8Init;
     }

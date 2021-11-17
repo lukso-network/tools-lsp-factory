@@ -1,7 +1,12 @@
 import { Signer } from '@ethersproject/abstract-signer';
 import { concat, EMPTY, from, Observable, shareReplay, switchMap, takeLast } from 'rxjs';
 
-import { LSP7__factory, LSP7Init__factory, LSP8__factory, LSP8Init__factory } from '../../';
+import {
+  LSP7DigitalAsset__factory,
+  LSP7DigitalAssetInit__factory,
+  LSP8IdentifiableDigitalAsset__factory,
+  LSP8IdentifiableDigitalAssetInit__factory,
+} from '../../';
 import { deployContract, deployProxyContract, waitForReceipt } from '../helpers/deployment.helper';
 import { DeploymentEventContract, DeploymentEventProxyContract } from '../interfaces';
 import {
@@ -49,8 +54,8 @@ async function deployLSP7DigitalAsset(
 ) {
   const deploymentFunction = async () => {
     return baseContractAddress
-      ? new LSP7Init__factory(signer).attach(baseContractAddress)
-      : await new LSP7__factory(signer).deploy(
+      ? new LSP7DigitalAssetInit__factory(signer).attach(baseContractAddress)
+      : await new LSP7DigitalAsset__factory(signer).deploy(
           digitalAssetDeploymentOptions.name,
           digitalAssetDeploymentOptions.symbol,
           digitalAssetDeploymentOptions.ownerAddress,
@@ -60,7 +65,7 @@ async function deployLSP7DigitalAsset(
 
   return baseContractAddress
     ? deployProxyContract(
-        LSP7Init__factory.abi,
+        LSP7DigitalAssetInit__factory.abi,
         deploymentFunction,
         ContractNames.LSP7_DIGITAL_ASSET,
         signer
@@ -78,7 +83,9 @@ function initializeLSP7Proxy(
   const initialize$ = digitalAssetDeploymentReceipt$.pipe(
     takeLast(1),
     switchMap(async (result) => {
-      const contract = await new LSP7Init__factory(signer).attach(result.receipt.contractAddress);
+      const contract = await new LSP7DigitalAssetInit__factory(signer).attach(
+        result.receipt.contractAddress
+      );
       const transaction = await contract[`initialize(string,string,address,bool)`](
         name,
         symbol,
@@ -137,8 +144,8 @@ async function deployLSP8IdentifiableDigitalAsset(
 ) {
   const deploymentFunction = async () => {
     return baseContractAddress
-      ? new LSP8Init__factory(signer).attach(baseContractAddress)
-      : await new LSP8__factory(signer).deploy(
+      ? new LSP8IdentifiableDigitalAssetInit__factory(signer).attach(baseContractAddress)
+      : await new LSP8IdentifiableDigitalAsset__factory(signer).deploy(
           digitalAssetDeploymentOptions.name,
           digitalAssetDeploymentOptions.symbol,
           digitalAssetDeploymentOptions.ownerAddress
@@ -147,7 +154,7 @@ async function deployLSP8IdentifiableDigitalAsset(
 
   return baseContractAddress
     ? deployProxyContract(
-        LSP8Init__factory.abi,
+        LSP8IdentifiableDigitalAssetInit__factory.abi,
         deploymentFunction,
         ContractNames.LSP8_DIGITAL_ASSET,
         signer
@@ -165,7 +172,9 @@ function initializeLSP8Proxy(
   const initialize$ = digitalAssetDeploymentReceipt$.pipe(
     takeLast(1),
     switchMap(async (result) => {
-      const contract = await new LSP7Init__factory(signer).attach(result.receipt.contractAddress);
+      const contract = await new LSP7DigitalAssetInit__factory(signer).attach(
+        result.receipt.contractAddress
+      );
       const transaction = await contract[`initialize(string,string,address)`](
         name,
         symbol,
