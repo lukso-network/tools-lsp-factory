@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.4](https://github.com/lukso-network/tools-lsp-factory/compare/v1.0.2-alpha.8...v1.1.4) (2021-11-18)
+
+### Bug Fixes
+
+* set UniversalReceiverDelegate key to setData ([#35](https://github.com/lukso-network/tools-lsp-factory/issues/35)) ([4a25e1c](https://github.com/lukso-network/tools-lsp-factory/commit/4a25e1c73ca85d99d289302ac91cda5d4e5100d0))
+
 ### [1.1.3](https://github.com/lukso-network/tools-lsp-factory/compare/v1.0.2-alpha.8...v1.1.3) (2021-11-17)
 
 
