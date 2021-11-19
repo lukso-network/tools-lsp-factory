@@ -1,12 +1,13 @@
 import imageCompression from 'browser-image-compression';
 import { keccak256 } from 'ethers/lib/utils';
+import imageSize from 'image-size';
 import { AddResult } from 'ipfs-core-types/src/root';
 import { ImportCandidate } from 'ipfs-core-types/src/utils';
 import { create, Options } from 'ipfs-http-client';
-import Jimp from 'jimp';
+import sharp from 'sharp';
 
 import { LSP3ProfileImage } from '../interfaces';
-import { ImageBuffer, SupportedImageBufferFormats } from '../interfaces/lsp3-profile';
+import { ImageBuffer } from '../interfaces/lsp3-profile';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
 
 export const sizes = [1800, 1024, 640, 320, 180];
@@ -25,7 +26,7 @@ export async function imageUpload(
       let imgToUpload, imgBuffer, width: number, height: number;
 
       if ('buffer' in givenFile) {
-        imgBuffer = await resizeBuffer(givenFile.buffer, givenFile.mimeType, size);
+        imgBuffer = await resizeBuffer(givenFile.buffer, size);
         height = size;
         width = size;
 
@@ -78,11 +79,18 @@ export async function prepareImageForLSP3(
   return lsp3Image;
 }
 
-async function resizeBuffer(
-  imageBuffer: Buffer,
-  format: SupportedImageBufferFormats,
-  size: number
-): Promise<Buffer> {
-  const image = await Jimp.read(imageBuffer);
-  return image.resize(size, size).getBufferAsync(format);
+async function resizeBuffer(buffer: Buffer, size: number): Promise<Buffer> {
+  const dimensions = imageSize(buffer);
+
+  let newWidth = size > dimensions.width ? dimensions.width : size;
+  let newHeight = undefined;
+
+  // Ensure dimensions are kept proportional
+  if (dimensions.width < dimensions.height) {
+    newWidth = undefined;
+    newHeight = size > dimensions.height ? dimensions.height : size;
+  }
+
+  const result = await sharp(buffer).resize({ height: newHeight, width: newWidth }).toBuffer();
+  return result;
 }

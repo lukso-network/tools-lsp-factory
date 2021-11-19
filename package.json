@@ -43,10 +43,11 @@
     "axios": "^0.23.0",
     "browser-image-compression": "^1.0.15",
     "ethers": "5.5.0",
+    "image-size": "^1.0.0",
     "ipfs-http-client": "52.0.3",
     "ipfs-utils": "8.1.6",
-    "jimp": "^0.16.1",
-    "rxjs": "^7.3.0"
+    "rxjs": "^7.3.0",
+    "sharp": "^0.29.3"
   },
   "devDependencies": {
     "@ethereum-waffle/jest": "^3.3.0",
@@ -54,6 +55,7 @@
     "@typechain/ethers-v5": "8.0.2",
     "@types/jest": "^27.0.2",
     "@types/node": "^16.4.0",
+    "@types/sharp": "^0.29.4",
     "@typescript-eslint/eslint-plugin": "^4.30.0",
     "@typescript-eslint/parser": "^4.30.0",
     "codecov": "^3.5.0",
