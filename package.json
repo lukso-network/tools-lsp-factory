@@ -45,6 +45,7 @@
     "ethers": "5.5.0",
     "ipfs-http-client": "52.0.3",
     "ipfs-utils": "8.1.6",
+    "jimp": "^0.16.1",
     "rxjs": "^7.3.0"
   },
   "devDependencies": {
