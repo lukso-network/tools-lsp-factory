@@ -25,8 +25,8 @@ export interface LSP3ProfileImage {
 }
 
 export interface ProfileDataBeforeUpload {
-  profileImage?: File | LSP3ProfileImage[];
-  backgroundImage?: File | LSP3ProfileImage[];
+  profileImage?: File | ImageBuffer | LSP3ProfileImage[];
+  backgroundImage?: File | ImageBuffer | LSP3ProfileImage[];
   name: string;
   description: string;
   links?: LSP3ProfileLink[];
@@ -36,4 +36,16 @@ export interface ProfileDataBeforeUpload {
 export interface LSP3ProfileDataForEncoding {
   profile: LSP3ProfileJSON;
   url: string;
+}
+
+export interface ImageBuffer {
+  buffer: Buffer;
+  mimeType: SupportedImageBufferFormats;
+}
+
+export enum SupportedImageBufferFormats {
+  MIME_PNG = 'image/png',
+  MIME_BMP = 'image/bmp',
+  MIME_JPEG = 'image/jpeg',
+  MIME_GIF = 'image/gif',
 }
