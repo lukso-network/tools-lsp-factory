@@ -79,7 +79,7 @@ export async function prepareImageForLSP3(
   return lsp3Image;
 }
 
-async function resizeBuffer(buffer: Buffer, size: number): Promise<Buffer> {
+export async function resizeBuffer(buffer: Buffer, size: number): Promise<Buffer> {
   const dimensions = imageSize(buffer);
 
   let newWidth = size > dimensions.width ? dimensions.width : size;
@@ -90,7 +90,5 @@ async function resizeBuffer(buffer: Buffer, size: number): Promise<Buffer> {
     newWidth = undefined;
     newHeight = size > dimensions.height ? dimensions.height : size;
   }
-
-  const result = await sharp(buffer).resize({ height: newHeight, width: newWidth }).toBuffer();
-  return result;
+  return await sharp(buffer).resize({ height: newHeight, width: newWidth }).toBuffer();
 }
