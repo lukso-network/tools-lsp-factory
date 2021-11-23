@@ -1,6 +1,6 @@
 import { Signer } from 'ethers';
-import { concat, EMPTY, Observable } from 'rxjs';
-import { shareReplay, switchMap, takeLast } from 'rxjs/operators';
+import { concat, EMPTY, from, Observable } from 'rxjs';
+import { shareReplay, switchMap } from 'rxjs/operators';
 
 import {
   DeploymentEventContract,
@@ -16,15 +16,12 @@ import {
 } from '../helpers/deployment.helper';
 import { ContractNames } from '../interfaces';
 
-import { LSP3AccountDeploymentEvent } from './lsp3-account.service';
-
 export type UniversalReveiverDeploymentEvent =
   | DeploymentEventContract
   | DeploymentEventProxyContract;
 
 export function universalReceiverDelegateDeployment$(
   signer: Signer,
-  accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
   baseContractDeployment$: Observable<{
     [ContractNames.ERC725_Account]: string;
     [ContractNames.UNIVERSAL_RECEIVER]: string;
@@ -34,7 +31,6 @@ export function universalReceiverDelegateDeployment$(
     switchMap((baseContractAddresses) => {
       return universalReceiverDelegateDeploymentWithBaseContractAddress$(
         signer,
-        accountDeployment$,
         baseContractAddresses.UniversalReceiverDelegate
       );
     }),
@@ -44,20 +40,11 @@ export function universalReceiverDelegateDeployment$(
 
 export function universalReceiverDelegateDeploymentWithBaseContractAddress$(
   signer: Signer,
-  accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
   baseContractAddress: string
 ): Observable<UniversalReveiverDeploymentEvent> {
-  const universalReceiverDelegateDeployment$ = accountDeployment$.pipe(
-    takeLast(1),
-    switchMap((result) => {
-      return deployUniversalReceiverDelegateStore(
-        signer,
-        result.receipt.contractAddress,
-        baseContractAddress
-      );
-    }),
-    shareReplay()
-  );
+  const universalReceiverDelegateDeployment$ = from(
+    deployUniversalReceiverDelegate(signer, baseContractAddress)
+  ).pipe(shareReplay());
 
   const universalReceiverDelegateStoreReceipt$ = waitForReceipt<UniversalReveiverDeploymentEvent>(
     universalReceiverDelegateDeployment$
@@ -84,12 +71,7 @@ export function universalReceiverDelegateDeploymentWithBaseContractAddress$(
 /**
  * TODO: docs
  */
-export async function deployUniversalReceiverDelegateStore(
-  signer: Signer,
-  lsp3AccountAddress: string,
-  baseContractAddress: string
-) {
-  lsp3AccountAddress;
+export async function deployUniversalReceiverDelegate(signer: Signer, baseContractAddress: string) {
   const deploymentFunction = async () => {
     return baseContractAddress
       ? new LSP1UniversalReceiverDelegateInit__factory(signer).attach(baseContractAddress)

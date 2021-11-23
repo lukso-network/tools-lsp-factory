@@ -93,7 +93,6 @@ export class LSP3UniversalProfile {
     // 3 > deploys UniversalReceiverDelegate
     const universalReceiver$ = universalReceiverDelegateDeployment$(
       this.signer,
-      account$,
       baseContractAddresses$
     );
 
