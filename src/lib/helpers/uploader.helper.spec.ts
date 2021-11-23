@@ -92,7 +92,7 @@ describe('#resizeBuffer', () => {
     const buffer = Buffer.from(imageResponse.data as string, 'binary');
 
     const size = 10;
-    const result = await resizeBuffer(buffer as Buffer, size);
+    const result = await resizeBuffer(buffer as Buffer, 'image/jpeg', size);
 
     expect(result.byteLength < buffer.byteLength);
 

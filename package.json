@@ -46,8 +46,8 @@
     "image-size": "^1.0.0",
     "ipfs-http-client": "52.0.3",
     "ipfs-utils": "8.1.6",
-    "rxjs": "^7.3.0",
-    "sharp": "^0.29.3"
+    "jimp": "^0.16.1",
+    "rxjs": "^7.3.0"
   },
   "devDependencies": {
     "@ethereum-waffle/jest": "^3.3.0",
