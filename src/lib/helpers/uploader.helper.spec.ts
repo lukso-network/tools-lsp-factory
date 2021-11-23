@@ -42,7 +42,7 @@ describe('#imageUpload', () => {
           ipfsClientOptions: {},
         }
       )
-    ).rejects.toThrowError('File provided is of type "zip".');
+    ).rejects.toThrowError("File type: 'zip' does not start with 'image/'");
   });
 
   it('should pin files when using IPFS', async () => {
