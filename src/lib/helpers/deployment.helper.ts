@@ -12,7 +12,7 @@ import {
 } from '../interfaces/deployment-events';
 import { ContractDeploymentOptions } from '../interfaces/profile-deployment';
 
-import { GAS_PRICE } from './config.helper';
+import { GAS_BUFFER, GAS_PRICE } from './config.helper';
 
 /**
  *
@@ -64,8 +64,11 @@ export function initialize(
     switchMap(async (result) => {
       const contract = await factory.attach(result.receipt.contractAddress);
       const initializeParams = await initArguments(result);
+      const gasEstimate = await contract.estimateGas.initialize(...initializeParams, {
+        gasPrice: GAS_PRICE,
+      });
       const transaction = await contract.initialize(...initializeParams, {
-        gasLimit: 3_000_000,
+        gasLimit: gasEstimate.add(GAS_BUFFER),
         gasPrice: GAS_PRICE,
       });
       return {

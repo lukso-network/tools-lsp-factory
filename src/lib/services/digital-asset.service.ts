@@ -7,6 +7,7 @@ import {
   LSP8IdentifiableDigitalAsset__factory,
   LSP8IdentifiableDigitalAssetInit__factory,
 } from '../../';
+import { GAS_BUFFER, GAS_PRICE } from '../helpers/config.helper';
 import { deployContract, deployProxyContract, waitForReceipt } from '../helpers/deployment.helper';
 import { DeploymentEventContract, DeploymentEventProxyContract } from '../interfaces';
 import {
@@ -86,15 +87,28 @@ function initializeLSP7Proxy(
       const contract = await new LSP7DigitalAssetInit__factory(signer).attach(
         result.receipt.contractAddress
       );
+
+      const gasEstimate = await contract.estimateGas[`initialize(string,string,address,bool)`](
+        name,
+        symbol,
+        ownerAddress,
+        isNFT,
+        {
+          gasPrice: GAS_PRICE,
+        }
+      );
+
       const transaction = await contract[`initialize(string,string,address,bool)`](
         name,
         symbol,
         ownerAddress,
         isNFT,
         {
-          gasLimit: 3_000_000,
+          gasLimit: gasEstimate.add(GAS_BUFFER),
+          gasPrice: GAS_PRICE,
         }
       );
+
       return {
         type: result.type,
         contractName: result.contractName,
@@ -175,12 +189,23 @@ function initializeLSP8Proxy(
       const contract = await new LSP7DigitalAssetInit__factory(signer).attach(
         result.receipt.contractAddress
       );
+
+      const gasEstimate = await contract.estimateGas[`initialize(string,string,address)`](
+        name,
+        symbol,
+        ownerAddress,
+        {
+          gasPrice: GAS_PRICE,
+        }
+      );
+
       const transaction = await contract[`initialize(string,string,address)`](
         name,
         symbol,
         ownerAddress,
         {
-          gasLimit: 3_000_000,
+          gasLimit: gasEstimate.add(GAS_BUFFER),
+          gasPrice: GAS_PRICE,
         }
       );
       return {
