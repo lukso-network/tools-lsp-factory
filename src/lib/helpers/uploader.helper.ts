@@ -18,7 +18,7 @@ export async function imageUpload(
   const type = 'type' in givenFile ? givenFile.type : givenFile.mimeType;
   const isImage = type?.substr(0, 6) === 'image/';
   if (!isImage) {
-    throw new Error(`File provided is of type "${type}".`);
+    throw new Error(`File type: '${type}' does not start with 'image/'`);
   }
 
   return Promise.all(
