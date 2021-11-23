@@ -4,7 +4,7 @@ import imageSize from 'image-size';
 import { AddResult } from 'ipfs-core-types/src/root';
 import { ImportCandidate } from 'ipfs-core-types/src/utils';
 import { create, Options } from 'ipfs-http-client';
-import sharp from 'sharp';
+import Jimp from 'jimp';
 
 import { LSP3ProfileImage } from '../interfaces';
 import { ImageBuffer } from '../interfaces/lsp3-profile';
@@ -26,11 +26,12 @@ export async function imageUpload(
       let imgToUpload, imgBuffer, width: number, height: number;
 
       if ('buffer' in givenFile) {
-        imgBuffer = await resizeBuffer(givenFile.buffer, size);
-        height = size;
-        width = size;
-
+        imgBuffer = await resizeBuffer(givenFile.buffer, givenFile.mimeType, size);
         imgToUpload = imgBuffer;
+
+        const resizedDimensions = imageSize(imgBuffer);
+        height = resizedDimensions.height;
+        width = resizedDimensions.width;
       } else {
         imgToUpload = await imageCompression(givenFile, {
           maxWidthOrHeight: size,
@@ -79,16 +80,7 @@ export async function prepareImageForLSP3(
   return lsp3Image;
 }
 
-export async function resizeBuffer(buffer: Buffer, size: number): Promise<Buffer> {
-  const dimensions = imageSize(buffer);
-
-  let newWidth = size > dimensions.width ? dimensions.width : size;
-  let newHeight = undefined;
-
-  // Ensure dimensions are kept proportional
-  if (dimensions.width < dimensions.height) {
-    newWidth = undefined;
-    newHeight = size > dimensions.height ? dimensions.height : size;
-  }
-  return await sharp(buffer).resize({ height: newHeight, width: newWidth }).toBuffer();
+export async function resizeBuffer(buffer: Buffer, format: string, size: number): Promise<Buffer> {
+  const image = await Jimp.read(buffer);
+  return image.scaleToFit(size, size).getBufferAsync(format);
 }
