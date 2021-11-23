@@ -12,6 +12,8 @@ import {
 import {
   ADDRESS_PERMISSIONS_ARRAY_KEY,
   ALL_PERMISSIONS,
+  GAS_BUFFER,
+  GAS_PRICE,
   LSP3_UP_KEYS,
   PREFIX_PERMISSIONS,
   SET_DATA_PERMISSION,
@@ -281,8 +283,17 @@ export async function setData(
     valuesToSet.push(encodedLSP3Profile);
   }
 
+  const gasEstimate = await erc725Account.estimateGas.setData(
+    keysToSet,
+    valuesToSet as BytesLike[],
+    {
+      gasPrice: GAS_PRICE,
+    }
+  );
+
   const transaction = await erc725Account.setData(keysToSet, valuesToSet as BytesLike[], {
-    gasLimit: 1_000_000,
+    gasLimit: gasEstimate.add(GAS_BUFFER),
+    gasPrice: GAS_PRICE,
   });
 
   return {
@@ -324,11 +335,21 @@ export async function transferOwnership(
     const contract = new UniversalProfile__factory(signer).attach(
       lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to
     );
+
+    const gasEstimate = await contract.estimateGas.transferOwnership(
+      keyManagerReceipt.contractAddress || keyManagerReceipt.to,
+      {
+        from: signerAddress,
+        gasPrice: GAS_PRICE,
+      }
+    );
+
     const transaction = await contract.transferOwnership(
       keyManagerReceipt.contractAddress || keyManagerReceipt.to,
       {
         from: signerAddress,
-        gasLimit: 500_000,
+        gasLimit: gasEstimate.add(GAS_BUFFER),
+        gasPrice: GAS_PRICE,
       }
     );
 
