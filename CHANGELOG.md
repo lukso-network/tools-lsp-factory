@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.5](https://github.com/lukso-network/tools-lsp-factory/compare/v1.0.2-alpha.8...v1.1.5) (2021-11-23)
+
+### Features
+
+* upload image to IPFS from buffer ([f17b911](https://github.com/lukso-network/tools-lsp-factory/commit/f17b911820e277cade73089968fb9566e00d832f))
+
+
 ### [1.1.4](https://github.com/lukso-network/tools-lsp-factory/compare/v1.0.2-alpha.8...v1.1.4) (2021-11-18)
 
 ### Bug Fixes
