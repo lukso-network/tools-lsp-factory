@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / DeploymentEventTransaction
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / DeploymentEventTransaction
 
 # Interface: DeploymentEventTransaction
 
@@ -31,7 +31,7 @@
 
 #### Defined in
 
-[lib/interfaces/deployment-events.ts:20](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/deployment-events.ts#L20)
+[lib/interfaces/deployment-events.ts:20](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L20)
 
 ___
 
@@ -41,7 +41,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/deployment-events.ts:43](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/deployment-events.ts#L43)
+[lib/interfaces/deployment-events.ts:43](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L43)
 
 ___
 
@@ -55,7 +55,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/deployment-events.ts:22](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/deployment-events.ts#L22)
+[lib/interfaces/deployment-events.ts:22](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L22)
 
 ___
 
@@ -69,7 +69,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/deployment-events.ts:19](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/deployment-events.ts#L19)
+[lib/interfaces/deployment-events.ts:19](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L19)
 
 ___
 
@@ -83,7 +83,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/deployment-events.ts:44](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/deployment-events.ts#L44)
+[lib/interfaces/deployment-events.ts:44](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L44)
 
 ___
 
@@ -97,4 +97,4 @@ ___
 
 #### Defined in
 
-[lib/interfaces/deployment-events.ts:42](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/deployment-events.ts#L42)
+[lib/interfaces/deployment-events.ts:42](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L42)

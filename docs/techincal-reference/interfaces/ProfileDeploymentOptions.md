@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / ProfileDeploymentOptions
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / ProfileDeploymentOptions
 
 # Interface: ProfileDeploymentOptions
 
@@ -28,7 +28,7 @@ TBD
 
 #### Defined in
 
-[lib/interfaces/profile-deployment.ts:23](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/profile-deployment.ts#L23)
+[lib/interfaces/profile-deployment.ts:23](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/profile-deployment.ts#L23)
 
 ___
 
@@ -38,7 +38,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/profile-deployment.ts:21](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/profile-deployment.ts#L21)
+[lib/interfaces/profile-deployment.ts:21](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/profile-deployment.ts#L21)
 
 ___
 
@@ -48,4 +48,4 @@ ___
 
 #### Defined in
 
-[lib/interfaces/profile-deployment.ts:22](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/profile-deployment.ts#L22)
+[lib/interfaces/profile-deployment.ts:22](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/profile-deployment.ts#L22)

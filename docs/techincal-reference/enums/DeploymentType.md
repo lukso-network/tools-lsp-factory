@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / DeploymentType
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / DeploymentType
 
 # Enumeration: DeploymentType
 
@@ -19,7 +19,7 @@
 
 #### Defined in
 
-[lib/interfaces/deployment-events.ts:9](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/deployment-events.ts#L9)
+[lib/interfaces/deployment-events.ts:9](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L9)
 
 ___
 
@@ -29,7 +29,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/deployment-events.ts:6](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/deployment-events.ts#L6)
+[lib/interfaces/deployment-events.ts:6](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L6)
 
 ___
 
@@ -39,7 +39,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/deployment-events.ts:8](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/deployment-events.ts#L8)
+[lib/interfaces/deployment-events.ts:8](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L8)
 
 ___
 
@@ -49,4 +49,4 @@ ___
 
 #### Defined in
 
-[lib/interfaces/deployment-events.ts:7](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/deployment-events.ts#L7)
+[lib/interfaces/deployment-events.ts:7](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L7)

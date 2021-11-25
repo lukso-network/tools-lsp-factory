@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / DigitalAsset
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / DigitalAsset
 
 # Class: DigitalAsset
 
@@ -35,7 +35,7 @@
 
 #### Defined in
 
-[lib/classes/digital-asset.ts:22](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/digital-asset.ts#L22)
+[lib/classes/digital-asset.ts:22](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/digital-asset.ts#L22)
 
 ## Properties
 
@@ -45,7 +45,7 @@
 
 #### Defined in
 
-[lib/classes/digital-asset.ts:20](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/digital-asset.ts#L20)
+[lib/classes/digital-asset.ts:20](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/digital-asset.ts#L20)
 
 ___
 
@@ -55,7 +55,7 @@ ___
 
 #### Defined in
 
-[lib/classes/digital-asset.ts:21](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/digital-asset.ts#L21)
+[lib/classes/digital-asset.ts:21](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/digital-asset.ts#L21)
 
 ## Methods
 
@@ -69,7 +69,7 @@ ___
 
 #### Defined in
 
-[lib/classes/digital-asset.ts:106](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/digital-asset.ts#L106)
+[lib/classes/digital-asset.ts:106](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/digital-asset.ts#L106)
 
 ___
 
@@ -90,7 +90,7 @@ ___
 
 #### Defined in
 
-[lib/classes/digital-asset.ts:42](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/digital-asset.ts#L42)
+[lib/classes/digital-asset.ts:42](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/digital-asset.ts#L42)
 
 ___
 
@@ -111,7 +111,7 @@ ___
 
 #### Defined in
 
-[lib/classes/digital-asset.ts:29](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/digital-asset.ts#L29)
+[lib/classes/digital-asset.ts:29](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/digital-asset.ts#L29)
 
 ___
 
@@ -132,7 +132,7 @@ ___
 
 #### Defined in
 
-[lib/classes/digital-asset.ts:83](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/digital-asset.ts#L83)
+[lib/classes/digital-asset.ts:83](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/digital-asset.ts#L83)
 
 ___
 
@@ -153,4 +153,4 @@ ___
 
 #### Defined in
 
-[lib/classes/digital-asset.ts:67](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/digital-asset.ts#L67)
+[lib/classes/digital-asset.ts:67](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/digital-asset.ts#L67)

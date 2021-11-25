@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / BaseContractAddresses
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / BaseContractAddresses
 
 # Interface: BaseContractAddresses
 
@@ -18,7 +18,7 @@
 
 #### Defined in
 
-[lib/interfaces/profile-deployment.ts:36](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/profile-deployment.ts#L36)
+[lib/interfaces/profile-deployment.ts:36](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/profile-deployment.ts#L36)
 
 ___
 
@@ -28,7 +28,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/profile-deployment.ts:37](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/profile-deployment.ts#L37)
+[lib/interfaces/profile-deployment.ts:37](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/profile-deployment.ts#L37)
 
 ___
 
@@ -38,4 +38,4 @@ ___
 
 #### Defined in
 
-[lib/interfaces/profile-deployment.ts:38](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/profile-deployment.ts#L38)
+[lib/interfaces/profile-deployment.ts:38](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/profile-deployment.ts#L38)

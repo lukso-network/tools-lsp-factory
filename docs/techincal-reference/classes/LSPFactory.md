@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / LSPFactory
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / LSPFactory
 
 # Class: LSPFactory
 
@@ -34,7 +34,7 @@ TBD
 
 #### Defined in
 
-[lib/lsp-factory.ts:24](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/lsp-factory.ts#L24)
+[lib/lsp-factory.ts:24](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/lsp-factory.ts#L24)
 
 ## Properties
 
@@ -44,7 +44,7 @@ TBD
 
 #### Defined in
 
-[lib/lsp-factory.ts:15](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/lsp-factory.ts#L15)
+[lib/lsp-factory.ts:15](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/lsp-factory.ts#L15)
 
 ___
 
@@ -54,7 +54,7 @@ ___
 
 #### Defined in
 
-[lib/lsp-factory.ts:14](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/lsp-factory.ts#L14)
+[lib/lsp-factory.ts:14](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/lsp-factory.ts#L14)
 
 ___
 
@@ -64,7 +64,7 @@ ___
 
 #### Defined in
 
-[lib/lsp-factory.ts:16](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/lsp-factory.ts#L16)
+[lib/lsp-factory.ts:16](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/lsp-factory.ts#L16)
 
 ___
 
@@ -74,4 +74,4 @@ ___
 
 #### Defined in
 
-[lib/lsp-factory.ts:13](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/lsp-factory.ts#L13)
+[lib/lsp-factory.ts:13](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/lsp-factory.ts#L13)

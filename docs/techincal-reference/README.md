@@ -1,6 +1,6 @@
-@lukso/lsp-factory.js
+@lukso/lsp-factory.js - v1.1.5
 
-# @lukso/lsp-factory.js
+# @lukso/lsp-factory.js - v1.1.5
 
 ## Table of contents
 
@@ -50,7 +50,7 @@
 
 #### Defined in
 
-[lib/interfaces/deployment-events.ts:47](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/deployment-events.ts#L47)
+[lib/interfaces/deployment-events.ts:47](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L47)
 
 ___
 
@@ -60,7 +60,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/deployment-events.ts:52](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/deployment-events.ts#L52)
+[lib/interfaces/deployment-events.ts:52](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L52)
 
 ___
 
@@ -70,4 +70,4 @@ ___
 
 #### Defined in
 
-[lib/interfaces/deployment-events.ts:37](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/deployment-events.ts#L37)
+[lib/interfaces/deployment-events.ts:37](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L37)

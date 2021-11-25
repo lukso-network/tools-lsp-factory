@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / LSP3ProfileJSON
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / LSP3ProfileJSON
 
 # Interface: LSP3ProfileJSON
 
@@ -16,4 +16,4 @@
 
 #### Defined in
 
-[lib/interfaces/lsp3-profile.ts:2](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp3-profile.ts#L2)
+[lib/interfaces/lsp3-profile.ts:2](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp3-profile.ts#L2)

@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / ContractOptions
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / ContractOptions
 
 # Interface: ContractOptions
 
@@ -28,7 +28,7 @@ TBD
 
 #### Defined in
 
-[lib/interfaces/contract-options.ts:12](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/contract-options.ts#L12)
+[lib/interfaces/contract-options.ts:12](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/contract-options.ts#L12)
 
 ___
 
@@ -46,7 +46,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/contract-options.ts:6](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/contract-options.ts#L6)
+[lib/interfaces/contract-options.ts:6](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/contract-options.ts#L6)
 
 ___
 
@@ -56,4 +56,4 @@ ___
 
 #### Defined in
 
-[lib/interfaces/contract-options.ts:5](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/contract-options.ts#L5)
+[lib/interfaces/contract-options.ts:5](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/contract-options.ts#L5)

@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / ContractDeploymentOptions
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / ContractDeploymentOptions
 
 # Interface: ContractDeploymentOptions
 
@@ -26,7 +26,7 @@
 
 #### Defined in
 
-[lib/interfaces/profile-deployment.ts:43](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/profile-deployment.ts#L43)
+[lib/interfaces/profile-deployment.ts:43](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/profile-deployment.ts#L43)
 
 ___
 
@@ -36,7 +36,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/profile-deployment.ts:48](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/profile-deployment.ts#L48)
+[lib/interfaces/profile-deployment.ts:48](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/profile-deployment.ts#L48)
 
 ___
 
@@ -46,4 +46,4 @@ ___
 
 #### Defined in
 
-[lib/interfaces/profile-deployment.ts:42](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/profile-deployment.ts#L42)
+[lib/interfaces/profile-deployment.ts:42](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/profile-deployment.ts#L42)

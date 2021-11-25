@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / ControllerOptions
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / ControllerOptions
 
 # Interface: ControllerOptions
 
@@ -17,7 +17,7 @@
 
 #### Defined in
 
-[lib/interfaces/profile-deployment.ts:13](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/profile-deployment.ts#L13)
+[lib/interfaces/profile-deployment.ts:13](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/profile-deployment.ts#L13)
 
 ___
 
@@ -27,4 +27,4 @@ ___
 
 #### Defined in
 
-[lib/interfaces/profile-deployment.ts:14](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/profile-deployment.ts#L14)
+[lib/interfaces/profile-deployment.ts:14](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/profile-deployment.ts#L14)
