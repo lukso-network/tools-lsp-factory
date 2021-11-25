@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / LSPFactoryOptions
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / LSPFactoryOptions
 
 # Interface: LSPFactoryOptions
 
@@ -20,7 +20,7 @@ TDB
 
 #### Defined in
 
-[lib/interfaces/lsp-factory-options.ts:7](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp-factory-options.ts#L7)
+[lib/interfaces/lsp-factory-options.ts:7](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp-factory-options.ts#L7)
 
 ___
 
@@ -30,7 +30,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/lsp-factory-options.ts:6](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp-factory-options.ts#L6)
+[lib/interfaces/lsp-factory-options.ts:6](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp-factory-options.ts#L6)
 
 ___
 
@@ -40,4 +40,4 @@ ___
 
 #### Defined in
 
-[lib/interfaces/lsp-factory-options.ts:8](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp-factory-options.ts#L8)
+[lib/interfaces/lsp-factory-options.ts:8](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp-factory-options.ts#L8)

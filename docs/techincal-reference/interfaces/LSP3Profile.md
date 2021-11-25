@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / LSP3Profile
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / LSP3Profile
 
 # Interface: LSP3Profile
 
@@ -21,7 +21,7 @@
 
 #### Defined in
 
-[lib/interfaces/lsp3-profile.ts:9](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp3-profile.ts#L9)
+[lib/interfaces/lsp3-profile.ts:9](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp3-profile.ts#L9)
 
 ___
 
@@ -31,7 +31,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/lsp3-profile.ts:7](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp3-profile.ts#L7)
+[lib/interfaces/lsp3-profile.ts:7](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp3-profile.ts#L7)
 
 ___
 
@@ -41,7 +41,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/lsp3-profile.ts:11](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp3-profile.ts#L11)
+[lib/interfaces/lsp3-profile.ts:11](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp3-profile.ts#L11)
 
 ___
 
@@ -51,7 +51,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/lsp3-profile.ts:6](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp3-profile.ts#L6)
+[lib/interfaces/lsp3-profile.ts:6](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp3-profile.ts#L6)
 
 ___
 
@@ -61,7 +61,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/lsp3-profile.ts:8](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp3-profile.ts#L8)
+[lib/interfaces/lsp3-profile.ts:8](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp3-profile.ts#L8)
 
 ___
 
@@ -71,4 +71,4 @@ ___
 
 #### Defined in
 
-[lib/interfaces/lsp3-profile.ts:10](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp3-profile.ts#L10)
+[lib/interfaces/lsp3-profile.ts:10](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp3-profile.ts#L10)

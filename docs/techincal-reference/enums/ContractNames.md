@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / ContractNames
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / ContractNames
 
 # Enumeration: ContractNames
 
@@ -18,7 +18,7 @@
 
 #### Defined in
 
-[lib/interfaces/profile-deployment.ts:7](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/profile-deployment.ts#L7)
+[lib/interfaces/profile-deployment.ts:7](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/profile-deployment.ts#L7)
 
 ___
 
@@ -28,7 +28,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/profile-deployment.ts:8](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/profile-deployment.ts#L8)
+[lib/interfaces/profile-deployment.ts:8](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/profile-deployment.ts#L8)
 
 ___
 
@@ -38,4 +38,4 @@ ___
 
 #### Defined in
 
-[lib/interfaces/profile-deployment.ts:9](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/profile-deployment.ts#L9)
+[lib/interfaces/profile-deployment.ts:9](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/profile-deployment.ts#L9)

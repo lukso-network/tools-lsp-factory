@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / LSP3ProfileImage
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / LSP3ProfileImage
 
 # Interface: LSP3ProfileImage
 
@@ -20,7 +20,7 @@
 
 #### Defined in
 
-[lib/interfaces/lsp3-profile.ts:23](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp3-profile.ts#L23)
+[lib/interfaces/lsp3-profile.ts:23](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp3-profile.ts#L23)
 
 ___
 
@@ -30,7 +30,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/lsp3-profile.ts:22](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp3-profile.ts#L22)
+[lib/interfaces/lsp3-profile.ts:22](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp3-profile.ts#L22)
 
 ___
 
@@ -40,7 +40,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/lsp3-profile.ts:21](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp3-profile.ts#L21)
+[lib/interfaces/lsp3-profile.ts:21](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp3-profile.ts#L21)
 
 ___
 
@@ -50,7 +50,7 @@ ___
 
 #### Defined in
 
-[lib/interfaces/lsp3-profile.ts:24](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp3-profile.ts#L24)
+[lib/interfaces/lsp3-profile.ts:24](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp3-profile.ts#L24)
 
 ___
 
@@ -60,4 +60,4 @@ ___
 
 #### Defined in
 
-[lib/interfaces/lsp3-profile.ts:20](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp3-profile.ts#L20)
+[lib/interfaces/lsp3-profile.ts:20](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp3-profile.ts#L20)

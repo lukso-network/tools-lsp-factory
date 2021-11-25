@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / LSP3ProfileLink
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / LSP3ProfileLink
 
 # Interface: LSP3ProfileLink
 
@@ -17,7 +17,7 @@
 
 #### Defined in
 
-[lib/interfaces/lsp3-profile.ts:15](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp3-profile.ts#L15)
+[lib/interfaces/lsp3-profile.ts:15](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp3-profile.ts#L15)
 
 ___
 
@@ -27,4 +27,4 @@ ___
 
 #### Defined in
 
-[lib/interfaces/lsp3-profile.ts:16](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/interfaces/lsp3-profile.ts#L16)
+[lib/interfaces/lsp3-profile.ts:16](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/lsp3-profile.ts#L16)

@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / LSP3UniversalProfile
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / LSP3UniversalProfile
 
 # Class: LSP3UniversalProfile
 
@@ -38,7 +38,7 @@ TODO: docs
 
 #### Defined in
 
-[lib/classes/lsp3-universal-profile.ts:38](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/lsp3-universal-profile.ts#L38)
+[lib/classes/lsp3-universal-profile.ts:38](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/lsp3-universal-profile.ts#L38)
 
 ## Properties
 
@@ -48,7 +48,7 @@ TODO: docs
 
 #### Defined in
 
-[lib/classes/lsp3-universal-profile.ts:36](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/lsp3-universal-profile.ts#L36)
+[lib/classes/lsp3-universal-profile.ts:36](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/lsp3-universal-profile.ts#L36)
 
 ___
 
@@ -58,7 +58,7 @@ ___
 
 #### Defined in
 
-[lib/classes/lsp3-universal-profile.ts:37](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/lsp3-universal-profile.ts#L37)
+[lib/classes/lsp3-universal-profile.ts:37](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/lsp3-universal-profile.ts#L37)
 
 ## Methods
 
@@ -81,7 +81,7 @@ TODO: docs
 
 #### Defined in
 
-[lib/classes/lsp3-universal-profile.ts:123](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/lsp3-universal-profile.ts#L123)
+[lib/classes/lsp3-universal-profile.ts:123](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/lsp3-universal-profile.ts#L123)
 
 ___
 
@@ -95,7 +95,7 @@ ___
 
 #### Defined in
 
-[lib/classes/lsp3-universal-profile.ts:150](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/lsp3-universal-profile.ts#L150)
+[lib/classes/lsp3-universal-profile.ts:150](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/lsp3-universal-profile.ts#L150)
 
 ___
 
@@ -118,7 +118,7 @@ TODO: docs
 
 #### Defined in
 
-[lib/classes/lsp3-universal-profile.ts:46](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/lsp3-universal-profile.ts#L46)
+[lib/classes/lsp3-universal-profile.ts:46](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/lsp3-universal-profile.ts#L46)
 
 ___
 
@@ -138,7 +138,7 @@ ___
 
 #### Defined in
 
-[lib/classes/lsp3-universal-profile.ts:146](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/lsp3-universal-profile.ts#L146)
+[lib/classes/lsp3-universal-profile.ts:146](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/lsp3-universal-profile.ts#L146)
 
 ___
 
@@ -160,7 +160,7 @@ Pre-deploys the latest Version of the LSP3UniversalProfile smart-contracts.
 
 #### Defined in
 
-[lib/classes/lsp3-universal-profile.ts:180](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/lsp3-universal-profile.ts#L180)
+[lib/classes/lsp3-universal-profile.ts:180](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/lsp3-universal-profile.ts#L180)
 
 ___
 
@@ -188,4 +188,4 @@ a public, centralized storage endpoint or an IPFS Node / Cluster
 
 #### Defined in
 
-[lib/classes/lsp3-universal-profile.ts:192](https://github.com/lukso-network/tools-lsp-factory/blob/eccea2c/src/lib/classes/lsp3-universal-profile.ts#L192)
+[lib/classes/lsp3-universal-profile.ts:192](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/classes/lsp3-universal-profile.ts#L192)
