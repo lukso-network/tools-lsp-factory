@@ -1,5 +1,6 @@
 {
   "entryPoints": ["./src/index.ts"],
   "out": "docs",
-  "exclude": ["**/*+(.spec|.e2e).ts"]
+  "exclude": ["**/*+(.spec|.e2e).ts", "./types/ethers-v5/**", "./README.md"],
+  "githubPages": false
 }
