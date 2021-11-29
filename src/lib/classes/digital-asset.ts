@@ -34,7 +34,7 @@ export class DigitalAsset {
       this.signer,
       digitalAssetDeploymentOptions,
       contractDeploymentOptions?.libAddress ??
-        versions[this.options.chainId]?.baseContracts?.LSP7DigitalAsset[DEFAULT_CONTRACT_VERSION]
+        versions[this.options.chainId]?.baseContracts?.LSP7Mintable[DEFAULT_CONTRACT_VERSION]
     );
     return digitalAsset$;
   }
@@ -72,9 +72,7 @@ export class DigitalAsset {
       this.signer,
       digitalAssetDeploymentOptions,
       contractDeploymentOptions?.libAddress ??
-        versions[this.options.chainId]?.baseContracts?.LSP8IdentifiableDigitalAsset[
-          DEFAULT_CONTRACT_VERSION
-        ]
+        versions[this.options.chainId]?.baseContracts?.LSP8Mintable[DEFAULT_CONTRACT_VERSION]
     );
 
     return digitalAsset$;

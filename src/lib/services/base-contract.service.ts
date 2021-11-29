@@ -6,8 +6,8 @@ import {
   ContractDeploymentOptions,
   DeploymentEventContract,
   LSP1UniversalReceiverDelegateInit__factory,
-  LSP7DigitalAssetInit__factory,
-  LSP8IdentifiableDigitalAssetInit__factory,
+  LSP7MintableInit__factory,
+  LSP8MintableInit__factory,
   ContractNames as UniversalProfileContractNames,
   UniversalProfileInit__factory,
 } from '../..';
@@ -59,7 +59,7 @@ export function digitalAssetBaseContractsDeployment$(
   const lsp7DigitalAssetBaseContractReceipt$ = deployBaseContract$(
     DigitalAssetContractNames.LSP7_DIGITAL_ASSET,
     async () => {
-      const lsp7Init = await new LSP7DigitalAssetInit__factory(signer).deploy({
+      const lsp7Init = await new LSP7MintableInit__factory(signer).deploy({
         gasPrice: GAS_PRICE,
       });
       await lsp7Init['initialize(address)'](NULL_ADDRESS);
@@ -70,7 +70,7 @@ export function digitalAssetBaseContractsDeployment$(
   const lsp8IdentifiableDigitalAssetReceipt$ = deployBaseContract$(
     DigitalAssetContractNames.LSP8_DIGITAL_ASSET,
     async () => {
-      const lsp8Init = await new LSP8IdentifiableDigitalAssetInit__factory(signer).deploy({
+      const lsp8Init = await new LSP8MintableInit__factory(signer).deploy({
         gasPrice: GAS_PRICE,
       });
       await lsp8Init['initialize(address)'](NULL_ADDRESS);

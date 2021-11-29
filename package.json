@@ -38,7 +38,7 @@
     "@erc725/erc725.js": "^0.6.2-beta.4",
     "@ethersproject/abi": "5.5.0",
     "@ethersproject/experimental": "5.5.0",
-    "@lukso/universalprofile-smart-contracts": "0.3.0",
+    "@lukso/universalprofile-smart-contracts": "0.4.1",
     "@typechain/web3-v1": "^4.0.0",
     "axios": "^0.23.0",
     "browser-image-compression": "^1.0.15",
