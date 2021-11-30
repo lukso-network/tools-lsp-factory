@@ -45,9 +45,14 @@ export function keyManagerDeployment$(
     keyManagerDeploymentInitialize$
   );
 }
-
 /**
- * TODO: docs
+ * Deploys KeyManager contract for a UniversalProfile
+ *
+ * @param {Signer} signer
+ * @param {string} lsp3AccountAddress
+ * @param {string} baseContractAddress
+ *
+ * @return {*} Promise<DeploymentEventStandardContract>
  */
 export async function deployKeyManager(
   signer: Signer,
