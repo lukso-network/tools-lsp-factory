@@ -228,7 +228,16 @@ export function lsp3ProfileUpload$(lsp3Profile: ProfileDataBeforeUpload | string
 }
 
 /**
- * TODO: docs
+ * Encodes and sets LSP3 Profile data on the UniversalProfile with
+ * Permissions for Universal Receiver Delegate and controller keys
+ *
+ * @param {Signer} signer
+ * @param {string} erc725AccountAddress
+ * @param {string} universalReceiverDelegateAddress
+ * @param {(string | ControllerOptions)[]} controllerAddresses
+ * @param {LSP3ProfileDataForEncoding | string} lsp3Profile
+ *
+ * @return {*}  Observable<LSP3AccountDeploymentEvent | DeploymentEventTransaction>
  */
 export async function setData(
   signer: Signer,
@@ -323,7 +332,16 @@ export function getTransferOwnershipTransaction$(
 }
 
 /**
- * TODO: docs
+ * Transfers ownership of the KeyManager contract to the
+ * Permissions for Universal Receiver Delegate and controller keys
+ *
+ * @param {Signer} signer
+ * @param {string} erc725AccountAddress
+ * @param {string} universalReceiverDelegateAddress
+ * @param {(string | ControllerOptions)[]} controllerAddresses
+ * @param {LSP3ProfileDataForEncoding | string} lsp3Profile
+ *
+ * @return {*}  Observable<LSP3AccountDeploymentEvent | DeploymentEventTransaction>
  */
 export async function transferOwnership(
   signer: Signer,

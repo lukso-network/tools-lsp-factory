@@ -16,6 +16,13 @@ import {
   lsp8IdentifiableDigitalAssetDeployment$,
 } from '../services/digital-asset.service';
 
+/**
+ * Class responsible for deploying Digital Assets
+ *
+ * @property {LSPFactoryOptions} options
+ * @property {NonceManager} signer
+ * @memberof LSPFactory
+ */
 export class DigitalAsset {
   options: LSPFactoryOptions;
   signer: NonceManager;
@@ -26,6 +33,16 @@ export class DigitalAsset {
 
   // LSP7
 
+  /**
+   * Deploys a mintable LSP7 Digital Asset
+   *
+   * Returns an Observable which emits events as contracts are deployed
+   *
+   * @param {LSP7DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
+   * @param {ContractDeploymentOptions} contractDeploymentOptions
+   * @return {*}  Observable<DigitalAssetDeploymentEvent>
+   * @memberof DigitalAsset
+   */
   deployLSP7DigitalAssetReactive(
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
@@ -39,6 +56,16 @@ export class DigitalAsset {
     return digitalAsset$;
   }
 
+  /**
+   * Deploys a mintable LSP7 Digital Asset
+   *
+   * Asyncronous version of `deployLSP7DigitalAssetReactive`. Returns a Promise with deployed contract details
+   *
+   * @param {LSP7DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
+   * @param {ContractDeploymentOptions} contractDeploymentOptions
+   * @return {*}  Promise<DeployedContracts>
+   * @memberof DigitalAsset
+   */
   deployLSP7DigitalAsset(
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
@@ -64,6 +91,16 @@ export class DigitalAsset {
 
   // LSP8
 
+  /**
+   * Deploys a mintable LSP8 Digital Asset
+   *
+   * Returns an Observable which emits events as contracts are deployed
+   *
+   * @param {LSP7DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
+   * @param {ContractDeploymentOptions} contractDeploymentOptions
+   * @return {*}  Observable<DigitalAssetDeploymentEvent>
+   * @memberof DigitalAsset
+   */
   deployLSP8IdentifiableDigitalAssetReactive(
     digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
@@ -78,6 +115,17 @@ export class DigitalAsset {
     return digitalAsset$;
   }
 
+  /**
+   * Deploys a mintable LSP7 Digital Asset
+   *
+   * Asyncronous version of `deployLSP8IdentifiableDigitalAssetReactive`.
+   * Returns a Promise with deployed contract details
+   *
+   * @param {LSP7DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
+   * @param {ContractDeploymentOptions} contractDeploymentOptions
+   * @return {*}  Promise<DeployedContracts>
+   * @memberof DigitalAsset
+   */
   deployLSP8IdentifiableDigitalAsset(
     digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
     ContractDeploymentOptions?: ContractDeploymentOptions
@@ -101,6 +149,14 @@ export class DigitalAsset {
     return lastValueFrom(deployments$);
   }
 
+  /**
+   * Deploys LSP7 and LSP7 base contracts
+   *
+   * Returns Promise with base contract details
+   *
+   * @returns {*}  Promise<DeployedContracts>
+   * @memberof LSP3UniversalProfile
+   */
   deployBaseContracts() {
     const baseContractsToDeploy$ = of([true, true] as [boolean, boolean]);
 

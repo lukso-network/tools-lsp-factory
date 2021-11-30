@@ -30,8 +30,13 @@ import {
 import { universalReceiverDelegateDeployment$ } from './../services/universal-receiver.service';
 
 /**
- * TODO: docs
+ * Class responsible for deploying UniversalProfiles and uploading LSP3 metadata to IPFS
+ *
+ * @property {LSPFactoryOptions} options
+ * @property {NonceManager} signer
+ * @memberof LSPFactory
  */
+
 export class LSP3UniversalProfile {
   options: LSPFactoryOptions;
   signer: NonceManager;
@@ -41,7 +46,14 @@ export class LSP3UniversalProfile {
   }
 
   /**
-   * TODO: docs
+   * Deploys a UniversalProfile and uploads LSP3 Profile data to IPFS
+   *
+   * Returns an Observable which emits events as UP contracts are deployed
+   *
+   * @param {ProfileDeploymentOptions} profileData
+   * @param {ContractDeploymentOptions} contractDeploymentOptions
+   * @return {*}  Observable<LSP3AccountDeploymentEvent | DeploymentEventTransaction>
+   * @memberof LSP3UniversalProfile
    */
   deployReactive(
     profileDeploymentOptions: ProfileDeploymentOptions,
@@ -117,7 +129,14 @@ export class LSP3UniversalProfile {
   }
 
   /**
-   * TODO: docs
+   * Deploys a UniversalProfile to the blockchain and uploads LSP3 Profile data to IPFS
+   *
+   * Asyncronous version of `deployReactive`. Returns a Promise with deployed contract details
+   *
+   * @param {ProfileDeploymentOptions} profileData
+   * @param {ContractDeploymentOptions} contractDeploymentOptions
+   * @returns {*}  Promise<DeployedContracts>
+   * @memberof LSP3UniversalProfile
    */
   deploy(
     profileDeploymentOptions: ProfileDeploymentOptions,
@@ -146,6 +165,14 @@ export class LSP3UniversalProfile {
     return this.options.provider.getCode(contractAddress);
   }
 
+  /**
+   * Deploys UniversalProfile base contracts
+   *
+   * Returns Promise with base contract details
+   *
+   * @returns {*}  Promise<DeployedContracts>
+   * @memberof LSP3UniversalProfile
+   */
   deployBaseContracts() {
     const baseContractsToDeploy$ = of([true, true] as [boolean, boolean]);
 

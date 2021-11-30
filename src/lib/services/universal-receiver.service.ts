@@ -69,7 +69,14 @@ export function universalReceiverDelegateDeploymentWithBaseContractAddress$(
 }
 
 /**
- * TODO: docs
+ * Deploys a UniversalReceiverDelegate contract
+ *
+ * Returns a DeploymentEvent Promise
+ *
+ * @param {Signer} signer
+ * @param {string} baseContractAddress
+ * @return {*}  Promise<DeploymentEventStandardContract | DeploymentEventProxyContract>
+ * @memberof LSP3UniversalProfile
  */
 export async function deployUniversalReceiverDelegate(signer: Signer, baseContractAddress: string) {
   const deploymentFunction = async () => {
