@@ -67,7 +67,7 @@ const myContracts = await lspFactory.LSP3UniversalProfile.deploy({
     },
   });
 
-const myUPAddress = myContracts.erc725Account.address;
+const myUPAddress = myContracts.ERC725Account.address;
 ```
 
 ### Using Deployment events
