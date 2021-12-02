@@ -7,6 +7,9 @@
             "ERC725Account": {
                 "0.0.1": "0xe6009BCbC6cb1046E72db3b50Ff0b9F3C94Db2fB"
             },
+            "KeyManager": {
+                "0.0.1": "0x36C80542f7ed462cc3fdB2b7AC1a83A80C5dD0f6"
+            },
             "UniversalReceiverDelegate": {
                 "0.0.1": "0x6533158b042775e2FdFeF3cA1a782EFDbB8EB9b1"
             },

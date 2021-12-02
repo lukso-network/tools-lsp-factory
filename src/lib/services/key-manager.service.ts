@@ -1,10 +1,19 @@
 import { Signer } from 'ethers';
-import { concat, EMPTY, Observable } from 'rxjs';
-import { shareReplay, switchMap, takeLast } from 'rxjs/operators';
+import { concat, EMPTY, forkJoin, from, Observable } from 'rxjs';
+import { shareReplay, switchMap } from 'rxjs/operators';
 
-import { LSP6KeyManager__factory } from '../..';
-import { deployContract, waitForReceipt } from '../helpers/deployment.helper';
-import { ContractNames, DeploymentEventContract } from '../interfaces';
+import { LSP6KeyManager__factory, LSP6KeyManagerInit__factory } from '../..';
+import {
+  deployContract,
+  deployProxyContract,
+  initialize,
+  waitForReceipt,
+} from '../helpers/deployment.helper';
+import {
+  ContractNames,
+  DeploymentEventContract,
+  DeploymentEventProxyContract,
+} from '../interfaces';
 
 import { LSP3AccountDeploymentEvent } from './lsp3-account.service';
 
@@ -13,36 +22,54 @@ export type KeyManagerDeploymentEvent = DeploymentEventContract;
 export function keyManagerDeployment$(
   signer: Signer,
   accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
-  baseContractAddress: string
-) {
-  const keyManagerDeployment$ = accountDeployment$.pipe(
-    takeLast(1),
-    switchMap(({ receipt }) => {
-      const erc725AccountAddress = receipt.contractAddress || receipt.to;
-      return deployKeyManager(signer, erc725AccountAddress, baseContractAddress);
+  baseContractAddress$: Observable<{
+    [ContractNames.ERC725_Account]: string;
+    [ContractNames.UNIVERSAL_RECEIVER]: string;
+    [ContractNames.KEY_MANAGER]: string;
+  }>
+): Observable<KeyManagerDeploymentEvent> {
+  return forkJoin([accountDeployment$, baseContractAddress$]).pipe(
+    switchMap(([{ receipt: lsp3AccountReceipt }, baseContractAddress]) => {
+      const erc725AccountAddress = lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
+      return keyManagerDeploymentForAccount$(
+        signer,
+        erc725AccountAddress,
+        baseContractAddress.KeyManager
+      );
     }),
     shareReplay()
   );
+}
+
+function keyManagerDeploymentForAccount$(
+  signer: Signer,
+  erc725AccountAddress: string,
+  baseContractAddress: string
+): Observable<KeyManagerDeploymentEvent> {
+  const keyManagerDeployment$ = from(
+    deployKeyManager(signer, erc725AccountAddress, baseContractAddress)
+  ).pipe(shareReplay());
 
   const keyManagerDeploymentReceipt$ = waitForReceipt<KeyManagerDeploymentEvent>(
     keyManagerDeployment$
   ).pipe(shareReplay());
 
-  if (baseContractAddress) {
-    throw new Error('Not yet implemented');
-    // const keyManagerDeploymentInitialize$ = baseContractAddress
-    // ? initializeProxy(
-    //     signer,
-    //     keyManagerDeploymentReceipt$ as Observable<DeploymentEventProxyContract<KeyManagerInit>>
-    //   )
-    // : EMPTY;
-  }
-  const keyManagerDeploymentInitialize$ = EMPTY;
+  const keyManagerInitialize$ = baseContractAddress
+    ? initializeProxy(
+        signer,
+        keyManagerDeploymentReceipt$ as Observable<DeploymentEventProxyContract>,
+        erc725AccountAddress
+      )
+    : EMPTY;
+
+  const keyManagerInitializeReceipt$ =
+    waitForReceipt<KeyManagerDeploymentEvent>(keyManagerInitialize$);
 
   return concat(
     keyManagerDeployment$,
     keyManagerDeploymentReceipt$,
-    keyManagerDeploymentInitialize$
+    keyManagerInitialize$,
+    keyManagerInitializeReceipt$
   );
 }
 /**
@@ -60,27 +87,33 @@ export async function deployKeyManager(
   baseContractAddress: string
 ) {
   const deploymentFunction = async () => {
-    return await new LSP6KeyManager__factory(signer).deploy(lsp3AccountAddress, {
-      gasLimit: 3_000_000,
-    });
+    return baseContractAddress
+      ? new LSP6KeyManagerInit__factory(signer).attach(baseContractAddress)
+      : await new LSP6KeyManager__factory(signer).deploy(lsp3AccountAddress, {
+          gasLimit: 3_000_000,
+        });
   };
 
-  if (baseContractAddress) {
-    throw new Error('Not yet implemented');
-  }
-
-  return deployContract(deploymentFunction, ContractNames.KEY_MANAGER);
+  return baseContractAddress
+    ? deployProxyContract(
+        LSP6KeyManagerInit__factory.abi,
+        deploymentFunction,
+        ContractNames.KEY_MANAGER,
+        signer
+      )
+    : deployContract(deploymentFunction, ContractNames.KEY_MANAGER);
 }
 
-// function initializeProxy(
-//   signer: Signer,
-//   accountDeploymentReceipt$: Observable<DeploymentEventProxyContract<LSP3AccountInit>>
-// ) {
-//   return initialize<KeyManagerInit>(
-//     accountDeploymentReceipt$,
-//     new KeyManagerInit__factory(signer),
-//     (result: DeploymentEvent<KeyManagerInit>) => {
-//       return result.initArguments;
-//     }
-//   ).pipe(shareReplay());
-// }
+function initializeProxy(
+  signer: Signer,
+  keyManagerDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
+  accountAddress: string
+) {
+  return initialize(
+    keyManagerDeploymentReceipt$,
+    new LSP6KeyManagerInit__factory(signer),
+    async () => {
+      return [accountAddress];
+    }
+  );
+}

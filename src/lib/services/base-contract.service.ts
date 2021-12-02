@@ -6,6 +6,7 @@ import {
   ContractDeploymentOptions,
   DeploymentEventContract,
   LSP1UniversalReceiverDelegateInit__factory,
+  LSP6KeyManagerInit__factory,
   LSP7MintableInit__factory,
   LSP8MintableInit__factory,
   ContractNames as UniversalProfileContractNames,
@@ -17,7 +18,7 @@ import { ContractNames as DigitalAssetContractNames } from '../interfaces/digita
 
 export function universalProfileBaseContractsDeployment$(
   signer: Signer,
-  baseContractsToDeploy$: Observable<[boolean, boolean]>
+  baseContractsToDeploy$: Observable<[boolean, boolean, boolean]>
 ): Observable<DeploymentEventContract> {
   const erc725AccountBaseContractDeploymentReceipt$ = deployBaseContract$(
     UniversalProfileContractNames.ERC725_Account,
@@ -37,15 +38,33 @@ export function universalProfileBaseContractsDeployment$(
     }
   );
 
+  const keyManagerBaseContractDeploymentReceipt$ = deployBaseContract$(
+    UniversalProfileContractNames.KEY_MANAGER,
+    async () => {
+      const keyManagerInit = await new LSP6KeyManagerInit__factory(signer).deploy({
+        gasPrice: GAS_PRICE,
+      });
+      await keyManagerInit.initialize(NULL_ADDRESS);
+      return keyManagerInit;
+    }
+  );
+
   const baseContractDeployment$ = baseContractsToDeploy$.pipe(
-    switchMap(([shouldDeployUPBaseContract, shouldDeployUniversalReceiverBaseContract]) => {
-      return merge(
-        shouldDeployUPBaseContract ? erc725AccountBaseContractDeploymentReceipt$ : EMPTY,
-        shouldDeployUniversalReceiverBaseContract
-          ? universalReceiverBaseContractDeploymentReceipt$
-          : EMPTY
-      );
-    }),
+    switchMap(
+      ([
+        shouldDeployUPBaseContract,
+        shouldDeployUniversalReceiverBaseContract,
+        shouldDeployKeyManagerBaseContract,
+      ]) => {
+        return merge(
+          shouldDeployUPBaseContract ? erc725AccountBaseContractDeploymentReceipt$ : EMPTY,
+          shouldDeployUniversalReceiverBaseContract
+            ? universalReceiverBaseContractDeploymentReceipt$
+            : EMPTY,
+          shouldDeployKeyManagerBaseContract ? keyManagerBaseContractDeploymentReceipt$ : EMPTY
+        );
+      }
+    ),
     shareReplay()
   );
 
@@ -111,30 +130,45 @@ function deployBaseContract$(
 export function getUniversalProfileBaseContractAddresses$(
   defaultUPBaseContractAddress: string,
   defaultUniversalReceiverBaseContractAddress: string,
-  defaultBaseContractByteCode$: Observable<[string, string]>,
+  defaultKeyManagerBaseContractAddress: string,
+  defaultBaseContractByteCode$: Observable<[string, string, string]>,
   signer: Signer,
   contractDeploymentOptions?: ContractDeploymentOptions
 ) {
   const providedUPBaseContractAddress = contractDeploymentOptions?.libAddresses?.erc725AccountInit;
   const providedUniversalReceiverContractAddress =
     contractDeploymentOptions?.libAddresses?.universalReceiverDelegateInit;
+  const providedKeyManagerContractAddress = contractDeploymentOptions?.libAddresses?.keyManagerInit;
 
   const baseContractsToDeploy$ = defaultBaseContractByteCode$.pipe(
-    switchMap(([defaultUPBaseContractByteCode, defaultUniversalReceiverBaseContractByteCode]) => {
-      const shouldDeployUPBaseContract =
-        !providedUPBaseContractAddress && defaultUPBaseContractByteCode === '0x';
+    switchMap(
+      ([
+        defaultUPBaseContractByteCode,
+        defaultUniversalReceiverBaseContractByteCode,
+        defaultkeyManagerBaseContractByteCode,
+      ]) => {
+        const shouldDeployUPBaseContract =
+          !providedUPBaseContractAddress && defaultUPBaseContractByteCode === '0x';
 
-      const shouldDeployUniversalReceiverBaseContract =
-        !providedUniversalReceiverContractAddress &&
-        defaultUniversalReceiverBaseContractByteCode === '0x';
+        const shouldDeployUniversalReceiverBaseContract =
+          !providedUniversalReceiverContractAddress &&
+          defaultUniversalReceiverBaseContractByteCode === '0x';
 
-      return of([shouldDeployUPBaseContract, shouldDeployUniversalReceiverBaseContract]);
-    })
+        const shouldDeployKeyManagerBaseContract =
+          !providedKeyManagerContractAddress && defaultkeyManagerBaseContractByteCode === '0x';
+
+        return of([
+          shouldDeployUPBaseContract,
+          shouldDeployUniversalReceiverBaseContract,
+          shouldDeployKeyManagerBaseContract,
+        ]);
+      }
+    )
   );
 
   const baseContracts$ = universalProfileBaseContractsDeployment$(
     signer,
-    baseContractsToDeploy$ as Observable<[boolean, boolean]>
+    baseContractsToDeploy$ as Observable<[boolean, boolean, boolean]>
   );
 
   const baseContractAddresses = {
@@ -142,6 +176,8 @@ export function getUniversalProfileBaseContractAddresses$(
       providedUPBaseContractAddress ?? defaultUPBaseContractAddress,
     [UniversalProfileContractNames.UNIVERSAL_RECEIVER]:
       providedUniversalReceiverContractAddress ?? defaultUniversalReceiverBaseContractAddress,
+    [UniversalProfileContractNames.KEY_MANAGER]:
+      providedKeyManagerContractAddress ?? defaultKeyManagerBaseContractAddress,
   };
 
   const baseContractAddresses$ = baseContracts$.pipe(
