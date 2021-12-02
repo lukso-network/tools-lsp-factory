@@ -64,7 +64,6 @@ const myContracts = await lspFactory.LSP3UniversalProfile.deploy({
       url: "",
     },
   });
-};
 
 const myUPAddress = myContracts.erc725Account.address;
 ```
