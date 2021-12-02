@@ -71,6 +71,8 @@ export class LSP3UniversalProfile {
       contractVersions[this.options.chainId]?.baseContracts?.UniversalReceiverDelegate[
         DEFAULT_CONTRACT_VERSION
       ];
+    const defaultKeyManagerBaseContractAddress =
+      contractVersions[this.options.chainId]?.baseContracts?.KeyManager[DEFAULT_CONTRACT_VERSION];
 
     const defaultBaseContractByteCode$ = forkJoin([
       this.getDeployedByteCode(
@@ -79,11 +81,15 @@ export class LSP3UniversalProfile {
       this.getDeployedByteCode(
         defaultUniversalReceiverBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
       ),
+      this.getDeployedByteCode(
+        defaultKeyManagerBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
+      ),
     ]);
 
     const baseContractAddresses$ = getUniversalProfileBaseContractAddresses$(
       defaultUPBaseContractAddress,
       defaultUniversalReceiverBaseContractAddress,
+      defaultKeyManagerBaseContractAddress,
       defaultBaseContractByteCode$,
       this.signer,
       contractDeploymentOptions
@@ -97,11 +103,8 @@ export class LSP3UniversalProfile {
     const account$ = accountDeployment$(this.signer, controllerAddresses, baseContractAddresses$);
 
     // 2 > deploys KeyManager
-    const keyManager$ = keyManagerDeployment$(
-      this.signer,
-      account$,
-      contractDeploymentOptions?.libAddresses?.keyManagerInit
-    );
+    const keyManager$ = keyManagerDeployment$(this.signer, account$, baseContractAddresses$);
+
     // 3 > deploys UniversalReceiverDelegate
     const universalReceiver$ = universalReceiverDelegateDeployment$(
       this.signer,
@@ -174,7 +177,7 @@ export class LSP3UniversalProfile {
    * @memberof LSP3UniversalProfile
    */
   deployBaseContracts() {
-    const baseContractsToDeploy$ = of([true, true] as [boolean, boolean]);
+    const baseContractsToDeploy$ = of([true, true, true] as [boolean, boolean, boolean]);
 
     const baseContracts$ = universalProfileBaseContractsDeployment$(
       this.signer,
