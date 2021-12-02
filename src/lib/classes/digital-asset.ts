@@ -96,7 +96,7 @@ export class DigitalAsset {
    *
    * Returns an Observable which emits events as contracts are deployed
    *
-   * @param {LSP7DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
+   * @param {DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
    * @param {ContractDeploymentOptions} contractDeploymentOptions
    * @return {*}  Observable<DigitalAssetDeploymentEvent>
    * @memberof DigitalAsset
@@ -121,7 +121,7 @@ export class DigitalAsset {
    * Asyncronous version of `deployLSP8IdentifiableDigitalAssetReactive`.
    * Returns a Promise with deployed contract details
    *
-   * @param {LSP7DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
+   * @param {DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
    * @param {ContractDeploymentOptions} contractDeploymentOptions
    * @return {*}  Promise<DeployedContracts>
    * @memberof DigitalAsset
