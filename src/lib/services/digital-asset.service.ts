@@ -164,7 +164,7 @@ async function deployLSP8IdentifiableDigitalAsset(
           digitalAssetDeploymentOptions.name,
           digitalAssetDeploymentOptions.symbol,
           digitalAssetDeploymentOptions.ownerAddress,
-          { gasLimit: 1_000_000 }
+          { gasLimit: 3_000_000 }
         );
   };
 

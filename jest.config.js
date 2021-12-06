@@ -33,5 +33,6 @@ module.exports = async () => {
     maxWorkers: '50%',
     maxConcurrency: 10,
     reporters: ['default'],
+    testPathIgnorePatterns: ["test/e2e"]
   };
 };

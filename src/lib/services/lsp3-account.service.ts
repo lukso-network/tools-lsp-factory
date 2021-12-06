@@ -119,7 +119,10 @@ export async function deployProxyContract(
       getProxyByteCode(contract.address),
       signer
     );
-    const deployedProxy = await factory.deploy(signer.getAddress());
+    const deployedProxy = await factory.deploy(signer.getAddress(), {
+      gasPrice: GAS_PRICE,
+      gasLimit: 3_000_000,
+    });
     const transaction = deployedProxy.deployTransaction;
     return {
       type: DeploymentType.PROXY,
