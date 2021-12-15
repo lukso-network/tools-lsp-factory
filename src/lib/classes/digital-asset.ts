@@ -65,6 +65,16 @@ export class DigitalAsset {
    * @param {ContractDeploymentOptions} contractDeploymentOptions
    * @return {*}  Promise<DeployedContracts>
    * @memberof DigitalAsset
+   *
+   * @example
+   * ```javascript
+   *lspFactory.DigitalAsset.deployLSP7DigitalAsset({
+   *  name: "My token",
+   *  symbol: "TKN",
+   *  ownerAddress: "0xb74a88C43BCf691bd7A851f6603cb1868f6fc147",
+   *  isNFT: true,
+   *}) 
+
    */
   deployLSP7DigitalAsset(
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
@@ -125,6 +135,15 @@ export class DigitalAsset {
    * @param {ContractDeploymentOptions} contractDeploymentOptions
    * @return {*}  Promise<DeployedContracts>
    * @memberof DigitalAsset
+   *
+   * @example
+   * ```javascript
+   *lspFactory.DigitalAsset.deployLSP8IdentifiableDigitalAsset({
+   *  name: "My token",
+   *  symbol: "TKN",
+   *  ownerAddress: "0xb74a88C43BCf691bd7A851f6603cb1868f6fc147",
+   *})
+   *```
    */
   deployLSP8IdentifiableDigitalAsset(
     digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,

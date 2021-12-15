@@ -49,4 +49,7 @@ export type DeploymentEvent =
   | DeploymentEventProxyContract
   | DeploymentEventTransaction;
 
+/**
+ * @internal
+ */
 export type DeploymentEvent$ = Observable<DeploymentEvent>;

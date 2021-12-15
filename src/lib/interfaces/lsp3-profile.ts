@@ -24,6 +24,19 @@ export interface LSP3ProfileImage {
   url: string;
 }
 
+/**
+ * @example
+ *```javascript
+ *{
+ *  name: "My Universal Profile",
+ *  description: "My cool Universal Profile",
+ *  profileImage: myLocalFile,
+ *  backgroundImage: myLocalFile,
+ *  tags: ['Fashion', 'Design'],
+ *  links: [{ title: "My Website", url: "www.my-website.com" }],
+ *};
+ *```
+ */
 export interface ProfileDataBeforeUpload {
   profileImage?: File | ImageBuffer | LSP3ProfileImage[];
   backgroundImage?: File | ImageBuffer | LSP3ProfileImage[];

@@ -7,7 +7,7 @@ import { LSPFactoryOptions } from './interfaces';
 import { SignerOptions } from './interfaces/lsp-factory-options';
 
 /**
- * Factory for creating LSP3UniversalProfiles / LSP4DigitalCertificates
+ * Factory for creating UniversalProfiles and Digital Assets
  */
 export class LSPFactory {
   options: LSPFactoryOptions;
