@@ -4,5 +4,6 @@
   "exclude": ["**/*+(.spec|.e2e).ts", "./types/ethers-v5/**", "./README.md"],
   "readme": "none",
   "githubPages": false,
-  "includeVersion": true
+  "includeVersion": true,
+  "excludeInternal": true
 }
