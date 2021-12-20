@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / [Exports](../modules.md) / DeploymentStatus
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / DeploymentStatus
 
 # Enumeration: DeploymentStatus
 
@@ -17,7 +17,7 @@
 
 #### Defined in
 
-[src/lib/interfaces/profile-deployment.ts:15](https://github.com/lukso-network/tools-lsp-factory/blob/c1d9183/src/lib/interfaces/profile-deployment.ts#L15)
+[lib/interfaces/deployment-events.ts:14](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L14)
 
 ___
 
@@ -27,4 +27,4 @@ ___
 
 #### Defined in
 
-[src/lib/interfaces/profile-deployment.ts:14](https://github.com/lukso-network/tools-lsp-factory/blob/c1d9183/src/lib/interfaces/profile-deployment.ts#L14)
+[lib/interfaces/deployment-events.ts:13](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L13)

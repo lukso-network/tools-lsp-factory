@@ -6,6 +6,9 @@ import { DeploymentStatus } from '../interfaces';
 import { waitForReceipt } from './deployment.helper';
 
 describe('waitForReceipt', () => {
+  beforeEach(() => {
+    jest.useRealTimers();
+  });
   describe('with type PROXY', () => {
     it('should return a new deployment event with the receipt', (done) => {
       const expectedDeploymentEvent = defaultDeploymentEvents.PROXY.ERC725Account.deployment;

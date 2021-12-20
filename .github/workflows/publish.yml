@@ -32,6 +32,12 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Update Docs
+        run: npm run doc:html
+
+      - name: Publish Docs
+        run: npm run doc:publish
+
       - name: Build
         run: npm run build
 

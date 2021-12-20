@@ -1,7 +1,13 @@
 import { Signer } from '@ethersproject/abstract-signer';
 import { concat, EMPTY, from, Observable, shareReplay, switchMap, takeLast } from 'rxjs';
 
-import { LSP7__factory, LSP7Init__factory, LSP8__factory, LSP8Init__factory } from '../../';
+import {
+  LSP7Mintable__factory,
+  LSP7MintableInit__factory,
+  LSP8Mintable__factory,
+  LSP8MintableInit__factory,
+} from '../../';
+import { GAS_BUFFER, GAS_PRICE } from '../helpers/config.helper';
 import { deployContract, deployProxyContract, waitForReceipt } from '../helpers/deployment.helper';
 import { DeploymentEventContract, DeploymentEventProxyContract } from '../interfaces';
 import {
@@ -49,8 +55,8 @@ async function deployLSP7DigitalAsset(
 ) {
   const deploymentFunction = async () => {
     return baseContractAddress
-      ? new LSP7Init__factory(signer).attach(baseContractAddress)
-      : await new LSP7__factory(signer).deploy(
+      ? new LSP7MintableInit__factory(signer).attach(baseContractAddress)
+      : await new LSP7Mintable__factory(signer).deploy(
           digitalAssetDeploymentOptions.name,
           digitalAssetDeploymentOptions.symbol,
           digitalAssetDeploymentOptions.controllerAddress,
@@ -60,7 +66,7 @@ async function deployLSP7DigitalAsset(
 
   return baseContractAddress
     ? deployProxyContract(
-        LSP7Init__factory.abi,
+        LSP7MintableInit__factory.abi,
         deploymentFunction,
         ContractNames.LSP7_DIGITAL_ASSET,
         signer
@@ -78,16 +84,31 @@ function initializeLSP7Proxy(
   const initialize$ = digitalAssetDeploymentReceipt$.pipe(
     takeLast(1),
     switchMap(async (result) => {
-      const contract = await new LSP7Init__factory(signer).attach(result.receipt.contractAddress);
+      const contract = await new LSP7MintableInit__factory(signer).attach(
+        result.receipt.contractAddress
+      );
+
+      const gasEstimate = await contract.estimateGas[`initialize(string,string,address,bool)`](
+        name,
+        symbol,
+        ownerAddress,
+        isNFT,
+        {
+          gasPrice: GAS_PRICE,
+        }
+      );
+
       const transaction = await contract[`initialize(string,string,address,bool)`](
         name,
         symbol,
         controllerAddress,
         isNFT,
         {
-          gasLimit: 3_000_000,
+          gasLimit: gasEstimate.add(GAS_BUFFER),
+          gasPrice: GAS_PRICE,
         }
       );
+
       return {
         type: result.type,
         contractName: result.contractName,
@@ -137,8 +158,8 @@ async function deployLSP8IdentifiableDigitalAsset(
 ) {
   const deploymentFunction = async () => {
     return baseContractAddress
-      ? new LSP8Init__factory(signer).attach(baseContractAddress)
-      : await new LSP8__factory(signer).deploy(
+      ? new LSP8MintableInit__factory(signer).attach(baseContractAddress)
+      : await new LSP8Mintable__factory(signer).deploy(
           digitalAssetDeploymentOptions.name,
           digitalAssetDeploymentOptions.symbol,
           digitalAssetDeploymentOptions.controllerAddress
@@ -147,7 +168,7 @@ async function deployLSP8IdentifiableDigitalAsset(
 
   return baseContractAddress
     ? deployProxyContract(
-        LSP8Init__factory.abi,
+        LSP8MintableInit__factory.abi,
         deploymentFunction,
         ContractNames.LSP8_DIGITAL_ASSET,
         signer
@@ -165,13 +186,26 @@ function initializeLSP8Proxy(
   const initialize$ = digitalAssetDeploymentReceipt$.pipe(
     takeLast(1),
     switchMap(async (result) => {
-      const contract = await new LSP7Init__factory(signer).attach(result.receipt.contractAddress);
+      const contract = await new LSP8MintableInit__factory(signer).attach(
+        result.receipt.contractAddress
+      );
+
+      const gasEstimate = await contract.estimateGas[`initialize(string,string,address)`](
+        name,
+        symbol,
+        ownerAddress,
+        {
+          gasPrice: GAS_PRICE,
+        }
+      );
+
       const transaction = await contract[`initialize(string,string,address)`](
         name,
         symbol,
         controllerAddress,
         {
-          gasLimit: 3_000_000,
+          gasLimit: gasEstimate.add(GAS_BUFFER),
+          gasPrice: GAS_PRICE,
         }
       );
       return {

@@ -30,8 +30,13 @@ import {
 import { universalReceiverDelegateDeployment$ } from './../services/universal-receiver.service';
 
 /**
- * TODO: docs
+ * Class responsible for deploying UniversalProfiles and uploading LSP3 metadata to IPFS
+ *
+ * @property {LSPFactoryOptions} options
+ * @property {NonceManager} signer
+ * @memberof LSPFactory
  */
+
 export class LSP3UniversalProfile {
   options: LSPFactoryOptions;
   signer: NonceManager;
@@ -41,7 +46,14 @@ export class LSP3UniversalProfile {
   }
 
   /**
-   * TODO: docs
+   * Deploys a UniversalProfile and uploads LSP3 Profile data to IPFS
+   *
+   * Returns an Observable which emits events as UP contracts are deployed
+   *
+   * @param {ProfileDeploymentOptions} profileData
+   * @param {ContractDeploymentOptions} contractDeploymentOptions
+   * @return {*}  Observable<LSP3AccountDeploymentEvent | DeploymentEventTransaction>
+   * @memberof LSP3UniversalProfile
    */
   deployReactive(
     profileDeploymentOptions: ProfileDeploymentOptions,
@@ -59,6 +71,8 @@ export class LSP3UniversalProfile {
       contractVersions[this.options.chainId]?.baseContracts?.UniversalReceiverDelegate[
         DEFAULT_CONTRACT_VERSION
       ];
+    const defaultKeyManagerBaseContractAddress =
+      contractVersions[this.options.chainId]?.baseContracts?.KeyManager[DEFAULT_CONTRACT_VERSION];
 
     const defaultBaseContractByteCode$ = forkJoin([
       this.getDeployedByteCode(
@@ -67,11 +81,15 @@ export class LSP3UniversalProfile {
       this.getDeployedByteCode(
         defaultUniversalReceiverBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
       ),
+      this.getDeployedByteCode(
+        defaultKeyManagerBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
+      ),
     ]);
 
     const baseContractAddresses$ = getUniversalProfileBaseContractAddresses$(
       defaultUPBaseContractAddress,
       defaultUniversalReceiverBaseContractAddress,
+      defaultKeyManagerBaseContractAddress,
       defaultBaseContractByteCode$,
       this.signer,
       contractDeploymentOptions
@@ -85,15 +103,11 @@ export class LSP3UniversalProfile {
     const account$ = accountDeployment$(this.signer, controllerAddresses, baseContractAddresses$);
 
     // 2 > deploys KeyManager
-    const keyManager$ = keyManagerDeployment$(
-      this.signer,
-      account$,
-      contractDeploymentOptions?.libAddresses?.keyManagerInit
-    );
+    const keyManager$ = keyManagerDeployment$(this.signer, account$, baseContractAddresses$);
+
     // 3 > deploys UniversalReceiverDelegate
     const universalReceiver$ = universalReceiverDelegateDeployment$(
       this.signer,
-      account$,
       baseContractAddresses$
     );
 
@@ -118,7 +132,24 @@ export class LSP3UniversalProfile {
   }
 
   /**
-   * TODO: docs
+   * Deploys a UniversalProfile to the blockchain and uploads LSP3 Profile data to IPFS
+   *
+   * Asyncronous version of `deployReactive`. Returns a Promise with deployed contract details
+   *
+   * @param {ProfileDeploymentOptions} profileData
+   * @param {ContractDeploymentOptions} contractDeploymentOptions
+   * @returns {*}  Promise<DeployedContracts>
+   * @memberof LSP3UniversalProfile
+   *
+   *
+   * @example
+   * ```javascript
+   *lspFactory.LSP3UniversalProfile.deploy({
+   *    controllingAccounts: ['0xb74a88C43BCf691bd7A851f6603cb1868f6fc147'],
+   *    lsp3Profile: myUniversalProfileData
+   *  });
+   *};
+   * ```
    */
   deploy(
     profileDeploymentOptions: ProfileDeploymentOptions,
@@ -147,8 +178,16 @@ export class LSP3UniversalProfile {
     return this.options.provider.getCode(contractAddress);
   }
 
+  /**
+   * Deploys UniversalProfile base contracts
+   *
+   * Returns Promise with base contract details
+   *
+   * @returns {*}  Promise<DeployedContracts>
+   * @memberof LSP3UniversalProfile
+   */
   deployBaseContracts() {
-    const baseContractsToDeploy$ = of([true, true] as [boolean, boolean]);
+    const baseContractsToDeploy$ = of([true, true, true] as [boolean, boolean, boolean]);
 
     const baseContracts$ = universalProfileBaseContractsDeployment$(
       this.signer,

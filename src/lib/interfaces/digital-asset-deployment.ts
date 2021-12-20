@@ -1,4 +1,4 @@
-import { LSP7, LSP8 } from '../../';
+import { LSP7DigitalAsset, LSP8IdentifiableDigitalAsset } from '../../';
 
 export enum ContractNames {
   LSP7_DIGITAL_ASSET = 'LSP7DigitalAsset',
@@ -16,8 +16,8 @@ export interface LSP7DigitalAssetDeploymentOptions extends DigitalAssetDeploymen
 }
 
 export interface DeployedContracts {
-  LSP7DigitalAsset: LSP7;
-  LSP8IdentifiableDigitalAsset: LSP8;
+  LSP7DigitalAsset: LSP7DigitalAsset;
+  LSP8IdentifiableDigitalAsset: LSP8IdentifiableDigitalAsset;
 }
 
 export interface ContractDeploymentOptions {

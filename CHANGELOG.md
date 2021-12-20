@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.5](https://github.com/lukso-network/tools-lsp-factory/compare/v1.0.2-alpha.8...v1.1.5) (2021-11-23)
+
+### Features
+
+* upload image to IPFS from buffer ([f17b911](https://github.com/lukso-network/tools-lsp-factory/commit/f17b911820e277cade73089968fb9566e00d832f))
+
+
+### [1.1.4](https://github.com/lukso-network/tools-lsp-factory/compare/v1.0.2-alpha.8...v1.1.4) (2021-11-18)
+
+### Bug Fixes
+
+* set UniversalReceiverDelegate key to setData ([#35](https://github.com/lukso-network/tools-lsp-factory/issues/35)) ([4a25e1c](https://github.com/lukso-network/tools-lsp-factory/commit/4a25e1c73ca85d99d289302ac91cda5d4e5100d0))
+
+### [1.1.3](https://github.com/lukso-network/tools-lsp-factory/compare/v1.0.2-alpha.8...v1.1.3) (2021-11-17)
+
+
+### Features
+
+* init base contracts on deploy ([#24](https://github.com/lukso-network/tools-lsp-factory/issues/24)) ([63821da](https://github.com/lukso-network/tools-lsp-factory/commit/63821da95684c68555075004754ffdde1a3da4b4))
+
+
+### Bug Fixes
+
+* add missing types files in build ([#25](https://github.com/lukso-network/tools-lsp-factory/issues/25)) ([01eb05d](https://github.com/lukso-network/tools-lsp-factory/commit/01eb05d724ea48729646cf165efa01812cc77016)), closes [/github.com/dethcrypto/TypeChain/issues/430#issuecomment-964314162](https://github.com/lukso-network//github.com/dethcrypto/TypeChain/issues/430/issues/issuecomment-964314162)
+* npm publish add .json file ([#15](https://github.com/lukso-network/tools-lsp-factory/issues/15)) ([ab52949](https://github.com/lukso-network/tools-lsp-factory/commit/ab529499b231a9fcf6d44edde6c592192832646d))
+* setData tx ([#17](https://github.com/lukso-network/tools-lsp-factory/issues/17)) ([b5b7cd7](https://github.com/lukso-network/tools-lsp-factory/commit/b5b7cd79d11212bad61b1f8bcda63dec24ea4294))
+
 ### [1.1.2](https://github.com/lukso-network/tools-lspFactory/compare/v1.0.2-alpha.8...v1.1.2) (2021-11-02)
 
 

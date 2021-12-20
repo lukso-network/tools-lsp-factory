@@ -1,4 +1,4 @@
-[@lukso/lsp-factory.js](../README.md) / [Exports](../modules.md) / DeploymentType
+[@lukso/lsp-factory.js - v1.1.5](../README.md) / DeploymentType
 
 # Enumeration: DeploymentType
 
@@ -6,11 +6,22 @@
 
 ### Enumeration members
 
+- [BASE\_CONTRACT](DeploymentType.md#base_contract)
 - [CONTRACT](DeploymentType.md#contract)
 - [PROXY](DeploymentType.md#proxy)
 - [TRANSACTION](DeploymentType.md#transaction)
 
 ## Enumeration members
+
+### BASE\_CONTRACT
+
+• **BASE\_CONTRACT** = `"BASE_CONTRACT"`
+
+#### Defined in
+
+[lib/interfaces/deployment-events.ts:9](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L9)
+
+___
 
 ### CONTRACT
 
@@ -18,7 +29,7 @@
 
 #### Defined in
 
-[src/lib/interfaces/profile-deployment.ts:8](https://github.com/lukso-network/tools-lsp-factory/blob/c1d9183/src/lib/interfaces/profile-deployment.ts#L8)
+[lib/interfaces/deployment-events.ts:6](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L6)
 
 ___
 
@@ -28,7 +39,7 @@ ___
 
 #### Defined in
 
-[src/lib/interfaces/profile-deployment.ts:10](https://github.com/lukso-network/tools-lsp-factory/blob/c1d9183/src/lib/interfaces/profile-deployment.ts#L10)
+[lib/interfaces/deployment-events.ts:8](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L8)
 
 ___
 
@@ -38,4 +49,4 @@ ___
 
 #### Defined in
 
-[src/lib/interfaces/profile-deployment.ts:9](https://github.com/lukso-network/tools-lsp-factory/blob/c1d9183/src/lib/interfaces/profile-deployment.ts#L9)
+[lib/interfaces/deployment-events.ts:7](https://github.com/lukso-network/tools-lsp-factory/blob/8e385a2/src/lib/interfaces/deployment-events.ts#L7)

@@ -8,6 +8,8 @@ describe('LSP3UniversalProfile', () => {
   let signer: SignerWithAddress;
 
   beforeAll(async () => {
+    jest.useRealTimers();
+
     const provider = ethers.provider;
     signer = provider.getSigner();
     proxyDeployer = new ProxyDeployer(signer);

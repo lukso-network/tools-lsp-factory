@@ -16,6 +16,13 @@ import {
   lsp8IdentifiableDigitalAssetDeployment$,
 } from '../services/digital-asset.service';
 
+/**
+ * Class responsible for deploying Digital Assets
+ *
+ * @property {LSPFactoryOptions} options
+ * @property {NonceManager} signer
+ * @memberof LSPFactory
+ */
 export class DigitalAsset {
   options: LSPFactoryOptions;
   signer: NonceManager;
@@ -26,6 +33,16 @@ export class DigitalAsset {
 
   // LSP7
 
+  /**
+   * Deploys a mintable LSP7 Digital Asset
+   *
+   * Returns an Observable which emits events as contracts are deployed
+   *
+   * @param {LSP7DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
+   * @param {ContractDeploymentOptions} contractDeploymentOptions
+   * @return {*}  Observable<DigitalAssetDeploymentEvent>
+   * @memberof DigitalAsset
+   */
   deployLSP7DigitalAssetReactive(
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
@@ -34,11 +51,31 @@ export class DigitalAsset {
       this.signer,
       digitalAssetDeploymentOptions,
       contractDeploymentOptions?.libAddress ??
-        versions[this.options.chainId]?.baseContracts?.LSP7DigitalAsset[DEFAULT_CONTRACT_VERSION]
+        versions[this.options.chainId]?.baseContracts?.LSP7Mintable[DEFAULT_CONTRACT_VERSION]
     );
     return digitalAsset$;
   }
 
+  /**
+   * Deploys a mintable LSP7 Digital Asset
+   *
+   * Asyncronous version of `deployLSP7DigitalAssetReactive`. Returns a Promise with deployed contract details
+   *
+   * @param {LSP7DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
+   * @param {ContractDeploymentOptions} contractDeploymentOptions
+   * @return {*}  Promise<DeployedContracts>
+   * @memberof DigitalAsset
+   *
+   * @example
+   * ```javascript
+   *lspFactory.DigitalAsset.deployLSP7DigitalAsset({
+   *  name: "My token",
+   *  symbol: "TKN",
+   *  ownerAddress: "0xb74a88C43BCf691bd7A851f6603cb1868f6fc147",
+   *  isNFT: true,
+   *}) 
+
+   */
   deployLSP7DigitalAsset(
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
@@ -64,6 +101,16 @@ export class DigitalAsset {
 
   // LSP8
 
+  /**
+   * Deploys a mintable LSP8 Digital Asset
+   *
+   * Returns an Observable which emits events as contracts are deployed
+   *
+   * @param {DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
+   * @param {ContractDeploymentOptions} contractDeploymentOptions
+   * @return {*}  Observable<DigitalAssetDeploymentEvent>
+   * @memberof DigitalAsset
+   */
   deployLSP8IdentifiableDigitalAssetReactive(
     digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
@@ -72,14 +119,32 @@ export class DigitalAsset {
       this.signer,
       digitalAssetDeploymentOptions,
       contractDeploymentOptions?.libAddress ??
-        versions[this.options.chainId]?.baseContracts?.LSP8IdentifiableDigitalAsset[
-          DEFAULT_CONTRACT_VERSION
-        ]
+        versions[this.options.chainId]?.baseContracts?.LSP8Mintable[DEFAULT_CONTRACT_VERSION]
     );
 
     return digitalAsset$;
   }
 
+  /**
+   * Deploys a mintable LSP7 Digital Asset
+   *
+   * Asyncronous version of `deployLSP8IdentifiableDigitalAssetReactive`.
+   * Returns a Promise with deployed contract details
+   *
+   * @param {DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
+   * @param {ContractDeploymentOptions} contractDeploymentOptions
+   * @return {*}  Promise<DeployedContracts>
+   * @memberof DigitalAsset
+   *
+   * @example
+   * ```javascript
+   *lspFactory.DigitalAsset.deployLSP8IdentifiableDigitalAsset({
+   *  name: "My token",
+   *  symbol: "TKN",
+   *  ownerAddress: "0xb74a88C43BCf691bd7A851f6603cb1868f6fc147",
+   *})
+   *```
+   */
   deployLSP8IdentifiableDigitalAsset(
     digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
     ContractDeploymentOptions?: ContractDeploymentOptions
@@ -103,6 +168,14 @@ export class DigitalAsset {
     return lastValueFrom(deployments$);
   }
 
+  /**
+   * Deploys LSP7 and LSP7 base contracts
+   *
+   * Returns Promise with base contract details
+   *
+   * @returns {*}  Promise<DeployedContracts>
+   * @memberof LSP3UniversalProfile
+   */
   deployBaseContracts() {
     const baseContractsToDeploy$ = of([true, true] as [boolean, boolean]);
 

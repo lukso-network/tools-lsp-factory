@@ -7,14 +7,17 @@
             "ERC725Account": {
                 "0.0.1": "0xe6009BCbC6cb1046E72db3b50Ff0b9F3C94Db2fB"
             },
+            "KeyManager": {
+                "0.0.1": "0x36C80542f7ed462cc3fdB2b7AC1a83A80C5dD0f6"
+            },
             "UniversalReceiverDelegate": {
                 "0.0.1": "0x6533158b042775e2FdFeF3cA1a782EFDbB8EB9b1"
             },
-            "LSP7DigitalAsset": {
-                "0.0.1": "0xaF9a777A58ed25F15e96C93A96fe0dA924af8E6C"
+            "LSP7Mintable": {
+                "0.0.1": "0x78CFf775e3084E9B064FB59FC25b6143f1ddB831"
             },
-            "LSP8IdentifiableDigitalAsset": {
-                "0.0.1": "0x8b08e6F3349ABF23F180DfAE72A3F2B5Ec7Df767"
+            "LSP8Mintable": {
+                "0.0.1": "0x61ADBa4744d78280d9A0D5012FdA25398068EAFb"
             }
         }
     }

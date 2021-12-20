@@ -1,4 +1,4 @@
-# lsp-factory.js &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![npm version](https://img.shields.io/npm/v/@lukso/lsp-factory.js.svg?style=flat)](https://www.npmjs.com/package/@lukso/lsp-factory.js) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/lukso-network/tools-lsp-factory/pulls)
+# lsp-factory.js &middot; [![GitHub license](https://img.shields.io/badge/license-Apache-blue.svg)](./LICENSE) [![npm version](https://img.shields.io/npm/v/@lukso/lsp-factory.js.svg?style=flat)](https://www.npmjs.com/package/@lukso/lsp-factory.js) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/lukso-network/tools-lsp-factory/pulls)
 
 <p align="center">
  <h2 align="center"><strong>@lukso/lsp-factory.js</strong></h2>
@@ -44,7 +44,8 @@ const myContracts = await lspFactory.LSP3UniversalProfile.deploy({
               width: 500,
               height: 500,
               hashFunction: "keccak256(bytes)",
-              hash: "0x...", // bytes32 hex string of the image hash
+              // bytes32 hex string of the image hash
+              hash: "0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14",
               url: "ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp",
             },
           ],
@@ -53,7 +54,8 @@ const myContracts = await lspFactory.LSP3UniversalProfile.deploy({
               width: 500,
               height: 500,
               hashFunction: "keccak256(bytes)",
-              hash: "0x...", // bytes32 hex string of the image hash
+              // bytes32 hex string of the image hash
+              hash: "0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14",
               url: "ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp",
             },
           ],
@@ -64,9 +66,8 @@ const myContracts = await lspFactory.LSP3UniversalProfile.deploy({
       url: "",
     },
   });
-};
 
-const myUPAddress = myContracts.erc725Account.address;
+const myUPAddress = myContracts.ERC725Account.address;
 ```
 
 ### Using Deployment events
@@ -97,4 +98,4 @@ Please check [CONTRIBUTING](./CONTRIBUTING.md).
 
 ### License
 
-lsp-factory.js is [MIT licensed](./LICENSE).
+lsp-factory.js is [Apache 2.0 licensed](./LICENSE).
