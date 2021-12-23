@@ -91,7 +91,7 @@ function initializeLSP7Proxy(
       const gasEstimate = await contract.estimateGas[`initialize(string,string,address,bool)`](
         name,
         symbol,
-        ownerAddress,
+        controllerAddress,
         isNFT,
         {
           gasPrice: GAS_PRICE,
@@ -193,7 +193,7 @@ function initializeLSP8Proxy(
       const gasEstimate = await contract.estimateGas[`initialize(string,string,address)`](
         name,
         symbol,
-        ownerAddress,
+        controllerAddress,
         {
           gasPrice: GAS_PRICE,
         }
