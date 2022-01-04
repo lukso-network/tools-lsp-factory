@@ -282,7 +282,7 @@ export async function setData(
     universalReceiverDelegateAddress,
     signerPermissions ?? ALL_PERMISSIONS,
     SET_DATA_PERMISSION,
-    ethers.utils.hexZeroPad(2, 32),
+    ethers.utils.hexZeroPad('0x02', 32),
     controllerAddress,
     universalReceiverDelegateAddress,
   ];
