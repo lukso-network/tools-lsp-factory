@@ -48,11 +48,9 @@ export class LSP3UniversalProfile {
   /**
    * Deploys a UniversalProfile and uploads LSP3 Profile data to IPFS
    *
-   * Returns an Observable which emits events as UP contracts are deployed
-   *
    * @param {ProfileDeploymentOptions} profileData
    * @param {ContractDeploymentOptions} contractDeploymentOptions
-   * @return {*}  Observable<LSP3AccountDeploymentEvent | DeploymentEventTransaction>
+   * @return {*}  Observable<LSP3AccountDeploymentEvent | DeploymentEventTransaction> Returns an Observable which emits events as UP contracts are deployed
    * @memberof LSP3UniversalProfile
    */
   deployReactive(
@@ -181,9 +179,7 @@ export class LSP3UniversalProfile {
   /**
    * Deploys UniversalProfile base contracts
    *
-   * Returns Promise with base contract details
-   *
-   * @returns {*}  Promise<DeployedContracts>
+   * @returns {*}  Promise<DeployedContracts> Returns Promise with base contract details
    * @memberof LSP3UniversalProfile
    */
   deployBaseContracts() {
@@ -222,10 +218,12 @@ export class LSP3UniversalProfile {
 
   /**
    * Uploads the LSP3Profile to the desired endpoint. This can be an `https` URL either pointing to
-   * a public, centralized storage endpoint or an IPFS Node / Cluster
+   * a public, centralized storage endpoint or an IPFS Node / Cluster.
+   *
+   * Will upload and process passed images.
    *
    * @param {ProfileDataBeforeUpload} profileData
-   * @return {*}  {(Promise<AddResult | string>)}
+   * @return {*}  {(Promise<AddResult | string>)} Returns processed LSP3 Data and upload url
    * @memberof LSP3UniversalProfile
    */
   static async uploadProfileData(
