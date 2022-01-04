@@ -1,6 +1,6 @@
 import { TransactionReceipt } from '@ethersproject/providers';
 import axios from 'axios';
-import { BytesLike, Contract, ContractFactory, Signer } from 'ethers';
+import { BytesLike, Contract, ContractFactory, ethers, Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, from, Observable, of } from 'rxjs';
 import { shareReplay, switchMap } from 'rxjs/operators';
 
@@ -282,7 +282,7 @@ export async function setData(
     universalReceiverDelegateAddress,
     signerPermissions ?? ALL_PERMISSIONS,
     SET_DATA_PERMISSION,
-    2,
+    ethers.utils.hexZeroPad('0x02', 32),
     controllerAddress,
     universalReceiverDelegateAddress,
   ];
