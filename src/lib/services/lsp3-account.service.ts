@@ -1,6 +1,6 @@
 import { TransactionReceipt } from '@ethersproject/providers';
 import axios from 'axios';
-import { BytesLike, Contract, ContractFactory, Signer, ethers } from 'ethers';
+import { BytesLike, Contract, ContractFactory, ethers, Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, from, Observable, of } from 'rxjs';
 import { shareReplay, switchMap } from 'rxjs/operators';
 
