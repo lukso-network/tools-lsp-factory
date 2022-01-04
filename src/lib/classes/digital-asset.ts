@@ -36,11 +36,9 @@ export class DigitalAsset {
   /**
    * Deploys a mintable LSP7 Digital Asset
    *
-   * Returns an Observable which emits events as contracts are deployed
-   *
    * @param {LSP7DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
    * @param {ContractDeploymentOptions} contractDeploymentOptions
-   * @return {*}  Observable<DigitalAssetDeploymentEvent>
+   * @return {*} Returns an rxjs Observable which emits events as contracts are deployed
    * @memberof DigitalAsset
    */
   deployLSP7DigitalAssetReactive(
@@ -104,11 +102,9 @@ export class DigitalAsset {
   /**
    * Deploys a mintable LSP8 Digital Asset
    *
-   * Returns an Observable which emits events as contracts are deployed
-   *
    * @param {DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
    * @param {ContractDeploymentOptions} contractDeploymentOptions
-   * @return {*}  Observable<DigitalAssetDeploymentEvent>
+   * @return {*}  Returns an rxjs Observable which emits events as contracts are deployed
    * @memberof DigitalAsset
    */
   deployLSP8IdentifiableDigitalAssetReactive(
@@ -129,11 +125,10 @@ export class DigitalAsset {
    * Deploys a mintable LSP7 Digital Asset
    *
    * Asyncronous version of `deployLSP8IdentifiableDigitalAssetReactive`.
-   * Returns a Promise with deployed contract details
    *
    * @param {DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
    * @param {ContractDeploymentOptions} contractDeploymentOptions
-   * @return {*}  Promise<DeployedContracts>
+   * @return {*}  Returns a Promise with deployed contract details
    * @memberof DigitalAsset
    *
    * @example
@@ -171,9 +166,7 @@ export class DigitalAsset {
   /**
    * Deploys LSP7 and LSP7 base contracts
    *
-   * Returns Promise with base contract details
-   *
-   * @returns {*}  Promise<DeployedContracts>
+   * @returns {*}  Returns Promise with object containing base contract details
    * @memberof LSP3UniversalProfile
    */
   deployBaseContracts() {
