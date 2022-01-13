@@ -64,7 +64,7 @@ const myDigitalAsset =
 
 const myNFT = new web3.eth.Contract(
     LSP8IdentifiableDigitalAsset.abi,
-    LSP8Contract.LSP8IdentifiableDigitalAsset.address
+    myDigitalAsset.LSP8IdentifiableDigitalAsset.address
 );
 
 const totalSupply = myNFT.methods.totalSupply().call()
