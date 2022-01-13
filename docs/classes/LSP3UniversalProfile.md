@@ -10,7 +10,7 @@ lspFactory.LSP3UniversalProfile.deploy(
   contractDeploymentOptions?);
 ```
 
-Deploys and **configure** a [Universal Profile](../../../standards/universal-profile/introduction) to the blockchain. It will deploy the following contracts:
+Deploys and **configures** a [Universal Profile](../../../standards/universal-profile/introduction) to the blockchain. It will deploy the following contracts:
 
 - [LSP0 ERC725 Account](../../../standards/universal-profile/LSP0-Foundation)
 - [LSP1 Universal Receiver Delegate](../../../standards/universal-profile/lsp1-universal-receiver-delegate)
@@ -383,7 +383,7 @@ Bytecode deployed at provided contract address.
 
 ```javascript
 await lspFactory.LSP3UniversalProfile.getDeployedByteCode(
-  '0xd92C7cA9c493aFC0DF51cE480ec7bB7DC8394549'
+  '0xd92C7cA9c493aFC0DF51cE480ec7bB7DC8394549',
 );
 
 // 0x363d3d373d3d3d363d736533158b042775e2fdfef3ca1a782efdbb8eb9b15af43d82803e903d91602b57fd5bf3
