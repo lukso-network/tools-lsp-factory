@@ -1,3 +1,4 @@
+import { ERC725 } from '@erc725/erc725.js';
 import { TransactionReceipt } from '@ethersproject/providers';
 import axios from 'axios';
 import { BytesLike, Contract, ContractFactory, ethers, Signer } from 'ethers';
@@ -11,12 +12,11 @@ import {
 } from '../..';
 import {
   ADDRESS_PERMISSIONS_ARRAY_KEY,
-  ALL_PERMISSIONS,
+  DEFAULT_PERMISSIONS,
   GAS_BUFFER,
   GAS_PRICE,
   LSP3_UP_KEYS,
   PREFIX_PERMISSIONS,
-  SET_DATA_PERMISSION,
 } from '../helpers/config.helper';
 import {
   deployContract,
@@ -302,6 +302,10 @@ export async function setData(
     ...addressPermissionsArrayElements, // AddressPermission[index] = controllerAddress
     universalReceiverPermissionIndex,
   ];
+
+  const SET_DATA_PERMISSION = ERC725.encodePermissions({
+    SETDATA: true,
+  });
 
   const valuesToSet = [
     universalReceiverDelegateAddress,
