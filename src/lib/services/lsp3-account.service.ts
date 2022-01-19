@@ -246,6 +246,8 @@ export async function setData(
   controllerAddresses: (string | ControllerOptions)[],
   lsp3Profile?: LSP3ProfileDataForEncoding | string
 ): Promise<DeploymentEventTransaction> {
+  const abiCoder = ethers.utils.defaultAbiCoder;
+
   let encodedLSP3Profile;
   if (lsp3Profile && typeof lsp3Profile !== 'string') {
     const encodedDataResult = lsp3Profile
@@ -259,31 +261,38 @@ export async function setData(
 
   const erc725Account = new UniversalProfile__factory(signer).attach(erc725AccountAddress);
 
-  let controllerAddress: string;
-  let signerPermissions: string;
+  let signersAddresses: string[];
+  let signersPermissions: string[];
 
-  if (typeof controllerAddresses[0] === 'string') {
-    controllerAddress = controllerAddresses[0];
-  } else {
-    controllerAddress = controllerAddresses[0].address;
-    signerPermissions = controllerAddresses[0].permissions;
+  if (controllerAddresses.every((address) => address as ControllerOptions)) {
+    controllerAddresses.map(
+      (controller, index) => (signersAddresses[index] = controller[index].address)
+    );
+    signersPermissions = controllerAddresses.map(
+      (controller, index) => controller[index].permissions
+    );
   }
 
   const keysToSet = [
     LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
-    PREFIX_PERMISSIONS + controllerAddress.substr(2), // TODO: handle multiple addresses,
-    PREFIX_PERMISSIONS + universalReceiverDelegateAddress.substr(2),
+    ...signersAddresses.map((key) => PREFIX_PERMISSIONS + key.substring(2)), // TODO: handle multiple addresses,
+    PREFIX_PERMISSIONS + universalReceiverDelegateAddress.substring(2),
     ADDRESS_PERMISSIONS_ARRAY_KEY,
-    ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) + '00000000000000000000000000000000',
-    ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) + '00000000000000000000000000000001',
+    ...signersAddresses.map(
+      (_, index) =>
+        ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
+        abiCoder.encode(['uint128'], [index]).substring(2)
+    ),
+    ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
+      abiCoder.encode(['uint128'], [signersAddresses.length + 1]).substring(2),
   ];
 
   const valuesToSet = [
     universalReceiverDelegateAddress,
-    signerPermissions ?? ALL_PERMISSIONS,
+    ...signersPermissions.map((permission) => permission ?? ALL_PERMISSIONS),
     SET_DATA_PERMISSION,
-    ethers.utils.hexZeroPad('0x02', 32),
-    controllerAddress,
+    abiCoder.encode(['uint256'], [signersPermissions.length]),
+    ...signersAddresses,
     universalReceiverDelegateAddress,
   ];
 
