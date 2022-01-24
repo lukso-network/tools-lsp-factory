@@ -264,32 +264,41 @@ export async function setData(
   let signersAddresses: string[];
   let signersPermissions: string[];
 
-  if (controllerAddresses.every((address) => address as ControllerOptions)) {
-    controllerAddresses.map(
-      (controller, index) => (signersAddresses[index] = controller[index].address)
-    );
-    signersPermissions = controllerAddresses.map(
-      (controller, index) => controller[index].permissions
-    );
-  }
+  controllerAddresses.map((controller, index) => {
+    if (typeof controller === 'string') {
+      signersAddresses[index] = controller;
+      signersPermissions[index] = ALL_PERMISSIONS;
+    } else {
+      signersAddresses[index] = controller.address;
+      signersPermissions[index] = controller.permissions;
+    }
+  });
+
+  // see: https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md#addresspermissionspermissionsaddress
+  const addressPermissionsKeys = signersAddresses.map(
+    (address) => PREFIX_PERMISSIONS + address.substring(2)
+  );
+
+  // see: https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md#addresspermissions
+  const addressPermissionsArrayElements = signersAddresses.map(
+    (_, index) =>
+      ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
+      abiCoder.encode(['uint128'], [index]).substring(2)
+  );
 
   const keysToSet = [
     LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
-    ...signersAddresses.map((key) => PREFIX_PERMISSIONS + key.substring(2)), // TODO: handle multiple addresses,
+    ...addressPermissionsKeys, // AddressPermissions:Permissions:<controllerAddress> = controllerPermission,
     PREFIX_PERMISSIONS + universalReceiverDelegateAddress.substring(2),
     ADDRESS_PERMISSIONS_ARRAY_KEY,
-    ...signersAddresses.map(
-      (_, index) =>
-        ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
-        abiCoder.encode(['uint128'], [index]).substring(2)
-    ),
+    ...addressPermissionsArrayElements, // AddressPermission[index] = controllerAddress
     ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
       abiCoder.encode(['uint128'], [signersAddresses.length + 1]).substring(2),
   ];
 
   const valuesToSet = [
     universalReceiverDelegateAddress,
-    ...signersPermissions.map((permission) => permission ?? ALL_PERMISSIONS),
+    ...signersPermissions,
     SET_DATA_PERMISSION,
     abiCoder.encode(['uint256'], [signersPermissions.length]),
     ...signersAddresses,
