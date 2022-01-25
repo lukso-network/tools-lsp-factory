@@ -11,7 +11,7 @@ import {
 } from '../..';
 import {
   ADDRESS_PERMISSIONS_ARRAY_KEY,
-  ALL_PERMISSIONS,
+  DEFAULT_PERMISSIONS,
   GAS_BUFFER,
   GAS_PRICE,
   LSP3_UP_KEYS,
@@ -280,7 +280,7 @@ export async function setData(
 
   const valuesToSet = [
     universalReceiverDelegateAddress,
-    signerPermissions ?? ALL_PERMISSIONS,
+    signerPermissions ?? DEFAULT_PERMISSIONS,
     SET_DATA_PERMISSION,
     ethers.utils.hexZeroPad('0x02', 32),
     controllerAddress,
