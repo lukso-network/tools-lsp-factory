@@ -3,6 +3,7 @@ import axios from 'axios';
 import { BytesLike, Contract, ContractFactory, ethers, Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, from, Observable, of } from 'rxjs';
 import { shareReplay, switchMap } from 'rxjs/operators';
+import { ERC725 } from '@erc725/erc725.js';
 
 import {
   LSP3UniversalProfile,
@@ -16,7 +17,6 @@ import {
   GAS_PRICE,
   LSP3_UP_KEYS,
   PREFIX_PERMISSIONS,
-  SET_DATA_PERMISSION,
 } from '../helpers/config.helper';
 import {
   deployContract,
@@ -278,9 +278,13 @@ export async function setData(
     ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) + '00000000000000000000000000000001',
   ];
 
+  const SET_DATA_PERMISSION = ERC725.encodePermissions({
+    SETDATA: true,
+  });
+
   const valuesToSet = [
     universalReceiverDelegateAddress,
-    signerPermissions ?? DEFAULT_PERMISSIONS,
+    signerPermissions ?? ERC725.encodePermissions(DEFAULT_PERMISSIONS),
     SET_DATA_PERMISSION,
     ethers.utils.hexZeroPad('0x02', 32),
     controllerAddress,
