@@ -25,12 +25,20 @@ export const ADDRESS_PERMISSIONS_ARRAY_KEY =
   '0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3';
 
 export const PREFIX_PERMISSIONS = '0x4b80742d0000000082ac0000';
-export const ALL_PERMISSIONS = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
-// exclude DELEGATECALL permission for safety
-export const DEFAULT_PERMISSIONS =
-  '0x00000000000000000000000000000000000000000000000000000000000003bf';
-export const SET_DATA_PERMISSION =
-  '0x0000000000000000000000000000000000000000000000000000000000000008';
+
+// exclude DELEGATECALL for safety
+export const DEFAULT_PERMISSIONS = {
+  CHANGEOWNER: true,
+  CHANGEPERMISSIONS: true,
+  ADDPERMISSIONS: true,
+  SETDATA: true,
+  CALL: true,
+  STATICCALL: true,
+  DELEGATECALL: false,
+  DEPLOY: true,
+  TRANSFERVALUE: true,
+  SIGN: true,
+};
 
 export const DEFAULT_CONTRACT_VERSION = '0.0.1';
 
