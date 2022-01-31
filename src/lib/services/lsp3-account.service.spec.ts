@@ -1,13 +1,13 @@
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { ethers } from 'hardhat';
-import { providers } from 'ethers';
+import { ERC725 } from '@erc725/erc725.js';
 import UniversalProfile from '@lukso/universalprofile-smart-contracts/artifacts/UniversalProfile.json';
-
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { providers } from 'ethers';
+import { ethers } from 'hardhat';
 import { LSPFactory } from '../../../build/main/src/lib/lsp-factory';
 
 import {
   ADDRESS_PERMISSIONS_ARRAY_KEY,
-  ALL_PERMISSIONS,
+  DEFAULT_PERMISSIONS,
   PREFIX_PERMISSIONS,
 } from '../helpers/config.helper';
 
@@ -36,23 +36,23 @@ describe('LSP3Account Service', () => {
       universalProfile = new ethers.Contract(ERC725Account.address, UniversalProfile.abi, provider);
     });
 
-    it('first address should have ALL_PERMISSIONS set', async () => {
-      let [signerPermissions] = await universalProfile
+    it('controller address should have DEFAULT_PERMISSIONS set', async () => {
+      const [signerPermissions] = await universalProfile
         .connect(signers[0])
         .callStatic.getData([PREFIX_PERMISSIONS + uniqueController.substring(2)]);
 
-      expect(signerPermissions).toEqual(ALL_PERMISSIONS);
+      expect(signerPermissions).toEqual(ERC725.encodePermissions(DEFAULT_PERMISSIONS));
     });
 
-    it('first address should be registered in AddressPermissions[0] array', async () => {
-      let hexIndex = ethers.utils.hexlify([0]);
-      let leftSide = ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34);
-      let rightSide = ethers.utils.hexZeroPad(hexIndex, 16);
+    it('controller address should be registered in AddressPermissions[0] array', async () => {
+      const hexIndex = ethers.utils.hexlify([0]);
+      const leftSide = ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34);
+      const rightSide = ethers.utils.hexZeroPad(hexIndex, 16);
 
-      let key = leftSide + rightSide.substring(2);
+      const key = leftSide + rightSide.substring(2);
 
-      let [result] = await universalProfile.connect(signers[0]).callStatic.getData([key]);
-      let checkedsumResult = ethers.utils.getAddress(result);
+      const [result] = await universalProfile.connect(signers[0]).callStatic.getData([key]);
+      const checkedsumResult = ethers.utils.getAddress(result);
       expect(checkedsumResult).toEqual(uniqueController);
     });
   });
@@ -73,43 +73,43 @@ describe('LSP3Account Service', () => {
       universalProfile = new ethers.Contract(ERC725Account.address, UniversalProfile.abi, provider);
     });
 
-    it('1st address should have ALL_PERMISSIONS set', async () => {
-      let [signerPermissions] = await universalProfile
+    it('1st address should have DEFAULT_PERMISSIONS set', async () => {
+      const [signerPermissions] = await universalProfile
         .connect(signers[0])
         .callStatic.getData([PREFIX_PERMISSIONS + firstController.substring(2)]);
 
-      expect(signerPermissions).toEqual(ALL_PERMISSIONS);
+      expect(signerPermissions).toEqual(ERC725.encodePermissions(DEFAULT_PERMISSIONS));
     });
 
     it('1st address should be registered in AddressPermissions[0] array', async () => {
-      let hexIndex = ethers.utils.hexlify([0]);
-      let leftSide = ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34);
-      let rightSide = ethers.utils.hexZeroPad(hexIndex, 16);
+      const hexIndex = ethers.utils.hexlify([0]);
+      const leftSide = ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34);
+      const rightSide = ethers.utils.hexZeroPad(hexIndex, 16);
 
-      let key = leftSide + rightSide.substring(2);
+      const key = leftSide + rightSide.substring(2);
 
-      let [result] = await universalProfile.connect(signers[0]).callStatic.getData([key]);
-      let checkedsumResult = ethers.utils.getAddress(result);
+      const [result] = await universalProfile.connect(signers[0]).callStatic.getData([key]);
+      const checkedsumResult = ethers.utils.getAddress(result);
       expect(checkedsumResult).toEqual(firstController);
     });
 
-    it('2nd address should have ALL_PERMISSIONS set', async () => {
-      let [signerPermissions] = await universalProfile
+    it('2nd address should have DEFAULT_PERMISSIONS set', async () => {
+      const [signerPermissions] = await universalProfile
         .connect(signers[1])
         .callStatic.getData([PREFIX_PERMISSIONS + secondController.substring(2)]);
 
-      expect(signerPermissions).toEqual(ALL_PERMISSIONS);
+      expect(signerPermissions).toEqual(ERC725.encodePermissions(DEFAULT_PERMISSIONS));
     });
 
     it('2nd address should be registered in AddressPermissions[1] array', async () => {
-      let hexIndex = ethers.utils.hexlify([1]);
-      let leftSide = ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34);
-      let rightSide = ethers.utils.hexZeroPad(hexIndex, 16);
+      const hexIndex = ethers.utils.hexlify([1]);
+      const leftSide = ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34);
+      const rightSide = ethers.utils.hexZeroPad(hexIndex, 16);
 
-      let key = leftSide + rightSide.substring(2);
+      const key = leftSide + rightSide.substring(2);
 
-      let [result] = await universalProfile.connect(signers[0]).callStatic.getData([key]);
-      let checkedsumResult = ethers.utils.getAddress(result);
+      const [result] = await universalProfile.connect(signers[0]).callStatic.getData([key]);
+      const checkedsumResult = ethers.utils.getAddress(result);
       expect(checkedsumResult).toEqual(secondController);
     });
   });

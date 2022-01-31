@@ -261,13 +261,13 @@ export async function setData(
 
   const erc725Account = new UniversalProfile__factory(signer).attach(erc725AccountAddress);
 
-  let signersAddresses: string[] = [];
-  let signersPermissions: string[] = [];
+  const signersAddresses: string[] = [];
+  const signersPermissions: string[] = [];
 
   controllerAddresses.map((controller, index) => {
     if (typeof controller === 'string') {
       signersAddresses[index] = controller;
-      signersPermissions[index] = ALL_PERMISSIONS;
+      signersPermissions[index] = ERC725.encodePermissions(DEFAULT_PERMISSIONS);
     } else {
       signersAddresses[index] = controller.address;
       signersPermissions[index] = controller.permissions;
