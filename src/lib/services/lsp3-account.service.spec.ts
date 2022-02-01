@@ -3,8 +3,8 @@ import UniversalProfile from '@lukso/universalprofile-smart-contracts/artifacts/
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
 import { ethers } from 'hardhat';
-import { LSPFactory } from '../../../build/main/src/lib/lsp-factory';
 
+import { LSPFactory } from '../../../build/main/src/lib/lsp-factory';
 import {
   ADDRESS_PERMISSIONS_ARRAY_KEY,
   DEFAULT_PERMISSIONS,
