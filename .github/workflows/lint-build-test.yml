@@ -41,10 +41,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Require for some tests to be run and interact with the deployed contracts
-      - name: Run local blockchain
-        run: npx hardhat node
-
       - name: Test
         run: npm run generate-types && npm run test # Types needed for tests
 
