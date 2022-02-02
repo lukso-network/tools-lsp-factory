@@ -5,6 +5,8 @@ import { NonceManager } from '@ethersproject/experimental';
 import {
   LSP1UniversalReceiverDelegateInit,
   LSP1UniversalReceiverDelegateInit__factory,
+  LSP7MintableInit__factory,
+  LSP8MintableInit__factory,
   UniversalProfileInit,
   UniversalProfileInit__factory,
 } from '../../';
@@ -21,7 +23,7 @@ export class ProxyDeployer {
     this.signer = new NonceManager(signer);
   }
 
-  async deployBaseContracts() {
+  async deployUniversalProfileBaseContracts() {
     const universalProfile = await new UniversalProfileInit__factory(this.signer).deploy();
     const universalReceiverDelegate = await new LSP1UniversalReceiverDelegateInit__factory(
       this.signer
@@ -33,6 +35,14 @@ export class ProxyDeployer {
     };
 
     return this.baseContracts;
+  }
+
+  async deployLSP7BaseContract() {
+    return await new LSP7MintableInit__factory(this.signer).deploy();
+  }
+
+  async deployLSP8BaseContract() {
+    return await new LSP8MintableInit__factory(this.signer).deploy();
   }
 
   async deployProxyContract<T extends Contract>(contract: T) {

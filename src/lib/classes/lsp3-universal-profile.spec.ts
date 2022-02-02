@@ -13,14 +13,13 @@ describe('LSP3UniversalProfile', () => {
   let provider: providers.Web3Provider;
 
   beforeAll(async () => {
-    const provider = ethers.provider;
+    provider = ethers.provider;
     signer = provider.getSigner();
     proxyDeployer = new ProxyDeployer(signer);
-    baseContracts = await proxyDeployer.deployBaseContracts();
+    baseContracts = await proxyDeployer.deployUniversalProfileBaseContracts();
   });
   it.skip('should deploy and set LSP3Profile data', (done) => {
     const myLSPFactory = new LSPFactory(provider, signer);
-
     const deployments$ = myLSPFactory.LSP3UniversalProfile.deployReactive(
       {
         controllingAccounts: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
