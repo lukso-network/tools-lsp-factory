@@ -66,7 +66,6 @@ describe('LSP3UniversalProfile', () => {
         },
         complete: async () => {
           const ownerAddress = await events.ERC725Account.contract.owner();
-          // const keyManagerAddress = await events.KeyManager.contract.address;
           expect(ownerAddress).toEqual('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
 
           await events.ERC725Account.contract.setData(
@@ -121,10 +120,9 @@ describe('LSP3UniversalProfile', () => {
 
     it('controller address should be registered in AddressPermissions[0] array', async () => {
       const hexIndex = ethers.utils.hexlify([0]);
-      const leftSide = ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34);
-      const rightSide = ethers.utils.hexZeroPad(hexIndex, 16);
-
-      const key = leftSide + rightSide.substring(2);
+      const key =
+        ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
+        ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
       const [result] = await universalProfile.getData([key]);
       const checkedsumResult = ethers.utils.getAddress(result);
@@ -158,10 +156,9 @@ describe('LSP3UniversalProfile', () => {
 
     it('1st address should be registered in AddressPermissions[0] array', async () => {
       const hexIndex = ethers.utils.hexlify([0]);
-      const leftSide = ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34);
-      const rightSide = ethers.utils.hexZeroPad(hexIndex, 16);
-
-      const key = leftSide + rightSide.substring(2);
+      const key =
+        ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
+        ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
       const [result] = await universalProfile.connect(signers[0]).callStatic.getData([key]);
       const checkedsumResult = ethers.utils.getAddress(result);
@@ -178,10 +175,9 @@ describe('LSP3UniversalProfile', () => {
 
     it('2nd address should be registered in AddressPermissions[1] array', async () => {
       const hexIndex = ethers.utils.hexlify([1]);
-      const leftSide = ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34);
-      const rightSide = ethers.utils.hexZeroPad(hexIndex, 16);
-
-      const key = leftSide + rightSide.substring(2);
+      const key =
+        ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
+        ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
       const [result] = await universalProfile.connect(signers[0]).callStatic.getData([key]);
       const checkedsumResult = ethers.utils.getAddress(result);
