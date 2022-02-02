@@ -12,15 +12,16 @@ import {
 } from '../helpers/config.helper';
 
 jest.setTimeout(60000);
+jest.useRealTimers();
 describe('LSP3Account Service', () => {
   let signers: SignerWithAddress[];
   let provider: providers.Web3Provider;
   let lspFactory: LSPFactory;
 
   beforeAll(async () => {
-    provider = ethers.providers.getDefaultProvider('http://127.0.0.1:8545/');
+    provider = ethers.provider;
     signers = await ethers.getSigners();
-    lspFactory = new LSPFactory(provider.connection.url, signers[0]);
+    lspFactory = new LSPFactory(provider, signers[0]);
   });
 
   describe('when deploying a UP with one controller address', () => {
