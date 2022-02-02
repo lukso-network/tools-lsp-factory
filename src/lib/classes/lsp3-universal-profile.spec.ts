@@ -189,15 +189,3 @@ describe('LSP3UniversalProfile', () => {
     });
   });
 });
-
-// describe('LSP3Account Service', () => {
-//   let signers: SignerWithAddress[];
-//   let provider: providers.JsonRpcProvider;
-//   let lspFactory: LSPFactory;
-
-//   beforeAll(async () => {
-//     provider = ethers.provider;
-//     signers = await ethers.getSigners();
-//     lspFactory = new LSPFactory(provider, signers[0]);
-//   });
-// });
