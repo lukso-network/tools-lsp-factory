@@ -38,11 +38,11 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Test
-        run: npm run generate-types && npm run test # Types needed for tests
-
       - name: Build
         run: npm run build
+
+      - name: Test
+        run: npm run generate-types && npm run test # Types needed for tests
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
