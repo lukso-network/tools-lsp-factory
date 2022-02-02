@@ -13,7 +13,7 @@ describe('LSP3UniversalProfile', () => {
     const provider = ethers.provider;
     signer = provider.getSigner();
     proxyDeployer = new ProxyDeployer(signer);
-    baseContracts = await proxyDeployer.deployBaseContracts();
+    baseContracts = await proxyDeployer.deployUniversalProfileBaseContracts();
   });
 
   it('should deploy the LSP3Account proxy and setData', async () => {

@@ -8,6 +8,7 @@ title: Reactive Deployment
 `lsp-factory.js` uses [RxJS](https://github.com/ReactiveX/rxjs) to deploy contracts. This can be leveraged to achieve reactive deployment of Universal Profiles and Digital Assets.
 
 ### Universal Profiles
+
 For Universal Profiles use the `deployReactive()` function and use `subscribe()` to listen for deployment events.
 
 ```typescript
@@ -24,6 +25,7 @@ lspFactory.LSP3UniversalProfile
     },
   });
 ```
+
 The function defined in `next` will be called whenever a new deployment event is created. In this case we are simply pushing every deployment event into a `deploymentEvents` array.
 
 The function defined in `complete` will be called once after deployment is finished. Here we log the `deploymentEvents` array.
@@ -53,14 +55,14 @@ The function defined in `complete` will be called once after deployment is finis
 
 ### Digtial Assets
 
-For reactive deployment of LSP7 and LSP8 Digital Assets use the `digitalAsset.deployLSP7DigitalAssetReactive` or `digitalAsset.deployLSP8IdentifiableDigitalAssetReactive` functions respectively 
+For reactive deployment of LSP7 and LSP8 Digital Assets use the `LSP7DigitalAsset.deployReactive` or `LSP8IdentifiableDigitalAsset.deployReactive` functions respectively
 
 ```typescript title="LSP7 Deployment"
 // Reactive deplyoyment of LSP7
 let deploymentEvents = [];
 
-lspFactory.digitalAsset
-  .deployLSP7DigitalAssetReactive(// ... omitted for brevity)
+lspFactory.LSP7DigitalAsset
+  .deployReactive(// ... omitted for brevity)
   .subscribe({
     next: (deploymentEvent) => {
       deploymentEvents.push(deploymentEvent);
@@ -71,13 +73,13 @@ lspFactory.digitalAsset
   });
 ```
 
-or 
+or
 
 ```typescript title="LSP8 Deployment"
 let deploymentEvents = [];
 
-lspFactory.digitalAsset
-  .deployLSP8IdentifiableDigitalAssetReactive(// ... omitted for brevity)
+lspFactory.LSP8IdentifiableDigitalAsset
+  .deployReactive(// ... omitted for brevity)
   .subscribe({
     next: (deploymentEvent) => {
       deploymentEvents.push(deploymentEvent);
