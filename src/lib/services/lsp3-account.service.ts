@@ -246,6 +246,8 @@ export async function setData(
   controllerAddresses: (string | ControllerOptions)[],
   lsp3Profile?: LSP3ProfileDataForEncoding | string
 ): Promise<DeploymentEventTransaction> {
+  const abiCoder = ethers.utils.defaultAbiCoder;
+
   let encodedLSP3Profile;
   if (lsp3Profile && typeof lsp3Profile !== 'string') {
     const encodedDataResult = lsp3Profile
@@ -259,23 +261,46 @@ export async function setData(
 
   const erc725Account = new UniversalProfile__factory(signer).attach(erc725AccountAddress);
 
-  let controllerAddress: string;
-  let signerPermissions: string;
+  const signersAddresses: string[] = [];
+  const signersPermissions: string[] = [];
 
-  if (typeof controllerAddresses[0] === 'string') {
-    controllerAddress = controllerAddresses[0];
-  } else {
-    controllerAddress = controllerAddresses[0].address;
-    signerPermissions = controllerAddresses[0].permissions;
-  }
+  controllerAddresses.map((controller, index) => {
+    if (typeof controller === 'string') {
+      signersAddresses[index] = controller;
+      signersPermissions[index] = ERC725.encodePermissions(DEFAULT_PERMISSIONS);
+    } else {
+      signersAddresses[index] = controller.address;
+      signersPermissions[index] = controller.permissions;
+    }
+  });
+
+  // see: https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md#addresspermissionspermissionsaddress
+  const addressPermissionsKeys = signersAddresses.map(
+    (address) => PREFIX_PERMISSIONS + address.substring(2)
+  );
+
+  // see: https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md#addresspermissions
+  const addressPermissionsArrayElements = signersAddresses.map((_, index) => {
+    const hexIndex = ethers.utils.hexlify([index]);
+
+    const leftSide = ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34);
+    const rightSide = ethers.utils.hexZeroPad(hexIndex, 16);
+
+    return leftSide + rightSide.substring(2);
+  });
+
+  const hexIndex = ethers.utils.hexlify([signersAddresses.length]);
+
+  const universalReceiverPermissionIndex =
+    ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) + ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
   const keysToSet = [
     LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
-    PREFIX_PERMISSIONS + controllerAddress.substr(2), // TODO: handle multiple addresses,
-    PREFIX_PERMISSIONS + universalReceiverDelegateAddress.substr(2),
+    ...addressPermissionsKeys, // AddressPermissions:Permissions:<controllerAddress> = controllerPermission,
+    PREFIX_PERMISSIONS + universalReceiverDelegateAddress.substring(2),
     ADDRESS_PERMISSIONS_ARRAY_KEY,
-    ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) + '00000000000000000000000000000000',
-    ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) + '00000000000000000000000000000001',
+    ...addressPermissionsArrayElements, // AddressPermission[index] = controllerAddress
+    universalReceiverPermissionIndex,
   ];
 
   const SET_DATA_PERMISSION = ERC725.encodePermissions({
@@ -284,10 +309,10 @@ export async function setData(
 
   const valuesToSet = [
     universalReceiverDelegateAddress,
-    signerPermissions ?? ERC725.encodePermissions(DEFAULT_PERMISSIONS),
+    ...signersPermissions,
     SET_DATA_PERMISSION,
-    ethers.utils.hexZeroPad('0x02', 32),
-    controllerAddress,
+    abiCoder.encode(['uint256'], [signersPermissions.length]),
+    ...signersAddresses,
     universalReceiverDelegateAddress,
   ];
 

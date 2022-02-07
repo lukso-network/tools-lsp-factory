@@ -1,5 +1,5 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, forkJoin, lastValueFrom, merge, of } from 'rxjs';
+import { concat, forkJoin, lastValueFrom, merge } from 'rxjs';
 import { concatAll, scan } from 'rxjs/operators';
 
 import contractVersions from '../../versions.json';
@@ -15,10 +15,7 @@ import {
 import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import { ContractDeploymentOptions, DeployedContracts } from '../interfaces/profile-deployment';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
-import {
-  getUniversalProfileBaseContractAddresses$,
-  universalProfileBaseContractsDeployment$,
-} from '../services/base-contract.service';
+import { getUniversalProfileBaseContractAddresses$ } from '../services/base-contract.service';
 import { keyManagerDeployment$ } from '../services/key-manager.service';
 
 import {
@@ -174,36 +171,6 @@ export class LSP3UniversalProfile {
 
   getDeployedByteCode(contractAddress: string) {
     return this.options.provider.getCode(contractAddress);
-  }
-
-  /**
-   * Deploys UniversalProfile base contracts
-   *
-   * @returns {*}  Promise<DeployedContracts> Returns Promise with base contract details
-   * @memberof LSP3UniversalProfile
-   */
-  deployBaseContracts() {
-    const baseContractsToDeploy$ = of([true, true, true] as [boolean, boolean, boolean]);
-
-    const baseContracts$ = universalProfileBaseContractsDeployment$(
-      this.signer,
-      baseContractsToDeploy$
-    );
-
-    const deployments$ = baseContracts$.pipe(
-      scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
-        if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
-          accumulator[deploymentEvent.contractName] = {
-            address: deploymentEvent.receipt.contractAddress,
-            receipt: deploymentEvent.receipt,
-          };
-        }
-
-        return accumulator;
-      }, {})
-    );
-
-    return lastValueFrom(deployments$);
   }
 
   /**

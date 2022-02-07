@@ -289,78 +289,6 @@ Deployment Complete
 
 ---
 
-## deployBaseContracts
-
-```js
-lspFactory.LSP3UniversalProfile.deployBaseContracts();
-```
-
-Deploys [Universal Profile](../../../standards/universal-profile/introduction) base contracts:
-
-- [LSP0 ERC725 Account](../../../standards/smart-contracts/lsp0-erc725-account)
-- [LSP1 Universal Receiver Delegate](../../../standards/smart-contracts/lsp1-universal-receiver-delegate-up)
-
-#### Returns
-
-`Promise`<`DeployedContracts`\>
-
-Promise with object containing base contract details.
-
-#### Example
-
-```javascript
-await lspFactory.LSP3UniversalProfile.deployBaseContracts();
-
-/**
-{
-  UniversalReceiverDelegate: {
-    address: '0xd87F7B3B115dd23e8226d8394996Ba4341D602dB',
-    receipt: {
-      to: null,
-      from: '0x9Fba07e245B415cC9580BD6c890a9fd7D22e20db',
-      contractAddress: '0xd87F7B3B115dd23e8226d8394996Ba4341D602dB',
-      transactionIndex: 1,
-      gasUsed: [BigNumber],
-      logsBloom: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-      blockHash: '0x80b0811c3d57039ca6626a195ea3610de05b13ca0d639e9eed25dda984bd82b3',
-      transactionHash: '0xadbbd68ff72846c5331475ce8b1f114a8f418e7ab0922bc3b76fed0b966f7c81',
-      logs: [],
-      blockNumber: 12028282,
-      confirmations: 1,
-      cumulativeGasUsed: [BigNumber],
-      status: 1,
-      type: 0,
-      byzantium: true,
-      events: []
-    }
-  },
-  ERC725Account: {
-    address: '0xA59C5b8Dd18063C977d8B060FC689dd637142DCf',
-    receipt: {
-      to: null,
-      from: '0x9Fba07e245B415cC9580BD6c890a9fd7D22e20db',
-      contractAddress: '0xA59C5b8Dd18063C977d8B060FC689dd637142DCf',
-      transactionIndex: 0,
-      gasUsed: [BigNumber],
-      logsBloom: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-      blockHash: '0x80b0811c3d57039ca6626a195ea3610de05b13ca0d639e9eed25dda984bd82b3',
-      transactionHash: '0xc1b6b6b71e051ed43d25c5237d873bae11149f49dc926c55cd2741279c16833a',
-      logs: [],
-      blockNumber: 12028282,
-      confirmations: 1,
-      cumulativeGasUsed: [BigNumber],
-      status: 1,
-      type: 0,
-      byzantium: true,
-      events: []
-    }
-  }
-}
-*/
-```
-
----
-
 ## getDeployedByteCode
 
 ```js
@@ -383,7 +311,7 @@ Bytecode deployed at provided contract address.
 
 ```javascript
 await lspFactory.LSP3UniversalProfile.getDeployedByteCode(
-  '0xd92C7cA9c493aFC0DF51cE480ec7bB7DC8394549',
+  '0xd92C7cA9c493aFC0DF51cE480ec7bB7DC8394549'
 );
 
 // 0x363d3d373d3d3d363d736533158b042775e2fdfef3ca1a782efdbb8eb9b15af43d82803e903d91602b57fd5bf3
