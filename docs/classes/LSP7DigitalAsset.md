@@ -12,8 +12,6 @@ lspFactory.LSP7DigitalAsset.deploy(
 
 Deploys a mintable [LSP7 Digital Asset](../../../standards/nft-2.0/LSP7-Digital-Asset).
 
-Asynchronous version of [`deployReactive`](./LSP7DigtialAsset#deployreactive). Returns a Promise with deployed contract details.
-
 #### Parameters
 
 1. `digitalAssetDeploymentOptions` - `Object`: The [options used for deployment](../../../../../standards/smart-contracts/lsp7-digital-asset#constructor).
@@ -22,14 +20,22 @@ Asynchronous version of [`deployReactive`](./LSP7DigtialAsset#deployreactive). R
    - `ownerAddress` - `string` : The owner of the contract.
    - `isNFT` - `boolean`: Specify if the contract represent a fungible or a non-fungible token.
 2. `contractDeploymentOptions?` - `Object`
+  - `version` - `string`: The version of LSP7 Contract you want to deploy
+  - `byteCode` - `string`: Custom bytecode to be deployed
+  - `libAddress` - `string`: The Address of a Base Contract to be used in deployment
+  - `deployReactive` - `boolean`: Whether to return an RxJS Observable of deployment events
 
 #### Returns
 
-`Promise`<`DeployedContracts`\>
+`Promise`<`DeployedContracts`\> | `Observable`<`DigitalAssetDeploymentEvent`\>
+
+Returns a Promise with object containing deployed contract details.
+
+If `deployReactive` flag is set to `true` in the `ContractDeploymentOptions` object, returns an [RxJS Observable](https://rxjs.dev/guide/observable) of deployment events.
 
 #### Example
 
-```javascript
+```javascript title="LSP7 Digital Asset deployment"
 await lspFactory.LSP7DigitalAsset.deploy({
   name: 'My token',
   symbol: 'TKN',
@@ -64,37 +70,18 @@ await lspFactory.LSP7DigitalAsset.deploy({
 */
 ```
 
----
-
-## deployReactive
-
-```js
-lspFactory.LSP7DigitalAsset.deployReactive(
-  digitalAssetDeploymentOptions,
-  contractDeploymentOptions?`);
-```
-
-Deploys a mintable [LSP7 Digital Asset](../../../standards/nft-2.0/LSP7-Digital-Asset).
-
-#### Parameters
-
-Same as for the [asynchronous version](./LSP7DigitalAsset#deploy).
-
-#### Returns
-
-`Observable`<`DigitalAssetDeploymentEvent`\>
-
-[RxJS](https://rxjs.dev/) observable which emits events as LSP7 contract is deployed and initialized.
-
-#### Example
-
-```javascript
-await lspFactory.LSP7DigitalAsset.deployReactive({
-  name: 'My token',
-  symbol: 'TKN',
-  ownerAddress: '0xb74a88C43BCf691bd7A851f6603cb1868f6fc147',
-  isNFT: true,
-}).subscribe({
+```javascript title="Reactive LSP7 Digital Asset deployment"
+await lspFactory.LSP7DigitalAsset.deploy(
+  {
+    name: 'My token',
+    symbol: 'TKN',
+    ownerAddress: '0xb74a88C43BCf691bd7A851f6603cb1868f6fc147',
+    isNFT: true,
+  },
+  {
+    deployReactive: true,
+  }
+).subscribe({
   next: (deploymentEvent) => {
     console.log(deploymentEvent);
   },

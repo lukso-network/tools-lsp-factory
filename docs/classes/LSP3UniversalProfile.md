@@ -4,7 +4,7 @@ sidebar_position: 1.2
 
 ## deploy
 
-```js
+```javascript
 lspFactory.LSP3UniversalProfile.deploy(
   profileDeploymentOptions,
   contractDeploymentOptions?);
@@ -12,18 +12,16 @@ lspFactory.LSP3UniversalProfile.deploy(
 
 Deploys and **configures** a [Universal Profile](../../../standards/universal-profile/introduction) to the blockchain. It will deploy the following contracts:
 
-- [LSP0 ERC725 Account](../../../standards/universal-profile/LSP0-Foundation)
+- [LSP0 ERC725 Account](../../../standards/universal-profile/lsp0-erc725account)
 - [LSP1 Universal Receiver Delegate](../../../standards/universal-profile/lsp1-universal-receiver-delegate)
 - [LSP6 Key Manager](../../../standards/universal-profile/lsp6-key-manager)
 
 Then, it will:
 
-- upload to IPFS and set the [LSP3 Universal Profile](../../../standards/universal-profile/lsp3-universal-profile) metadata.
+- upload to IPFS and set the [LSP3 Universal Profile](../../../standards/universal-profile/lsp3-universal-profile-metadata) metadata.
 - attach the Universal Receiver Delegate to the LSP0 ERC725 Account.
 - set the Key Manager as the owner of the LSP0 ERC725 Account.
 - give all [permissions](../../../standards/universal-profile/lsp6-key-manager#-types-of-permissions) to the `controllingAccounts`.
-
-Asynchronous version of `deployReactive`.
 
 #### Parameters
 
@@ -37,16 +35,27 @@ Asynchronous version of `deployReactive`.
      - `tags?` - `string[]`
      - `links?` - `{title: string, url: string}[]`
 2. `contractDeploymentOptions?` - `Object`
+   - `version` - `string`: The version of Universal Profile Contracts you want to deploy
+   - `deployReactive` - `boolean`: Whether to return an RxJS Observable of deployment events
+   - `byteCode` - `Object`: Custom bytecode to be deployed
+     - `erc725AccountInit` - `string`: Custom bytecode to use for deployment of ERC725Account Contract
+     - `keyManagerInit` - `string`: Custom bytecode to use for deployment of KeyManager Contract
+     - `universalReceiverDelegateInit` - `string`: Custom bytecode to use for deployment of Universal Receiver Delegate Contract
+   - `libAddress` - `string`: The Address of a Base Contract to be used in deployment
+     - `erc725AccountInit` - `string`: The Address of a Base Contract to be used in deployment of ERC725Account Contract
+     - `keyManagerInit` - `string`: The Address of a Base Contract to be used in deployment of KeyManager Contract
+     - `universalReceiverDelegateInit` - `string`: The Address of a Base Contract to be used in deployment of Universal Receiver Delegate contract
 
 #### Returns
 
-`Promise`<`Object`\>
+`Promise`<`Object`\> | `Observable`<`Object`\>
 
-Promise with object containing deployed contract details
+Returns a Promise with object containing deployed contract details.
+If `deployReactive` flag is set to `true` in the `ContractDeploymentOptions` object, returns an [RxJS Observable](https://rxjs.dev/guide/observable) of deployment events.
 
 #### Example
 
-```javascript
+```javascript title="Universal Profile Deployment"
 await lspFactory.LSP3UniversalProfile.deploy({
   controllingAccounts: ['0xb74a88C43BCf691bd7A851f6603cb1868f6fc147'],
   lsp3Profile: {
@@ -126,34 +135,15 @@ await lspFactory.LSP3UniversalProfile.deploy({
 */
 ```
 
----
-
-## deployReactive
-
-```js
-lspFactory.LSP3UniversalProfile.deployReactive(
-  profileDeploymentOptions,
-  contractDeploymentOptions?);
-```
-
-Please check the [asynchronous version](./LSP3UniversalProfile#deploy).
-
-#### Parameters
-
-Same as for the [asynchronous version](./LSP3UniversalProfile#deploy).
-
-#### Returns
-
-`Observable`<`LSP3AccountDeploymentEvent` \| `DeploymentEventTransaction`\>
-
-[RxJS](https://rxjs.dev/) observable which emits events as UniversalProfile contracts are deployed.
-
-#### Example
-
-```javascript
-await lspFactory.LSP3UniversalProfile.deployReactive({
-  controllingAccounts: ['0x9Fba07e245B415cC9580BD6c890a9fd7D22e20db'],
-}).subscribe({
+```javascript title="Reactive Universal Profile Deployment"
+await lspFactory.LSP3UniversalProfile.deploy(
+  {
+    controllingAccounts: ['0x9Fba07e245B415cC9580BD6c890a9fd7D22e20db'],
+  },
+  {
+    deployReactive: true,
+  }
+).subscribe({
   next: (deploymentEvent) => {
     console.log(deploymentEvent);
   },

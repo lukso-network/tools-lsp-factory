@@ -29,32 +29,11 @@ export class LSP7DigitalAsset {
   /**
    * Deploys a mintable LSP7 Digital Asset
    *
-   * @param {LSP7DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
-   * @param {ContractDeploymentOptions} contractDeploymentOptions
-   * @return {*} Returns an rxjs Observable which emits events as contracts are deployed
-   * @memberof LSP7DigitalAsset
-   */
-  deployReactive(
-    digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
-    contractDeploymentOptions?: ContractDeploymentOptions
-  ) {
-    const digitalAsset$ = lsp7DigitalAssetDeployment$(
-      this.signer,
-      digitalAssetDeploymentOptions,
-      contractDeploymentOptions?.libAddress ??
-        versions[this.options.chainId]?.baseContracts?.LSP7Mintable[DEFAULT_CONTRACT_VERSION]
-    );
-    return digitalAsset$;
-  }
-
-  /**
-   * Deploys a mintable LSP7 Digital Asset
-   *
-   * Asyncronous version of `deployReactive`. Returns a Promise with deployed contract details
+   * Returns a Promise with deployed contract details or an RxJS Observable of transaction details if `deployReactive` flag is set to true
    *
    * @param {LSP7DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
    * @param {ContractDeploymentOptions} contractDeploymentOptions
-   * @return {*}  Promise<DeployedContracts>
+   * @return {*}  Promise<DeployedContracts> | Observable<DigitalAssetDeploymentEvent>
    * @memberof LSP7DigitalAsset
    *
    * @example
@@ -64,29 +43,35 @@ export class LSP7DigitalAsset {
    *  symbol: "TKN",
    *  ownerAddress: "0xb74a88C43BCf691bd7A851f6603cb1868f6fc147",
    *  isNFT: true,
-   *}) 
-
+   *})
+   *```
    */
   deploy(
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
-    const deployments$ = this.deployReactive(
+    const digitalAsset$ = lsp7DigitalAssetDeployment$(
+      this.signer,
       digitalAssetDeploymentOptions,
-      contractDeploymentOptions
-    ).pipe(
-      scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
-        if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
-          accumulator[deploymentEvent.contractName] = {
-            address: deploymentEvent.receipt.contractAddress,
-            receipt: deploymentEvent.receipt,
-          };
-        }
-
-        return accumulator;
-      }, {})
+      contractDeploymentOptions?.libAddress ??
+        versions[this.options.chainId]?.baseContracts?.LSP7Mintable[DEFAULT_CONTRACT_VERSION]
     );
 
-    return lastValueFrom(deployments$);
+    if (contractDeploymentOptions?.deployReactive) return digitalAsset$;
+
+    return lastValueFrom(
+      digitalAsset$.pipe(
+        scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
+          if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
+            accumulator[deploymentEvent.contractName] = {
+              address: deploymentEvent.receipt.contractAddress,
+              receipt: deploymentEvent.receipt,
+            };
+          }
+
+          return accumulator;
+        }, {})
+      )
+    );
   }
 }

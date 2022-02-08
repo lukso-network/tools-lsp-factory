@@ -45,12 +45,23 @@ export class LSP3UniversalProfile {
   /**
    * Deploys a UniversalProfile and uploads LSP3 Profile data to IPFS
    *
+   *  Returns a Promise with deployed contract details or an RxJS Observable of transaction details if `deployReactive` flag is set to true
+   *
    * @param {ProfileDeploymentOptions} profileData
    * @param {ContractDeploymentOptions} contractDeploymentOptions
-   * @return {*}  Observable<LSP3AccountDeploymentEvent | DeploymentEventTransaction> Returns an Observable which emits events as UP contracts are deployed
+   * @return {*}  Promise<DeployedContracts> | Observable<LSP3AccountDeploymentEvent | DeploymentEventTransaction>
    * @memberof LSP3UniversalProfile
+   *
+   * @example
+   * ```javascript
+   *lspFactory.LSP3UniversalProfile.deploy({
+   *    controllingAccounts: ['0xb74a88C43BCf691bd7A851f6603cb1868f6fc147'],
+   *    lsp3Profile: myUniversalProfileData
+   *  });
+   *};
+   * ```
    */
-  deployReactive(
+  deploy(
     profileDeploymentOptions: ProfileDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
@@ -118,55 +129,29 @@ export class LSP3UniversalProfile {
     // 5 > transfersOwnership to KeyManager
     const transferOwnership$ = getTransferOwnershipTransaction$(this.signer, account$, keyManager$);
 
-    return concat([
+    const deployment$ = concat([
       account$,
       merge(universalReceiver$, keyManager$),
       setData$,
       transferOwnership$,
     ]).pipe(concatAll());
-  }
 
-  /**
-   * Deploys a UniversalProfile to the blockchain and uploads LSP3 Profile data to IPFS
-   *
-   * Asyncronous version of `deployReactive`. Returns a Promise with deployed contract details
-   *
-   * @param {ProfileDeploymentOptions} profileData
-   * @param {ContractDeploymentOptions} contractDeploymentOptions
-   * @returns {*}  Promise<DeployedContracts>
-   * @memberof LSP3UniversalProfile
-   *
-   *
-   * @example
-   * ```javascript
-   *lspFactory.LSP3UniversalProfile.deploy({
-   *    controllingAccounts: ['0xb74a88C43BCf691bd7A851f6603cb1868f6fc147'],
-   *    lsp3Profile: myUniversalProfileData
-   *  });
-   *};
-   * ```
-   */
-  deploy(
-    profileDeploymentOptions: ProfileDeploymentOptions,
-    contractDeploymentOptions?: ContractDeploymentOptions
-  ) {
-    const deployments$ = this.deployReactive(
-      profileDeploymentOptions,
-      contractDeploymentOptions
-    ).pipe(
-      scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
-        if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
-          accumulator[deploymentEvent.contractName] = {
-            address: deploymentEvent.receipt.contractAddress,
-            receipt: deploymentEvent.receipt,
-          };
-        }
+    if (contractDeploymentOptions?.deployReactive) return deployment$;
 
-        return accumulator;
-      }, {})
+    return lastValueFrom(
+      deployment$.pipe(
+        scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
+          if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
+            accumulator[deploymentEvent.contractName] = {
+              address: deploymentEvent.receipt.contractAddress,
+              receipt: deploymentEvent.receipt,
+            };
+          }
+
+          return accumulator;
+        }, {})
+      )
     );
-
-    return lastValueFrom(deployments$);
   }
 
   getDeployedByteCode(contractAddress: string) {

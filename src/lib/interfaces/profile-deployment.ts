@@ -46,4 +46,5 @@ export interface ContractDeploymentOptions {
     universalReceiverDelegateInit: string;
   };
   libAddresses?: BaseContractAddresses;
+  deployReactive?: boolean;
 }

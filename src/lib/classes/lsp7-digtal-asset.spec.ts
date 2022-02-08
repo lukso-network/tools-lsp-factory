@@ -1,7 +1,8 @@
 import { providers } from 'ethers';
 import { ethers, SignerWithAddress } from 'hardhat';
+import { Observable } from 'rxjs';
 
-import { LSP7Mintable__factory, LSPFactory } from '../../../build/main/src/index';
+import { DeploymentEvent, LSP7Mintable__factory, LSPFactory } from '../../../build/main/src/index';
 
 import { ProxyDeployer } from './proxy-deployer';
 
@@ -16,20 +17,17 @@ describe('LSP7DigitalAsset', () => {
 
   beforeAll(async () => {
     provider = ethers.provider;
-    signer = provider.getSigner();
+    signer = (await ethers.getSigners())[0];
     proxyDeployer = new ProxyDeployer(signer);
     baseContract = await proxyDeployer.deployLSP7BaseContract();
   });
 
   it('should deploy LSP7 Digital asset', async () => {
-    const myLSPFactory = new LSPFactory(
-      provider,
-      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
-    );
+    const myLSPFactory = new LSPFactory(provider, signer);
 
     const lsp7DigitalAsset = await myLSPFactory.LSP7DigitalAsset.deploy(
       {
-        controllerAddress: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
+        controllerAddress: signer.address,
         isNFT: false,
         name: 'TOKEN',
         symbol: 'TKN',
@@ -45,6 +43,47 @@ describe('LSP7DigitalAsset', () => {
     );
 
     const ownerAddress = await LSP7DigitalAsset.owner();
-    expect(ownerAddress).toEqual('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
+    expect(ownerAddress).toEqual(signer.address);
+  });
+
+  it('should deploy reactive', (done) => {
+    const myLSPFactory = new LSPFactory(provider, signer);
+
+    const lsp7DigitalAsset$ = myLSPFactory.LSP7DigitalAsset.deploy(
+      {
+        controllerAddress: signer.address,
+        isNFT: false,
+        name: 'TOKEN',
+        symbol: 'TKN',
+      },
+      {
+        libAddress: baseContract.address,
+        deployReactive: true,
+      }
+    ) as Observable<DeploymentEvent>;
+
+    let lsp7Address: string;
+
+    lsp7DigitalAsset$.subscribe({
+      next: (deploymentEvent: DeploymentEvent) => {
+        if (
+          deploymentEvent.receipt?.contractAddress &&
+          deploymentEvent.contractName === 'LSP7DigitalAsset'
+        ) {
+          lsp7Address = deploymentEvent.receipt.contractAddress;
+        }
+      },
+      error: () => {
+        done();
+      },
+      complete: async () => {
+        const lsp7DigitalAsset = LSP7Mintable__factory.connect(lsp7Address, signer);
+
+        const ownerAddress = await lsp7DigitalAsset.owner();
+        expect(ownerAddress).toEqual(signer.address);
+
+        done();
+      },
+    });
   });
 });
