@@ -47,7 +47,8 @@ export interface DeploymentEventTransaction extends DeploymentEventBase {
 export type DeploymentEvent =
   | DeploymentEventStandardContract
   | DeploymentEventProxyContract
-  | DeploymentEventTransaction;
+  | DeploymentEventTransaction
+  | DeploymentEventBaseContract;
 
 /**
  * @internal

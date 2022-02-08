@@ -122,7 +122,8 @@ export function shouldDeployLSP7BaseContract$(
           contractDeploymentOptions?.deployProxy !== false &&
           defultBaseContractBytecode === '0x'
       );
-    })
+    }),
+    shareReplay()
   );
 }
 

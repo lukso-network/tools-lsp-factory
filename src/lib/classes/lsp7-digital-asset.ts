@@ -1,10 +1,26 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { defaultIfEmpty, EMPTY, from, lastValueFrom, of, scan, switchMap, tap } from 'rxjs';
+import {
+  concat,
+  concatAll,
+  defaultIfEmpty,
+  EMPTY,
+  from,
+  lastValueFrom,
+  of,
+  scan,
+  shareReplay,
+  switchMap,
+} from 'rxjs';
 
 import versions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION, NULL_ADDRESS } from '../helpers/config.helper';
 import { getDeployedByteCode } from '../helpers/deployment.helper';
-import { DeploymentEvent, DeploymentEventContract, LSPFactoryOptions } from '../interfaces';
+import {
+  DeploymentEvent,
+  DeploymentEventContract,
+  DeploymentType,
+  LSPFactoryOptions,
+} from '../interfaces';
 import {
   ContractDeploymentOptions,
   DeployedContracts,
@@ -71,7 +87,8 @@ export class LSP7DigitalAsset {
     const baseContractDeployment$ = shouldDeployBaseContract$.pipe(
       switchMap((shouldDeployBaseContract) => {
         return shouldDeployBaseContract ? lsp7BaseContractDeployment$(this.options.signer) : EMPTY;
-      })
+      }),
+      shareReplay()
     );
 
     const baseContractAddress$ = baseContractDeployment$.pipe(
@@ -82,7 +99,12 @@ export class LSP7DigitalAsset {
 
         return of('');
       }),
-      defaultIfEmpty(defaultBaseContractAddress)
+      defaultIfEmpty(
+        (function () {
+          if (contractDeploymentOptions?.deployProxy === false) return null;
+          return defaultBaseContractAddress;
+        })()
+      )
     );
 
     const digitalAsset$ = lsp7DigitalAssetDeployment$(
@@ -91,15 +113,28 @@ export class LSP7DigitalAsset {
       baseContractAddress$
     );
 
-    if (contractDeploymentOptions?.deployReactive) return digitalAsset$;
+    const deployment$ = concat([baseContractDeployment$, digitalAsset$]).pipe(concatAll());
+
+    if (contractDeploymentOptions?.deployReactive) return deployment$;
 
     return lastValueFrom(
-      digitalAsset$.pipe(
+      deployment$.pipe(
         scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
-          if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
+          if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
+            return accumulator;
+          }
+
+          if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
+            accumulator[`${deploymentEvent.contractName}BaseContract`] = {
+              address: deploymentEvent.receipt.contractAddress,
+              receipt: deploymentEvent.receipt,
+              type: deploymentEvent.type,
+            };
+          } else {
             accumulator[deploymentEvent.contractName] = {
               address: deploymentEvent.receipt.contractAddress,
               receipt: deploymentEvent.receipt,
+              type: deploymentEvent.type,
             };
           }
 

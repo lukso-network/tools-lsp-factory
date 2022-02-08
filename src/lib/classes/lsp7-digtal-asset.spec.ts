@@ -22,7 +22,7 @@ describe('LSP7DigitalAsset', () => {
     baseContract = await proxyDeployer.deployLSP7BaseContract();
   });
 
-  it('should deploy LSP7 Digital asset with no deployment options passed', async () => {
+  it('should deploy LSP7 Digital asset with no passed deployment options', async () => {
     const myLSPFactory = new LSPFactory(provider, signer);
 
     const lsp7DigitalAsset = await myLSPFactory.LSP7DigitalAsset.deploy({
@@ -40,6 +40,7 @@ describe('LSP7DigitalAsset', () => {
     const ownerAddress = await LSP7DigitalAsset.owner();
     expect(ownerAddress).toEqual(signer.address);
   });
+
   it('should deploy LSP7 Digital asset from specified base contract', async () => {
     const myLSPFactory = new LSPFactory(provider, signer);
 
@@ -64,6 +65,30 @@ describe('LSP7DigitalAsset', () => {
     expect(ownerAddress).toEqual(signer.address);
   });
 
+  it('should deploy LSP7 Digital asset without a base contract', async () => {
+    const myLSPFactory = new LSPFactory(provider, signer);
+
+    const lsp7DigitalAsset = await myLSPFactory.LSP7DigitalAsset.deploy(
+      {
+        controllerAddress: signer.address,
+        isNFT: false,
+        name: 'TOKEN',
+        symbol: 'TKN',
+      },
+      {
+        deployProxy: false,
+      }
+    );
+
+    const LSP7DigitalAsset = LSP7Mintable__factory.connect(
+      lsp7DigitalAsset.LSP7DigitalAsset.address,
+      signer
+    );
+
+    const ownerAddress = await LSP7DigitalAsset.owner();
+    expect(ownerAddress).toEqual(signer.address);
+  });
+
   it('should deploy reactive', (done) => {
     const myLSPFactory = new LSPFactory(provider, signer);
 
@@ -75,8 +100,8 @@ describe('LSP7DigitalAsset', () => {
         symbol: 'TKN',
       },
       {
-        libAddress: baseContract.address,
         deployReactive: true,
+        deployProxy: true,
       }
     ) as Observable<DeploymentEvent>;
 
