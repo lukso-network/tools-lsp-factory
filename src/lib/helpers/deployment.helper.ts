@@ -1,4 +1,4 @@
-import { Contract, ContractFactory, ContractInterface, Signer } from 'ethers';
+import { Contract, ContractFactory, ContractInterface, providers, Signer } from 'ethers';
 import { Observable } from 'rxjs';
 import { catchError, shareReplay, switchMap, takeLast } from 'rxjs/operators';
 
@@ -169,4 +169,11 @@ export function getProxyByteCode(address: string) {
 
 export function getBaseContractAddresses(contractDeploymentOptions: ContractDeploymentOptions) {
   return contractDeploymentOptions.libAddresses;
+}
+
+export function getDeployedByteCode(
+  contractAddress: string,
+  provider: providers.Web3Provider | providers.JsonRpcProvider
+) {
+  return provider.getCode(contractAddress);
 }

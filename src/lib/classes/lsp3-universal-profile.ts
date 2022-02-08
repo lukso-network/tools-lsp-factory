@@ -70,15 +70,17 @@ export class LSP3UniversalProfile {
 
     // 0 > Check for existing base contracts and deploy
     const defaultUPBaseContractAddress =
-      contractVersions[this.options.chainId]?.baseContracts?.ERC725Account[
+      contractVersions[this.options.chainId]?.contracts?.ERC725Account?.versions[
         DEFAULT_CONTRACT_VERSION
       ];
     const defaultUniversalReceiverBaseContractAddress =
-      contractVersions[this.options.chainId]?.baseContracts?.UniversalReceiverDelegate[
+      contractVersions[this.options.chainId]?.contracts?.UniversalReceiverDelegate?.versions[
         DEFAULT_CONTRACT_VERSION
       ];
     const defaultKeyManagerBaseContractAddress =
-      contractVersions[this.options.chainId]?.baseContracts?.KeyManager[DEFAULT_CONTRACT_VERSION];
+      contractVersions[this.options.chainId]?.contracts?.KeyManager?.versions[
+        DEFAULT_CONTRACT_VERSION
+      ];
 
     const defaultBaseContractByteCode$ = forkJoin([
       this.getDeployedByteCode(

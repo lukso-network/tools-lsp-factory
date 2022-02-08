@@ -23,6 +23,23 @@ export type DigitalAssetDeploymentEvent = DeploymentEventContract | DeploymentEv
 export function lsp7DigitalAssetDeployment$(
   signer: Signer,
   digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
+  baseContractAddress$: Observable<string>
+) {
+  return baseContractAddress$.pipe(
+    switchMap((baseContractAddress) => {
+      return lsp7DigitalAssetDeploymentWithBaseContractAddresses$(
+        signer,
+        digitalAssetDeploymentOptions,
+        baseContractAddress
+      );
+    }),
+    shareReplay()
+  );
+}
+
+export function lsp7DigitalAssetDeploymentWithBaseContractAddresses$(
+  signer: Signer,
+  digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
   baseContractAddress?: string
 ) {
   const lsp7Deployment$ = from(

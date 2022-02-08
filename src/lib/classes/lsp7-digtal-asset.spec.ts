@@ -22,7 +22,25 @@ describe('LSP7DigitalAsset', () => {
     baseContract = await proxyDeployer.deployLSP7BaseContract();
   });
 
-  it('should deploy LSP7 Digital asset', async () => {
+  it('should deploy LSP7 Digital asset with no deployment options passed', async () => {
+    const myLSPFactory = new LSPFactory(provider, signer);
+
+    const lsp7DigitalAsset = await myLSPFactory.LSP7DigitalAsset.deploy({
+      controllerAddress: signer.address,
+      isNFT: false,
+      name: 'TOKEN',
+      symbol: 'TKN',
+    });
+
+    const LSP7DigitalAsset = LSP7Mintable__factory.connect(
+      lsp7DigitalAsset.LSP7DigitalAsset.address,
+      signer
+    );
+
+    const ownerAddress = await LSP7DigitalAsset.owner();
+    expect(ownerAddress).toEqual(signer.address);
+  });
+  it('should deploy LSP7 Digital asset from specified base contract', async () => {
     const myLSPFactory = new LSPFactory(provider, signer);
 
     const lsp7DigitalAsset = await myLSPFactory.LSP7DigitalAsset.deploy(

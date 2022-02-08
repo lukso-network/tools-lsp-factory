@@ -3,18 +3,19 @@ import { defer, EMPTY, merge, Observable, of } from 'rxjs';
 import { defaultIfEmpty, shareReplay, switchMap, tap } from 'rxjs/operators';
 
 import {
-  ContractDeploymentOptions,
   DeploymentEventContract,
   LSP1UniversalReceiverDelegateInit__factory,
   LSP6KeyManagerInit__factory,
   LSP7MintableInit__factory,
   LSP8MintableInit__factory,
+  ContractDeploymentOptions as ProfileContractDeploymentOptions,
   ContractNames as UniversalProfileContractNames,
   UniversalProfileInit__factory,
 } from '../..';
 import { GAS_PRICE, NULL_ADDRESS } from '../helpers/config.helper';
 import { deployBaseContract, waitForReceipt } from '../helpers/deployment.helper';
 import { ContractNames as DigitalAssetContractNames } from '../interfaces/digital-asset-deployment';
+import { ContractDeploymentOptions as DigitalAssetContractDeploymentOptions } from '../interfaces/digital-asset-deployment';
 
 export function universalProfileBaseContractsDeployment$(
   signer: Signer,
@@ -71,43 +72,24 @@ export function universalProfileBaseContractsDeployment$(
   return baseContractDeployment$;
 }
 
-export function digitalAssetBaseContractsDeployment$(
-  signer: Signer,
-  baseContractsToDeploy$: Observable<[boolean, boolean]>
-): Observable<DeploymentEventContract> {
-  const lsp7DigitalAssetBaseContractReceipt$ = deployBaseContract$(
-    DigitalAssetContractNames.LSP7_DIGITAL_ASSET,
-    async () => {
-      const lsp7Init = await new LSP7MintableInit__factory(signer).deploy({
-        gasPrice: GAS_PRICE,
-      });
-      await lsp7Init['initialize(address)'](NULL_ADDRESS);
-      return lsp7Init;
-    }
-  );
+export function lsp7BaseContractDeployment$(signer: Signer) {
+  return deployBaseContract$(DigitalAssetContractNames.LSP7_DIGITAL_ASSET, async () => {
+    const lsp7Init = await new LSP7MintableInit__factory(signer).deploy({
+      gasPrice: GAS_PRICE,
+    });
+    await lsp7Init['initialize(address)'](NULL_ADDRESS);
+    return lsp7Init;
+  });
+}
 
-  const lsp8IdentifiableDigitalAssetReceipt$ = deployBaseContract$(
-    DigitalAssetContractNames.LSP8_DIGITAL_ASSET,
-    async () => {
-      const lsp8Init = await new LSP8MintableInit__factory(signer).deploy({
-        gasPrice: GAS_PRICE,
-      });
-      await lsp8Init['initialize(address)'](NULL_ADDRESS);
-      return lsp8Init;
-    }
-  );
-
-  const baseContractDeployment$ = baseContractsToDeploy$.pipe(
-    switchMap(([shouldDeployLSP7, shouldDeployLSP8]) => {
-      return merge(
-        shouldDeployLSP7 ? lsp7DigitalAssetBaseContractReceipt$ : EMPTY,
-        shouldDeployLSP8 ? lsp8IdentifiableDigitalAssetReceipt$ : EMPTY
-      );
-    }),
-    shareReplay()
-  );
-
-  return baseContractDeployment$;
+export function lsp8BaseContractDeployment$(signer: Signer) {
+  return deployBaseContract$(DigitalAssetContractNames.LSP8_DIGITAL_ASSET, async () => {
+    const lsp8Init = await new LSP8MintableInit__factory(signer).deploy({
+      gasPrice: GAS_PRICE,
+    });
+    await lsp8Init['initialize(address)'](NULL_ADDRESS);
+    return lsp8Init;
+  });
 }
 
 function deployBaseContract$(
@@ -127,13 +109,30 @@ function deployBaseContract$(
   return baseContractDeploymentReceipt$;
 }
 
+export function shouldDeployLSP7BaseContract$(
+  defaultBaseContractBytecode$: Observable<string>,
+  contractDeploymentOptions?: DigitalAssetContractDeploymentOptions
+) {
+  const providedBaseContractAddress = contractDeploymentOptions?.libAddress;
+
+  return defaultBaseContractBytecode$.pipe(
+    switchMap((defultBaseContractBytecode) => {
+      return of(
+        !providedBaseContractAddress &&
+          contractDeploymentOptions?.deployProxy !== false &&
+          defultBaseContractBytecode === '0x'
+      );
+    })
+  );
+}
+
 export function getUniversalProfileBaseContractAddresses$(
   defaultUPBaseContractAddress: string,
   defaultUniversalReceiverBaseContractAddress: string,
   defaultKeyManagerBaseContractAddress: string,
   defaultBaseContractByteCode$: Observable<[string, string, string]>,
   signer: Signer,
-  contractDeploymentOptions?: ContractDeploymentOptions
+  contractDeploymentOptions?: ProfileContractDeploymentOptions
 ) {
   const providedUPBaseContractAddress = contractDeploymentOptions?.libAddresses?.erc725AccountInit;
   const providedUniversalReceiverContractAddress =

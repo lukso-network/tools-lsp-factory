@@ -53,7 +53,7 @@ export class LSP8IdentifiableDigitalAsset {
       this.signer,
       digitalAssetDeploymentOptions,
       contractDeploymentOptions?.libAddress ??
-        versions[this.options.chainId]?.baseContracts?.LSP8Mintable[DEFAULT_CONTRACT_VERSION]
+        versions[this.options.chainId]?.contracts.LSP8Mintable.versions[DEFAULT_CONTRACT_VERSION]
     );
 
     if (contractDeploymentOptions?.deployReactive) return digitalAsset$;

@@ -1,14 +1,19 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { lastValueFrom, scan } from 'rxjs';
+import { defaultIfEmpty, EMPTY, from, lastValueFrom, of, scan, switchMap, tap } from 'rxjs';
 
 import versions from '../../versions.json';
-import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
-import { DeploymentEvent, LSPFactoryOptions } from '../interfaces';
+import { DEFAULT_CONTRACT_VERSION, NULL_ADDRESS } from '../helpers/config.helper';
+import { getDeployedByteCode } from '../helpers/deployment.helper';
+import { DeploymentEvent, DeploymentEventContract, LSPFactoryOptions } from '../interfaces';
 import {
   ContractDeploymentOptions,
   DeployedContracts,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
+import {
+  lsp7BaseContractDeployment$,
+  shouldDeployLSP7BaseContract$,
+} from '../services/base-contract.service';
 import { lsp7DigitalAssetDeployment$ } from '../services/digital-asset.service';
 
 /**
@@ -50,11 +55,40 @@ export class LSP7DigitalAsset {
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
+    const defaultBaseContractAddress: string =
+      contractDeploymentOptions?.libAddress ??
+      versions[this.options.chainId]?.contracts.LSP7Mintable?.versions[DEFAULT_CONTRACT_VERSION];
+
+    const defaultBaseContractByteCode$ = from(
+      getDeployedByteCode(defaultBaseContractAddress ?? NULL_ADDRESS, this.options.provider)
+    );
+
+    const shouldDeployBaseContract$ = shouldDeployLSP7BaseContract$(
+      defaultBaseContractByteCode$,
+      contractDeploymentOptions
+    );
+
+    const baseContractDeployment$ = shouldDeployBaseContract$.pipe(
+      switchMap((shouldDeployBaseContract) => {
+        return shouldDeployBaseContract ? lsp7BaseContractDeployment$(this.options.signer) : EMPTY;
+      })
+    );
+
+    const baseContractAddress$ = baseContractDeployment$.pipe(
+      switchMap((deploymentEvent: DeploymentEventContract) => {
+        if (deploymentEvent.receipt?.contractAddress) {
+          return of(deploymentEvent.receipt.contractAddress);
+        }
+
+        return of('');
+      }),
+      defaultIfEmpty(defaultBaseContractAddress)
+    );
+
     const digitalAsset$ = lsp7DigitalAssetDeployment$(
       this.signer,
       digitalAssetDeploymentOptions,
-      contractDeploymentOptions?.libAddress ??
-        versions[this.options.chainId]?.baseContracts?.LSP7Mintable[DEFAULT_CONTRACT_VERSION]
+      baseContractAddress$
     );
 
     if (contractDeploymentOptions?.deployReactive) return digitalAsset$;
