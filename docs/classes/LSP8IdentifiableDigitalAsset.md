@@ -19,10 +19,10 @@ Deploys a mintable [LSP8 Identifiable Digital Asset](../../../standards/nft-2.0/
    - `symbol` - `string`: The symbol of the token.
    - `ownerAddress` - `string` : The owner of the contract.
 2. `contractDeploymentOptions?` - `Object`
-  - `version` - `string`: The version of LSP8 Contract you want to deploy
-  - `byteCode` - `string`: Custom bytecode to be deployed
-  - `libAddress` - `string`: The Address of a Base Contract to be used in deployment
-  - `deployReactive` - `boolean`: Whether to return an RxJS Observable of deployment events
+  - `version` - `string`: The creation + runtime bytecode of a LSP8 contract to be deployed.
+  - `byteCode` - `string`: Custom bytecode to be deployed.
+  - `libAddress` - `string`: as implementation behind a proxy contract (eg: [EIP1167](https://eips.ethereum.org/EIPS/eip-1167).
+  - `deployReactive` - `boolean`: Whether to return an RxJS Observable of deployment events.
 
 #### Returns
 
