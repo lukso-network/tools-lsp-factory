@@ -1,5 +1,6 @@
 import { ERC725 } from '@erc725/erc725.js';
-import UniversalProfile from '@lukso/universalprofile-smart-contracts/artifacts/UniversalProfile.json';
+import KeyManagerContract from '@lukso/universalprofile-smart-contracts/artifacts/LSP6KeyManager.json';
+import UniversalProfileContract from '@lukso/universalprofile-smart-contracts/artifacts/UniversalProfile.json';
 import { providers } from 'ethers';
 import { ethers, SignerWithAddress } from 'hardhat';
 import { Observable } from 'rxjs';
@@ -95,24 +96,31 @@ describe('LSP3UniversalProfile', () => {
 
   describe('Deploying UP with 2 x controller addresses', () => {
     let universalProfile;
-    let firstController;
-    let secondController;
+    let keyManager;
+    let firstControllerAddress;
+    let secondControllerAddress;
 
     beforeAll(async () => {
-      firstController = signers[0].address;
-      secondController = signers[1].address;
+      firstControllerAddress = signers[0].address;
+      secondControllerAddress = signers[1].address;
 
-      const { ERC725Account } = await lspFactory.LSP3UniversalProfile.deploy({
-        controllerAddresses: [firstController, secondController],
+      const { ERC725Account, KeyManager } = await lspFactory.LSP3UniversalProfile.deploy({
+        controllerAddresses: [firstControllerAddress, secondControllerAddress],
       });
 
-      universalProfile = new ethers.Contract(ERC725Account.address, UniversalProfile.abi, provider);
+      universalProfile = new ethers.Contract(
+        ERC725Account.address,
+        UniversalProfileContract.abi,
+        provider
+      );
+
+      keyManager = new ethers.Contract(KeyManager.address, KeyManagerContract.abi, provider);
     });
 
     it('1st address should have DEFAULT_PERMISSIONS set', async () => {
       const [signerPermissions] = await universalProfile
         .connect(signers[0])
-        .callStatic.getData([PREFIX_PERMISSIONS + firstController.substring(2)]);
+        .callStatic.getData([PREFIX_PERMISSIONS + firstControllerAddress.substring(2)]);
 
       expect(signerPermissions).toEqual(ERC725.encodePermissions(DEFAULT_PERMISSIONS));
     });
@@ -125,13 +133,13 @@ describe('LSP3UniversalProfile', () => {
 
       const [result] = await universalProfile.connect(signers[0]).callStatic.getData([key]);
       const checkedsumResult = ethers.utils.getAddress(result);
-      expect(checkedsumResult).toEqual(firstController);
+      expect(checkedsumResult).toEqual(firstControllerAddress);
     });
 
     it('2nd address should have DEFAULT_PERMISSIONS set', async () => {
       const [signerPermissions] = await universalProfile
         .connect(signers[1])
-        .callStatic.getData([PREFIX_PERMISSIONS + secondController.substring(2)]);
+        .callStatic.getData([PREFIX_PERMISSIONS + secondControllerAddress.substring(2)]);
 
       expect(signerPermissions).toEqual(ERC725.encodePermissions(DEFAULT_PERMISSIONS));
     });
@@ -144,16 +152,18 @@ describe('LSP3UniversalProfile', () => {
 
       const [result] = await universalProfile.connect(signers[0]).callStatic.getData([key]);
       const checkedsumResult = ethers.utils.getAddress(result);
-      expect(checkedsumResult).toEqual(secondController);
+      expect(checkedsumResult).toEqual(secondControllerAddress);
     });
 
-    it.skip('should be able to setData', async () => {
-      await universalProfile
-        .connect(signers[0])
-        .setData(
-          ['0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'],
-          ['0xbeefbeef']
-        );
+    it.only('first account should be able to setData', async () => {
+      const abi = await universalProfile.populateTransaction.setData(
+        ['0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'],
+        ['0xbeefbeef']
+      );
+
+      const result = await keyManager.connect(signers[0]).execute(abi.data);
+
+      expect(result).toBeTruthy();
 
       const data = await universalProfile.getData([
         '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
@@ -161,8 +171,23 @@ describe('LSP3UniversalProfile', () => {
 
       expect(data).toEqual(['0xbeefbeef']);
     });
-  });
+    it.only('second account should be able to setData', async () => {
+      const abi = await universalProfile.populateTransaction.setData(
+        ['0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'],
+        ['0xcafecafe']
+      );
 
+      const result = await keyManager.connect(signers[1]).execute(abi.data);
+
+      expect(result).toBeTruthy();
+
+      const data = await universalProfile.getData([
+        '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+      ]);
+
+      expect(data).toEqual(['0xcafecafe']);
+    });
+  });
   it('should deploy reactive', (done) => {
     const deployments$ = lspFactory.LSP3UniversalProfile.deploy(
       {
