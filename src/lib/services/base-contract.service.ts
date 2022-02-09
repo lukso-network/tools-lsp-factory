@@ -1,5 +1,6 @@
 import { Signer } from '@ethersproject/abstract-signer';
-import { defer, EMPTY, merge, Observable, of } from 'rxjs';
+import { providers } from 'ethers';
+import { defer, EMPTY, from, merge, Observable, of } from 'rxjs';
 import { defaultIfEmpty, shareReplay, switchMap, tap } from 'rxjs/operators';
 
 import {
@@ -13,7 +14,11 @@ import {
   UniversalProfileInit__factory,
 } from '../..';
 import { GAS_PRICE, NULL_ADDRESS } from '../helpers/config.helper';
-import { deployBaseContract, waitForReceipt } from '../helpers/deployment.helper';
+import {
+  deployBaseContract,
+  getDeployedByteCode,
+  waitForReceipt,
+} from '../helpers/deployment.helper';
 import { ContractNames as DigitalAssetContractNames } from '../interfaces/digital-asset-deployment';
 import { ContractDeploymentOptions as DigitalAssetContractDeploymentOptions } from '../interfaces/digital-asset-deployment';
 
@@ -109,10 +114,15 @@ function deployBaseContract$(
   return baseContractDeploymentReceipt$;
 }
 
-export function shouldDeployLSP7BaseContract$(
-  defaultBaseContractBytecode$: Observable<string>,
+export function shouldDeployDigitalAssetBaseContract$(
+  provider: providers.Web3Provider | providers.JsonRpcProvider,
+  defaultBaseContractAddress?: string,
   contractDeploymentOptions?: DigitalAssetContractDeploymentOptions
 ) {
+  const defaultBaseContractBytecode$ = from(
+    getDeployedByteCode(defaultBaseContractAddress ?? NULL_ADDRESS, provider)
+  );
+
   const providedBaseContractAddress = contractDeploymentOptions?.libAddress;
 
   return defaultBaseContractBytecode$.pipe(

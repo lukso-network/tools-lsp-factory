@@ -1,15 +1,22 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { lastValueFrom, scan } from 'rxjs';
+import { concat, concatAll, defaultIfEmpty, EMPTY, from, of, shareReplay, switchMap } from 'rxjs';
 
 import versions from '../../versions.json';
-import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
-import { DeploymentEvent, LSPFactoryOptions } from '../interfaces';
+import { DEFAULT_CONTRACT_VERSION, NULL_ADDRESS } from '../helpers/config.helper';
+import { getDeployedByteCode } from '../helpers/deployment.helper';
+import { DeploymentEventContract, LSPFactoryOptions } from '../interfaces';
 import {
   ContractDeploymentOptions,
-  DeployedContracts,
   DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
-import { lsp8IdentifiableDigitalAssetDeployment$ } from '../services/digital-asset.service';
+import {
+  lsp8BaseContractDeployment$,
+  shouldDeployDigitalAssetBaseContract$,
+} from '../services/base-contract.service';
+import {
+  lsp8IdentifiableDigitalAssetDeployment$,
+  waitForContractDeployment$,
+} from '../services/digital-asset.service';
 
 /**
  * Class responsible for deploying LSP8 Identifiable Digital Assets
@@ -49,28 +56,48 @@ export class LSP8IdentifiableDigitalAsset {
     digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
+    const defaultBaseContractAddress: string | undefined =
+      contractDeploymentOptions?.libAddress ??
+      versions[this.options.chainId]?.contracts.LSP8Mintable?.versions[DEFAULT_CONTRACT_VERSION];
+
+    const shouldDeployBaseContract$ = shouldDeployDigitalAssetBaseContract$(
+      this.options.provider,
+      defaultBaseContractAddress,
+      contractDeploymentOptions
+    );
+
+    const baseContractDeployment$ = shouldDeployBaseContract$.pipe(
+      switchMap((shouldDeployBaseContract) => {
+        return shouldDeployBaseContract ? lsp8BaseContractDeployment$(this.options.signer) : EMPTY;
+      }),
+      shareReplay()
+    );
+
+    const baseContractAddress$ = baseContractDeployment$.pipe(
+      switchMap((deploymentEvent: DeploymentEventContract) => {
+        if (deploymentEvent.receipt?.contractAddress) {
+          return of(deploymentEvent.receipt.contractAddress);
+        }
+        return '';
+      }),
+      defaultIfEmpty(
+        (function () {
+          if (contractDeploymentOptions?.deployProxy === false) return null;
+          return defaultBaseContractAddress;
+        })()
+      )
+    );
+
     const digitalAsset$ = lsp8IdentifiableDigitalAssetDeployment$(
       this.signer,
       digitalAssetDeploymentOptions,
-      contractDeploymentOptions?.libAddress ??
-        versions[this.options.chainId]?.contracts.LSP8Mintable.versions[DEFAULT_CONTRACT_VERSION]
+      baseContractAddress$
     );
 
-    if (contractDeploymentOptions?.deployReactive) return digitalAsset$;
+    const deployment$ = concat([baseContractDeployment$, digitalAsset$]).pipe(concatAll());
 
-    return lastValueFrom(
-      digitalAsset$.pipe(
-        scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
-          if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
-            accumulator[deploymentEvent.contractName] = {
-              address: deploymentEvent.receipt.contractAddress,
-              receipt: deploymentEvent.receipt,
-            };
-          }
+    if (contractDeploymentOptions?.deployReactive) return deployment$;
 
-          return accumulator;
-        }, {})
-      )
-    );
+    return waitForContractDeployment$(deployment$);
   }
 }

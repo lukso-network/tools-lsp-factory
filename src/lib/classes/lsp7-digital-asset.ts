@@ -1,36 +1,22 @@
 import { NonceManager } from '@ethersproject/experimental';
-import {
-  concat,
-  concatAll,
-  defaultIfEmpty,
-  EMPTY,
-  from,
-  lastValueFrom,
-  of,
-  scan,
-  shareReplay,
-  switchMap,
-} from 'rxjs';
+import { concat, concatAll, defaultIfEmpty, EMPTY, from, of, shareReplay, switchMap } from 'rxjs';
 
 import versions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION, NULL_ADDRESS } from '../helpers/config.helper';
 import { getDeployedByteCode } from '../helpers/deployment.helper';
-import {
-  DeploymentEvent,
-  DeploymentEventContract,
-  DeploymentType,
-  LSPFactoryOptions,
-} from '../interfaces';
+import { DeploymentEventContract, LSPFactoryOptions } from '../interfaces';
 import {
   ContractDeploymentOptions,
-  DeployedContracts,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
 import {
   lsp7BaseContractDeployment$,
-  shouldDeployLSP7BaseContract$,
+  shouldDeployDigitalAssetBaseContract$,
 } from '../services/base-contract.service';
-import { lsp7DigitalAssetDeployment$ } from '../services/digital-asset.service';
+import {
+  lsp7DigitalAssetDeployment$,
+  waitForContractDeployment$,
+} from '../services/digital-asset.service';
 
 /**
  * Class responsible for deploying LSP7 Digital Assets
@@ -71,16 +57,13 @@ export class LSP7DigitalAsset {
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
-    const defaultBaseContractAddress: string =
+    const defaultBaseContractAddress: string | undefined =
       contractDeploymentOptions?.libAddress ??
       versions[this.options.chainId]?.contracts.LSP7Mintable?.versions[DEFAULT_CONTRACT_VERSION];
 
-    const defaultBaseContractByteCode$ = from(
-      getDeployedByteCode(defaultBaseContractAddress ?? NULL_ADDRESS, this.options.provider)
-    );
-
-    const shouldDeployBaseContract$ = shouldDeployLSP7BaseContract$(
-      defaultBaseContractByteCode$,
+    const shouldDeployBaseContract$ = shouldDeployDigitalAssetBaseContract$(
+      this.options.provider,
+      defaultBaseContractAddress,
       contractDeploymentOptions
     );
 
@@ -96,8 +79,7 @@ export class LSP7DigitalAsset {
         if (deploymentEvent.receipt?.contractAddress) {
           return of(deploymentEvent.receipt.contractAddress);
         }
-
-        return of('');
+        return '';
       }),
       defaultIfEmpty(
         (function () {
@@ -117,30 +99,6 @@ export class LSP7DigitalAsset {
 
     if (contractDeploymentOptions?.deployReactive) return deployment$;
 
-    return lastValueFrom(
-      deployment$.pipe(
-        scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
-          if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
-            return accumulator;
-          }
-
-          if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
-            accumulator[`${deploymentEvent.contractName}BaseContract`] = {
-              address: deploymentEvent.receipt.contractAddress,
-              receipt: deploymentEvent.receipt,
-              type: deploymentEvent.type,
-            };
-          } else {
-            accumulator[deploymentEvent.contractName] = {
-              address: deploymentEvent.receipt.contractAddress,
-              receipt: deploymentEvent.receipt,
-              type: deploymentEvent.type,
-            };
-          }
-
-          return accumulator;
-        }, {})
-      )
-    );
+    return waitForContractDeployment$(deployment$);
   }
 }

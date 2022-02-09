@@ -1,5 +1,15 @@
 import { Signer } from '@ethersproject/abstract-signer';
-import { concat, EMPTY, from, Observable, shareReplay, switchMap, takeLast } from 'rxjs';
+import {
+  concat,
+  EMPTY,
+  from,
+  lastValueFrom,
+  Observable,
+  scan,
+  shareReplay,
+  switchMap,
+  takeLast,
+} from 'rxjs';
 
 import {
   LSP7Mintable__factory,
@@ -9,7 +19,13 @@ import {
 } from '../../';
 import { GAS_BUFFER, GAS_PRICE } from '../helpers/config.helper';
 import { deployContract, deployProxyContract, waitForReceipt } from '../helpers/deployment.helper';
-import { DeploymentEventContract, DeploymentEventProxyContract } from '../interfaces';
+import {
+  DeployedContracts,
+  DeploymentEvent,
+  DeploymentEventContract,
+  DeploymentEventProxyContract,
+  DeploymentType,
+} from '../interfaces';
 import {
   ContractNames,
   DigitalAssetDeploymentOptions,
@@ -27,7 +43,7 @@ export function lsp7DigitalAssetDeployment$(
 ) {
   return baseContractAddress$.pipe(
     switchMap((baseContractAddress) => {
-      return lsp7DigitalAssetDeploymentWithBaseContractAddresses$(
+      return lsp7DigitalAssetDeploymentWithBaseContractAddress$(
         signer,
         digitalAssetDeploymentOptions,
         baseContractAddress
@@ -37,7 +53,7 @@ export function lsp7DigitalAssetDeployment$(
   );
 }
 
-export function lsp7DigitalAssetDeploymentWithBaseContractAddresses$(
+export function lsp7DigitalAssetDeploymentWithBaseContractAddress$(
   signer: Signer,
   digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
   baseContractAddress?: string
@@ -145,6 +161,23 @@ function initializeLSP7Proxy(
 export function lsp8IdentifiableDigitalAssetDeployment$(
   signer: Signer,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
+  baseContractAddress$: Observable<string>
+) {
+  return baseContractAddress$.pipe(
+    switchMap((baseContractAddress) => {
+      return lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
+        signer,
+        digitalAssetDeploymentOptions,
+        baseContractAddress
+      );
+    }),
+    shareReplay()
+  );
+}
+
+export function lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
+  signer: Signer,
+  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
   baseContractAddress: string
 ) {
   const lsp8Deployment$ = from(
@@ -237,4 +270,32 @@ function initializeLSP8Proxy(
   );
 
   return initialize$ as unknown as Observable<DeploymentEventProxyContract>;
+}
+
+export function waitForContractDeployment$(deployment$: Observable<DeploymentEvent>) {
+  return lastValueFrom(
+    deployment$.pipe(
+      scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
+        if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
+          return accumulator;
+        }
+
+        if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
+          accumulator[`${deploymentEvent.contractName}BaseContract`] = {
+            address: deploymentEvent.receipt.contractAddress,
+            receipt: deploymentEvent.receipt,
+            type: deploymentEvent.type,
+          };
+        } else {
+          accumulator[deploymentEvent.contractName] = {
+            address: deploymentEvent.receipt.contractAddress,
+            receipt: deploymentEvent.receipt,
+            type: deploymentEvent.type,
+          };
+        }
+
+        return accumulator;
+      }, {})
+    )
+  );
 }

@@ -17,16 +17,34 @@ describe('LSP8IdentifiableDigitalAsset', () => {
 
   beforeAll(async () => {
     provider = ethers.provider;
-    signer = provider.getSigner();
+    signer = (await ethers.getSigners())[0];
     proxyDeployer = new ProxyDeployer(signer);
     baseContract = await proxyDeployer.deployLSP8BaseContract();
   });
 
-  it('should deploy LSP8 Identifiable Digital asset', async () => {
-    const myLSPFactory = new LSPFactory(
-      provider,
-      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+  it('should deploy LSP8 Identifiable Digital asset with no passed deployment options', async () => {
+    const myLSPFactory = new LSPFactory(provider, signer);
+
+    const lsp8IdentifiableDigitalAsset = await myLSPFactory.LSP8IdentifiableDigitalAsset.deploy({
+      controllerAddress: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
+      name: 'TOKEN',
+      symbol: 'TKN',
+    });
+
+    expect(lsp8IdentifiableDigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
+    expect(Object.keys(lsp8IdentifiableDigitalAsset).length).toEqual(2);
+
+    const LSP8IdentifiableDigitalAsset = LSP8Mintable__factory.connect(
+      lsp8IdentifiableDigitalAsset.LSP8IdentifiableDigitalAsset.address,
+      signer
     );
+
+    const ownerAddress = await LSP8IdentifiableDigitalAsset.owner();
+    expect(ownerAddress).toEqual('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
+  });
+
+  it('should deploy LSP8 Identifiable Digital asset from a specified base contract', async () => {
+    const myLSPFactory = new LSPFactory(provider, signer);
 
     const lsp8IdentifiableDigitalAsset = await myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
       {
@@ -38,6 +56,35 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         libAddress: baseContract.address,
       }
     );
+
+    expect(lsp8IdentifiableDigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
+    expect(Object.keys(lsp8IdentifiableDigitalAsset).length).toEqual(1);
+
+    const LSP8IdentifiableDigitalAsset = LSP8Mintable__factory.connect(
+      lsp8IdentifiableDigitalAsset.LSP8IdentifiableDigitalAsset.address,
+      signer
+    );
+
+    const ownerAddress = await LSP8IdentifiableDigitalAsset.owner();
+    expect(ownerAddress).toEqual('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
+  });
+
+  it('should deploy LSP8 Identifiable Digital without a base contract', async () => {
+    const myLSPFactory = new LSPFactory(provider, signer);
+
+    const lsp8IdentifiableDigitalAsset = await myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
+      {
+        controllerAddress: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
+        name: 'TOKEN',
+        symbol: 'TKN',
+      },
+      {
+        deployProxy: false,
+      }
+    );
+
+    expect(lsp8IdentifiableDigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
+    expect(Object.keys(lsp8IdentifiableDigitalAsset).length).toEqual(1);
 
     const LSP8IdentifiableDigitalAsset = LSP8Mintable__factory.connect(
       lsp8IdentifiableDigitalAsset.LSP8IdentifiableDigitalAsset.address,
