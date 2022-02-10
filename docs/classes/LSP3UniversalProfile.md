@@ -34,17 +34,17 @@ Then, it will:
      - `backgroundImage?` - `File | ImageBuffer | LSP3ProfileImage[]`
      - `tags?` - `string[]`
      - `links?` - `{title: string, url: string}[]`
-2. `contractDeploymentOptions?` - `Object`
-   - `version` - `string`: The version of the `UniversalProfile`, `LSP6KeyManager` and `LSP1UniversalReceiverDelegate` contracts you want to deploy.
-   - `deployReactive` - `boolean`: Whether to return an RxJS Observable of deployment events.
-   - `byteCode` - `Object`: An Object containing the creation + runtime bytecode of each smart contracts being deployed.
-     - `erc725AccountInit` - `string`: A "0x"-prefixed hex string of the `ERC725AccountInit` contract bytecode to use for deployment.
-     - `keyManagerInit` - `string`: A "0x"-prefixed hex string of the`LSP6KeyManagerInit` contract bytecode to use for deployment.
-     - `universalReceiverDelegateInit` - `string`: A "0x"-prefixed hex string of the`LSP1UniversalReceiverDelegateInit` contract bytecode to use for deployment.
-   - `libAddress` - `string`: The Address of a Base Contract to be used as implementation behind a proxy contract (eg: [EIP1167](https://eips.ethereum.org/EIPS/eip-1167)).
-     - `erc725AccountInit` - `string`: The Address of a Base Contract to be used in deployment of ERC725Account Contract.
-     - `keyManagerInit` - `string`: The Address of a Base Contract to be used in deployment of KeyManager Contract.
-     - `universalReceiverDelegateInit` - `string`: The Address of a Base Contract to be used in deployment of Universal Receiver Delegate contract.
+2. `contractDeploymentOptions?` - `Object`: Specify which smart contract versions you want to deploy. If `version`, `byteCode` and `libAddresses` are omitted the latest version from [lsp-smart-contracts library](https://github.com/lukso-network/lsp-smart-contracts) will be deployed.
+   - `version?` - `string`: The version of the `UniversalProfile`, `LSP6KeyManager` and `LSP1UniversalReceiverDelegate` contracts you want to deploy.
+   - `deployReactive?` - `boolean`: Whether to return an RxJS Observable of deployment events. Defaults to false.
+   - `byteCode?` - `Object`: An Object containing the creation + runtime bytecode of each smart contracts being deployed.
+     - `erc725AccountInit?` - `string`: A "0x"-prefixed hex string of the `ERC725AccountInit` contract bytecode to use for deployment.
+     - `keyManagerInit?` - `string`: A "0x"-prefixed hex string of the`LSP6KeyManagerInit` contract bytecode to use for deployment.
+     - `universalReceiverDelegateInit?` - `string`: A "0x"-prefixed hex string of the`LSP1UniversalReceiverDelegateInit` contract bytecode to use for deployment.
+   - `libAddresses?` - `string`: The Address of a Base Contract to be used as implementation behind a proxy contract (eg: [EIP1167](https://eips.ethereum.org/EIPS/eip-1167)).
+     - `erc725AccountInit?` - `string`: The Address of a Base Contract to be used in deployment of ERC725Account Contract.
+     - `keyManagerInit?` - `string`: The Address of a Base Contract to be used in deployment of KeyManager Contract.
+     - `universalReceiverDelegateInit?` - `string`: The Address of a Base Contract to be used in deployment of Universal Receiver Delegate contract.
 
 #### Returns
 

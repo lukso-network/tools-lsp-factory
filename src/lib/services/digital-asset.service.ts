@@ -219,5 +219,5 @@ function initializeLSP8Proxy(
     shareReplay()
   );
 
-  return initialize$ as unknown as Observable<DeploymentEventProxyContract>;
+  return initialize$ as Observable<DeploymentEventProxyContract>;
 }
