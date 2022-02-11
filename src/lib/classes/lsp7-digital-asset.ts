@@ -6,7 +6,7 @@ import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { DeploymentEvent, LSPFactoryOptions } from '../interfaces';
 import {
   ContractDeploymentOptions,
-  DeployedContracts,
+  DeployedLSP7DigitalAsset,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
 import { lsp7DigitalAssetDeployment$ } from '../services/digital-asset.service';
@@ -61,7 +61,7 @@ export class LSP7DigitalAsset {
 
     return lastValueFrom(
       digitalAsset$.pipe(
-        scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
+        scan((accumulator: DeployedLSP7DigitalAsset, deploymentEvent: DeploymentEvent) => {
           if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
             accumulator[deploymentEvent.contractName] = {
               address: deploymentEvent.receipt.contractAddress,

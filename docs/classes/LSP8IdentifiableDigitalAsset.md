@@ -26,7 +26,7 @@ Deploys a mintable [LSP8 Identifiable Digital Asset](../../../standards/nft-2.0/
 
 #### Returns
 
-`Promise`<`DeployedContracts`\> | `Observable`<`DigitalAssetDeploymentEvent`\>
+`Promise`<`DeployedLSP8IdentifiableDigitalAsset`\> | `Observable`<`DigitalAssetDeploymentEvent`\>
 
 Promise with deployed contract details.
 

@@ -27,7 +27,7 @@ Deploys a mintable [LSP7 Digital Asset](../../../standards/nft-2.0/LSP7-Digital-
 
 #### Returns
 
-`Promise`<`DeployedContracts`\> | `Observable`<`DigitalAssetDeploymentEvent`\>
+`Promise`<`DeployedLSP7DigitalAsset`\> | `Observable`<`DigitalAssetDeploymentEvent`\>
 
 Returns a Promise with object containing deployed contract details.
 
