@@ -19,15 +19,15 @@ Deploys a mintable [LSP7 Digital Asset](../../../standards/nft-2.0/LSP7-Digital-
    - `symbol` - `string`: The symbol of the token.
    - `ownerAddress` - `string` : The owner of the contract.
    - `isNFT` - `boolean`: Specify if the contract represent a fungible or a non-fungible token.
-2. `contractDeploymentOptions?` - `Object`
-  - `version` - `string`: The version of LSP7 Contract you want to deploy.
-  - `byteCode` - `string`: The creation + runtime bytecode of the `LSP7DigitalAsset` contract to deploy.
-  - `libAddress` - `string`: The Address of a Base Contract to be used in deployment as implementation behind a proxy contract (eg: [EIP1167](https://eips.ethereum.org/EIPS/eip-1167).
-  - `deployReactive` - `boolean`: Whether to return an RxJS Observable of deployment events.
+2. `contractDeploymentOptions?` - `Object`: Specify which smart contract version you want to deploy. If `version`, `byteCode` and `libAddress` are omitted the latest version from [lsp-smart-contracts library](https://github.com/lukso-network/lsp-smart-contracts) will be deployed.
+  - `version?` - `string`: The version of LSP7 Contract you want to deploy. Defaults to version `0.4.1` of [lsp-smart-contracts library](https://github.com/lukso-network/lsp-smart-contracts).
+  - `byteCode?` - `string`: The creation + runtime bytecode of the `LSP7DigitalAsset` contract to deploy.
+  - `libAddress?` - `string`: The Address of a Base Contract to be used in deployment as implementation behind a proxy contract (eg: [EIP1167](https://eips.ethereum.org/EIPS/eip-1167).
+  - `deployReactive?` - `boolean`: Whether to return an RxJS Observable of deployment events. Defaults to false.
 
 #### Returns
 
-`Promise`<`DeployedContracts`\> | `Observable`<`DigitalAssetDeploymentEvent`\>
+`Promise`<`DeployedLSP7DigitalAsset`\> | `Observable`<`DigitalAssetDeploymentEvent`\>
 
 Returns a Promise with object containing deployed contract details.
 

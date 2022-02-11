@@ -20,7 +20,6 @@ import {
 import { GAS_BUFFER, GAS_PRICE } from '../helpers/config.helper';
 import { deployContract, deployProxyContract, waitForReceipt } from '../helpers/deployment.helper';
 import {
-  DeployedContracts,
   DeploymentEvent,
   DeploymentEventContract,
   DeploymentEventProxyContract,
@@ -28,6 +27,8 @@ import {
 } from '../interfaces';
 import {
   ContractNames,
+  DeployedLSP7DigitalAsset,
+  DeployedLSP8IdentifiableDigitalAsset,
   DigitalAssetDeploymentOptions,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
@@ -269,33 +270,39 @@ function initializeLSP8Proxy(
     shareReplay()
   );
 
-  return initialize$ as unknown as Observable<DeploymentEventProxyContract>;
+  return initialize$ as Observable<DeploymentEventProxyContract>;
 }
 
 export function waitForContractDeployment$(deployment$: Observable<DeploymentEvent>) {
   return lastValueFrom(
     deployment$.pipe(
-      scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
-        if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
+      scan(
+        (
+          accumulator: DeployedLSP7DigitalAsset | DeployedLSP8IdentifiableDigitalAsset,
+          deploymentEvent: DeploymentEvent
+        ) => {
+          if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
+            return accumulator;
+          }
+
+          if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
+            accumulator[`${deploymentEvent.contractName}BaseContract`] = {
+              address: deploymentEvent.receipt.contractAddress,
+              receipt: deploymentEvent.receipt,
+              type: deploymentEvent.type,
+            };
+          } else {
+            accumulator[deploymentEvent.contractName] = {
+              address: deploymentEvent.receipt.contractAddress,
+              receipt: deploymentEvent.receipt,
+              type: deploymentEvent.type,
+            };
+          }
+
           return accumulator;
-        }
-
-        if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
-          accumulator[`${deploymentEvent.contractName}BaseContract`] = {
-            address: deploymentEvent.receipt.contractAddress,
-            receipt: deploymentEvent.receipt,
-            type: deploymentEvent.type,
-          };
-        } else {
-          accumulator[deploymentEvent.contractName] = {
-            address: deploymentEvent.receipt.contractAddress,
-            receipt: deploymentEvent.receipt,
-            type: deploymentEvent.type,
-          };
-        }
-
-        return accumulator;
-      }, {})
+        },
+        {}
+      )
     )
   );
 }

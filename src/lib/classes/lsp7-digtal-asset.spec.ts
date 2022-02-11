@@ -125,8 +125,9 @@ describe('LSP7DigitalAsset', () => {
           lsp7Address = deploymentEvent.receipt.contractAddress;
         }
       },
-      error: () => {
-        done();
+      error: (error) => {
+        // Fail to exit subsciber
+        expect(1).toEqual(error);
       },
       complete: async () => {
         const lsp7DigitalAsset = LSP7Mintable__factory.connect(lsp7Address, signer);

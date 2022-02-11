@@ -18,15 +18,15 @@ Deploys a mintable [LSP8 Identifiable Digital Asset](../../../standards/nft-2.0/
    - `name` - `string`: The name of the token.
    - `symbol` - `string`: The symbol of the token.
    - `ownerAddress` - `string` : The owner of the contract.
-2. `contractDeploymentOptions?` - `Object`
-  - `version` - `string`: The creation + runtime bytecode of a LSP8 contract to be deployed.
-  - `byteCode` - `string`: Custom bytecode to be deployed.
-  - `libAddress` - `string`: as implementation behind a proxy contract (eg: [EIP1167](https://eips.ethereum.org/EIPS/eip-1167).
-  - `deployReactive` - `boolean`: Whether to return an RxJS Observable of deployment events.
+2. `contractDeploymentOptions?` - `Object`: : Specify which smart contract version you want to deploy. If `version`, `byteCode` and `libAddress` are omitted the latest version from [lsp-smart-contracts library](https://github.com/lukso-network/lsp-smart-contracts) will be deployed.
+  - `version?` - `string`: The creation + runtime bytecode of a LSP8 contract to be deployed.
+  - `byteCode?` - `string`: Custom bytecode to be deployed.
+  - `libAddress?` - `string`: as implementation behind a proxy contract (eg: [EIP1167](https://eips.ethereum.org/EIPS/eip-1167).
+  - `deployReactive?` - `boolean`: Whether to return an RxJS Observable of deployment events.
 
 #### Returns
 
-`Promise`<`DeployedContracts`\> | `Observable`<`DigitalAssetDeploymentEvent`\>
+`Promise`<`DeployedLSP8IdentifiableDigitalAsset`\> | `Observable`<`DigitalAssetDeploymentEvent`\>
 
 Promise with deployed contract details.
 

@@ -14,6 +14,11 @@ export enum DeploymentStatus {
   COMPLETE = 'COMPLETE',
 }
 
+export interface DeployedContract {
+  address: string;
+  receipt: TransactionReceipt;
+}
+
 export interface DeploymentEventBase {
   type: DeploymentType;
   status: DeploymentStatus;
