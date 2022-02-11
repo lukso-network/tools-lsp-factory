@@ -6,7 +6,7 @@ import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { DeploymentEvent, LSPFactoryOptions } from '../interfaces';
 import {
   ContractDeploymentOptions,
-  DeployedContracts,
+  DeployedLSP8IdentifiableDigitalAsset,
   DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
 import { lsp8IdentifiableDigitalAssetDeployment$ } from '../services/digital-asset.service';
@@ -29,33 +29,11 @@ export class LSP8IdentifiableDigitalAsset {
   /**
    * Deploys a mintable LSP8 Identifiable Digital Asset
    *
-   * @param {DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
-   * @param {ContractDeploymentOptions} contractDeploymentOptions
-   * @return {*}  Returns an rxjs Observable which emits events as contracts are deployed
-   * @memberof LSP8IdentifiableDigitalAsset
-   */
-  deployReactive(
-    digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
-    contractDeploymentOptions?: ContractDeploymentOptions
-  ) {
-    const digitalAsset$ = lsp8IdentifiableDigitalAssetDeployment$(
-      this.signer,
-      digitalAssetDeploymentOptions,
-      contractDeploymentOptions?.libAddress ??
-        versions[this.options.chainId]?.baseContracts?.LSP8Mintable[DEFAULT_CONTRACT_VERSION]
-    );
-
-    return digitalAsset$;
-  }
-
-  /**
-   * Deploys a mintable LSP8 Identifiable Digital Asset
-   *
-   * Asyncronous version of `deployLSP8IdentifiableDigitalAssetReactive`.
+   * Returns a Promise with deployed contract details or an RxJS Observable of transaction details if `deployReactive` flag is set to true
    *
    * @param {DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
    * @param {ContractDeploymentOptions} contractDeploymentOptions
-   * @return {*}  Returns a Promise with deployed contract details
+   * @return {*}  Promise<DeployedContracts> | Observable<DigitalAssetDeploymentEvent>
    * @memberof LSP8IdentifiableDigitalAsset
    *
    * @example
@@ -69,24 +47,33 @@ export class LSP8IdentifiableDigitalAsset {
    */
   deploy(
     digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
-    ContractDeploymentOptions?: ContractDeploymentOptions
+    contractDeploymentOptions?: ContractDeploymentOptions
   ) {
-    const deployments$ = this.deployReactive(
+    const digitalAsset$ = lsp8IdentifiableDigitalAssetDeployment$(
+      this.signer,
       digitalAssetDeploymentOptions,
-      ContractDeploymentOptions
-    ).pipe(
-      scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
-        if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
-          accumulator[deploymentEvent.contractName] = {
-            address: deploymentEvent.receipt.contractAddress,
-            receipt: deploymentEvent.receipt,
-          };
-        }
-
-        return accumulator;
-      }, {})
+      contractDeploymentOptions?.libAddress ??
+        versions[this.options.chainId]?.baseContracts?.LSP8Mintable[DEFAULT_CONTRACT_VERSION]
     );
 
-    return lastValueFrom(deployments$);
+    if (contractDeploymentOptions?.deployReactive) return digitalAsset$;
+
+    return lastValueFrom(
+      digitalAsset$.pipe(
+        scan(
+          (accumulator: DeployedLSP8IdentifiableDigitalAsset, deploymentEvent: DeploymentEvent) => {
+            if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
+              accumulator[deploymentEvent.contractName] = {
+                address: deploymentEvent.receipt.contractAddress,
+                receipt: deploymentEvent.receipt,
+              };
+            }
+
+            return accumulator;
+          },
+          {}
+        )
+      )
+    );
   }
 }

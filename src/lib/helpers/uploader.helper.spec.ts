@@ -15,6 +15,7 @@ import { imageUpload, ipfsUpload, resizeBuffer } from './uploader.helper';
 
 jest.mock('ipfs-http-client');
 jest.mock('browser-image-compression');
+jest.setTimeout(30000);
 
 const file = new File(['FileContents'], 'file-name');
 describe('uploader.helper.spec.ts', () => {

@@ -12,21 +12,25 @@ lspFactory.LSP8IdentifiableDigitalAsset.deploy(
 
 Deploys a mintable [LSP8 Identifiable Digital Asset](../../../standards/nft-2.0/LSP8-Identifiable-Digital-Asset).
 
-Asynchronous version of [`deployReactive`](./LSP8IdentifiableDigitalAsset#deployreactive).
-
 #### Parameters
 
 1. `digitalAssetDeploymentOptions` - `Object` The [options used for deployment](../../../../../standards/smart-contracts/lsp8-identifiable-digital-asset#constructor).
    - `name` - `string`: The name of the token.
    - `symbol` - `string`: The symbol of the token.
    - `ownerAddress` - `string` : The owner of the contract.
-2. `contractDeploymentOptions?` - `Object`
+2. `contractDeploymentOptions?` - `Object`: : Specify which smart contract version you want to deploy. If `version`, `byteCode` and `libAddress` are omitted the latest version from [lsp-smart-contracts library](https://github.com/lukso-network/lsp-smart-contracts) will be deployed.
+  - `version?` - `string`: The creation + runtime bytecode of a LSP8 contract to be deployed.
+  - `byteCode?` - `string`: Custom bytecode to be deployed.
+  - `libAddress?` - `string`: as implementation behind a proxy contract (eg: [EIP1167](https://eips.ethereum.org/EIPS/eip-1167).
+  - `deployReactive?` - `boolean`: Whether to return an RxJS Observable of deployment events.
 
 #### Returns
 
-`Promise`<`DeployedContracts`\>
+`Promise`<`DeployedLSP8IdentifiableDigitalAsset`\> | `Observable`<`DigitalAssetDeploymentEvent`\>
 
 Promise with deployed contract details.
+
+If `deployReactive` flag is set to `true` in the `ContractDeploymentOptions` object, returns an [RxJS Observable](https://rxjs.dev/guide/observable) of deployment events.
 
 #### Example
 
@@ -64,36 +68,15 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
 */
 ```
 
----
-
-## deployReactive
-
-```js
-lspFactory.LSP8IdentifiableDigitalAsset.deployReactive(
-  digitalAssetDeploymentOptions,
-  contractDeploymentOptions?);
-```
-
-Deploys a mintable [LSP8 Digital Asset](../../../standards/nft-2.0/LSP8-Identifiable-Digital-Asset).
-
-#### Parameters
-
-Same as for the [asynchronous version](./LSP8IdentifiableDigitalAsset#deploy).
-
-#### Returns
-
-`Observable`<`DigitalAssetDeploymentEvent`\>
-
-[RxJS](https://rxjs.dev/) observable which emits events as contracts are deployed and initialized.
-
-#### Example
-
-```javascript
-await lspFactory.LSP8IdentifiableDigitalAsset.deployReactive({
-  name: 'My token',
-  symbol: 'TKN',
-  ownerAddress: '0xb74a88C43BCf691bd7A851f6603cb1868f6fc147',
-}).subscribe({
+```javascript title="Reactive LSP8 Identifiable Digital Asset deployment"
+await lspFactory.LSP8IdentifiableDigitalAsset.deploy(
+  {
+    name: 'My token',
+    symbol: 'TKN',
+    ownerAddress: '0xb74a88C43BCf691bd7A851f6603cb1868f6fc147',
+  },
+  { deployReactive: true }
+).subscribe({
   next: (deploymentEvent) => {
     console.log(deploymentEvent);
   },

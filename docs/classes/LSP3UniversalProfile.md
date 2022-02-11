@@ -4,7 +4,7 @@ sidebar_position: 1.2
 
 ## deploy
 
-```js
+```javascript
 lspFactory.LSP3UniversalProfile.deploy(
   profileDeploymentOptions,
   contractDeploymentOptions?);
@@ -12,41 +12,50 @@ lspFactory.LSP3UniversalProfile.deploy(
 
 Deploys and **configures** a [Universal Profile](../../../standards/universal-profile/introduction) to the blockchain. It will deploy the following contracts:
 
-- [LSP0 ERC725 Account](../../../standards/universal-profile/LSP0-Foundation)
+- [LSP0 ERC725 Account](../../../standards/universal-profile/lsp0-erc725account)
 - [LSP1 Universal Receiver Delegate](../../../standards/universal-profile/lsp1-universal-receiver-delegate)
 - [LSP6 Key Manager](../../../standards/universal-profile/lsp6-key-manager)
 
 Then, it will:
 
-- upload to IPFS and set the [LSP3 Universal Profile](../../../standards/universal-profile/lsp3-universal-profile) metadata.
+- upload to IPFS and set the [LSP3 Universal Profile](../../../standards/universal-profile/lsp3-universal-profile-metadata) metadata.
 - attach the Universal Receiver Delegate to the LSP0 ERC725 Account.
 - set the Key Manager as the owner of the LSP0 ERC725 Account.
 - give all [permissions](../../../standards/universal-profile/lsp6-key-manager#-types-of-permissions) to the `controllingAccounts`.
-
-Asynchronous version of `deployReactive`.
 
 #### Parameters
 
 1. `profileDeploymentOptions` - `Object`: The options used for deployment.
    - `controllingAccounts` - `string[]`: A list of accounts (public addresses) which will be granted [all permissions](../../../../../standards/universal-profile/lsp6-key-manager#-address-permissions) on the newly created Universal Profile.
    - `lsp3Profile?` - `Object`: If set, the created Universal Profile will be populated with these values.
-     - `name` - `string`: The name of the Universal Profile
-     - `description` - `string`: The description of the Universal Profile
+     - `name` - `string`: The name of the Universal Profile.
+     - `description` - `string`: The description of the Universal Profile.
      - `profileImage?` - `File | ImageBuffer | LSP3ProfileImage[]`
      - `backgroundImage?` - `File | ImageBuffer | LSP3ProfileImage[]`
      - `tags?` - `string[]`
      - `links?` - `{title: string, url: string}[]`
-2. `contractDeploymentOptions?` - `Object`
+2. `contractDeploymentOptions?` - `Object`: Specify which smart contract versions you want to deploy. If `version`, `byteCode` and `libAddresses` are omitted the latest version from [lsp-smart-contracts library](https://github.com/lukso-network/lsp-smart-contracts) will be deployed.
+   - `version?` - `string`: The version of the `UniversalProfile`, `LSP6KeyManager` and `LSP1UniversalReceiverDelegate` contracts you want to deploy.
+   - `deployReactive?` - `boolean`: Whether to return an RxJS Observable of deployment events. Defaults to false.
+   - `byteCode?` - `Object`: An Object containing the creation + runtime bytecode of each smart contracts being deployed.
+     - `erc725AccountInit?` - `string`: A "0x"-prefixed hex string of the `ERC725AccountInit` contract bytecode to use for deployment.
+     - `keyManagerInit?` - `string`: A "0x"-prefixed hex string of the`LSP6KeyManagerInit` contract bytecode to use for deployment.
+     - `universalReceiverDelegateInit?` - `string`: A "0x"-prefixed hex string of the`LSP1UniversalReceiverDelegateInit` contract bytecode to use for deployment.
+   - `libAddresses?` - `string`: The Address of a Base Contract to be used as implementation behind a proxy contract (eg: [EIP1167](https://eips.ethereum.org/EIPS/eip-1167)).
+     - `erc725AccountInit?` - `string`: The Address of a Base Contract to be used in deployment of ERC725Account Contract.
+     - `keyManagerInit?` - `string`: The Address of a Base Contract to be used in deployment of KeyManager Contract.
+     - `universalReceiverDelegateInit?` - `string`: The Address of a Base Contract to be used in deployment of Universal Receiver Delegate contract.
 
 #### Returns
 
-`Promise`<`Object`\>
+`Promise`<`Object`\> | `Observable`<`Object`\>
 
-Promise with object containing deployed contract details
+Returns a Promise with object containing deployed contract details.
+If `deployReactive` flag is set to `true` in the `ContractDeploymentOptions` object, returns an [RxJS Observable](https://rxjs.dev/guide/observable) of deployment events.
 
 #### Example
 
-```javascript
+```javascript title="Universal Profile Deployment"
 await lspFactory.LSP3UniversalProfile.deploy({
   controllingAccounts: ['0xb74a88C43BCf691bd7A851f6603cb1868f6fc147'],
   lsp3Profile: {
@@ -126,34 +135,15 @@ await lspFactory.LSP3UniversalProfile.deploy({
 */
 ```
 
----
-
-## deployReactive
-
-```js
-lspFactory.LSP3UniversalProfile.deployReactive(
-  profileDeploymentOptions,
-  contractDeploymentOptions?);
-```
-
-Please check the [asynchronous version](./LSP3UniversalProfile#deploy).
-
-#### Parameters
-
-Same as for the [asynchronous version](./LSP3UniversalProfile#deploy).
-
-#### Returns
-
-`Observable`<`LSP3AccountDeploymentEvent` \| `DeploymentEventTransaction`\>
-
-[RxJS](https://rxjs.dev/) observable which emits events as UniversalProfile contracts are deployed.
-
-#### Example
-
-```javascript
-await lspFactory.LSP3UniversalProfile.deployReactive({
-  controllingAccounts: ['0x9Fba07e245B415cC9580BD6c890a9fd7D22e20db'],
-}).subscribe({
+```javascript title="Reactive Universal Profile Deployment"
+await lspFactory.LSP3UniversalProfile.deploy(
+  {
+    controllingAccounts: ['0x9Fba07e245B415cC9580BD6c890a9fd7D22e20db'],
+  },
+  {
+    deployReactive: true,
+  }
+).subscribe({
   next: (deploymentEvent) => {
     console.log(deploymentEvent);
   },

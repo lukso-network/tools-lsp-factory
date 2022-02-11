@@ -1,5 +1,4 @@
-import { LSP6KeyManager } from '../..';
-import { LSP1UniversalReceiverDelegate, UniversalProfile } from '../../';
+import { DeployedContract } from '../..';
 
 import { ProfileDataBeforeUpload } from './lsp3-profile';
 
@@ -27,9 +26,9 @@ export interface ProfileDeploymentOptions {
   };
 }
 export interface DeployedContracts {
-  ERC725Account?: UniversalProfile;
-  KeyManager: LSP6KeyManager;
-  UniversalReceiverDelegate: LSP1UniversalReceiverDelegate;
+  ERC725Account?: DeployedContract;
+  KeyManager: DeployedContract;
+  UniversalReceiverDelegate: DeployedContract;
 }
 
 export interface BaseContractAddresses {
@@ -46,4 +45,5 @@ export interface ContractDeploymentOptions {
     universalReceiverDelegateInit: string;
   };
   libAddresses?: BaseContractAddresses;
+  deployReactive?: boolean;
 }

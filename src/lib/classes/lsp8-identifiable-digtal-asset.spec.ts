@@ -1,7 +1,8 @@
 import { providers } from 'ethers';
 import { ethers, SignerWithAddress } from 'hardhat';
+import { Observable } from 'rxjs';
 
-import { LSP8Mintable__factory, LSPFactory } from '../../../build/main/src/index';
+import { DeploymentEvent, LSP8Mintable__factory, LSPFactory } from '../../../build/main/src/index';
 
 import { ProxyDeployer } from './proxy-deployer';
 
@@ -16,20 +17,17 @@ describe('LSP8IdentifiableDigitalAsset', () => {
 
   beforeAll(async () => {
     provider = ethers.provider;
-    signer = provider.getSigner();
+    signer = (await ethers.getSigners())[0];
     proxyDeployer = new ProxyDeployer(signer);
     baseContract = await proxyDeployer.deployLSP8BaseContract();
   });
 
   it('should deploy LSP8 Identifiable Digital asset', async () => {
-    const myLSPFactory = new LSPFactory(
-      provider,
-      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
-    );
+    const myLSPFactory = new LSPFactory(provider, signer);
 
     const lsp8IdentifiableDigitalAsset = await myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
       {
-        controllerAddress: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
+        controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
       },
@@ -44,6 +42,46 @@ describe('LSP8IdentifiableDigitalAsset', () => {
     );
 
     const ownerAddress = await LSP8IdentifiableDigitalAsset.owner();
-    expect(ownerAddress).toEqual('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
+    expect(ownerAddress).toEqual(signer.address);
+  });
+
+  it('should deploy reactive', (done) => {
+    const myLSPFactory = new LSPFactory(provider, signer);
+
+    const lsp8IdentifiableDigitalAsset$ = myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
+      {
+        controllerAddress: signer.address,
+        name: 'TOKEN',
+        symbol: 'TKN',
+      },
+      {
+        libAddress: baseContract.address,
+        deployReactive: true,
+      }
+    ) as Observable<DeploymentEvent>;
+
+    let lsp8Address: string;
+
+    lsp8IdentifiableDigitalAsset$.subscribe({
+      next: (deploymentEvent: DeploymentEvent) => {
+        if (
+          deploymentEvent.receipt?.contractAddress &&
+          deploymentEvent.contractName === 'LSP8IdentifiableDigitalAsset'
+        ) {
+          lsp8Address = deploymentEvent.receipt.contractAddress;
+        }
+      },
+      error: (error) => {
+        // Fail to exit subsciber
+        expect(1).toEqual(error);
+      },
+      complete: async () => {
+        const lsp8IdentifiableDigitalAsset = LSP8Mintable__factory.connect(lsp8Address, signer);
+
+        const ownerAddress = await lsp8IdentifiableDigitalAsset.owner();
+        expect(ownerAddress).toEqual(signer.address);
+        done();
+      },
+    });
   });
 });

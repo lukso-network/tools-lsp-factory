@@ -1,7 +1,11 @@
+import crypto from 'crypto';
+
 import { ERC725 } from '@erc725/erc725.js';
-import UniversalProfile from '@lukso/universalprofile-smart-contracts/artifacts/UniversalProfile.json';
+import KeyManagerContract from '@lukso/universalprofile-smart-contracts/artifacts/LSP6KeyManager.json';
+import UniversalProfileContract from '@lukso/universalprofile-smart-contracts/artifacts/UniversalProfile.json';
 import { providers } from 'ethers';
 import { ethers, SignerWithAddress } from 'hardhat';
+import { Observable } from 'rxjs';
 
 import { UniversalProfile__factory } from '../../../build/main/src';
 import { LSPFactory } from '../../../build/main/src/lib/lsp-factory';
@@ -46,44 +50,6 @@ describe('LSP3UniversalProfile', () => {
       keyManager = KeyManager;
     });
 
-    it.skip('should deploy and set LSP3Profile data (reactive)', (done) => {
-      const myLSPFactory = new LSPFactory(provider, signer);
-
-      const deployments$ = myLSPFactory.LSP3UniversalProfile.deployReactive({
-        controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
-        lsp3Profile: lsp3ProfileJson,
-      });
-
-      let events;
-
-      deployments$.subscribe({
-        next: (deploymentEvents: DeploymentEvent) => {
-          events = deploymentEvents;
-        },
-        error: (error) => {
-          expect(1).toEqual(error);
-          done();
-        },
-        complete: async () => {
-          const ownerAddress = await events.ERC725Account.contract.owner();
-          expect(ownerAddress).toEqual('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
-
-          await events.ERC725Account.contract.setData(
-            '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-            '0xbeefbeef',
-            {
-              from: await signer.getAddress(),
-            }
-          );
-          const data = await events.ERC725Account.contract.getData(
-            '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'
-          );
-
-          expect(data).toEqual('0xbeefbeef');
-          done();
-        },
-      });
-    });
     it('should deploy and set LSP3Profile data', async () => {
       const ownerAddress = await universalProfile.owner();
       expect(ownerAddress).toEqual(keyManager.address);
@@ -132,24 +98,31 @@ describe('LSP3UniversalProfile', () => {
 
   describe('Deploying UP with 2 x controller addresses', () => {
     let universalProfile;
-    let firstController;
-    let secondController;
+    let keyManager;
+    let firstControllerAddress;
+    let secondControllerAddress;
 
     beforeAll(async () => {
-      firstController = signers[0].address;
-      secondController = signers[1].address;
+      firstControllerAddress = signers[0].address;
+      secondControllerAddress = signers[1].address;
 
-      const { ERC725Account } = await lspFactory.LSP3UniversalProfile.deploy({
-        controllerAddresses: [firstController, secondController],
+      const { ERC725Account, KeyManager } = await lspFactory.LSP3UniversalProfile.deploy({
+        controllerAddresses: [firstControllerAddress, secondControllerAddress],
       });
 
-      universalProfile = new ethers.Contract(ERC725Account.address, UniversalProfile.abi, provider);
+      universalProfile = new ethers.Contract(
+        ERC725Account.address,
+        UniversalProfileContract.abi,
+        provider
+      );
+
+      keyManager = new ethers.Contract(KeyManager.address, KeyManagerContract.abi, provider);
     });
 
     it('1st address should have DEFAULT_PERMISSIONS set', async () => {
       const [signerPermissions] = await universalProfile
         .connect(signers[0])
-        .callStatic.getData([PREFIX_PERMISSIONS + firstController.substring(2)]);
+        .callStatic.getData([PREFIX_PERMISSIONS + firstControllerAddress.substring(2)]);
 
       expect(signerPermissions).toEqual(ERC725.encodePermissions(DEFAULT_PERMISSIONS));
     });
@@ -162,13 +135,13 @@ describe('LSP3UniversalProfile', () => {
 
       const [result] = await universalProfile.connect(signers[0]).callStatic.getData([key]);
       const checkedsumResult = ethers.utils.getAddress(result);
-      expect(checkedsumResult).toEqual(firstController);
+      expect(checkedsumResult).toEqual(firstControllerAddress);
     });
 
     it('2nd address should have DEFAULT_PERMISSIONS set', async () => {
       const [signerPermissions] = await universalProfile
         .connect(signers[1])
-        .callStatic.getData([PREFIX_PERMISSIONS + secondController.substring(2)]);
+        .callStatic.getData([PREFIX_PERMISSIONS + secondControllerAddress.substring(2)]);
 
       expect(signerPermissions).toEqual(ERC725.encodePermissions(DEFAULT_PERMISSIONS));
     });
@@ -181,7 +154,73 @@ describe('LSP3UniversalProfile', () => {
 
       const [result] = await universalProfile.connect(signers[0]).callStatic.getData([key]);
       const checkedsumResult = ethers.utils.getAddress(result);
-      expect(checkedsumResult).toEqual(secondController);
+      expect(checkedsumResult).toEqual(secondControllerAddress);
+    });
+
+    it('All controllers should be able to setData', async () => {
+      const controllers = [signers[0], signers[1]];
+      for (const controller of controllers) {
+        const key = '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5';
+        const value = '0x' + crypto.randomBytes(32).toString('hex');
+
+        const abi = await universalProfile.populateTransaction.setData([key], [value]);
+
+        const result = await keyManager.connect(controller).execute(abi.data);
+
+        expect(result).toBeTruthy();
+
+        const data = await universalProfile.getData([key]);
+
+        expect(data).toEqual([value]);
+      }
+    });
+  });
+  describe('Reactive deployment', () => {
+    it('should have correct controller address', (done) => {
+      lspFactory = new LSPFactory(provider, signers[0]);
+
+      const deployments$ = lspFactory.LSP3UniversalProfile.deploy(
+        {
+          controllerAddresses: [signers[0].address],
+          lsp3Profile: lsp3ProfileJson,
+        },
+        {
+          deployReactive: true,
+        }
+      ) as Observable<DeploymentEvent>;
+
+      let erc725Address: string;
+      let keyManagerAddress: string;
+
+      deployments$.subscribe({
+        next: (deploymentEvent: DeploymentEvent) => {
+          if (
+            deploymentEvent.receipt?.contractAddress &&
+            deploymentEvent.contractName === 'ERC725Account'
+          ) {
+            erc725Address = deploymentEvent.receipt.contractAddress;
+          }
+
+          if (
+            deploymentEvent.receipt?.contractAddress &&
+            deploymentEvent.contractName === 'KeyManager'
+          ) {
+            keyManagerAddress = deploymentEvent.receipt.contractAddress;
+          }
+        },
+        error: (error) => {
+          // Fail to exit subsciber
+          expect(1).toEqual(error);
+        },
+        complete: async () => {
+          const universalProfile = UniversalProfile__factory.connect(erc725Address, signers[0]);
+
+          const ownerAddress = await universalProfile.owner();
+          expect(ownerAddress).toEqual(keyManagerAddress);
+
+          done();
+        },
+      });
     });
   });
 });

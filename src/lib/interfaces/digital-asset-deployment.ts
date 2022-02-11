@@ -1,4 +1,4 @@
-import { LSP7DigitalAsset, LSP8IdentifiableDigitalAsset } from '../../';
+import { DeployedContract } from '.';
 
 export enum ContractNames {
   LSP7_DIGITAL_ASSET = 'LSP7DigitalAsset',
@@ -15,13 +15,17 @@ export interface LSP7DigitalAssetDeploymentOptions extends DigitalAssetDeploymen
   isNFT: boolean;
 }
 
-export interface DeployedContracts {
-  LSP7DigitalAsset: LSP7DigitalAsset;
-  LSP8IdentifiableDigitalAsset: LSP8IdentifiableDigitalAsset;
+export interface DeployedLSP8IdentifiableDigitalAsset {
+  LSP8IdentifiableDigitalAsset: DeployedContract;
+}
+
+export interface DeployedLSP7DigitalAsset {
+  LSP7DigitalAsset: DeployedContract;
 }
 
 export interface ContractDeploymentOptions {
   version?: string;
   byteCode?: string;
   libAddress?: string;
+  deployReactive?: boolean;
 }
