@@ -3,9 +3,11 @@ import { concat, concatAll, EMPTY, shareReplay, switchMap } from 'rxjs';
 
 import versions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
+import { waitForContractDeployment$ } from '../helpers/deployment.helper';
 import { LSPFactoryOptions } from '../interfaces';
 import {
   ContractDeploymentOptions,
+  DeployedLSP7DigitalAsset,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
 import {
@@ -13,10 +15,7 @@ import {
   shouldDeployBaseContract$,
   waitForBaseContractAddress$,
 } from '../services/base-contract.service';
-import {
-  lsp7DigitalAssetDeployment$,
-  waitForContractDeployment$,
-} from '../services/digital-asset.service';
+import { lsp7DigitalAssetDeployment$ } from '../services/digital-asset.service';
 
 /**
  * Class responsible for deploying LSP7 Digital Assets
@@ -93,6 +92,6 @@ export class LSP7DigitalAsset {
 
     if (contractDeploymentOptions?.deployReactive) return deployment$;
 
-    return waitForContractDeployment$(deployment$);
+    return waitForContractDeployment$(deployment$) as Promise<DeployedLSP7DigitalAsset>;
   }
 }

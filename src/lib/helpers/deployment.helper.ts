@@ -1,6 +1,6 @@
 import { Contract, ContractFactory, ContractInterface, providers, Signer } from 'ethers';
-import { Observable } from 'rxjs';
-import { catchError, shareReplay, switchMap, takeLast } from 'rxjs/operators';
+import { lastValueFrom, Observable } from 'rxjs';
+import { catchError, scan, shareReplay, switchMap, takeLast } from 'rxjs/operators';
 
 import {
   DeploymentEvent,
@@ -171,4 +171,32 @@ export function getDeployedByteCode(
   provider: providers.Web3Provider | providers.JsonRpcProvider
 ) {
   return provider.getCode(contractAddress);
+}
+
+export function waitForContractDeployment$(deployment$: Observable<DeploymentEvent>) {
+  return lastValueFrom(
+    deployment$.pipe(
+      scan((accumulator, deploymentEvent: DeploymentEvent) => {
+        if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
+          return accumulator;
+        }
+
+        if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
+          accumulator[`${deploymentEvent.contractName}BaseContract`] = {
+            address: deploymentEvent.receipt.contractAddress,
+            receipt: deploymentEvent.receipt,
+            type: deploymentEvent.type,
+          };
+        } else {
+          accumulator[deploymentEvent.contractName] = {
+            address: deploymentEvent.receipt.contractAddress,
+            receipt: deploymentEvent.receipt,
+            type: deploymentEvent.type,
+          };
+        }
+
+        return accumulator;
+      }, {})
+    )
+  );
 }

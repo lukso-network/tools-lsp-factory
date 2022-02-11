@@ -139,9 +139,9 @@ export function shouldDeployUniversalProfileBaseContractAddresses$(
   contractDeploymentOptions?: ProfileContractDeploymentOptions
 ) {
   const deployERC725AccountProxy = contractDeploymentOptions?.ERC725Account?.baseContract !== false;
-  const deployKeyManagerProxy = contractDeploymentOptions?.KeyManager?.baseContract !== false;
   const deployUniversalReceiverProxy =
     contractDeploymentOptions?.UniversalReceiverDelegate?.baseContract !== false;
+  const deployKeyManagerProxy = contractDeploymentOptions?.KeyManager?.baseContract !== false;
 
   return forkJoin([
     shouldDeployBaseContract$(
@@ -152,15 +152,15 @@ export function shouldDeployUniversalProfileBaseContractAddresses$(
     ),
     shouldDeployBaseContract$(
       provider,
-      deployKeyManagerProxy,
-      defaultUniversalReceiverBaseContractAddress,
-      contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress
-    ),
-    shouldDeployBaseContract$(
-      provider,
       deployUniversalReceiverProxy,
       defaultKeyManagerBaseContractAddress,
       contractDeploymentOptions?.KeyManager?.libAddress
+    ),
+    shouldDeployBaseContract$(
+      provider,
+      deployKeyManagerProxy,
+      defaultUniversalReceiverBaseContractAddress,
+      contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress
     ),
   ]).pipe(shareReplay());
 }

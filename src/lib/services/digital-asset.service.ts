@@ -1,15 +1,5 @@
 import { Signer } from '@ethersproject/abstract-signer';
-import {
-  concat,
-  EMPTY,
-  from,
-  lastValueFrom,
-  Observable,
-  scan,
-  shareReplay,
-  switchMap,
-  takeLast,
-} from 'rxjs';
+import { concat, EMPTY, from, Observable, shareReplay, switchMap, takeLast } from 'rxjs';
 
 import {
   LSP7Mintable__factory,
@@ -19,16 +9,9 @@ import {
 } from '../../';
 import { GAS_BUFFER, GAS_PRICE } from '../helpers/config.helper';
 import { deployContract, deployProxyContract, waitForReceipt } from '../helpers/deployment.helper';
-import {
-  DeploymentEvent,
-  DeploymentEventContract,
-  DeploymentEventProxyContract,
-  DeploymentType,
-} from '../interfaces';
+import { DeploymentEventContract, DeploymentEventProxyContract } from '../interfaces';
 import {
   ContractNames,
-  DeployedLSP7DigitalAsset,
-  DeployedLSP8IdentifiableDigitalAsset,
   DigitalAssetDeploymentOptions,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
@@ -271,38 +254,4 @@ function initializeLSP8Proxy(
   );
 
   return initialize$ as Observable<DeploymentEventProxyContract>;
-}
-
-export function waitForContractDeployment$(deployment$: Observable<DeploymentEvent>) {
-  return lastValueFrom(
-    deployment$.pipe(
-      scan(
-        (
-          accumulator: DeployedLSP7DigitalAsset | DeployedLSP8IdentifiableDigitalAsset,
-          deploymentEvent: DeploymentEvent
-        ) => {
-          if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
-            return accumulator;
-          }
-
-          if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
-            accumulator[`${deploymentEvent.contractName}BaseContract`] = {
-              address: deploymentEvent.receipt.contractAddress,
-              receipt: deploymentEvent.receipt,
-              type: deploymentEvent.type,
-            };
-          } else {
-            accumulator[deploymentEvent.contractName] = {
-              address: deploymentEvent.receipt.contractAddress,
-              receipt: deploymentEvent.receipt,
-              type: deploymentEvent.type,
-            };
-          }
-
-          return accumulator;
-        },
-        {}
-      )
-    )
-  );
 }

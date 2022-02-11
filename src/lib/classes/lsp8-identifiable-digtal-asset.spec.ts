@@ -1,8 +1,9 @@
 import { providers } from 'ethers';
-import { ethers, SignerWithAddress } from 'hardhat';
+import { ethers } from 'hardhat';
 import { Observable } from 'rxjs';
 
 import { DeploymentEvent, LSP8Mintable__factory, LSPFactory } from '../../../build/main/src/index';
+import { DeployedLSP8IdentifiableDigitalAsset } from '../../../build/main/src/lib/interfaces/digital-asset-deployment';
 
 import { ProxyDeployer } from './proxy-deployer';
 
@@ -12,7 +13,7 @@ jest.useRealTimers();
 describe('LSP8IdentifiableDigitalAsset', () => {
   let baseContract;
   let proxyDeployer: ProxyDeployer;
-  let signer: SignerWithAddress;
+  let signer;
   let provider: providers.JsonRpcProvider;
 
   beforeAll(async () => {
@@ -25,11 +26,11 @@ describe('LSP8IdentifiableDigitalAsset', () => {
   it('should deploy LSP8 Identifiable Digital asset with no passed deployment options', async () => {
     const myLSPFactory = new LSPFactory(provider, signer);
 
-    const lsp8IdentifiableDigitalAsset = await myLSPFactory.LSP8IdentifiableDigitalAsset.deploy({
+    const lsp8IdentifiableDigitalAsset = (await myLSPFactory.LSP8IdentifiableDigitalAsset.deploy({
       controllerAddress: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
       name: 'TOKEN',
       symbol: 'TKN',
-    });
+    })) as DeployedLSP8IdentifiableDigitalAsset;
 
     expect(lsp8IdentifiableDigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
     expect(Object.keys(lsp8IdentifiableDigitalAsset).length).toEqual(2);
@@ -46,7 +47,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
   it('should deploy LSP8 Identifiable Digital asset from a specified base contract', async () => {
     const myLSPFactory = new LSPFactory(provider, signer);
 
-    const lsp8IdentifiableDigitalAsset = await myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
+    const lsp8IdentifiableDigitalAsset = (await myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
       {
         controllerAddress: signer.address,
         name: 'TOKEN',
@@ -55,7 +56,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       {
         libAddress: baseContract.address,
       }
-    );
+    )) as DeployedLSP8IdentifiableDigitalAsset;
 
     expect(lsp8IdentifiableDigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
     expect(Object.keys(lsp8IdentifiableDigitalAsset).length).toEqual(1);
@@ -112,7 +113,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
   it('should deploy LSP8 Identifiable Digital without a base contract', async () => {
     const myLSPFactory = new LSPFactory(provider, signer);
 
-    const lsp8IdentifiableDigitalAsset = await myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
+    const lsp8IdentifiableDigitalAsset = (await myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
       {
         controllerAddress: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
         name: 'TOKEN',
@@ -121,7 +122,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       {
         deployProxy: false,
       }
-    );
+    )) as DeployedLSP8IdentifiableDigitalAsset;
 
     expect(lsp8IdentifiableDigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
     expect(Object.keys(lsp8IdentifiableDigitalAsset).length).toEqual(1);

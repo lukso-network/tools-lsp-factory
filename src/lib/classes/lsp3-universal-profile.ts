@@ -1,13 +1,13 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, lastValueFrom, merge } from 'rxjs';
-import { concatAll, scan } from 'rxjs/operators';
+import { concat, merge } from 'rxjs';
+import { concatAll } from 'rxjs/operators';
 
 import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { defaultUploadOptions } from '../helpers/config.helper';
+import { waitForContractDeployment$ } from '../helpers/deployment.helper';
 import { ipfsUpload, prepareImageForLSP3 } from '../helpers/uploader.helper';
 import {
-  DeploymentEvent,
   LSPFactoryOptions,
   ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
@@ -137,6 +137,7 @@ export class LSP3UniversalProfile {
     const transferOwnership$ = getTransferOwnershipTransaction$(this.signer, account$, keyManager$);
 
     const deployment$ = concat([
+      baseContractDeployment$,
       account$,
       merge(universalReceiver$, keyManager$),
       setData$,
@@ -145,20 +146,7 @@ export class LSP3UniversalProfile {
 
     if (contractDeploymentOptions?.deployReactive) return deployment$;
 
-    return lastValueFrom(
-      deployment$.pipe(
-        scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
-          if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
-            accumulator[deploymentEvent.contractName] = {
-              address: deploymentEvent.receipt.contractAddress,
-              receipt: deploymentEvent.receipt,
-            };
-          }
-
-          return accumulator;
-        }, {})
-      )
-    );
+    return waitForContractDeployment$(deployment$) as Promise<DeployedContracts>;
   }
 
   /**
