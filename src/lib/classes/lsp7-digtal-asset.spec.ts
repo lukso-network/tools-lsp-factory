@@ -32,6 +32,9 @@ describe('LSP7DigitalAsset', () => {
       symbol: 'TKN',
     });
 
+    expect(lsp7DigitalAsset.LSP7DigitalAsset.address).toBeDefined();
+    expect(Object.keys(lsp7DigitalAsset).length).toEqual(2);
+
     const LSP7DigitalAsset = LSP7Mintable__factory.connect(
       lsp7DigitalAsset.LSP7DigitalAsset.address,
       signer
@@ -56,6 +59,9 @@ describe('LSP7DigitalAsset', () => {
       }
     );
 
+    expect(lsp7DigitalAsset.LSP7DigitalAsset.address).toBeDefined();
+    expect(Object.keys(lsp7DigitalAsset).length).toEqual(1);
+
     const LSP7DigitalAsset = LSP7Mintable__factory.connect(
       lsp7DigitalAsset.LSP7DigitalAsset.address,
       signer
@@ -79,6 +85,9 @@ describe('LSP7DigitalAsset', () => {
         deployProxy: false,
       }
     );
+
+    expect(lsp7DigitalAsset.LSP7DigitalAsset.address).toBeDefined();
+    expect(Object.keys(lsp7DigitalAsset).length).toEqual(1);
 
     const LSP7DigitalAsset = LSP7Mintable__factory.connect(
       lsp7DigitalAsset.LSP7DigitalAsset.address,

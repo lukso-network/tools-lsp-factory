@@ -1,17 +1,17 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, concatAll, defaultIfEmpty, EMPTY, from, of, shareReplay, switchMap } from 'rxjs';
+import { concat, concatAll, EMPTY, shareReplay, switchMap } from 'rxjs';
 
 import versions from '../../versions.json';
-import { DEFAULT_CONTRACT_VERSION, NULL_ADDRESS } from '../helpers/config.helper';
-import { getDeployedByteCode } from '../helpers/deployment.helper';
-import { DeploymentEventContract, LSPFactoryOptions } from '../interfaces';
+import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
+import { LSPFactoryOptions } from '../interfaces';
 import {
   ContractDeploymentOptions,
   DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
 import {
   lsp8BaseContractDeployment$,
-  shouldDeployDigitalAssetBaseContract$,
+  shouldDeployBaseContract$,
+  waitForBaseContractAddress$,
 } from '../services/base-contract.service';
 import {
   lsp8IdentifiableDigitalAssetDeployment$,
@@ -60,32 +60,26 @@ export class LSP8IdentifiableDigitalAsset {
       contractDeploymentOptions?.libAddress ??
       versions[this.options.chainId]?.contracts.LSP8Mintable?.versions[DEFAULT_CONTRACT_VERSION];
 
-    const shouldDeployBaseContract$ = shouldDeployDigitalAssetBaseContract$(
+    const deployProxy = contractDeploymentOptions?.deployProxy === false ? false : true;
+
+    const deployBaseContract$ = shouldDeployBaseContract$(
       this.options.provider,
+      deployProxy,
       defaultBaseContractAddress,
-      contractDeploymentOptions
+      contractDeploymentOptions?.libAddress
     );
 
-    const baseContractDeployment$ = shouldDeployBaseContract$.pipe(
+    const baseContractDeployment$ = deployBaseContract$.pipe(
       switchMap((shouldDeployBaseContract) => {
         return shouldDeployBaseContract ? lsp8BaseContractDeployment$(this.options.signer) : EMPTY;
       }),
       shareReplay()
     );
 
-    const baseContractAddress$ = baseContractDeployment$.pipe(
-      switchMap((deploymentEvent: DeploymentEventContract) => {
-        if (deploymentEvent.receipt?.contractAddress) {
-          return of(deploymentEvent.receipt.contractAddress);
-        }
-        return '';
-      }),
-      defaultIfEmpty(
-        (function () {
-          if (contractDeploymentOptions?.deployProxy === false) return null;
-          return defaultBaseContractAddress;
-        })()
-      )
+    const baseContractAddress$ = waitForBaseContractAddress$(
+      baseContractDeployment$,
+      defaultBaseContractAddress,
+      deployProxy
     );
 
     const digitalAsset$ = lsp8IdentifiableDigitalAssetDeployment$(

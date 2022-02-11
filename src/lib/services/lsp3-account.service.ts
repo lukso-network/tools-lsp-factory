@@ -47,7 +47,7 @@ export function accountDeployment$(
   signer: Signer,
   controllerAddresses: string[],
   baseContractAddresses$: Observable<{
-    [ContractNames.ERC725_Account]: string;
+    [ContractNames.ERC725_Account]: string; // TODO: move this to interface
     [ContractNames.UNIVERSAL_RECEIVER]: string;
   }>
 ) {

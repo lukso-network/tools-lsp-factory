@@ -38,13 +38,28 @@ export interface BaseContractAddresses {
   universalReceiverDelegateInit?: string;
 }
 
-export interface ContractDeploymentOptions {
+// export interface ContractDeploymentOptions {
+//   version?: string;
+//   deployReactive?: boolean;
+//   byteCode?: {
+//     erc725AccountInit: string;
+//     keyManagerInit: string;
+//     universalReceiverDelegateInit: string;
+//   };
+//   libAddresses?: BaseContractAddresses;
+// }
+
+// TODO: implement new Contract Options structure
+interface ContractOptions {
   version?: string;
-  byteCode?: {
-    erc725AccountInit: string;
-    keyManagerInit: string;
-    universalReceiverDelegateInit: string;
-  };
-  libAddresses?: BaseContractAddresses;
+  byteCode?: string;
+  baseContract?: boolean;
+  libAddress?: string;
+}
+export interface ContractDeploymentOptions {
+  version?: string; // Master version. Sets version for all contracts
   deployReactive?: boolean;
+  ERC725Account?: ContractOptions;
+  KeyManager?: ContractOptions;
+  UniversalReceiverDelegate?: ContractOptions;
 }

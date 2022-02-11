@@ -155,7 +155,7 @@ describe('LSP3UniversalProfile', () => {
       expect(checkedsumResult).toEqual(secondControllerAddress);
     });
 
-    it.only('first account should be able to setData', async () => {
+    it('first account should be able to setData', async () => {
       const abi = await universalProfile.populateTransaction.setData(
         ['0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'],
         ['0xbeefbeef']
@@ -171,7 +171,7 @@ describe('LSP3UniversalProfile', () => {
 
       expect(data).toEqual(['0xbeefbeef']);
     });
-    it.only('second account should be able to setData', async () => {
+    it('second account should be able to setData', async () => {
       const abi = await universalProfile.populateTransaction.setData(
         ['0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'],
         ['0xcafecafe']

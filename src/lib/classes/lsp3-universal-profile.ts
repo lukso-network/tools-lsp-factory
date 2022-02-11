@@ -1,5 +1,5 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, forkJoin, lastValueFrom, merge } from 'rxjs';
+import { concat, lastValueFrom, merge } from 'rxjs';
 import { concatAll, scan } from 'rxjs/operators';
 
 import contractVersions from '../../versions.json';
@@ -15,7 +15,11 @@ import {
 import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import { ContractDeploymentOptions, DeployedContracts } from '../interfaces/profile-deployment';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
-import { getUniversalProfileBaseContractAddresses$ } from '../services/base-contract.service';
+import {
+  shouldDeployUniversalProfileBaseContractAddresses$,
+  universalProfileBaseContractAddresses$,
+  universalProfileBaseContractsDeployment$,
+} from '../services/base-contract.service';
 import { keyManagerDeployment$ } from '../services/key-manager.service';
 
 import {
@@ -82,27 +86,28 @@ export class LSP3UniversalProfile {
         DEFAULT_CONTRACT_VERSION
       ];
 
-    const defaultBaseContractByteCode$ = forkJoin([
-      this.getDeployedByteCode(
-        defaultUPBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
-      ),
-      this.getDeployedByteCode(
-        defaultUniversalReceiverBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
-      ),
-      this.getDeployedByteCode(
-        defaultKeyManagerBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
-      ),
-    ]);
-
-    const baseContractAddresses$ = getUniversalProfileBaseContractAddresses$(
+    const baseContractsToDeploy$ = shouldDeployUniversalProfileBaseContractAddresses$(
       defaultUPBaseContractAddress,
       defaultUniversalReceiverBaseContractAddress,
       defaultKeyManagerBaseContractAddress,
-      defaultBaseContractByteCode$,
-      this.signer,
+      this.options.provider,
       contractDeploymentOptions
     );
 
+    const baseContractDeployment$ = universalProfileBaseContractsDeployment$(
+      this.signer,
+      baseContractsToDeploy$
+    );
+
+    const baseContractAddresses$ = universalProfileBaseContractAddresses$(
+      baseContractDeployment$,
+      defaultUPBaseContractAddress,
+      defaultUniversalReceiverBaseContractAddress,
+      defaultKeyManagerBaseContractAddress,
+      contractDeploymentOptions
+    );
+
+    // TODO: move this inside accountDeployment$
     const controllerAddresses = profileDeploymentOptions.controllerAddresses.map((controller) => {
       return typeof controller === 'string' ? controller : controller.address;
     });
@@ -154,10 +159,6 @@ export class LSP3UniversalProfile {
         }, {})
       )
     );
-  }
-
-  getDeployedByteCode(contractAddress: string) {
-    return this.options.provider.getCode(contractAddress);
   }
 
   /**
