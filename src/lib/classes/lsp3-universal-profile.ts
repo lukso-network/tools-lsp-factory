@@ -72,23 +72,23 @@ export class LSP3UniversalProfile {
     // -1 > Run IPFS upload process in parallel with contract deployment
     const lsp3Profile$ = lsp3ProfileUpload$(profileDeploymentOptions.lsp3Profile);
 
-    const defaultContractVersion = contractDeploymentOptions.version ?? DEFAULT_CONTRACT_VERSION;
+    const defaultContractVersion = contractDeploymentOptions?.version ?? DEFAULT_CONTRACT_VERSION;
 
     // 0 > Check for existing base contracts and deploy
     const defaultUPBaseContractAddress =
       contractDeploymentOptions?.ERC725Account?.libAddress ??
       contractVersions[this.options.chainId]?.contracts?.ERC725Account?.versions[
-        contractDeploymentOptions.ERC725Account.version ?? defaultContractVersion
+        contractDeploymentOptions?.ERC725Account?.version ?? defaultContractVersion
       ];
     const defaultUniversalReceiverBaseContractAddress =
       contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress ??
       contractVersions[this.options.chainId]?.contracts?.UniversalReceiverDelegate?.versions[
-        contractDeploymentOptions.UniversalReceiverDelegate.version ?? defaultContractVersion
+        contractDeploymentOptions?.UniversalReceiverDelegate?.version ?? defaultContractVersion
       ];
     const defaultKeyManagerBaseContractAddress =
       contractDeploymentOptions?.KeyManager?.libAddress ??
       contractVersions[this.options.chainId]?.contracts?.KeyManager?.versions[
-        contractDeploymentOptions.KeyManager.version ?? defaultContractVersion
+        contractDeploymentOptions?.KeyManager?.version ?? defaultContractVersion
       ];
 
     const baseContractsToDeploy$ = shouldDeployUniversalProfileBaseContractAddresses$(
