@@ -1,5 +1,5 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, merge } from 'rxjs';
+import { concat } from 'rxjs';
 import { concatAll } from 'rxjs/operators';
 
 import contractVersions from '../../versions.json';
@@ -72,18 +72,23 @@ export class LSP3UniversalProfile {
     // -1 > Run IPFS upload process in parallel with contract deployment
     const lsp3Profile$ = lsp3ProfileUpload$(profileDeploymentOptions.lsp3Profile);
 
+    const defaultContractVersion = contractDeploymentOptions.version ?? DEFAULT_CONTRACT_VERSION;
+
     // 0 > Check for existing base contracts and deploy
     const defaultUPBaseContractAddress =
+      contractDeploymentOptions?.ERC725Account?.libAddress ??
       contractVersions[this.options.chainId]?.contracts?.ERC725Account?.versions[
-        DEFAULT_CONTRACT_VERSION
+        contractDeploymentOptions.ERC725Account.version ?? defaultContractVersion
       ];
     const defaultUniversalReceiverBaseContractAddress =
+      contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress ??
       contractVersions[this.options.chainId]?.contracts?.UniversalReceiverDelegate?.versions[
-        DEFAULT_CONTRACT_VERSION
+        contractDeploymentOptions.UniversalReceiverDelegate.version ?? defaultContractVersion
       ];
     const defaultKeyManagerBaseContractAddress =
+      contractDeploymentOptions?.KeyManager?.libAddress ??
       contractVersions[this.options.chainId]?.contracts?.KeyManager?.versions[
-        DEFAULT_CONTRACT_VERSION
+        contractDeploymentOptions.KeyManager.version ?? defaultContractVersion
       ];
 
     const baseContractsToDeploy$ = shouldDeployUniversalProfileBaseContractAddresses$(
@@ -107,7 +112,6 @@ export class LSP3UniversalProfile {
       contractDeploymentOptions
     );
 
-    // TODO: move this inside accountDeployment$
     const controllerAddresses = profileDeploymentOptions.controllerAddresses.map((controller) => {
       return typeof controller === 'string' ? controller : controller.address;
     });
@@ -139,7 +143,8 @@ export class LSP3UniversalProfile {
     const deployment$ = concat([
       baseContractDeployment$,
       account$,
-      merge(universalReceiver$, keyManager$),
+      universalReceiver$,
+      keyManager$,
       setData$,
       transferOwnership$,
     ]).pipe(concatAll());

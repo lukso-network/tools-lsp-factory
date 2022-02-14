@@ -196,7 +196,8 @@ export function waitForContractDeployment$(deployment$: Observable<DeploymentEve
         }
 
         return accumulator;
-      }, {})
+      }, {}),
+      shareReplay()
     )
   );
 }

@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import { Signer } from '@ethersproject/abstract-signer';
 import { NonceManager } from '@ethersproject/experimental';
 
@@ -5,6 +7,7 @@ import { UniversalProfile__factory } from '../types/ethers-v5/factories/Universa
 import { LSP6KeyManager__factory } from '../types/ethers-v5/factories/LSP6KeyManager__factory';
 import { LSP1UniversalReceiverDelegate__factory } from '../types/ethers-v5/factories/LSP1UniversalReceiverDelegate__factory';
 import { LSPFactory } from '../build/main/src';
+import { DeployedContracts } from '../src/lib/interfaces';
 
 export async function deployUniversalProfileContracts(signer: Signer, owner: string) {
   let nonceManager = new NonceManager(signer);
@@ -24,18 +27,23 @@ export async function deployUniversalProfileContracts(signer: Signer, owner: str
 }
 
 export async function testUPDeploymentWithBaseContractFlag(
-  baseContracts,
+  deployBaseContracts: {
+    ERC725Account: boolean;
+    KeyManager: boolean;
+    UniversalReceiverDelegate: boolean;
+  },
   expectedContractNumber: number,
-  lspFactory: LSPFactory
-) {
+  lspFactory: LSPFactory,
+  controllerAddresses: string[]
+): Promise<DeployedContracts> {
   const deployedContracts = await lspFactory.LSP3UniversalProfile.deploy(
     {
-      controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
+      controllerAddresses,
     },
     {
-      ERC725Account: { baseContract: baseContracts.ERC725Account },
-      KeyManager: { baseContract: baseContracts.KeyManager },
-      UniversalReceiverDelegate: { baseContract: baseContracts.ERC725Account },
+      ERC725Account: { baseContract: deployBaseContracts.ERC725Account },
+      KeyManager: { baseContract: deployBaseContracts.KeyManager },
+      UniversalReceiverDelegate: { baseContract: deployBaseContracts.UniversalReceiverDelegate },
     }
   );
 
@@ -44,7 +52,31 @@ export async function testUPDeploymentWithBaseContractFlag(
   const contractNames = Object.keys(deployedContracts);
   const deployBaseContract = Object.values(deployedContracts);
 
-  for (let i; i < contractNames.length; i++) {
-    if (deployBaseContract[i]) expect(deployedContracts[contractNames[i]]).toBeDefined();
+  for (const contractName of contractNames) {
+    if (deployBaseContract[contractName]) {
+      expect(deployedContracts[`${contractName}BaseContract`]).toBeDefined();
+    }
+
+    if (deployBaseContract[contractName] === false) {
+      expect(deployedContracts[`${contractName}BaseContract`]).toBeUndefined();
+    }
   }
+  return deployedContracts as DeployedContracts;
+}
+
+export async function testSetData(upAddress: string, keyManagerAddress: string, signer: Signer) {
+  const key = '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5';
+  const value = '0x' + crypto.randomBytes(32).toString('hex');
+
+  const universalProfile = UniversalProfile__factory.connect(upAddress, signer);
+
+  const keyManager = LSP6KeyManager__factory.connect(keyManagerAddress, signer);
+
+  const abi = await universalProfile.populateTransaction.setData([key], [value]);
+
+  const result = await keyManager.connect(signer).execute(abi.data);
+  expect(result).toBeTruthy();
+
+  const data = await universalProfile.getData([key]);
+  expect(data).toEqual([value]);
 }

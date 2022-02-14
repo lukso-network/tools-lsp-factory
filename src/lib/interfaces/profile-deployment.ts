@@ -27,8 +27,11 @@ export interface ProfileDeploymentOptions {
 }
 export interface DeployedContracts {
   ERC725Account?: DeployedContract;
+  ERC725AccountBaseContract?: DeployedContract;
   KeyManager: DeployedContract;
+  KeyManagerBaseContract: DeployedContract;
   UniversalReceiverDelegate: DeployedContract;
+  UniversalReceiverDelegateBaseContract: DeployedContract;
 }
 
 export interface BaseContractAddresses {
@@ -37,18 +40,6 @@ export interface BaseContractAddresses {
   universalReceiverDelegateInit?: string;
 }
 
-// export interface ContractDeploymentOptions {
-//   version?: string;
-//   deployReactive?: boolean;
-//   byteCode?: {
-//     erc725AccountInit: string;
-//     keyManagerInit: string;
-//     universalReceiverDelegateInit: string;
-//   };
-//   libAddresses?: BaseContractAddresses;
-// }
-
-// TODO: implement new Contract Options structure
 interface ContractOptions {
   version?: string;
   byteCode?: string;
@@ -56,7 +47,7 @@ interface ContractOptions {
   libAddress?: string;
 }
 export interface ContractDeploymentOptions {
-  version?: string; // Master version. Sets version for all contracts
+  version?: string;
   deployReactive?: boolean;
   ERC725Account?: ContractOptions;
   KeyManager?: ContractOptions;

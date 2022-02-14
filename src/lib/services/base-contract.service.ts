@@ -1,7 +1,7 @@
 import { Signer } from '@ethersproject/abstract-signer';
 import { providers } from 'ethers';
 import { defer, EMPTY, forkJoin, from, merge, Observable, of } from 'rxjs';
-import { defaultIfEmpty, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { defaultIfEmpty, last, shareReplay, switchMap, tap } from 'rxjs/operators';
 
 import {
   DeploymentEventContract,
@@ -153,14 +153,14 @@ export function shouldDeployUniversalProfileBaseContractAddresses$(
     shouldDeployBaseContract$(
       provider,
       deployUniversalReceiverProxy,
-      defaultKeyManagerBaseContractAddress,
-      contractDeploymentOptions?.KeyManager?.libAddress
+      defaultUniversalReceiverBaseContractAddress,
+      contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress
     ),
     shouldDeployBaseContract$(
       provider,
       deployKeyManagerProxy,
-      defaultUniversalReceiverBaseContractAddress,
-      contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress
+      defaultKeyManagerBaseContractAddress,
+      contractDeploymentOptions?.KeyManager?.libAddress
     ),
   ]).pipe(shareReplay());
 }
@@ -200,10 +200,10 @@ export function universalProfileBaseContractAddresses$(
       baseContractAddresses[deploymentEvent.contractName] = deploymentEvent.receipt.contractAddress;
     }),
     defaultIfEmpty(of(baseContractAddresses)),
+    last(),
     switchMap(() => of(baseContractAddresses)),
     shareReplay()
   );
-
   return baseContractAddresses$;
 }
 

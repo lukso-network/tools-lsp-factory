@@ -1,5 +1,3 @@
-import crypto from 'crypto';
-
 import { ERC725 } from '@erc725/erc725.js';
 import KeyManagerContract from '@lukso/universalprofile-smart-contracts/artifacts/LSP6KeyManager.json';
 import UniversalProfileContract from '@lukso/universalprofile-smart-contracts/artifacts/UniversalProfile.json';
@@ -9,7 +7,7 @@ import { Observable } from 'rxjs';
 
 import { UniversalProfile__factory } from '../../../build/main/src';
 import { LSPFactory } from '../../../build/main/src/lib/lsp-factory';
-import { testUPDeploymentWithBaseContractFlag } from '../../../test/test.utils';
+import { testSetData, testUPDeploymentWithBaseContractFlag } from '../../../test/test.utils';
 import {
   ADDRESS_PERMISSIONS_ARRAY_KEY,
   DEFAULT_PERMISSIONS,
@@ -160,18 +158,7 @@ describe('LSP3UniversalProfile', () => {
     it('All controllers should be able to setData', async () => {
       const controllers = [signers[0], signers[1]];
       for (const controller of controllers) {
-        const key = '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5';
-        const value = '0x' + crypto.randomBytes(32).toString('hex');
-
-        const abi = await universalProfile.populateTransaction.setData([key], [value]);
-
-        const result = await keyManager.connect(controller).execute(abi.data);
-
-        expect(result).toBeTruthy();
-
-        const data = await universalProfile.getData([key]);
-
-        expect(data).toEqual([value]);
+        await testSetData(universalProfile.address, keyManager.address, controller);
       }
     });
   });
@@ -225,26 +212,9 @@ describe('LSP3UniversalProfile', () => {
     });
   });
 
-  describe.only('baseContract deployment flag', () => {
+  describe('baseContract deployment flag', () => {
     describe('Deployment with all baseContract flags set to false', () => {
       it('Should not deploy base contracts', async () => {
-        const deployedContracts: DeployedContracts = (await lspFactory.LSP3UniversalProfile.deploy(
-          {
-            controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
-          },
-          {
-            ERC725Account: { baseContract: false },
-            KeyManager: { baseContract: false },
-            UniversalReceiverDelegate: { baseContract: false },
-          }
-        )) as DeployedContracts;
-
-        expect(Object.keys(deployedContracts).length).toEqual(3);
-      });
-    });
-
-    describe('Deployment with only ERC725 baseContract set to true', () => {
-      it('Should deploy only ERC725 Base contract', async () => {
         await testUPDeploymentWithBaseContractFlag(
           {
             ERC725Account: false,
@@ -252,7 +222,23 @@ describe('LSP3UniversalProfile', () => {
             UniversalReceiverDelegate: false,
           },
           3,
-          lspFactory
+          lspFactory,
+          [signers[0].address]
+        );
+      });
+    });
+
+    describe('Deployment with only ERC725 baseContract set to true', () => {
+      it('Should deploy only ERC725 Base contract', async () => {
+        await testUPDeploymentWithBaseContractFlag(
+          {
+            ERC725Account: true,
+            KeyManager: false,
+            UniversalReceiverDelegate: false,
+          },
+          4,
+          lspFactory,
+          [signers[0].address]
         );
       });
     });
@@ -266,76 +252,107 @@ describe('LSP3UniversalProfile', () => {
             UniversalReceiverDelegate: false,
           },
           4,
-          lspFactory
+          lspFactory,
+          [signers[0].address]
         );
       });
     });
 
-    describe.skip('Deployment with only URD baseContract set to true', () => {
+    describe('Deployment with only URD baseContract set to true', () => {
       it('Should deploy only URD Base contract', async () => {
         await testUPDeploymentWithBaseContractFlag(
           {
             ERC725Account: false,
-            KeyManager: true,
-            UniversalReceiverDelegate: false,
+            KeyManager: false,
+            UniversalReceiverDelegate: true,
           },
           4,
-          lspFactory
+          lspFactory,
+          [signers[0].address]
+        );
+      });
+    });
+
+    describe('Deployment with all baseContracts set to true', () => {
+      it('Should deploy with all baseContracts', async () => {
+        await testUPDeploymentWithBaseContractFlag(
+          {
+            ERC725Account: true,
+            KeyManager: true,
+            UniversalReceiverDelegate: true,
+          },
+          6,
+          lspFactory,
+          [signers[0].address]
         );
       });
     });
   });
 
   describe('Deploying UP from specified base contracts', () => {
-    let universalProfile;
-    let signer;
-    let keyManager;
-    let deployedContracts: DeployedContracts;
     let baseContracts;
 
     beforeAll(async () => {
       const proxyDeployer = new ProxyDeployer(signers[0]);
       baseContracts = await proxyDeployer.deployUniversalProfileBaseContracts();
-
-      signer = signers[0];
-      deployedContracts = (await lspFactory.LSP3UniversalProfile.deploy(
-        {
-          controllerAddresses: [signer.address],
-        },
-        {
-          ERC725Account: { libAddress: baseContracts.universalProfile.address },
-        }
-      )) as DeployedContracts;
-
-      universalProfile = UniversalProfile__factory.connect(
-        deployedContracts.ERC725Account.address,
-        signer
-      );
-
-      keyManager = new ethers.Contract(
-        deployedContracts.KeyManager.address,
-        KeyManagerContract.abi,
-        provider
-      );
     });
 
-    it('should only deploy proxy contract', async () => {
-      expect(Object.keys(deployedContracts).length).toEqual(3);
+    describe('Deploying with only UP base contract specified', () => {
+      let deployedContracts: DeployedContracts;
+
+      it('should not deploy UP base contract', async () => {
+        lspFactory = new LSPFactory(provider, signers[1]);
+
+        deployedContracts = (await lspFactory.LSP3UniversalProfile.deploy(
+          {
+            controllerAddresses: [signers[0].address],
+          },
+          {
+            ERC725Account: { libAddress: baseContracts.universalProfile.address },
+          }
+        )) as DeployedContracts;
+
+        expect(Object.keys(deployedContracts).length).toEqual(5);
+        expect(deployedContracts.ERC725AccountBaseContract).toBeUndefined();
+        expect(deployedContracts.KeyManagerBaseContract).toBeDefined();
+        expect(deployedContracts.UniversalReceiverDelegateBaseContract).toBeDefined();
+      });
+
+      it('should be able to setData', async () => {
+        await testSetData(
+          deployedContracts.ERC725Account.address,
+          deployedContracts.KeyManager.address,
+          signers[0]
+        );
+      });
     });
 
-    it('should be able to setData', async () => {
-      const key = '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5';
-      const value = '0x' + crypto.randomBytes(32).toString('hex');
+    describe('Deploying with only KeyManager base contract specified', () => {
+      let deployedContracts: DeployedContracts;
 
-      const abi = await universalProfile.populateTransaction.setData([key], [value]);
+      it('should not deploy KeyManager base contract', async () => {
+        deployedContracts = (await lspFactory.LSP3UniversalProfile.deploy(
+          {
+            controllerAddresses: [signers[0].address],
+          },
+          {
+            KeyManager: { libAddress: baseContracts.keyManager.address },
+          }
+        )) as DeployedContracts;
 
-      const result = await keyManager.connect(signers[0]).execute(abi.data);
+        expect(Object.keys(deployedContracts).length).toEqual(5);
+        expect(deployedContracts.ERC725AccountBaseContract).toBeDefined();
+        expect(deployedContracts.KeyManagerBaseContract).toBeUndefined();
+        expect(deployedContracts.UniversalReceiverDelegateBaseContract).toBeDefined();
+      });
 
-      expect(result).toBeTruthy();
-
-      const data = await universalProfile.getData([key]);
-
-      expect(data).toEqual([value]);
+      it('should be able to setData', async () => {
+        await testSetData(
+          deployedContracts.ERC725Account.address,
+          deployedContracts.KeyManager.address,
+          signers[0]
+        );
+      });
     });
   });
 });
