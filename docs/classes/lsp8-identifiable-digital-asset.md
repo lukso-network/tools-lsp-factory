@@ -1,6 +1,9 @@
 ---
 sidebar_position: 1.3
+title: LSP8IdentifiableDigitalAsset
 ---
+
+# LSP8IdentifiableDigtialAsset
 
 ## deploy
 
@@ -14,15 +17,11 @@ Deploys a mintable [LSP8 Identifiable Digital Asset](../../../standards/nft-2.0/
 
 #### Parameters
 
-1. `digitalAssetDeploymentOptions` - `Object` The [options used for deployment](../../../../../standards/smart-contracts/lsp8-identifiable-digital-asset#constructor).
+1. `digitalAssetDeploymentOptions` - `Object`: The [options used for deployment](../../../../../standards/smart-contracts/lsp8-identifiable-digital-asset#constructor).
    - `name` - `string`: The name of the token.
    - `symbol` - `string`: The symbol of the token.
    - `ownerAddress` - `string` : The owner of the contract.
-2. `contractDeploymentOptions?` - `Object`: : Specify which smart contract version you want to deploy. If `version`, `byteCode` and `libAddress` are omitted the latest version from [lsp-smart-contracts library](https://github.com/lukso-network/lsp-smart-contracts) will be deployed.
-  - `version?` - `string`: The creation + runtime bytecode of a LSP8 contract to be deployed.
-  - `byteCode?` - `string`: Custom bytecode to be deployed.
-  - `libAddress?` - `string`: as implementation behind a proxy contract (eg: [EIP1167](https://eips.ethereum.org/EIPS/eip-1167).
-  - `deployReactive?` - `boolean`: Whether to return an RxJS Observable of deployment events.
+2. `contractDeploymentOptions?` - `Object`: Same as for [LSP7DigitalAsset deployment](./lsp7-digital-asset)
 
 #### Returns
 
@@ -75,7 +74,7 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy(
     symbol: 'TKN',
     ownerAddress: '0xb74a88C43BCf691bd7A851f6603cb1868f6fc147',
   },
-  { deployReactive: true }
+  { deployReactive: true },
 ).subscribe({
   next: (deploymentEvent) => {
     console.log(deploymentEvent);
