@@ -53,7 +53,6 @@ export type DeploymentEvent =
   | DeploymentEventStandardContract
   | DeploymentEventProxyContract
   | DeploymentEventTransaction
-  | DeploymentEventBaseContract
   | DeploymentEventBaseContract;
 
 /**

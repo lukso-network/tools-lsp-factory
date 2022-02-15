@@ -41,9 +41,9 @@ export async function testUPDeploymentWithBaseContractFlag(
       controllerAddresses,
     },
     {
-      ERC725Account: { baseContract: deployBaseContracts.ERC725Account },
-      KeyManager: { baseContract: deployBaseContracts.KeyManager },
-      UniversalReceiverDelegate: { baseContract: deployBaseContracts.UniversalReceiverDelegate },
+      ERC725Account: { deployProxy: deployBaseContracts.ERC725Account },
+      KeyManager: { deployProxy: deployBaseContracts.KeyManager },
+      UniversalReceiverDelegate: { deployProxy: deployBaseContracts.UniversalReceiverDelegate },
     }
   );
 

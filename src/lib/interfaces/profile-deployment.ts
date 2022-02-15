@@ -43,7 +43,7 @@ export interface BaseContractAddresses {
 interface ContractOptions {
   version?: string;
   byteCode?: string;
-  baseContract?: boolean;
+  deployProxy?: boolean;
   libAddress?: string;
 }
 export interface ContractDeploymentOptions {

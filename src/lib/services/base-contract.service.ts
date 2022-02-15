@@ -138,10 +138,10 @@ export function shouldDeployUniversalProfileBaseContractAddresses$(
   provider: providers.Web3Provider | providers.JsonRpcProvider,
   contractDeploymentOptions?: ProfileContractDeploymentOptions
 ) {
-  const deployERC725AccountProxy = contractDeploymentOptions?.ERC725Account?.baseContract !== false;
+  const deployERC725AccountProxy = contractDeploymentOptions?.ERC725Account?.deployProxy !== false;
   const deployUniversalReceiverProxy =
-    contractDeploymentOptions?.UniversalReceiverDelegate?.baseContract !== false;
-  const deployKeyManagerProxy = contractDeploymentOptions?.KeyManager?.baseContract !== false;
+    contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy !== false;
+  const deployKeyManagerProxy = contractDeploymentOptions?.KeyManager?.deployProxy !== false;
 
   return forkJoin([
     shouldDeployBaseContract$(
@@ -180,17 +180,17 @@ export function universalProfileBaseContractAddresses$(
   const baseContractAddresses = {
     [UniversalProfileContractNames.ERC725_Account]:
       providedUPBaseContractAddress ??
-      contractDeploymentOptions?.ERC725Account?.baseContract !== false
+      contractDeploymentOptions?.ERC725Account?.deployProxy !== false
         ? defaultUPBaseContractAddress
         : null,
     [UniversalProfileContractNames.UNIVERSAL_RECEIVER]:
       providedUniversalReceiverContractAddress ??
-      contractDeploymentOptions?.UniversalReceiverDelegate?.baseContract !== false
+      contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy !== false
         ? defaultUniversalReceiverBaseContractAddress
         : null,
     [UniversalProfileContractNames.KEY_MANAGER]:
       providedKeyManagerContractAddress ??
-      contractDeploymentOptions?.KeyManager?.baseContract !== false
+      contractDeploymentOptions?.KeyManager?.deployProxy !== false
         ? defaultKeyManagerBaseContractAddress
         : null,
   };
