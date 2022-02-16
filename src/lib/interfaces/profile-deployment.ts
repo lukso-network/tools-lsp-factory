@@ -35,9 +35,9 @@ export interface DeployedContracts {
 }
 
 export interface BaseContractAddresses {
-  erc725AccountInit?: string;
-  keyManagerInit?: string;
-  universalReceiverDelegateInit?: string;
+  [ContractNames.ERC725_Account]?: string;
+  [ContractNames.KEY_MANAGER]?: string;
+  [ContractNames.UNIVERSAL_RECEIVER]?: string;
 }
 
 interface ContractOptions {

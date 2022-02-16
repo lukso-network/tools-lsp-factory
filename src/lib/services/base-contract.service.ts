@@ -4,6 +4,7 @@ import { defer, EMPTY, forkJoin, from, merge, Observable, of } from 'rxjs';
 import { defaultIfEmpty, last, shareReplay, switchMap, tap } from 'rxjs/operators';
 
 import {
+  BaseContractAddresses,
   DeploymentEventContract,
   LSP1UniversalReceiverDelegateInit__factory,
   LSP6KeyManagerInit__factory,
@@ -177,7 +178,7 @@ export function universalProfileBaseContractAddresses$(
     contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress;
   const providedKeyManagerContractAddress = contractDeploymentOptions?.KeyManager?.libAddress;
 
-  const baseContractAddresses = {
+  const baseContractAddresses: BaseContractAddresses = {
     [UniversalProfileContractNames.ERC725_Account]:
       providedUPBaseContractAddress ??
       contractDeploymentOptions?.ERC725Account?.deployProxy !== false
@@ -195,7 +196,7 @@ export function universalProfileBaseContractAddresses$(
         : null,
   };
 
-  const baseContractAddresses$ = baseContractDeployment$.pipe(
+  return baseContractDeployment$.pipe(
     tap((deploymentEvent: DeploymentEventContract) => {
       baseContractAddresses[deploymentEvent.contractName] = deploymentEvent.receipt.contractAddress;
     }),
@@ -204,7 +205,6 @@ export function universalProfileBaseContractAddresses$(
     switchMap(() => of(baseContractAddresses)),
     shareReplay()
   );
-  return baseContractAddresses$;
 }
 
 export function waitForBaseContractAddress$(

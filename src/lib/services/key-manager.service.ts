@@ -10,6 +10,7 @@ import {
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import {
+  BaseContractAddresses,
   ContractNames,
   DeploymentEventContract,
   DeploymentEventProxyContract,
@@ -22,11 +23,7 @@ export type KeyManagerDeploymentEvent = DeploymentEventContract;
 export function keyManagerDeployment$(
   signer: Signer,
   accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
-  baseContractAddress$: Observable<{
-    [ContractNames.ERC725_Account]: string;
-    [ContractNames.UNIVERSAL_RECEIVER]: string;
-    [ContractNames.KEY_MANAGER]: string;
-  }>
+  baseContractAddress$: Observable<BaseContractAddresses>
 ): Observable<KeyManagerDeploymentEvent> {
   return forkJoin([accountDeployment$, baseContractAddress$]).pipe(
     switchMap(([{ receipt: lsp3AccountReceipt }, baseContractAddress]) => {

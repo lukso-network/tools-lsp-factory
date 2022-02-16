@@ -26,6 +26,7 @@ import {
 } from '../helpers/deployment.helper';
 import { encodeLSP3Profile } from '../helpers/erc725.helper';
 import {
+  BaseContractAddresses,
   ContractNames,
   ControllerOptions,
   DeploymentEvent$,
@@ -46,10 +47,7 @@ export type LSP3AccountDeploymentEvent = DeploymentEventContract | DeploymentEve
 export function accountDeployment$(
   signer: Signer,
   controllerAddresses: string[],
-  baseContractAddresses$: Observable<{
-    [ContractNames.ERC725_Account]: string; // TODO: move this to interface
-    [ContractNames.UNIVERSAL_RECEIVER]: string;
-  }>
+  baseContractAddresses$: Observable<BaseContractAddresses>
 ) {
   return baseContractAddresses$.pipe(
     switchMap((baseContractAddresses) => {

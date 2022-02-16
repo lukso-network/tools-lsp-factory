@@ -14,7 +14,7 @@ import {
   initialize,
   waitForReceipt,
 } from '../helpers/deployment.helper';
-import { ContractNames } from '../interfaces';
+import { BaseContractAddresses, ContractNames } from '../interfaces';
 
 export type UniversalReveiverDeploymentEvent =
   | DeploymentEventContract
@@ -22,10 +22,7 @@ export type UniversalReveiverDeploymentEvent =
 
 export function universalReceiverDelegateDeployment$(
   signer: Signer,
-  baseContractDeployment$: Observable<{
-    [ContractNames.ERC725_Account]: string;
-    [ContractNames.UNIVERSAL_RECEIVER]: string;
-  }>
+  baseContractDeployment$: Observable<BaseContractAddresses>
 ) {
   return baseContractDeployment$.pipe(
     switchMap((baseContractAddresses) => {
