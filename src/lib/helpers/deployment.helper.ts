@@ -1,6 +1,6 @@
-import { Contract, ContractFactory, ContractInterface, Signer } from 'ethers';
-import { Observable } from 'rxjs';
-import { catchError, shareReplay, switchMap, takeLast } from 'rxjs/operators';
+import { Contract, ContractFactory, ContractInterface, providers, Signer } from 'ethers';
+import { lastValueFrom, Observable } from 'rxjs';
+import { catchError, scan, shareReplay, switchMap, takeLast } from 'rxjs/operators';
 
 import {
   DeploymentEvent,
@@ -10,7 +10,6 @@ import {
   DeploymentStatus,
   DeploymentType,
 } from '../interfaces/deployment-events';
-import { ContractDeploymentOptions } from '../interfaces/profile-deployment';
 
 import { GAS_BUFFER, GAS_PRICE } from './config.helper';
 
@@ -167,6 +166,38 @@ export function getProxyByteCode(address: string) {
   return `0x3d602d80600a3d3981f3363d3d373d3d3d363d73${address.substr(2)}5af43d82803e903d91602b57fd5bf3`;
 }
 
-export function getBaseContractAddresses(contractDeploymentOptions: ContractDeploymentOptions) {
-  return contractDeploymentOptions.libAddresses;
+export function getDeployedByteCode(
+  contractAddress: string,
+  provider: providers.Web3Provider | providers.JsonRpcProvider
+) {
+  return provider.getCode(contractAddress);
+}
+
+export function waitForContractDeployment$(deployment$: Observable<DeploymentEvent>) {
+  return lastValueFrom(
+    deployment$.pipe(
+      scan((accumulator, deploymentEvent: DeploymentEvent) => {
+        if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
+          return accumulator;
+        }
+
+        if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
+          accumulator[`${deploymentEvent.contractName}BaseContract`] = {
+            address: deploymentEvent.receipt.contractAddress,
+            receipt: deploymentEvent.receipt,
+            type: deploymentEvent.type,
+          };
+        } else {
+          accumulator[deploymentEvent.contractName] = {
+            address: deploymentEvent.receipt.contractAddress,
+            receipt: deploymentEvent.receipt,
+            type: deploymentEvent.type,
+          };
+        }
+
+        return accumulator;
+      }, {}),
+      shareReplay()
+    )
+  );
 }

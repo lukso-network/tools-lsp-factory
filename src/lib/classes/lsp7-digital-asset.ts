@@ -1,14 +1,20 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { lastValueFrom, scan } from 'rxjs';
+import { concat, concatAll, EMPTY, shareReplay, switchMap } from 'rxjs';
 
 import versions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
-import { DeploymentEvent, LSPFactoryOptions } from '../interfaces';
+import { waitForContractDeployment$ } from '../helpers/deployment.helper';
+import { LSPFactoryOptions } from '../interfaces';
 import {
   ContractDeploymentOptions,
   DeployedLSP7DigitalAsset,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
+import {
+  lsp7BaseContractDeployment$,
+  shouldDeployBaseContract$,
+  waitForBaseContractAddress$,
+} from '../services/base-contract.service';
 import { lsp7DigitalAssetDeployment$ } from '../services/digital-asset.service';
 
 /**
@@ -50,28 +56,42 @@ export class LSP7DigitalAsset {
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
+    const defaultBaseContractAddress: string | undefined =
+      contractDeploymentOptions?.libAddress ??
+      versions[this.options.chainId]?.contracts.LSP7Mintable?.versions[DEFAULT_CONTRACT_VERSION];
+
+    const deployProxy = contractDeploymentOptions?.deployProxy === false ? false : true;
+
+    const deployBaseContract$ = shouldDeployBaseContract$(
+      this.options.provider,
+      deployProxy,
+      defaultBaseContractAddress,
+      contractDeploymentOptions?.libAddress
+    );
+
+    const baseContractDeployment$ = deployBaseContract$.pipe(
+      switchMap((shouldDeployBaseContract) => {
+        return shouldDeployBaseContract ? lsp7BaseContractDeployment$(this.options.signer) : EMPTY;
+      }),
+      shareReplay()
+    );
+
+    const baseContractAddress$ = waitForBaseContractAddress$(
+      baseContractDeployment$,
+      defaultBaseContractAddress,
+      deployProxy
+    );
+
     const digitalAsset$ = lsp7DigitalAssetDeployment$(
       this.signer,
       digitalAssetDeploymentOptions,
-      contractDeploymentOptions?.libAddress ??
-        versions[this.options.chainId]?.baseContracts?.LSP7Mintable[DEFAULT_CONTRACT_VERSION]
+      baseContractAddress$
     );
 
-    if (contractDeploymentOptions?.deployReactive) return digitalAsset$;
+    const deployment$ = concat([baseContractDeployment$, digitalAsset$]).pipe(concatAll());
 
-    return lastValueFrom(
-      digitalAsset$.pipe(
-        scan((accumulator: DeployedLSP7DigitalAsset, deploymentEvent: DeploymentEvent) => {
-          if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
-            accumulator[deploymentEvent.contractName] = {
-              address: deploymentEvent.receipt.contractAddress,
-              receipt: deploymentEvent.receipt,
-            };
-          }
+    if (contractDeploymentOptions?.deployReactive) return deployment$;
 
-          return accumulator;
-        }, {})
-      )
-    );
+    return waitForContractDeployment$(deployment$) as Promise<DeployedLSP7DigitalAsset>;
   }
 }

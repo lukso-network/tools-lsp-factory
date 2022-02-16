@@ -28,4 +28,5 @@ export interface ContractDeploymentOptions {
   byteCode?: string;
   libAddress?: string;
   deployReactive?: boolean;
+  deployProxy?: boolean;
 }

@@ -5,6 +5,8 @@ import { NonceManager } from '@ethersproject/experimental';
 import {
   LSP1UniversalReceiverDelegateInit,
   LSP1UniversalReceiverDelegateInit__factory,
+  LSP6KeyManagerInit,
+  LSP6KeyManagerInit__factory,
   LSP7MintableInit__factory,
   LSP8MintableInit__factory,
   UniversalProfileInit,
@@ -17,6 +19,7 @@ export class ProxyDeployer {
   baseContracts: {
     universalProfile: UniversalProfileInit;
     universalReceiverDelegate: LSP1UniversalReceiverDelegateInit;
+    keyManager: LSP6KeyManagerInit;
   };
 
   constructor(signer: Signer) {
@@ -28,10 +31,12 @@ export class ProxyDeployer {
     const universalReceiverDelegate = await new LSP1UniversalReceiverDelegateInit__factory(
       this.signer
     ).deploy();
+    const keyManager = await new LSP6KeyManagerInit__factory(this.signer).deploy();
 
     this.baseContracts = {
       universalProfile,
       universalReceiverDelegate,
+      keyManager,
     };
 
     return this.baseContracts;

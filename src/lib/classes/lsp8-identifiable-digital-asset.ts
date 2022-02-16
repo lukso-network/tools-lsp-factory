@@ -1,14 +1,20 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { lastValueFrom, scan } from 'rxjs';
+import { concat, concatAll, EMPTY, shareReplay, switchMap } from 'rxjs';
 
 import versions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
-import { DeploymentEvent, LSPFactoryOptions } from '../interfaces';
+import { waitForContractDeployment$ } from '../helpers/deployment.helper';
+import { LSPFactoryOptions } from '../interfaces';
 import {
   ContractDeploymentOptions,
   DeployedLSP8IdentifiableDigitalAsset,
   DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
+import {
+  lsp8BaseContractDeployment$,
+  shouldDeployBaseContract$,
+  waitForBaseContractAddress$,
+} from '../services/base-contract.service';
 import { lsp8IdentifiableDigitalAssetDeployment$ } from '../services/digital-asset.service';
 
 /**
@@ -49,31 +55,42 @@ export class LSP8IdentifiableDigitalAsset {
     digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
+    const defaultBaseContractAddress: string | undefined =
+      contractDeploymentOptions?.libAddress ??
+      versions[this.options.chainId]?.contracts.LSP8Mintable?.versions[DEFAULT_CONTRACT_VERSION];
+
+    const deployProxy = contractDeploymentOptions?.deployProxy === false ? false : true;
+
+    const deployBaseContract$ = shouldDeployBaseContract$(
+      this.options.provider,
+      deployProxy,
+      defaultBaseContractAddress,
+      contractDeploymentOptions?.libAddress
+    );
+
+    const baseContractDeployment$ = deployBaseContract$.pipe(
+      switchMap((shouldDeployBaseContract) => {
+        return shouldDeployBaseContract ? lsp8BaseContractDeployment$(this.options.signer) : EMPTY;
+      }),
+      shareReplay()
+    );
+
+    const baseContractAddress$ = waitForBaseContractAddress$(
+      baseContractDeployment$,
+      defaultBaseContractAddress,
+      deployProxy
+    );
+
     const digitalAsset$ = lsp8IdentifiableDigitalAssetDeployment$(
       this.signer,
       digitalAssetDeploymentOptions,
-      contractDeploymentOptions?.libAddress ??
-        versions[this.options.chainId]?.baseContracts?.LSP8Mintable[DEFAULT_CONTRACT_VERSION]
+      baseContractAddress$
     );
 
-    if (contractDeploymentOptions?.deployReactive) return digitalAsset$;
+    const deployment$ = concat([baseContractDeployment$, digitalAsset$]).pipe(concatAll());
 
-    return lastValueFrom(
-      digitalAsset$.pipe(
-        scan(
-          (accumulator: DeployedLSP8IdentifiableDigitalAsset, deploymentEvent: DeploymentEvent) => {
-            if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
-              accumulator[deploymentEvent.contractName] = {
-                address: deploymentEvent.receipt.contractAddress,
-                receipt: deploymentEvent.receipt,
-              };
-            }
+    if (contractDeploymentOptions?.deployReactive) return deployment$;
 
-            return accumulator;
-          },
-          {}
-        )
-      )
-    );
+    return waitForContractDeployment$(deployment$) as Promise<DeployedLSP8IdentifiableDigitalAsset>;
   }
 }

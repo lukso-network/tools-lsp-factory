@@ -27,23 +27,29 @@ export interface ProfileDeploymentOptions {
 }
 export interface DeployedContracts {
   ERC725Account?: DeployedContract;
+  ERC725AccountBaseContract?: DeployedContract;
   KeyManager: DeployedContract;
+  KeyManagerBaseContract: DeployedContract;
   UniversalReceiverDelegate: DeployedContract;
+  UniversalReceiverDelegateBaseContract: DeployedContract;
 }
 
 export interface BaseContractAddresses {
-  erc725AccountInit?: string;
-  keyManagerInit?: string;
-  universalReceiverDelegateInit?: string;
+  [ContractNames.ERC725_Account]?: string;
+  [ContractNames.KEY_MANAGER]?: string;
+  [ContractNames.UNIVERSAL_RECEIVER]?: string;
 }
 
+interface ContractOptions {
+  version?: string;
+  byteCode?: string;
+  deployProxy?: boolean;
+  libAddress?: string;
+}
 export interface ContractDeploymentOptions {
   version?: string;
-  byteCode?: {
-    erc725AccountInit: string;
-    keyManagerInit: string;
-    universalReceiverDelegateInit: string;
-  };
-  libAddresses?: BaseContractAddresses;
   deployReactive?: boolean;
+  ERC725Account?: ContractOptions;
+  KeyManager?: ContractOptions;
+  UniversalReceiverDelegate?: ContractOptions;
 }

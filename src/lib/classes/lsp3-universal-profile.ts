@@ -1,13 +1,13 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, forkJoin, lastValueFrom, merge } from 'rxjs';
-import { concatAll, scan } from 'rxjs/operators';
+import { concat } from 'rxjs';
+import { concatAll } from 'rxjs/operators';
 
 import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { defaultUploadOptions } from '../helpers/config.helper';
+import { waitForContractDeployment$ } from '../helpers/deployment.helper';
 import { ipfsUpload, prepareImageForLSP3 } from '../helpers/uploader.helper';
 import {
-  DeploymentEvent,
   LSPFactoryOptions,
   ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
@@ -15,7 +15,11 @@ import {
 import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import { ContractDeploymentOptions, DeployedContracts } from '../interfaces/profile-deployment';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
-import { getUniversalProfileBaseContractAddresses$ } from '../services/base-contract.service';
+import {
+  shouldDeployUniversalProfileBaseContracts$,
+  universalProfileBaseContractAddresses$,
+  universalProfileBaseContractsDeployment$,
+} from '../services/base-contract.service';
 import { keyManagerDeployment$ } from '../services/key-manager.service';
 
 import {
@@ -68,36 +72,43 @@ export class LSP3UniversalProfile {
     // -1 > Run IPFS upload process in parallel with contract deployment
     const lsp3Profile$ = lsp3ProfileUpload$(profileDeploymentOptions.lsp3Profile);
 
+    const defaultContractVersion = contractDeploymentOptions?.version ?? DEFAULT_CONTRACT_VERSION;
+
     // 0 > Check for existing base contracts and deploy
     const defaultUPBaseContractAddress =
-      contractVersions[this.options.chainId]?.baseContracts?.ERC725Account[
-        DEFAULT_CONTRACT_VERSION
+      contractDeploymentOptions?.ERC725Account?.libAddress ??
+      contractVersions[this.options.chainId]?.contracts?.ERC725Account?.versions[
+        contractDeploymentOptions?.ERC725Account?.version ?? defaultContractVersion
       ];
     const defaultUniversalReceiverBaseContractAddress =
-      contractVersions[this.options.chainId]?.baseContracts?.UniversalReceiverDelegate[
-        DEFAULT_CONTRACT_VERSION
+      contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress ??
+      contractVersions[this.options.chainId]?.contracts?.UniversalReceiverDelegate?.versions[
+        contractDeploymentOptions?.UniversalReceiverDelegate?.version ?? defaultContractVersion
       ];
     const defaultKeyManagerBaseContractAddress =
-      contractVersions[this.options.chainId]?.baseContracts?.KeyManager[DEFAULT_CONTRACT_VERSION];
+      contractDeploymentOptions?.KeyManager?.libAddress ??
+      contractVersions[this.options.chainId]?.contracts?.KeyManager?.versions[
+        contractDeploymentOptions?.KeyManager?.version ?? defaultContractVersion
+      ];
 
-    const defaultBaseContractByteCode$ = forkJoin([
-      this.getDeployedByteCode(
-        defaultUPBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
-      ),
-      this.getDeployedByteCode(
-        defaultUniversalReceiverBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
-      ),
-      this.getDeployedByteCode(
-        defaultKeyManagerBaseContractAddress ?? '0x0000000000000000000000000000000000000000'
-      ),
-    ]);
-
-    const baseContractAddresses$ = getUniversalProfileBaseContractAddresses$(
+    const baseContractsToDeploy$ = shouldDeployUniversalProfileBaseContracts$(
       defaultUPBaseContractAddress,
       defaultUniversalReceiverBaseContractAddress,
       defaultKeyManagerBaseContractAddress,
-      defaultBaseContractByteCode$,
+      this.options.provider,
+      contractDeploymentOptions
+    );
+
+    const baseContractDeployment$ = universalProfileBaseContractsDeployment$(
       this.signer,
+      baseContractsToDeploy$
+    );
+
+    const baseContractAddresses$ = universalProfileBaseContractAddresses$(
+      baseContractDeployment$,
+      defaultUPBaseContractAddress,
+      defaultUniversalReceiverBaseContractAddress,
+      defaultKeyManagerBaseContractAddress,
       contractDeploymentOptions
     );
 
@@ -130,32 +141,17 @@ export class LSP3UniversalProfile {
     const transferOwnership$ = getTransferOwnershipTransaction$(this.signer, account$, keyManager$);
 
     const deployment$ = concat([
+      baseContractDeployment$,
       account$,
-      merge(universalReceiver$, keyManager$),
+      universalReceiver$,
+      keyManager$,
       setData$,
       transferOwnership$,
     ]).pipe(concatAll());
 
     if (contractDeploymentOptions?.deployReactive) return deployment$;
 
-    return lastValueFrom(
-      deployment$.pipe(
-        scan((accumulator: DeployedContracts, deploymentEvent: DeploymentEvent) => {
-          if (deploymentEvent.receipt && deploymentEvent.receipt.contractAddress) {
-            accumulator[deploymentEvent.contractName] = {
-              address: deploymentEvent.receipt.contractAddress,
-              receipt: deploymentEvent.receipt,
-            };
-          }
-
-          return accumulator;
-        }, {})
-      )
-    );
-  }
-
-  getDeployedByteCode(contractAddress: string) {
-    return this.options.provider.getCode(contractAddress);
+    return waitForContractDeployment$(deployment$) as Promise<DeployedContracts>;
   }
 
   /**

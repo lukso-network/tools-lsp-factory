@@ -23,6 +23,23 @@ export type DigitalAssetDeploymentEvent = DeploymentEventContract | DeploymentEv
 export function lsp7DigitalAssetDeployment$(
   signer: Signer,
   digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
+  baseContractAddress$: Observable<string>
+) {
+  return baseContractAddress$.pipe(
+    switchMap((baseContractAddress) => {
+      return lsp7DigitalAssetDeploymentWithBaseContractAddress$(
+        signer,
+        digitalAssetDeploymentOptions,
+        baseContractAddress
+      );
+    }),
+    shareReplay()
+  );
+}
+
+export function lsp7DigitalAssetDeploymentWithBaseContractAddress$(
+  signer: Signer,
+  digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
   baseContractAddress?: string
 ) {
   const lsp7Deployment$ = from(
@@ -126,6 +143,23 @@ function initializeLSP7Proxy(
 // LSP8
 
 export function lsp8IdentifiableDigitalAssetDeployment$(
+  signer: Signer,
+  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
+  baseContractAddress$: Observable<string>
+) {
+  return baseContractAddress$.pipe(
+    switchMap((baseContractAddress) => {
+      return lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
+        signer,
+        digitalAssetDeploymentOptions,
+        baseContractAddress
+      );
+    }),
+    shareReplay()
+  );
+}
+
+export function lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
   signer: Signer,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
   baseContractAddress: string

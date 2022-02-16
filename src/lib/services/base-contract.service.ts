@@ -1,19 +1,25 @@
 import { Signer } from '@ethersproject/abstract-signer';
-import { defer, EMPTY, merge, Observable, of } from 'rxjs';
-import { defaultIfEmpty, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { providers } from 'ethers';
+import { defer, EMPTY, forkJoin, from, merge, Observable, of } from 'rxjs';
+import { defaultIfEmpty, last, shareReplay, switchMap, tap } from 'rxjs/operators';
 
 import {
-  ContractDeploymentOptions,
+  BaseContractAddresses,
   DeploymentEventContract,
   LSP1UniversalReceiverDelegateInit__factory,
   LSP6KeyManagerInit__factory,
   LSP7MintableInit__factory,
   LSP8MintableInit__factory,
+  ContractDeploymentOptions as ProfileContractDeploymentOptions,
   ContractNames as UniversalProfileContractNames,
   UniversalProfileInit__factory,
 } from '../..';
 import { GAS_PRICE, NULL_ADDRESS } from '../helpers/config.helper';
-import { deployBaseContract, waitForReceipt } from '../helpers/deployment.helper';
+import {
+  deployBaseContract,
+  getDeployedByteCode,
+  waitForReceipt,
+} from '../helpers/deployment.helper';
 import { ContractNames as DigitalAssetContractNames } from '../interfaces/digital-asset-deployment';
 
 export function universalProfileBaseContractsDeployment$(
@@ -71,43 +77,24 @@ export function universalProfileBaseContractsDeployment$(
   return baseContractDeployment$;
 }
 
-export function digitalAssetBaseContractsDeployment$(
-  signer: Signer,
-  baseContractsToDeploy$: Observable<[boolean, boolean]>
-): Observable<DeploymentEventContract> {
-  const lsp7DigitalAssetBaseContractReceipt$ = deployBaseContract$(
-    DigitalAssetContractNames.LSP7_DIGITAL_ASSET,
-    async () => {
-      const lsp7Init = await new LSP7MintableInit__factory(signer).deploy({
-        gasPrice: GAS_PRICE,
-      });
-      await lsp7Init['initialize(address)'](NULL_ADDRESS);
-      return lsp7Init;
-    }
-  );
+export function lsp7BaseContractDeployment$(signer: Signer) {
+  return deployBaseContract$(DigitalAssetContractNames.LSP7_DIGITAL_ASSET, async () => {
+    const lsp7Init = await new LSP7MintableInit__factory(signer).deploy({
+      gasPrice: GAS_PRICE,
+    });
+    await lsp7Init['initialize(address)'](NULL_ADDRESS);
+    return lsp7Init;
+  });
+}
 
-  const lsp8IdentifiableDigitalAssetReceipt$ = deployBaseContract$(
-    DigitalAssetContractNames.LSP8_DIGITAL_ASSET,
-    async () => {
-      const lsp8Init = await new LSP8MintableInit__factory(signer).deploy({
-        gasPrice: GAS_PRICE,
-      });
-      await lsp8Init['initialize(address)'](NULL_ADDRESS);
-      return lsp8Init;
-    }
-  );
-
-  const baseContractDeployment$ = baseContractsToDeploy$.pipe(
-    switchMap(([shouldDeployLSP7, shouldDeployLSP8]) => {
-      return merge(
-        shouldDeployLSP7 ? lsp7DigitalAssetBaseContractReceipt$ : EMPTY,
-        shouldDeployLSP8 ? lsp8IdentifiableDigitalAssetReceipt$ : EMPTY
-      );
-    }),
-    shareReplay()
-  );
-
-  return baseContractDeployment$;
+export function lsp8BaseContractDeployment$(signer: Signer) {
+  return deployBaseContract$(DigitalAssetContractNames.LSP8_DIGITAL_ASSET, async () => {
+    const lsp8Init = await new LSP8MintableInit__factory(signer).deploy({
+      gasPrice: GAS_PRICE,
+    });
+    await lsp8Init['initialize(address)'](NULL_ADDRESS);
+    return lsp8Init;
+  });
 }
 
 function deployBaseContract$(
@@ -127,67 +114,116 @@ function deployBaseContract$(
   return baseContractDeploymentReceipt$;
 }
 
-export function getUniversalProfileBaseContractAddresses$(
+export function shouldDeployBaseContract$(
+  provider: providers.Web3Provider | providers.JsonRpcProvider,
+  deployProxy: boolean,
+  defaultBaseContractAddress?: string,
+  providedBaseContractAddress?: string
+) {
+  const defaultBaseContractBytecode$ = from(
+    getDeployedByteCode(defaultBaseContractAddress ?? NULL_ADDRESS, provider)
+  );
+
+  return defaultBaseContractBytecode$.pipe(
+    switchMap((defultBaseContractBytecode) => {
+      return of(!providedBaseContractAddress && deployProxy && defultBaseContractBytecode === '0x');
+    }),
+    shareReplay()
+  );
+}
+
+export function shouldDeployUniversalProfileBaseContracts$(
   defaultUPBaseContractAddress: string,
   defaultUniversalReceiverBaseContractAddress: string,
   defaultKeyManagerBaseContractAddress: string,
-  defaultBaseContractByteCode$: Observable<[string, string, string]>,
-  signer: Signer,
-  contractDeploymentOptions?: ContractDeploymentOptions
+  provider: providers.Web3Provider | providers.JsonRpcProvider,
+  contractDeploymentOptions?: ProfileContractDeploymentOptions
 ) {
-  const providedUPBaseContractAddress = contractDeploymentOptions?.libAddresses?.erc725AccountInit;
+  const deployERC725AccountProxy = contractDeploymentOptions?.ERC725Account?.deployProxy !== false;
+  const deployUniversalReceiverProxy =
+    contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy !== false;
+  const deployKeyManagerProxy = contractDeploymentOptions?.KeyManager?.deployProxy !== false;
+
+  return forkJoin([
+    shouldDeployBaseContract$(
+      provider,
+      deployERC725AccountProxy,
+      defaultUPBaseContractAddress,
+      contractDeploymentOptions?.ERC725Account?.libAddress
+    ),
+    shouldDeployBaseContract$(
+      provider,
+      deployUniversalReceiverProxy,
+      defaultUniversalReceiverBaseContractAddress,
+      contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress
+    ),
+    shouldDeployBaseContract$(
+      provider,
+      deployKeyManagerProxy,
+      defaultKeyManagerBaseContractAddress,
+      contractDeploymentOptions?.KeyManager?.libAddress
+    ),
+  ]).pipe(shareReplay());
+}
+
+export function universalProfileBaseContractAddresses$(
+  baseContractDeployment$: Observable<DeploymentEventContract>,
+  defaultUPBaseContractAddress: string,
+  defaultUniversalReceiverBaseContractAddress: string,
+  defaultKeyManagerBaseContractAddress: string,
+  contractDeploymentOptions?: ProfileContractDeploymentOptions
+) {
+  const providedUPBaseContractAddress = contractDeploymentOptions?.ERC725Account?.libAddress;
   const providedUniversalReceiverContractAddress =
-    contractDeploymentOptions?.libAddresses?.universalReceiverDelegateInit;
-  const providedKeyManagerContractAddress = contractDeploymentOptions?.libAddresses?.keyManagerInit;
+    contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress;
+  const providedKeyManagerContractAddress = contractDeploymentOptions?.KeyManager?.libAddress;
 
-  const baseContractsToDeploy$ = defaultBaseContractByteCode$.pipe(
-    switchMap(
-      ([
-        defaultUPBaseContractByteCode,
-        defaultUniversalReceiverBaseContractByteCode,
-        defaultkeyManagerBaseContractByteCode,
-      ]) => {
-        const shouldDeployUPBaseContract =
-          !providedUPBaseContractAddress && defaultUPBaseContractByteCode === '0x';
-
-        const shouldDeployUniversalReceiverBaseContract =
-          !providedUniversalReceiverContractAddress &&
-          defaultUniversalReceiverBaseContractByteCode === '0x';
-
-        const shouldDeployKeyManagerBaseContract =
-          !providedKeyManagerContractAddress && defaultkeyManagerBaseContractByteCode === '0x';
-
-        return of([
-          shouldDeployUPBaseContract,
-          shouldDeployUniversalReceiverBaseContract,
-          shouldDeployKeyManagerBaseContract,
-        ]);
-      }
-    )
-  );
-
-  const baseContracts$ = universalProfileBaseContractsDeployment$(
-    signer,
-    baseContractsToDeploy$ as Observable<[boolean, boolean, boolean]>
-  );
-
-  const baseContractAddresses = {
+  const baseContractAddresses: BaseContractAddresses = {
     [UniversalProfileContractNames.ERC725_Account]:
-      providedUPBaseContractAddress ?? defaultUPBaseContractAddress,
+      providedUPBaseContractAddress ??
+      contractDeploymentOptions?.ERC725Account?.deployProxy !== false
+        ? defaultUPBaseContractAddress
+        : null,
     [UniversalProfileContractNames.UNIVERSAL_RECEIVER]:
-      providedUniversalReceiverContractAddress ?? defaultUniversalReceiverBaseContractAddress,
+      providedUniversalReceiverContractAddress ??
+      contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy !== false
+        ? defaultUniversalReceiverBaseContractAddress
+        : null,
     [UniversalProfileContractNames.KEY_MANAGER]:
-      providedKeyManagerContractAddress ?? defaultKeyManagerBaseContractAddress,
+      providedKeyManagerContractAddress ??
+      contractDeploymentOptions?.KeyManager?.deployProxy !== false
+        ? defaultKeyManagerBaseContractAddress
+        : null,
   };
 
-  const baseContractAddresses$ = baseContracts$.pipe(
+  return baseContractDeployment$.pipe(
     tap((deploymentEvent: DeploymentEventContract) => {
       baseContractAddresses[deploymentEvent.contractName] = deploymentEvent.receipt.contractAddress;
     }),
     defaultIfEmpty(of(baseContractAddresses)),
+    last(),
     switchMap(() => of(baseContractAddresses)),
     shareReplay()
   );
+}
 
-  return baseContractAddresses$;
+export function waitForBaseContractAddress$(
+  baseContractDeployment$: Observable<DeploymentEventContract>,
+  defaultBaseContractAddress: string,
+  deployProxy: boolean
+) {
+  return baseContractDeployment$.pipe(
+    switchMap((deploymentEvent: DeploymentEventContract) => {
+      if (deploymentEvent.receipt?.contractAddress) {
+        return of(deploymentEvent.receipt.contractAddress);
+      }
+      return '';
+    }),
+    defaultIfEmpty(
+      (function () {
+        if (!deployProxy) return null;
+        return defaultBaseContractAddress;
+      })()
+    )
+  );
 }

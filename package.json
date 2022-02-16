@@ -14,6 +14,7 @@
     "build:module": "tsc -p tsconfig.module.json",
     "lint": "eslint src --ext .ts",
     "test": "run-s test:unit",
+    "test-build": "npm run build && npm run test",
     "test:unit": "HARDHAT_VERBOSE=true DEBUG=true NODE_NO_WARNINGS=1 TS_NODE_FILES=true jest --coverage",
     "check-cli": "run-s test diff-integration-tests",
     "diff-integration-tests": "mkdir -p diff && rm -rf diff/test && cp -r test diff/test && rm -rf diff/test/test-*/.git && cd diff && git init --quiet && git add -A && git commit --quiet --no-verify --allow-empty -m 'WIP' && echo '\\n\\nCommitted most recent integration test output in the \"diff\" directory. Review the changes with \"cd diff && git diff HEAD\" or your preferred git diff viewer.'",
