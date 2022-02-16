@@ -16,7 +16,7 @@ import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import { ContractDeploymentOptions, DeployedContracts } from '../interfaces/profile-deployment';
 import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
 import {
-  shouldDeployUniversalProfileBaseContractAddresses$,
+  shouldDeployUniversalProfileBaseContracts$,
   universalProfileBaseContractAddresses$,
   universalProfileBaseContractsDeployment$,
 } from '../services/base-contract.service';
@@ -91,7 +91,7 @@ export class LSP3UniversalProfile {
         contractDeploymentOptions?.KeyManager?.version ?? defaultContractVersion
       ];
 
-    const baseContractsToDeploy$ = shouldDeployUniversalProfileBaseContractAddresses$(
+    const baseContractsToDeploy$ = shouldDeployUniversalProfileBaseContracts$(
       defaultUPBaseContractAddress,
       defaultUniversalReceiverBaseContractAddress,
       defaultKeyManagerBaseContractAddress,

@@ -131,7 +131,7 @@ export function shouldDeployBaseContract$(
   );
 }
 
-export function shouldDeployUniversalProfileBaseContractAddresses$(
+export function shouldDeployUniversalProfileBaseContracts$(
   defaultUPBaseContractAddress: string,
   defaultUniversalReceiverBaseContractAddress: string,
   defaultKeyManagerBaseContractAddress: string,
