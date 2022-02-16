@@ -118,7 +118,8 @@ export function shouldDeployBaseContract$(
   provider: providers.Web3Provider | providers.JsonRpcProvider,
   deployProxy: boolean,
   defaultBaseContractAddress?: string,
-  providedBaseContractAddress?: string
+  providedBaseContractAddress?: string,
+  providedByteCode?: string
 ) {
   const defaultBaseContractBytecode$ = from(
     getDeployedByteCode(defaultBaseContractAddress ?? NULL_ADDRESS, provider)
@@ -126,7 +127,12 @@ export function shouldDeployBaseContract$(
 
   return defaultBaseContractBytecode$.pipe(
     switchMap((defultBaseContractBytecode) => {
-      return of(!providedBaseContractAddress && deployProxy && defultBaseContractBytecode === '0x');
+      return of(
+        !providedBaseContractAddress &&
+          !providedByteCode &&
+          deployProxy &&
+          defultBaseContractBytecode === '0x'
+      );
     }),
     shareReplay()
   );
@@ -149,19 +155,22 @@ export function shouldDeployUniversalProfileBaseContracts$(
       provider,
       deployERC725AccountProxy,
       defaultUPBaseContractAddress,
-      contractDeploymentOptions?.ERC725Account?.libAddress
+      contractDeploymentOptions?.ERC725Account?.libAddress,
+      contractDeploymentOptions?.ERC725Account?.byteCode
     ),
     shouldDeployBaseContract$(
       provider,
       deployUniversalReceiverProxy,
       defaultUniversalReceiverBaseContractAddress,
-      contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress
+      contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress,
+      contractDeploymentOptions?.UniversalReceiverDelegate?.byteCode
     ),
     shouldDeployBaseContract$(
       provider,
       deployKeyManagerProxy,
       defaultKeyManagerBaseContractAddress,
-      contractDeploymentOptions?.KeyManager?.libAddress
+      contractDeploymentOptions?.KeyManager?.libAddress,
+      contractDeploymentOptions?.KeyManager?.byteCode
     ),
   ]).pipe(shareReplay());
 }
@@ -210,7 +219,8 @@ export function universalProfileBaseContractAddresses$(
 export function waitForBaseContractAddress$(
   baseContractDeployment$: Observable<DeploymentEventContract>,
   defaultBaseContractAddress: string,
-  deployProxy: boolean
+  deployProxy: boolean,
+  providedByteCode?: string
 ) {
   return baseContractDeployment$.pipe(
     switchMap((deploymentEvent: DeploymentEventContract) => {
@@ -221,7 +231,7 @@ export function waitForBaseContractAddress$(
     }),
     defaultIfEmpty(
       (function () {
-        if (!deployProxy) return null;
+        if (!deployProxy || providedByteCode) return null;
         return defaultBaseContractAddress;
       })()
     )

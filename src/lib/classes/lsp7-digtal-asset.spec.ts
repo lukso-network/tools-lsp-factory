@@ -140,4 +140,44 @@ describe('LSP7DigitalAsset', () => {
       },
     });
   });
+
+  it('should deploy lsp7 with custom bytecode', async () => {
+    const lspFactory = new LSPFactory(provider, signer);
+
+    const passedBytecode = LSP7Mintable__factory.bytecode;
+
+    const lsp7DigitalAsset = (await lspFactory.LSP7DigitalAsset.deploy(
+      {
+        controllerAddress: signer.address,
+        isNFT: false,
+        name: 'TOKEN',
+        symbol: 'TKN',
+      },
+      {
+        byteCode: passedBytecode,
+      }
+    )) as DeployedLSP7DigitalAsset;
+
+    expect(lsp7DigitalAsset.LSP7DigitalAsset.address).toBeDefined();
+    expect(Object.keys(lsp7DigitalAsset).length).toEqual(1);
+
+    const LSP7DigitalAsset = LSP7Mintable__factory.connect(
+      lsp7DigitalAsset.LSP7DigitalAsset.address,
+      signer
+    );
+
+    const ownerAddress = await LSP7DigitalAsset.owner();
+    expect(ownerAddress).toEqual(signer.address);
+
+    const mintBalance = 10;
+    const mintAddress = '0x1da537A8D1979b25794FB07d694119574f4f46Cf';
+
+    const mint = await LSP7DigitalAsset.mint(mintAddress, mintBalance, true, '0x');
+
+    expect(mint).toBeTruthy();
+    await mint.wait();
+
+    const actualMintBalance = (await LSP7DigitalAsset.balanceOf(mintAddress)).toNumber();
+    expect(actualMintBalance).toEqual(mintBalance);
+  });
 });
