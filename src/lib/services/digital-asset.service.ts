@@ -1,9 +1,12 @@
 import { Signer } from '@ethersproject/abstract-signer';
+import { ContractFactory } from 'ethers';
 import { concat, EMPTY, from, Observable, shareReplay, switchMap, takeLast } from 'rxjs';
 
 import {
+  LSP7DigitalAsset__factory,
   LSP7Mintable__factory,
   LSP7MintableInit__factory,
+  LSP8IdentifiableDigitalAsset__factory,
   LSP8Mintable__factory,
   LSP8MintableInit__factory,
 } from '../../';
@@ -23,14 +26,16 @@ export type DigitalAssetDeploymentEvent = DeploymentEventContract | DeploymentEv
 export function lsp7DigitalAssetDeployment$(
   signer: Signer,
   digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
-  baseContractAddress$: Observable<string>
+  baseContractAddress$: Observable<string>,
+  byteCode?: string
 ) {
   return baseContractAddress$.pipe(
     switchMap((baseContractAddress) => {
       return lsp7DigitalAssetDeploymentWithBaseContractAddress$(
         signer,
         digitalAssetDeploymentOptions,
-        baseContractAddress
+        baseContractAddress,
+        byteCode
       );
     }),
     shareReplay()
@@ -40,10 +45,11 @@ export function lsp7DigitalAssetDeployment$(
 export function lsp7DigitalAssetDeploymentWithBaseContractAddress$(
   signer: Signer,
   digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
-  baseContractAddress?: string
+  baseContractAddress?: string,
+  byteCode?: string
 ) {
   const lsp7Deployment$ = from(
-    deployLSP7DigitalAsset(signer, digitalAssetDeploymentOptions, baseContractAddress)
+    deployLSP7DigitalAsset(signer, digitalAssetDeploymentOptions, baseContractAddress, byteCode)
   ).pipe(shareReplay());
 
   const lsp7DeploymentReceipt$ = waitForReceipt<DigitalAssetDeploymentEvent>(lsp7Deployment$).pipe(
@@ -68,17 +74,29 @@ export function lsp7DigitalAssetDeploymentWithBaseContractAddress$(
 async function deployLSP7DigitalAsset(
   signer: Signer,
   digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
-  baseContractAddress?: string
+  baseContractAddress?: string,
+  byteCode?: string
 ) {
   const deploymentFunction = async () => {
-    return baseContractAddress
-      ? new LSP7MintableInit__factory(signer).attach(baseContractAddress)
-      : await new LSP7Mintable__factory(signer).deploy(
-          digitalAssetDeploymentOptions.name,
-          digitalAssetDeploymentOptions.symbol,
-          digitalAssetDeploymentOptions.controllerAddress,
-          digitalAssetDeploymentOptions.isNFT
-        );
+    if (baseContractAddress) {
+      return new LSP7MintableInit__factory(signer).attach(baseContractAddress);
+    }
+
+    if (byteCode) {
+      return new ContractFactory(LSP7DigitalAsset__factory.abi, byteCode, signer).deploy(
+        digitalAssetDeploymentOptions.name,
+        digitalAssetDeploymentOptions.symbol,
+        digitalAssetDeploymentOptions.controllerAddress,
+        digitalAssetDeploymentOptions.isNFT
+      );
+    }
+
+    return await new LSP7Mintable__factory(signer).deploy(
+      digitalAssetDeploymentOptions.name,
+      digitalAssetDeploymentOptions.symbol,
+      digitalAssetDeploymentOptions.controllerAddress,
+      digitalAssetDeploymentOptions.isNFT
+    );
   };
 
   return baseContractAddress
@@ -145,14 +163,16 @@ function initializeLSP7Proxy(
 export function lsp8IdentifiableDigitalAssetDeployment$(
   signer: Signer,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
-  baseContractAddress$: Observable<string>
+  baseContractAddress$: Observable<string>,
+  byteCode?: string
 ) {
   return baseContractAddress$.pipe(
     switchMap((baseContractAddress) => {
       return lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
         signer,
         digitalAssetDeploymentOptions,
-        baseContractAddress
+        baseContractAddress,
+        byteCode
       );
     }),
     shareReplay()
@@ -162,10 +182,16 @@ export function lsp8IdentifiableDigitalAssetDeployment$(
 export function lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
   signer: Signer,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
-  baseContractAddress: string
+  baseContractAddress: string,
+  byteCode?: string
 ) {
   const lsp8Deployment$ = from(
-    deployLSP8IdentifiableDigitalAsset(signer, digitalAssetDeploymentOptions, baseContractAddress)
+    deployLSP8IdentifiableDigitalAsset(
+      signer,
+      digitalAssetDeploymentOptions,
+      baseContractAddress,
+      byteCode
+    )
   ).pipe(shareReplay());
 
   const lsp8DeploymentReceipt$ = waitForReceipt<DigitalAssetDeploymentEvent>(lsp8Deployment$);
@@ -188,16 +214,31 @@ export function lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
 async function deployLSP8IdentifiableDigitalAsset(
   signer: Signer,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
-  baseContractAddress: string
+  baseContractAddress: string,
+  byteCode?: string
 ) {
   const deploymentFunction = async () => {
-    return baseContractAddress
-      ? new LSP8MintableInit__factory(signer).attach(baseContractAddress)
-      : await new LSP8Mintable__factory(signer).deploy(
-          digitalAssetDeploymentOptions.name,
-          digitalAssetDeploymentOptions.symbol,
-          digitalAssetDeploymentOptions.controllerAddress
-        );
+    if (baseContractAddress) {
+      return new LSP8MintableInit__factory(signer).attach(baseContractAddress);
+    }
+
+    if (byteCode) {
+      return new ContractFactory(
+        LSP8IdentifiableDigitalAsset__factory.abi,
+        byteCode,
+        signer
+      ).deploy(
+        digitalAssetDeploymentOptions.name,
+        digitalAssetDeploymentOptions.symbol,
+        digitalAssetDeploymentOptions.controllerAddress
+      );
+    }
+
+    return new LSP8Mintable__factory(signer).deploy(
+      digitalAssetDeploymentOptions.name,
+      digitalAssetDeploymentOptions.symbol,
+      digitalAssetDeploymentOptions.controllerAddress
+    );
   };
 
   return baseContractAddress

@@ -65,7 +65,8 @@ export class LSP8IdentifiableDigitalAsset {
       this.options.provider,
       deployProxy,
       defaultBaseContractAddress,
-      contractDeploymentOptions?.libAddress
+      contractDeploymentOptions?.libAddress,
+      contractDeploymentOptions?.byteCode
     );
 
     const baseContractDeployment$ = deployBaseContract$.pipe(
@@ -78,13 +79,15 @@ export class LSP8IdentifiableDigitalAsset {
     const baseContractAddress$ = waitForBaseContractAddress$(
       baseContractDeployment$,
       defaultBaseContractAddress,
-      deployProxy
+      deployProxy,
+      contractDeploymentOptions?.byteCode
     );
 
     const digitalAsset$ = lsp8IdentifiableDigitalAssetDeployment$(
       this.signer,
       digitalAssetDeploymentOptions,
-      baseContractAddress$
+      baseContractAddress$,
+      contractDeploymentOptions?.byteCode
     );
 
     const deployment$ = concat([baseContractDeployment$, digitalAsset$]).pipe(concatAll());

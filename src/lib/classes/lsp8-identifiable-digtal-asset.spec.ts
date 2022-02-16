@@ -174,4 +174,50 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       },
     });
   });
+
+  it('should deploy lsp8 with custom bytecode', async () => {
+    const lspFactory = new LSPFactory(provider, signer);
+
+    const passedBytecode = LSP8Mintable__factory.bytecode;
+
+    const lsp8IdentifiableDigitalAsset = (await lspFactory.LSP8IdentifiableDigitalAsset.deploy(
+      {
+        controllerAddress: signer.address,
+        name: 'TOKEN',
+        symbol: 'TKN',
+      },
+      {
+        byteCode: passedBytecode,
+      }
+    )) as DeployedLSP8IdentifiableDigitalAsset;
+
+    expect(lsp8IdentifiableDigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
+    expect(Object.keys(lsp8IdentifiableDigitalAsset).length).toEqual(1);
+
+    const LSP8IdentifiableDigitalAsset = LSP8Mintable__factory.connect(
+      lsp8IdentifiableDigitalAsset.LSP8IdentifiableDigitalAsset.address,
+      signer
+    );
+
+    const ownerAddress = await LSP8IdentifiableDigitalAsset.owner();
+    expect(ownerAddress).toEqual(signer.address);
+
+    const mintAddress = '0x1da537A8D1979b25794FB07d694119574f4f46Cf';
+
+    const mint = await LSP8IdentifiableDigitalAsset.mint(
+      mintAddress,
+      ethers.utils.hexZeroPad(ethers.utils.hexlify(1), 32),
+      true,
+      '0x'
+    );
+
+    expect(mint).toBeTruthy();
+    await mint.wait();
+
+    const actualMintBalance = (
+      await LSP8IdentifiableDigitalAsset.balanceOf(mintAddress)
+    ).toNumber();
+
+    expect(actualMintBalance).toEqual(1);
+  });
 });
