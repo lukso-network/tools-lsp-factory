@@ -1,3 +1,4 @@
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
 import { ethers } from 'hardhat';
 import { Observable } from 'rxjs';
@@ -13,7 +14,7 @@ jest.useRealTimers();
 describe('LSP7DigitalAsset', () => {
   let baseContract;
   let proxyDeployer: ProxyDeployer;
-  let signer;
+  let signer: SignerWithAddress;
   let provider: providers.JsonRpcProvider;
 
   beforeAll(async () => {
