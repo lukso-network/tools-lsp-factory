@@ -6,7 +6,7 @@ import { NonceManager } from '@ethersproject/experimental';
 import { UniversalProfile__factory } from '../types/ethers-v5/factories/UniversalProfile__factory';
 import { LSP6KeyManager__factory } from '../types/ethers-v5/factories/LSP6KeyManager__factory';
 import { LSP1UniversalReceiverDelegate__factory } from '../types/ethers-v5/factories/LSP1UniversalReceiverDelegate__factory';
-import { LSPFactory } from '../build/main/src';
+import { ContractDeploymentOptions, LSPFactory } from '../build/main/src';
 import { DeployedContracts } from '../src/lib/interfaces';
 
 export async function deployUniversalProfileContracts(signer: Signer, owner: string) {
@@ -26,41 +26,35 @@ export async function deployUniversalProfileContracts(signer: Signer, owner: str
   };
 }
 
-export async function testUPDeploymentWithBaseContractFlag(
-  deployBaseContracts: {
-    ERC725Account: boolean;
-    KeyManager: boolean;
-    UniversalReceiverDelegate: boolean;
-  },
+export async function testUPDeployment(
+  contractDeploymentOptions: ContractDeploymentOptions,
   expectedContractNumber: number,
   lspFactory: LSPFactory,
   controllerAddresses: string[]
-): Promise<DeployedContracts> {
+) {
   const deployedContracts = await lspFactory.LSP3UniversalProfile.deploy(
     {
       controllerAddresses,
     },
-    {
-      ERC725Account: { deployProxy: deployBaseContracts.ERC725Account },
-      KeyManager: { deployProxy: deployBaseContracts.KeyManager },
-      UniversalReceiverDelegate: { deployProxy: deployBaseContracts.UniversalReceiverDelegate },
-    }
+    contractDeploymentOptions
   );
 
   expect(Object.keys(deployedContracts).length).toEqual(expectedContractNumber);
 
-  const contractNames = Object.keys(deployedContracts);
-  const deployBaseContract = Object.values(deployedContracts);
+  const contractNames = ['ERC725Account', 'KeyManager', 'UniversalReceiverDelegate'];
 
   for (const contractName of contractNames) {
-    if (deployBaseContract[contractName]) {
+    if (
+      contractDeploymentOptions[contractName]?.libAddress ||
+      contractDeploymentOptions[contractName]?.byteCode ||
+      contractDeploymentOptions[contractName]?.deployProxy === false
+    ) {
+      expect(deployedContracts[`${contractName}BaseContract`]).toBeUndefined();
+    } else {
       expect(deployedContracts[`${contractName}BaseContract`]).toBeDefined();
     }
-
-    if (deployBaseContract[contractName] === false) {
-      expect(deployedContracts[`${contractName}BaseContract`]).toBeUndefined();
-    }
   }
+
   return deployedContracts as DeployedContracts;
 }
 

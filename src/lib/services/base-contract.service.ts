@@ -190,17 +190,20 @@ export function universalProfileBaseContractAddresses$(
   const baseContractAddresses: BaseContractAddresses = {
     [UniversalProfileContractNames.ERC725_Account]:
       providedUPBaseContractAddress ??
-      contractDeploymentOptions?.ERC725Account?.deployProxy !== false
+      (contractDeploymentOptions?.ERC725Account?.deployProxy !== false &&
+        !contractDeploymentOptions?.ERC725Account?.byteCode)
         ? defaultUPBaseContractAddress
         : null,
     [UniversalProfileContractNames.UNIVERSAL_RECEIVER]:
       providedUniversalReceiverContractAddress ??
-      contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy !== false
+      (contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy !== false &&
+        !contractDeploymentOptions?.UniversalReceiverDelegate?.byteCode)
         ? defaultUniversalReceiverBaseContractAddress
         : null,
     [UniversalProfileContractNames.KEY_MANAGER]:
       providedKeyManagerContractAddress ??
-      contractDeploymentOptions?.KeyManager?.deployProxy !== false
+      (contractDeploymentOptions?.KeyManager?.deployProxy !== false &&
+        !contractDeploymentOptions?.KeyManager?.byteCode)
         ? defaultKeyManagerBaseContractAddress
         : null,
   };
