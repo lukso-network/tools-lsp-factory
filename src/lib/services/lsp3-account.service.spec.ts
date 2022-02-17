@@ -1,5 +1,6 @@
 import ERC725 from '@erc725/erc725.js';
-import { ethers, SignerWithAddress } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { ethers } from 'hardhat';
 
 import { deployUniversalProfileContracts } from '../../../test/test.utils';
 import {
