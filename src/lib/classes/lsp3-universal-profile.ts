@@ -70,7 +70,10 @@ export class LSP3UniversalProfile {
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
     // -1 > Run IPFS upload process in parallel with contract deployment
-    const lsp3Profile$ = lsp3ProfileUpload$(profileDeploymentOptions.lsp3Profile);
+    const lsp3Profile$ = lsp3ProfileUpload$(
+      profileDeploymentOptions.lsp3Profile,
+      contractDeploymentOptions?.uploadOptions
+    );
 
     const defaultContractVersion = contractDeploymentOptions?.version ?? DEFAULT_CONTRACT_VERSION;
 
@@ -193,11 +196,12 @@ export class LSP3UniversalProfile {
       },
     };
 
-    // TODO: allow simple http upload too
-    const uploadResponse = await ipfsUpload(
-      JSON.stringify(profile),
-      uploadOptions.ipfsClientOptions
-    );
+    let uploadResponse;
+    if (uploadOptions.url) {
+      // TODO: simple HTTP upload
+    } else {
+      uploadResponse = await ipfsUpload(JSON.stringify(profile), uploadOptions.ipfsClientOptions);
+    }
 
     return {
       profile,

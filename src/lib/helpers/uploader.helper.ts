@@ -45,7 +45,12 @@ export async function imageUpload(
         width = loadedImg[0].width;
       }
 
-      const uploadResponse = await ipfsUpload(imgToUpload, uploadOptions.ipfsClientOptions);
+      let uploadResponse;
+      if (uploadOptions.url) {
+        // TODO: add simple HTTP upload
+      } else {
+        uploadResponse = await ipfsUpload(imgToUpload, uploadOptions.ipfsClientOptions);
+      }
 
       return {
         width: height,

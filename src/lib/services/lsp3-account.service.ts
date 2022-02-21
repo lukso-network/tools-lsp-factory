@@ -39,6 +39,7 @@ import {
   ProfileDataBeforeUpload,
 } from '../interfaces';
 import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
+import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
 
 import { UniversalReveiverDeploymentEvent } from './universal-receiver.service';
 
@@ -176,7 +177,8 @@ export function setDataTransaction$(
 }
 
 export async function getLsp3ProfileDataUrl(
-  lsp3Profile: ProfileDataBeforeUpload | string
+  lsp3Profile: ProfileDataBeforeUpload | string,
+  uploadOptions?: ProfileUploadOptions
 ): Promise<LSP3ProfileDataForEncoding> {
   let lsp3ProfileData: {
     profile: LSP3ProfileJSON;
@@ -188,6 +190,7 @@ export async function getLsp3ProfileDataUrl(
     const isIPFSUrl = lsp3Profile.startsWith('ipfs://');
 
     if (isIPFSUrl) {
+      // TODO: What to do if upload url is passed as global uploadGateway url and then an ipfs:// url is passed here? How do we transform ?
       lsp3JsonUrl = 'https://ipfs.lukso.network/ipfs/' + lsp3Profile.split('/').at(-1); // TODO: Allow custom IPFS upload location
     }
 
@@ -199,7 +202,7 @@ export async function getLsp3ProfileDataUrl(
       profile: lsp3ProfileJson as LSP3ProfileJSON,
     };
   } else {
-    lsp3ProfileData = await LSP3UniversalProfile.uploadProfileData(lsp3Profile);
+    lsp3ProfileData = await LSP3UniversalProfile.uploadProfileData(lsp3Profile, uploadOptions);
   }
 
   return lsp3ProfileData;
@@ -213,11 +216,14 @@ export function isLSP3ProfileDataEncoded(lsp3Profile: string): boolean {
   return false;
 }
 
-export function lsp3ProfileUpload$(lsp3Profile: ProfileDataBeforeUpload | string) {
+export function lsp3ProfileUpload$(
+  lsp3Profile: ProfileDataBeforeUpload | string,
+  uploadOptions?: ProfileUploadOptions
+) {
   let lsp3Profile$: Observable<LSP3ProfileDataForEncoding | string>;
 
   if (typeof lsp3Profile !== 'string' || !isLSP3ProfileDataEncoded(lsp3Profile)) {
-    lsp3Profile$ = lsp3Profile ? from(getLsp3ProfileDataUrl(lsp3Profile)) : of(null);
+    lsp3Profile$ = lsp3Profile ? from(getLsp3ProfileDataUrl(lsp3Profile, uploadOptions)) : of(null);
   } else {
     lsp3Profile$ = of(lsp3Profile);
   }
