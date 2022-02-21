@@ -126,12 +126,12 @@ export function shouldDeployBaseContract$(
   );
 
   return defaultBaseContractBytecode$.pipe(
-    switchMap((defultBaseContractBytecode) => {
+    switchMap((defaultBaseContractBytecode) => {
       return of(
         !providedBaseContractAddress &&
           !providedByteCode &&
           deployProxy &&
-          defultBaseContractBytecode === '0x'
+          defaultBaseContractBytecode === '0x'
       );
     }),
     shareReplay()
