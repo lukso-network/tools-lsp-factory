@@ -8,6 +8,8 @@ import { LSP6KeyManager__factory } from '../types/ethers-v5/factories/LSP6KeyMan
 import { LSP1UniversalReceiverDelegate__factory } from '../types/ethers-v5/factories/LSP1UniversalReceiverDelegate__factory';
 import { ContractDeploymentOptions, LSPFactory } from '../build/main/src';
 import { DeployedContracts } from '../src/lib/interfaces';
+import { getDeployedByteCode, getProxyByteCode } from '../src/lib/helpers/deployment.helper';
+import { providers } from 'ethers';
 
 export async function deployUniversalProfileContracts(signer: Signer, owner: string) {
   let nonceManager = new NonceManager(signer);
@@ -73,4 +75,14 @@ export async function testSetData(upAddress: string, keyManagerAddress: string, 
 
   const data = await universalProfile.getData([key]);
   expect(data).toEqual([value]);
+}
+
+export async function testProxyBytecodeContainsAddress(
+  proxyAddress: string,
+  baseContractAddress: string,
+  provider: providers.Web3Provider | providers.JsonRpcProvider
+) {
+  const bytecode = await getDeployedByteCode(proxyAddress, provider);
+
+  expect(bytecode).toContain(baseContractAddress.slice(0, 2));
 }

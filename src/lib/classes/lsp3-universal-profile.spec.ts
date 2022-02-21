@@ -12,7 +12,11 @@ import {
   UniversalProfile__factory,
 } from '../../../build/main/src';
 import { LSPFactory } from '../../../build/main/src/lib/lsp-factory';
-import { testSetData, testUPDeployment } from '../../../test/test.utils';
+import {
+  testProxyBytecodeContainsAddress,
+  testSetData,
+  testUPDeployment,
+} from '../../../test/test.utils';
 import {
   ADDRESS_PERMISSIONS_ARRAY_KEY,
   DEFAULT_PERMISSIONS,
@@ -68,7 +72,7 @@ describe('LSP3UniversalProfile', () => {
 
   describe('Deploying a UP with one controller address', () => {
     let uniqueController: SignerWithAddress;
-    let universalProfile: SignerWithAddress;
+    let universalProfile;
 
     beforeAll(async () => {
       uniqueController = signers[0];
@@ -234,8 +238,9 @@ describe('LSP3UniversalProfile', () => {
     });
 
     describe('Deployment with only ERC725 baseContract set to true', () => {
+      let deployedContracts: DeployedContracts;
       it('Should deploy only ERC725 Base contract', async () => {
-        await testUPDeployment(
+        deployedContracts = await testUPDeployment(
           {
             ERC725Account: { deployProxy: true },
             KeyManager: { deployProxy: false },
@@ -246,11 +251,19 @@ describe('LSP3UniversalProfile', () => {
           [signers[0].address]
         );
       });
+      it('UP contract bytecode should contain base contract address', async () => {
+        await testProxyBytecodeContainsAddress(
+          deployedContracts.ERC725Account.address,
+          deployedContracts.ERC725AccountBaseContract.address,
+          provider
+        );
+      });
     });
 
     describe('Deployment with only KeyManager baseContract set to true', () => {
+      let deployedContracts: DeployedContracts;
       it('Should deploy only KeyManager Base contract', async () => {
-        await testUPDeployment(
+        deployedContracts = await testUPDeployment(
           {
             ERC725Account: { deployProxy: false },
             KeyManager: { deployProxy: true },
@@ -261,11 +274,19 @@ describe('LSP3UniversalProfile', () => {
           [signers[0].address]
         );
       });
+      it('KeyManager contract bytecode should contain base contract address', async () => {
+        await testProxyBytecodeContainsAddress(
+          deployedContracts.KeyManager.address,
+          deployedContracts.KeyManagerBaseContract.address,
+          provider
+        );
+      });
     });
 
     describe('Deployment with only URD baseContract set to true', () => {
+      let deployedContracts: DeployedContracts;
       it('Should deploy only URD Base contract', async () => {
-        await testUPDeployment(
+        deployedContracts = await testUPDeployment(
           {
             ERC725Account: { deployProxy: false },
             KeyManager: { deployProxy: false },
@@ -274,6 +295,14 @@ describe('LSP3UniversalProfile', () => {
           4,
           lspFactory,
           [signers[0].address]
+        );
+      });
+
+      it('KeyManager contract bytecode should contain base contract address', async () => {
+        await testProxyBytecodeContainsAddress(
+          deployedContracts.UniversalReceiverDelegate.address,
+          deployedContracts.UniversalReceiverDelegateBaseContract.address,
+          provider
         );
       });
     });
@@ -384,12 +413,18 @@ describe('LSP3UniversalProfile', () => {
           [signers[0].address]
         );
       });
-
       it('should be able to setData', async () => {
         await testSetData(
           deployedContracts.ERC725Account.address,
           deployedContracts.KeyManager.address,
           signers[0]
+        );
+      });
+      it('UP contract bytecode should contain base contract address', async () => {
+        await testProxyBytecodeContainsAddress(
+          deployedContracts.ERC725Account.address,
+          baseContracts.universalProfile.address,
+          provider
         );
       });
     });
@@ -407,12 +442,18 @@ describe('LSP3UniversalProfile', () => {
           [signers[0].address]
         );
       });
-
       it('should be able to setData', async () => {
         await testSetData(
           deployedContracts.ERC725Account.address,
           deployedContracts.KeyManager.address,
           signers[0]
+        );
+      });
+      it('UP contract bytecode should contain base contract address', async () => {
+        await testProxyBytecodeContainsAddress(
+          deployedContracts.KeyManager.address,
+          baseContracts.keyManager.address,
+          provider
         );
       });
     });

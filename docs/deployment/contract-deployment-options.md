@@ -14,9 +14,9 @@ The `deploy` function takes an object `contractDeploymentOptions` as its second 
 - `deployProxy?` - `boolean`: Whether the contract should be deployed using a proxy contract implementation (eg: [EIP1167](https://eips.ethereum.org/EIPS/eip-1167)). Defaults to true.
 - `libAddress?` - `string`: The Address of a Base Contract to be used in deployment as implementation behind a proxy contract (eg: [EIP1167](https://eips.ethereum.org/EIPS/eip-1167)).
 
-This is an optional parameter and so may be omitted. If no contract deployment options are specified, `LSPFactory` will deploy a proxy contract which defers to a base contract implementation as per the [EIP1167](https://eips.ethereum.org/EIPS/eip-1167) standard.
+This is an optional parameter and so may be omitted. If no contract deployment options are specified, `LSPFactory` will deploy a **minimal proxy contract** based on the [EIP1167](https://eips.ethereum.org/EIPS/eip-1167. The proxy contract will reference the address of a base contract implementation already deployed on the network.
 
-If you do not want your contract to use proxy deployment you can set `deployProxy` to `false`. This will deploy a 'full' contract with constructor rather than using a proxy deployment with initializer.
+If you do not want your contract to use proxy deployment you can set `deployProxy` to `false`. This will deploy a 'full' contract with a constructor rather than using a proxy deployment with initializer.
 
 :::info Info
 LSPFactory stores base contract addresses for different versions [internally](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json) and uses the latest available version if no version is specified.
@@ -24,27 +24,15 @@ LSPFactory stores base contract addresses for different versions [internally](ht
 
 #### Custom Bytecode
 
-You can specify the bytecode you want your contract to use by providing the `byteCode` parameter. Unless `deployProxy` is set to `false`, LSPFactory will deploy a proxy contract which will defer to a base contract where your bytecode is deployed.
+You can specify the bytecode you want your contract to use by providing the `byteCode` parameter. This will deploy a full contract from your custom bytecode without using a proxy.
 
-For example, you could deploy a Universal Profile with a KeyManager which uses your custom bytecode as a base contract implementation:
+For example, you could deploy a Universal Profile with a Key Manager which uses your custom bytecode:
 
-```javascript title="Deploying a Universal Profile with a custom KeyManager base contract"
+```javascript title="Deploying a Universal Profile with a custom Key Manager base contract"
 lspFactory.LSP3UniversalProfile.deploy({...}, {
     version: '0.4.1'
     KeyManager: {
         bytecode: '0x...',
-    }
-})
-```
-
-Or if you want to use your custom bytecode for the KeyManager contract itself (rather than for a base contract behind a proxy), you can set deployProxy to `false`:
-
-```javascript title="Deploying a Universal Profile with a custom KeyManager base contract"
-lspFactory.LSP3UniversalProfile.deploy({...}, {
-    version: '0.4.1'
-    KeyManager: {
-        bytecode: '0x...',
-        deployProxy: false
     }
 })
 ```
