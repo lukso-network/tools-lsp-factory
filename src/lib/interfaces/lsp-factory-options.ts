@@ -6,6 +6,7 @@ export interface LSPFactoryOptions {
   provider: providers.Web3Provider | providers.JsonRpcProvider;
   chainId: number;
   signer: Signer;
+  uploadGateway: string;
 }
 
 export interface SignerOptions {

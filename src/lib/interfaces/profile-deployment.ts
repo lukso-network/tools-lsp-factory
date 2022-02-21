@@ -1,6 +1,7 @@
 import { DeployedContract } from '../..';
 
 import { ProfileDataBeforeUpload } from './lsp3-profile';
+import { ProfileUploadOptions } from './profile-upload-options';
 
 export enum ContractNames {
   ERC725_Account = 'ERC725Account',
@@ -49,6 +50,7 @@ interface ContractOptions {
 export interface ContractDeploymentOptions {
   version?: string;
   deployReactive?: boolean;
+  uploadOptions?: ProfileUploadOptions; // || string
   ERC725Account?: ContractOptions;
   KeyManager?: ContractOptions;
   UniversalReceiverDelegate?: ContractOptions;

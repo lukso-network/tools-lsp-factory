@@ -90,6 +90,30 @@ describe('uploader.helper.spec.ts', () => {
     });
   });
 
+  it('should accept custom IPFS client options', async () => {
+    const { addMock } = await mockDependencies();
+    const imageResponse = await axios.get('https://picsum.photos/200/300', {
+      responseType: 'arraybuffer',
+    });
+    const buffer = Buffer.from(imageResponse.data as string, 'binary');
+
+    const result = await imageUpload(
+      { buffer, mimeType: SupportedImageBufferFormats.MIME_JPEG },
+      {
+        ipfsClientOptions: { host: 'ipfs.infura.io', port: 5001, protocol: 'https' },
+      }
+    );
+
+    expect(addMock).toHaveBeenCalled();
+
+    expect(result.length === 5);
+    expect(result[0]).toHaveProperty('width');
+    expect(result[0]).toHaveProperty('height');
+    expect(result[0]).toHaveProperty('hashFunction');
+    expect(result[0]).toHaveProperty('hash');
+    expect(result[0]).toHaveProperty('url');
+  });
+
   describe('#resizeBuffer', () => {
     it('should resize buffer images', async () => {
       const imageResponse = await axios.get('https://picsum.photos/200/300', {

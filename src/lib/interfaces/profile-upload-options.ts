@@ -2,7 +2,7 @@ import { Options } from 'ipfs-http-client';
 
 export interface ProfileUploadOptionsHTTP {
   url: string;
-  port: number;
+  port?: number;
   ipfsClientOptions?: never;
 }
 
