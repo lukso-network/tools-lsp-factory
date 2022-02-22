@@ -39,7 +39,7 @@ import {
   ProfileDataBeforeUpload,
 } from '../interfaces';
 import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
-import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
+import { UploadOptions } from '../interfaces/profile-upload-options';
 
 import { UniversalReveiverDeploymentEvent } from './universal-receiver.service';
 
@@ -178,7 +178,7 @@ export function setDataTransaction$(
 
 export async function getLsp3ProfileDataUrl(
   lsp3Profile: ProfileDataBeforeUpload | string,
-  uploadOptions?: ProfileUploadOptions
+  uploadOptions?: UploadOptions
 ): Promise<LSP3ProfileDataForEncoding> {
   let lsp3ProfileData: {
     profile: LSP3ProfileJSON;
@@ -190,8 +190,11 @@ export async function getLsp3ProfileDataUrl(
     const isIPFSUrl = lsp3Profile.startsWith('ipfs://');
 
     if (isIPFSUrl) {
-      // TODO: What to do if upload url is passed as global uploadGateway url and then an ipfs:// url is passed here? How do we transform ?
-      lsp3JsonUrl = 'https://ipfs.lukso.network/ipfs/' + lsp3Profile.split('/').at(-1); // TODO: Allow custom IPFS upload location
+      // TODO: Handle simple HTTP upload
+      const protocol = uploadOptions.ipfsClientOptions.host ?? 'https';
+      const host = uploadOptions.ipfsClientOptions.host ?? 'ipfs.lukso.network';
+
+      lsp3JsonUrl = `${[protocol]}://${host}/ipfs/${lsp3Profile.split('/').at(-1)}`;
     }
 
     const ipfsResponse = await axios.get(lsp3JsonUrl);
@@ -218,7 +221,7 @@ export function isLSP3ProfileDataEncoded(lsp3Profile: string): boolean {
 
 export function lsp3ProfileUpload$(
   lsp3Profile: ProfileDataBeforeUpload | string,
-  uploadOptions?: ProfileUploadOptions
+  uploadOptions?: UploadOptions
 ) {
   let lsp3Profile$: Observable<LSP3ProfileDataForEncoding | string>;
 

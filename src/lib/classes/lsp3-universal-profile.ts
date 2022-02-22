@@ -14,7 +14,7 @@ import {
 } from '../interfaces';
 import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import { ContractDeploymentOptions, DeployedContracts } from '../interfaces/profile-deployment';
-import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
+import { UploadOptions } from '../interfaces/profile-upload-options';
 import {
   shouldDeployUniversalProfileBaseContracts$,
   universalProfileBaseContractAddresses$,
@@ -72,7 +72,7 @@ export class LSP3UniversalProfile {
     // -1 > Run IPFS upload process in parallel with contract deployment
     const lsp3Profile$ = lsp3ProfileUpload$(
       profileDeploymentOptions.lsp3Profile,
-      contractDeploymentOptions?.uploadOptions
+      contractDeploymentOptions?.uploadOptions ?? this.options.uploadOptions
     );
 
     const defaultContractVersion = contractDeploymentOptions?.version ?? DEFAULT_CONTRACT_VERSION;
@@ -179,7 +179,7 @@ export class LSP3UniversalProfile {
    */
   static async uploadProfileData(
     profileData: ProfileDataBeforeUpload,
-    uploadOptions?: ProfileUploadOptions
+    uploadOptions?: UploadOptions
   ): Promise<LSP3ProfileDataForEncoding> {
     uploadOptions = uploadOptions || defaultUploadOptions;
 
@@ -207,5 +207,22 @@ export class LSP3UniversalProfile {
       profile,
       url: uploadResponse.cid ? 'ipfs://' + uploadResponse.cid : 'https upload TBD',
     };
+  }
+
+  /**
+   * Uploads the LSP3Profile to the desired endpoint. This can be an `https` URL either pointing to
+   * a public, centralized storage endpoint or an IPFS Node / Cluster.
+   *
+   * Will upload and process passed images.
+   *
+   * Uses UploadOptions specified when instantiating LSPFactory instance.
+   *
+   * @param {ProfileDataBeforeUpload} profileData
+   * @return {*}  {(Promise<AddResult | string>)} Returns processed LSP3 Data and upload url
+   * @memberof LSP3UniversalProfile
+   */
+  async uploadProfileData(profileData: ProfileDataBeforeUpload, uploadOptions?: UploadOptions) {
+    const uploadOptionsToUse = uploadOptions || this.options.uploadOptions || defaultUploadOptions;
+    return LSP3UniversalProfile.uploadProfileData(profileData, uploadOptionsToUse);
   }
 }

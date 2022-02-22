@@ -30,7 +30,7 @@ export class LSPFactory {
     let signer: Signer;
     let provider: providers.Web3Provider | providers.JsonRpcProvider;
     let chainId = 22;
-    let uploadGateway;
+    let uploadOptions;
 
     if (
       rpcUrlOrProvider instanceof providers.Web3Provider ||
@@ -48,14 +48,14 @@ export class LSPFactory {
     } else {
       signer = new ethers.Wallet(privateKeyOrSigner.deployKey, provider);
       chainId = privateKeyOrSigner.chainId;
-      uploadGateway = privateKeyOrSigner.uploadGateway;
+      uploadOptions = privateKeyOrSigner.uploadOptions;
     }
 
     this.options = {
       signer,
       provider,
       chainId,
-      uploadGateway,
+      uploadOptions,
     };
 
     this.LSP3UniversalProfile = new LSP3UniversalProfile(this.options);

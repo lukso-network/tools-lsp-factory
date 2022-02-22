@@ -1,4 +1,6 @@
 import { providers, Signer } from 'ethers';
+
+import { UploadOptions } from './profile-upload-options';
 /**
  * TDB
  */
@@ -6,11 +8,11 @@ export interface LSPFactoryOptions {
   provider: providers.Web3Provider | providers.JsonRpcProvider;
   chainId: number;
   signer: Signer;
-  uploadGateway: string;
+  uploadOptions: UploadOptions;
 }
 
 export interface SignerOptions {
   deployKey: string;
-  uploadGateway?: string; // TODO: implement
   chainId: number;
+  uploadOptions?: UploadOptions;
 }
