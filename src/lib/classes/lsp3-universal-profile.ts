@@ -182,7 +182,7 @@ export class LSP3UniversalProfile {
     uploadOptions?: UploadOptions
   ): Promise<LSP3ProfileDataForEncoding> {
     uploadOptions = uploadOptions || defaultUploadOptions;
-
+    console.log(uploadOptions);
     const [profileImage, backgroundImage] = await Promise.all([
       prepareImageForLSP3(uploadOptions, profileData.profileImage),
       prepareImageForLSP3(uploadOptions, profileData.backgroundImage),
