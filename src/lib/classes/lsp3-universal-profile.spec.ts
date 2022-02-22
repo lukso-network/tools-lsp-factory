@@ -101,8 +101,6 @@ describe('LSP3UniversalProfile', () => {
         '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
       ]);
 
-      console.log('data', data);
-
       expect(data[0].startsWith('0x6f357c6a')).toBe(true);
     });
   });

@@ -8,12 +8,12 @@ import Jimp from 'jimp';
 
 import { LSP3ProfileImage } from '../interfaces';
 import { ImageBuffer } from '../interfaces/lsp3-profile';
-import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
+import { UploadOptions } from '../interfaces/profile-upload-options';
 
 export const sizes = [1800, 1024, 640, 320, 180];
 export async function imageUpload(
   givenFile: File | ImageBuffer,
-  uploadOptions: ProfileUploadOptions
+  uploadOptions: UploadOptions
 ): Promise<LSP3ProfileImage[]> {
   const type = 'type' in givenFile ? givenFile.type : givenFile.mimeType;
   const isImage = type?.substr(0, 6) === 'image/';
@@ -71,7 +71,7 @@ export async function ipfsUpload(file: ImportCandidate, options: Options): Promi
 }
 
 export async function prepareImageForLSP3(
-  uploadOptions?: ProfileUploadOptions,
+  uploadOptions?: UploadOptions,
   image?: File | ImageBuffer | LSP3ProfileImage[]
 ): Promise<LSP3ProfileImage[]> | null {
   let lsp3Image: LSP3ProfileImage[] | null;

@@ -2,7 +2,7 @@ import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
 import { Options } from 'ipfs-http-client';
 
-import { ProfileUploadOptions } from '../interfaces/profile-upload-options';
+import { UploadOptions } from '../interfaces/profile-upload-options';
 
 const defaultIpfsClientOptions: Options = {
   host: 'api.ipfs.lukso.network',
@@ -10,7 +10,7 @@ const defaultIpfsClientOptions: Options = {
   protocol: 'https',
 };
 
-export const defaultUploadOptions: ProfileUploadOptions = {
+export const defaultUploadOptions: UploadOptions = {
   ipfsClientOptions: defaultIpfsClientOptions,
 };
 

@@ -1,15 +1,15 @@
 import { Options } from 'ipfs-http-client';
 
-export interface ProfileUploadOptionsHTTP {
+export interface UploadOptionsHTTP {
   url: string;
   port?: number;
   ipfsClientOptions?: never;
 }
 
-export interface ProfileUploadOptionsIPFS {
+export interface UploadOptionsIPFS {
   url?: never;
   port?: never;
   ipfsClientOptions: Options;
 }
 
-export type ProfileUploadOptions = ProfileUploadOptionsHTTP | ProfileUploadOptionsIPFS;
+export type UploadOptions = UploadOptionsHTTP | UploadOptionsIPFS;
