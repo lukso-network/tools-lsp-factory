@@ -57,7 +57,9 @@ export class LSP8IdentifiableDigitalAsset {
   ) {
     const defaultBaseContractAddress: string | undefined =
       contractDeploymentOptions?.libAddress ??
-      versions[this.options.chainId]?.contracts.LSP8Mintable?.versions[DEFAULT_CONTRACT_VERSION];
+      versions[this.options.chainId]?.contracts.LSP8Mintable?.versions[
+        contractDeploymentOptions?.version ?? DEFAULT_CONTRACT_VERSION
+      ];
 
     const deployProxy = contractDeploymentOptions?.deployProxy === false ? false : true;
 

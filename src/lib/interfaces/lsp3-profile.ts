@@ -1,3 +1,5 @@
+import { Asset, Image, ImageBuffer, Link } from './metadata';
+
 export interface LSP3ProfileJSON {
   LSP3Profile: LSP3Profile;
 }
@@ -5,23 +7,11 @@ export interface LSP3ProfileJSON {
 export interface LSP3Profile {
   name: string;
   description: string;
-  profileImage?: LSP3ProfileImage[];
-  backgroundImage?: LSP3ProfileImage[];
+  profileImage?: Image[];
+  backgroundImage?: Image[];
   tags?: string[];
-  links?: LSP3ProfileLink[];
-}
-
-export interface LSP3ProfileLink {
-  title: string;
-  url: string;
-}
-
-export interface LSP3ProfileImage {
-  width: number;
-  height: number;
-  hashFunction: string;
-  hash: string;
-  url: string;
+  links?: Link[];
+  avatar?: Asset[];
 }
 
 /**
@@ -38,27 +28,15 @@ export interface LSP3ProfileImage {
  *```
  */
 export interface ProfileDataBeforeUpload {
-  profileImage?: File | ImageBuffer | LSP3ProfileImage[];
-  backgroundImage?: File | ImageBuffer | LSP3ProfileImage[];
+  profileImage?: File | ImageBuffer | Image[];
+  backgroundImage?: File | ImageBuffer | Image[];
   name: string;
   description: string;
-  links?: LSP3ProfileLink[];
+  links?: Link[];
   tags?: string[];
 }
 
 export interface LSP3ProfileDataForEncoding {
   profile: LSP3ProfileJSON;
   url: string;
-}
-
-export interface ImageBuffer {
-  buffer: Buffer;
-  mimeType: SupportedImageBufferFormats;
-}
-
-export enum SupportedImageBufferFormats {
-  MIME_PNG = 'image/png',
-  MIME_BMP = 'image/bmp',
-  MIME_JPEG = 'image/jpeg',
-  MIME_GIF = 'image/gif',
 }

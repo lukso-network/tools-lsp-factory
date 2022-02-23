@@ -58,7 +58,9 @@ export class LSP7DigitalAsset {
   ) {
     const defaultBaseContractAddress: string | undefined =
       contractDeploymentOptions?.libAddress ??
-      versions[this.options.chainId]?.contracts.LSP7Mintable?.versions[DEFAULT_CONTRACT_VERSION];
+      versions[this.options.chainId]?.contracts.LSP7Mintable?.versions[
+        contractDeploymentOptions?.version ?? DEFAULT_CONTRACT_VERSION
+      ];
 
     const deployProxy = contractDeploymentOptions?.deployProxy === false ? false : true;
 

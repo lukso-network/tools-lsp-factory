@@ -1,6 +1,7 @@
 import { Signer } from '@ethersproject/abstract-signer';
+import axios from 'axios';
 import { ContractFactory } from 'ethers';
-import { concat, EMPTY, from, Observable, shareReplay, switchMap, takeLast } from 'rxjs';
+import { concat, EMPTY, from, Observable, of, shareReplay, switchMap, takeLast } from 'rxjs';
 
 import {
   LSP7DigitalAsset__factory,
@@ -10,14 +11,22 @@ import {
   LSP8Mintable__factory,
   LSP8MintableInit__factory,
 } from '../../';
+import { LSP4DigitalAssetMetadata } from '../classes/lsp4-digital-asset-metadata';
 import { GAS_BUFFER, GAS_PRICE } from '../helpers/config.helper';
 import { deployContract, deployProxyContract, waitForReceipt } from '../helpers/deployment.helper';
+import { isMetadataEncoded } from '../helpers/uploader.helper';
 import { DeploymentEventContract, DeploymentEventProxyContract } from '../interfaces';
 import {
   ContractNames,
   DigitalAssetDeploymentOptions,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
+import {
+  LSP4DigitalAssetJSON,
+  LSP4MetadataBeforeUpload,
+  LSP4MetadataForEncoding,
+} from '../interfaces/lsp4-digital-asset';
+import { UploadOptions } from '../interfaces/profile-upload-options';
 
 export type DigitalAssetDeploymentEvent = DeploymentEventContract | DeploymentEventProxyContract;
 
@@ -295,4 +304,54 @@ function initializeLSP8Proxy(
   );
 
   return initialize$ as Observable<DeploymentEventProxyContract>;
+}
+
+export function lsp4MetadataUpload$(
+  lsp4Metadata: LSP4MetadataBeforeUpload | string,
+  uploadOptions?: UploadOptions
+) {
+  let lsp4Metadata$: Observable<LSP4MetadataForEncoding | string>;
+
+  if (typeof lsp4Metadata !== 'string' || isMetadataEncoded(lsp4Metadata)) {
+    lsp4Metadata$ = lsp4Metadata ? from(getLSP4MetadataUrl(lsp4Metadata, uploadOptions)) : of(null);
+  } else {
+    lsp4Metadata$ = of(lsp4Metadata);
+  }
+
+  return lsp4Metadata$;
+}
+
+export async function getLSP4MetadataUrl(
+  lsp4Metadata: LSP4MetadataBeforeUpload | string,
+  uploadOptions: UploadOptions
+): Promise<LSP4MetadataForEncoding> {
+  let lsp4MetadataForEncoding: LSP4MetadataForEncoding;
+
+  if (typeof lsp4Metadata === 'string') {
+    let lsp4JsonUrl = lsp4Metadata;
+    const isIPFSUrl = lsp4Metadata.startsWith('ipfs://');
+
+    if (isIPFSUrl) {
+      // TODO: Handle simple HTTP upload
+      const protocol = uploadOptions.ipfsClientOptions.host ?? 'https';
+      const host = uploadOptions.ipfsClientOptions.host ?? 'ipfs.lukso.network';
+
+      lsp4JsonUrl = `${[protocol]}://${host}/ipfs/${lsp4Metadata.split('/').at(-1)}`;
+    }
+
+    const ipfsResponse = await axios.get(lsp4JsonUrl);
+    const lsp4MetadataJSON = ipfsResponse.data;
+
+    lsp4MetadataForEncoding = {
+      url: lsp4Metadata,
+      lsp4Metadata: lsp4MetadataJSON as LSP4DigitalAssetJSON,
+    };
+  } else {
+    lsp4MetadataForEncoding = await LSP4DigitalAssetMetadata.uploadMetadata(
+      lsp4Metadata,
+      uploadOptions
+    );
+  }
+
+  return lsp4MetadataForEncoding;
 }
