@@ -33,8 +33,8 @@ Then, it will:
    - `lsp3Profile?` - `Object`: If set, the created Universal Profile will be populated with these values.
      - `name` - `string`: The name of the Universal Profile.
      - `description` - `string`: The description of the Universal Profile.
-     - `profileImage?` - `File | ImageBuffer | LSP3ProfileImage[]`
-     - `backgroundImage?` - `File | ImageBuffer | LSP3ProfileImage[]`
+     - `profileImage?` - `File | ImageBuffer | Image[]`
+     - `backgroundImage?` - `File | ImageBuffer | Image[]`
      - `tags?` - `string[]`
      - `links?` - `{title: string, url: string}[]`
 2. `contractDeploymentOptions?` - `Object`: Specify contract deployment details. See [Contract Deployment Options specification](../deployment/contract-deployment-options) for more information.
@@ -140,7 +140,7 @@ await lspFactory.LSP3UniversalProfile.deploy(
   },
   {
     deployReactive: true,
-  },
+  }
 ).subscribe({
   next: (deploymentEvent) => {
     console.log(deploymentEvent);
@@ -299,7 +299,7 @@ Bytecode deployed at provided contract address.
 
 ```javascript
 await lspFactory.LSP3UniversalProfile.getDeployedByteCode(
-  '0xd92C7cA9c493aFC0DF51cE480ec7bB7DC8394549',
+  '0xd92C7cA9c493aFC0DF51cE480ec7bB7DC8394549'
 );
 
 // 0x363d3d373d3d3d363d736533158b042775e2fdfef3ca1a782efdbb8eb9b15af43d82803e903d91602b57fd5bf3

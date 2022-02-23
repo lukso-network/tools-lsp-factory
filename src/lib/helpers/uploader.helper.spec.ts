@@ -9,7 +9,7 @@ import imageCompression from 'browser-image-compression';
 import imageSize from 'image-size';
 import { create } from 'ipfs-http-client';
 
-import { SupportedImageBufferFormats } from '../interfaces/lsp3-profile';
+import { SupportedImageBufferFormats } from '../interfaces/metadata';
 
 import { imageUpload, ipfsUpload, resizeBuffer } from './uploader.helper';
 

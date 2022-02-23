@@ -25,6 +25,7 @@ import {
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { encodeLSP3Profile } from '../helpers/erc725.helper';
+import { isMetadataEncoded } from '../helpers/uploader.helper';
 import {
   BaseContractAddresses,
   ContractNames,
@@ -180,10 +181,7 @@ export async function getLsp3ProfileDataUrl(
   lsp3Profile: ProfileDataBeforeUpload | string,
   uploadOptions?: UploadOptions
 ): Promise<LSP3ProfileDataForEncoding> {
-  let lsp3ProfileData: {
-    profile: LSP3ProfileJSON;
-    url: string;
-  };
+  let lsp3ProfileData: LSP3ProfileDataForEncoding;
 
   if (typeof lsp3Profile === 'string') {
     let lsp3JsonUrl = lsp3Profile;
@@ -211,21 +209,13 @@ export async function getLsp3ProfileDataUrl(
   return lsp3ProfileData;
 }
 
-export function isLSP3ProfileDataEncoded(lsp3Profile: string): boolean {
-  if (!lsp3Profile.startsWith('ipfs://') && !lsp3Profile.startsWith('https://')) {
-    return true;
-  }
-
-  return false;
-}
-
 export function lsp3ProfileUpload$(
   lsp3Profile: ProfileDataBeforeUpload | string,
   uploadOptions?: UploadOptions
 ) {
   let lsp3Profile$: Observable<LSP3ProfileDataForEncoding | string>;
 
-  if (typeof lsp3Profile !== 'string' || !isLSP3ProfileDataEncoded(lsp3Profile)) {
+  if (typeof lsp3Profile !== 'string' || !isMetadataEncoded(lsp3Profile)) {
     lsp3Profile$ = lsp3Profile ? from(getLsp3ProfileDataUrl(lsp3Profile, uploadOptions)) : of(null);
   } else {
     lsp3Profile$ = of(lsp3Profile);
@@ -255,6 +245,7 @@ export async function setData(
 ): Promise<DeploymentEventTransaction> {
   const abiCoder = ethers.utils.defaultAbiCoder;
 
+  // TODO: move this to profile upload logic
   let encodedLSP3Profile;
   if (lsp3Profile && typeof lsp3Profile !== 'string') {
     const encodedDataResult = lsp3Profile

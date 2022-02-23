@@ -6,20 +6,23 @@ import { ImportCandidate } from 'ipfs-core-types/src/utils';
 import { create, Options } from 'ipfs-http-client';
 import Jimp from 'jimp';
 
-import { LSP3ProfileImage } from '../interfaces';
-import { ImageBuffer } from '../interfaces/lsp3-profile';
+import { Image, ImageBuffer } from '../interfaces';
+import { Asset, AssetBuffer } from '../interfaces/metadata';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 
-export const sizes = [1800, 1024, 640, 320, 180];
+export const defaultSizes = [1800, 1024, 640, 320, 180];
 export async function imageUpload(
   givenFile: File | ImageBuffer,
-  uploadOptions: UploadOptions
-): Promise<LSP3ProfileImage[]> {
+  uploadOptions: UploadOptions,
+  sizes?: number[]
+): Promise<Image[]> {
   const type = 'type' in givenFile ? givenFile.type : givenFile.mimeType;
   const isImage = type?.substr(0, 6) === 'image/';
   if (!isImage) {
     throw new Error(`File type: '${type}' does not start with 'image/'`);
   }
+
+  sizes = sizes ?? defaultSizes;
 
   return Promise.all(
     sizes.map(async (size) => {
@@ -63,6 +66,36 @@ export async function imageUpload(
   );
 }
 
+export async function assetUpload(
+  asset: File | AssetBuffer,
+  uploadOptions: UploadOptions
+): Promise<Asset> {
+  let fileBuffer;
+  let fileType: string;
+
+  if ('buffer' in asset) {
+    fileBuffer = asset.buffer;
+    fileType = asset.mimeType;
+  } else {
+    fileBuffer = new Uint8Array(await asset.arrayBuffer());
+    fileType = asset.type;
+  }
+
+  let ipfsResult;
+  if (uploadOptions.url) {
+    // TODO: Simple HTTP upload
+  } else {
+    ipfsResult = await ipfsUpload(fileBuffer, uploadOptions.ipfsClientOptions);
+  }
+
+  return {
+    hashFunction: 'keccak256(bytes)',
+    hash: keccak256(fileBuffer),
+    url: 'ipfs://' + ipfsResult.cid.toString(),
+    fileType,
+  };
+}
+
 export async function ipfsUpload(file: ImportCandidate, options: Options): Promise<AddResult> {
   const ipfs = create(options);
   return await ipfs.add(file, {
@@ -70,22 +103,46 @@ export async function ipfsUpload(file: ImportCandidate, options: Options): Promi
   });
 }
 
-export async function prepareImageForLSP3(
+export async function prepareMetadataImage(
   uploadOptions?: UploadOptions,
-  image?: File | ImageBuffer | LSP3ProfileImage[]
-): Promise<LSP3ProfileImage[]> | null {
-  let lsp3Image: LSP3ProfileImage[] | null;
+  image?: File | ImageBuffer | Image[],
+  sizes?: number[]
+): Promise<Image[]> | null {
+  let metadataImage: Image[] | null;
 
   if (Array.isArray(image)) {
-    lsp3Image = image ?? null;
+    metadataImage = image ?? null;
   } else if (image) {
-    lsp3Image = await imageUpload(image, uploadOptions);
+    metadataImage = await imageUpload(image, uploadOptions, sizes);
   }
 
-  return lsp3Image;
+  return metadataImage;
+}
+
+export async function prepareMetadataAsset(
+  asset: File | AssetBuffer | Asset,
+  uploadOptions?: UploadOptions
+): Promise<Asset> {
+  let assetMetadata: Asset | null;
+
+  if ('hashFunction' in asset) {
+    assetMetadata = asset ?? null;
+  } else if (asset) {
+    assetMetadata = await assetUpload(asset, uploadOptions);
+  }
+
+  return assetMetadata;
 }
 
 export async function resizeBuffer(buffer: Buffer, format: string, size: number): Promise<Buffer> {
   const image = await Jimp.read(buffer);
   return image.scaleToFit(size, size).getBufferAsync(format);
+}
+
+export function isMetadataEncoded(metdata: string): boolean {
+  if (!metdata.startsWith('ipfs://') && !metdata.startsWith('https://')) {
+    return true;
+  }
+
+  return false;
 }

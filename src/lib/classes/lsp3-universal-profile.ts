@@ -6,7 +6,7 @@ import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { defaultUploadOptions } from '../helpers/config.helper';
 import { waitForContractDeployment$ } from '../helpers/deployment.helper';
-import { ipfsUpload, prepareImageForLSP3 } from '../helpers/uploader.helper';
+import { ipfsUpload, prepareMetadataImage } from '../helpers/uploader.helper';
 import {
   LSPFactoryOptions,
   ProfileDataBeforeUpload,
@@ -182,10 +182,9 @@ export class LSP3UniversalProfile {
     uploadOptions?: UploadOptions
   ): Promise<LSP3ProfileDataForEncoding> {
     uploadOptions = uploadOptions || defaultUploadOptions;
-    console.log(uploadOptions);
     const [profileImage, backgroundImage] = await Promise.all([
-      prepareImageForLSP3(uploadOptions, profileData.profileImage),
-      prepareImageForLSP3(uploadOptions, profileData.backgroundImage),
+      prepareMetadataImage(uploadOptions, profileData.profileImage),
+      prepareMetadataImage(uploadOptions, profileData.backgroundImage),
     ]);
 
     const profile = {

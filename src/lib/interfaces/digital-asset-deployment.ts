@@ -1,3 +1,6 @@
+import { LSP4MetadataBeforeUpload } from './lsp4-digital-asset';
+import { UploadOptions } from './profile-upload-options';
+
 import { DeployedContract } from '.';
 
 export enum ContractNames {
@@ -9,6 +12,7 @@ export interface DigitalAssetDeploymentOptions {
   controllerAddress: string;
   name: string;
   symbol: string;
+  digitalAssetMetadata: LSP4MetadataBeforeUpload | string;
 }
 
 export interface LSP7DigitalAssetDeploymentOptions extends DigitalAssetDeploymentOptions {
@@ -29,4 +33,5 @@ export interface ContractDeploymentOptions {
   libAddress?: string;
   deployReactive?: boolean;
   deployProxy?: boolean;
+  uploadOptions?: UploadOptions;
 }
