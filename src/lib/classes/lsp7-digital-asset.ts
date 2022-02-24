@@ -7,6 +7,7 @@ import { waitForContractDeployment$ } from '../helpers/deployment.helper';
 import { LSPFactoryOptions } from '../interfaces';
 import {
   ContractDeploymentOptions,
+  ContractNames,
   DeployedLSP7DigitalAsset,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
@@ -15,7 +16,11 @@ import {
   shouldDeployBaseContract$,
   waitForBaseContractAddress$,
 } from '../services/base-contract.service';
-import { lsp7DigitalAssetDeployment$ } from '../services/digital-asset.service';
+import {
+  lsp4MetadataUpload$,
+  lsp7DigitalAssetDeployment$,
+  setMetadataAndTransferOwnership$,
+} from '../services/digital-asset.service';
 
 /**
  * Class responsible for deploying LSP7 Digital Assets
@@ -56,6 +61,11 @@ export class LSP7DigitalAsset {
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
   ) {
+    const lsp4Metadata$ = lsp4MetadataUpload$(
+      digitalAssetDeploymentOptions.digitalAssetMetadata,
+      contractDeploymentOptions?.uploadOptions ?? this.options.uploadOptions
+    );
+
     const defaultBaseContractAddress: string | undefined =
       contractDeploymentOptions?.libAddress ??
       versions[this.options.chainId]?.contracts.LSP7Mintable?.versions[
@@ -90,10 +100,23 @@ export class LSP7DigitalAsset {
       this.signer,
       digitalAssetDeploymentOptions,
       baseContractAddress$,
+      lsp4Metadata$,
       contractDeploymentOptions?.byteCode
     );
 
-    const deployment$ = concat([baseContractDeployment$, digitalAsset$]).pipe(concatAll());
+    const setLSP4AndTransferOwnership$ = setMetadataAndTransferOwnership$(
+      this.signer,
+      digitalAsset$,
+      lsp4Metadata$,
+      digitalAssetDeploymentOptions,
+      ContractNames.LSP7_DIGITAL_ASSET
+    );
+
+    const deployment$ = concat([
+      baseContractDeployment$,
+      digitalAsset$,
+      setLSP4AndTransferOwnership$,
+    ]).pipe(concatAll());
 
     if (contractDeploymentOptions?.deployReactive) return deployment$;
 

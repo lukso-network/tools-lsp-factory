@@ -12,7 +12,7 @@ export interface DigitalAssetDeploymentOptions {
   controllerAddress: string;
   name: string;
   symbol: string;
-  digitalAssetMetadata: LSP4MetadataBeforeUpload | string;
+  digitalAssetMetadata?: LSP4MetadataBeforeUpload | string;
 }
 
 export interface LSP7DigitalAssetDeploymentOptions extends DigitalAssetDeploymentOptions {
