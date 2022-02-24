@@ -3,9 +3,15 @@ import { providers } from 'ethers';
 import { ethers } from 'hardhat';
 import { Observable } from 'rxjs';
 
-import { DeploymentEvent, LSP7Mintable__factory, LSPFactory } from '../../../build/main/src/index';
+import {
+  DeploymentEvent,
+  LSP7Mintable,
+  LSP7Mintable__factory,
+  LSPFactory,
+} from '../../../build/main/src/index';
 import { DeployedLSP7DigitalAsset } from '../../../build/main/src/lib/interfaces/digital-asset-deployment';
 
+import { lsp4DigitalAsset } from './../../../test/lsp4-digital-asset.mock';
 import { ProxyDeployer } from './proxy-deployer';
 
 jest.setTimeout(30000);
@@ -180,5 +186,39 @@ describe('LSP7DigitalAsset', () => {
 
     const actualMintBalance = (await LSP7DigitalAsset.balanceOf(mintAddress)).toNumber();
     expect(actualMintBalance).toEqual(mintBalance);
+  });
+
+  describe('lsp7 with passed lsp4Metadata', () => {
+    let digitalAsset: LSP7Mintable;
+    const controllerAddress = '0xaDa25A4424b08F5337DacD619D4bCb21536a9B95';
+
+    it('should deploy lsp7 with metadata', async () => {
+      const lspFactory = new LSPFactory(provider, signer);
+      const lsp7DigitalAsset = (await lspFactory.LSP7DigitalAsset.deploy({
+        controllerAddress,
+        isNFT: false,
+        name: 'TOKEN',
+        symbol: 'TKN',
+        digitalAssetMetadata: lsp4DigitalAsset.LSP4Metadata,
+      })) as DeployedLSP7DigitalAsset;
+
+      expect(lsp7DigitalAsset.LSP7DigitalAsset.address).toBeDefined();
+      expect(Object.keys(lsp7DigitalAsset).length).toEqual(2);
+
+      digitalAsset = LSP7Mintable__factory.connect(
+        lsp7DigitalAsset.LSP7DigitalAsset.address,
+        signer
+      );
+    });
+    it('should deploy and set LSP3Profile data', async () => {
+      const ownerAddress = await digitalAsset.owner();
+      expect(ownerAddress).toEqual(controllerAddress);
+
+      const data = await digitalAsset.getData([
+        '0x9afb95cacc9f95858ec44aa8c3b685511002e30ae54415823f406128b85b238e',
+      ]);
+
+      expect(data[0].startsWith('0x6f357c6a')).toBe(true);
+    });
   });
 });

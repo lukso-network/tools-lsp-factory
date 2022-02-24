@@ -3,8 +3,14 @@ import { providers } from 'ethers';
 import { ethers } from 'hardhat';
 import { Observable } from 'rxjs';
 
-import { DeploymentEvent, LSP8Mintable__factory, LSPFactory } from '../../../build/main/src/index';
+import {
+  DeploymentEvent,
+  LSP8Mintable,
+  LSP8Mintable__factory,
+  LSPFactory,
+} from '../../../build/main/src/index';
 import { DeployedLSP8IdentifiableDigitalAsset } from '../../../build/main/src/lib/interfaces/digital-asset-deployment';
+import { lsp4DigitalAsset } from '../../../test/lsp4-digital-asset.mock';
 
 import { ProxyDeployer } from './proxy-deployer';
 
@@ -167,9 +173,9 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         done();
       },
       complete: async () => {
-        const lsp7DigitalAsset = LSP8Mintable__factory.connect(lsp8Address, signer);
+        const lsp8DigitalAsset = LSP8Mintable__factory.connect(lsp8Address, signer);
 
-        const ownerAddress = await lsp7DigitalAsset.owner();
+        const ownerAddress = await lsp8DigitalAsset.owner();
         expect(ownerAddress).toEqual(signer.address);
         done();
       },
@@ -220,5 +226,38 @@ describe('LSP8IdentifiableDigitalAsset', () => {
     ).toNumber();
 
     expect(actualMintBalance).toEqual(1);
+  });
+
+  describe('lsp8 with passed lsp4Metadata', () => {
+    let digitalAsset: LSP8Mintable;
+    const controllerAddress = '0xaDa25A4424b08F5337DacD619D4bCb21536a9B95';
+
+    it('should deploy lsp8 with metadata', async () => {
+      const lspFactory = new LSPFactory(provider, signer);
+      const lsp8DigitalAsset = (await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
+        controllerAddress,
+        name: 'TOKEN',
+        symbol: 'TKN',
+        digitalAssetMetadata: lsp4DigitalAsset.LSP4Metadata,
+      })) as DeployedLSP8IdentifiableDigitalAsset;
+
+      expect(lsp8DigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
+      expect(Object.keys(lsp8DigitalAsset).length).toEqual(2);
+
+      digitalAsset = LSP8Mintable__factory.connect(
+        lsp8DigitalAsset.LSP8IdentifiableDigitalAsset.address,
+        signer
+      );
+    });
+    it('should deploy and set LSP3Profile data', async () => {
+      const ownerAddress = await digitalAsset.owner();
+      expect(ownerAddress).toEqual(controllerAddress);
+
+      const data = await digitalAsset.getData([
+        '0x9afb95cacc9f95858ec44aa8c3b685511002e30ae54415823f406128b85b238e',
+      ]);
+
+      expect(data[0].startsWith('0x6f357c6a')).toBe(true);
+    });
   });
 });

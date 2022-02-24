@@ -216,7 +216,9 @@ export function lsp3ProfileUpload$(
   let lsp3Profile$: Observable<LSP3ProfileDataForEncoding | string>;
 
   if (typeof lsp3Profile !== 'string' || !isMetadataEncoded(lsp3Profile)) {
-    lsp3Profile$ = lsp3Profile ? from(getLsp3ProfileDataUrl(lsp3Profile, uploadOptions)) : of(null);
+    lsp3Profile$ = lsp3Profile
+      ? from(getLsp3ProfileDataUrl(lsp3Profile, uploadOptions)).pipe(shareReplay())
+      : of(null);
   } else {
     lsp3Profile$ = of(lsp3Profile);
   }
