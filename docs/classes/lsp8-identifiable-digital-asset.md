@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1.3
+sidebar_position: 1.4
 title: LSP8IdentifiableDigitalAsset
 ---
 
@@ -21,6 +21,7 @@ Deploys a mintable [LSP8 Identifiable Digital Asset](../../../standards/nft-2.0/
    - `name` - `string`: The name of the token.
    - `symbol` - `string`: The symbol of the token.
    - `ownerAddress` - `string` : The owner of the contract.
+   - `digitalAssetMetadata`?: `LSP4MetadataBeforeUpload | string`: [LSP4 Digital Asset Metadata](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-4-DigitalAsset-Metadata.md) to be attached to the smart contract. Can be an encoded hex string, ipfs url or         metadata object as defined in (LSP4DigitalAssetMetadata.uploadMetadata)[./lsp4-digital-asset-metadata#uploadMetadata].
 2. `contractDeploymentOptions?` - `Object`: Same as for [LSP7DigitalAsset deployment](./lsp7-digital-asset)
 
 #### Returns
@@ -38,6 +39,13 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
   name: 'My token',
   symbol: 'TKN',
   ownerAddress: '0xb74a88C43BCf691bd7A851f6603cb1868f6fc147',
+  digitalAssetMetadata: {
+      description: "Digital Asset",
+      assets: [asset],
+      images: [image],
+      icon: icon,
+      links: [{ title: "MyDigitalAsset", url: "my-asset.com" }],
+  };
 });
 
 /**
