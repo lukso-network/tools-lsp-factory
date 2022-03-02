@@ -7,7 +7,7 @@ import { create, Options } from 'ipfs-http-client';
 import Jimp from 'jimp';
 
 import { Image, ImageBuffer } from '../interfaces';
-import { AssetMetadata, AssetBuffer } from '../interfaces/metadata';
+import { AssetBuffer, AssetMetadata } from '../interfaces/metadata';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 
 export const defaultSizes = [1800, 1024, 640, 320, 180];

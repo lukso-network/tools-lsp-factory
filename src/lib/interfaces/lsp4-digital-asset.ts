@@ -1,4 +1,4 @@
-import { AssetMetadata, AssetBuffer, ImageMetadata, ImageBuffer, LinkMetdata } from './metadata';
+import { AssetBuffer, AssetMetadata, ImageBuffer, ImageMetadata, LinkMetdata } from './metadata';
 
 export interface LSP4DigitalAssetJSON {
   LSP4Metadata: LSP4DigitalAsset;

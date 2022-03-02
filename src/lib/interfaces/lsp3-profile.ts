@@ -1,4 +1,4 @@
-import { AssetMetadata, ImageMetadata, ImageBuffer, LinkMetdata } from './metadata';
+import { AssetMetadata, ImageBuffer, ImageMetadata, LinkMetdata } from './metadata';
 
 export interface LSP3ProfileJSON {
   LSP3Profile: LSP3Profile;
