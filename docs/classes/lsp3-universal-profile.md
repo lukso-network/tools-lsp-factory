@@ -33,8 +33,8 @@ Then, it will:
    - `lsp3Profile?` - `Object`: If set, the created Universal Profile will be populated with these values.
      - `name` - `string`: The name of the Universal Profile.
      - `description` - `string`: The description of the Universal Profile.
-     - `profileImage?` - `File | ImageBuffer | Image[]`
-     - `backgroundImage?` - `File | ImageBuffer | Image[]`
+     - `profileImage?` - `File | ImageBuffer | ImageMetadata[]`
+     - `backgroundImage?` - `File | ImageBuffer | ImageMetadata[]`
      - `tags?` - `string[]`
      - `links?` - `{title: string, url: string}[]`
 2. `contractDeploymentOptions?` - `Object`: Specify contract deployment details. See [Contract Deployment Options specification](../deployment/contract-deployment-options) for more information.

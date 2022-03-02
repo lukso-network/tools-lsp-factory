@@ -25,9 +25,9 @@ If used on an `LSPFactory` instance the `uploadOptions` passed to LSPFactory on 
 1. `metaData` - `Object`: The Metadata to be uploaded.
    - `description` - `string`: A description of the digital asset.
    - `links?` - `{title: string, url: string}[]`
-   - `icon?` - `File | ImageBuffer | Image[]`
-   - `images?` - `File | ImageBuffer | Image[]`
-   - `assets?` - `File | ImageBuffer | Image[]`
+   - `icon?` - `File | ImageBuffer | ImageMetadata[]`
+   - `images?` - `File | ImageBuffer | ImageMetadata[]`
+   - `assets?` - `File | AssetBuffer | AssetMetadata[]`
 2. `uploadOptions?` - `Object`: Specify how the metadata should be uploaded.
    - `url?` - `string`: Upload URL to be used for simple HTTP uploads.
    - `port?` - `string`: Port to be used for simple HTTP uploads.
