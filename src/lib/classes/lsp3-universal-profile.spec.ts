@@ -1,13 +1,13 @@
 import { ERC725 } from '@erc725/erc725.js';
-import KeyManagerContract from '@lukso/universalprofile-smart-contracts/artifacts/LSP6KeyManager.json';
-import UniversalProfileContract from '@lukso/universalprofile-smart-contracts/artifacts/UniversalProfile.json';
+import KeyManagerContract from '@lukso/lsp-smart-contracts/artifacts/LSP6KeyManager.json';
+import UniversalProfileContract from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
 import { ethers } from 'hardhat';
 import { Observable } from 'rxjs';
 
 import {
-  LSP1UniversalReceiverDelegate__factory,
+  LSP1UniversalReceiverDelegateUP__factory,
   LSP6KeyManager__factory,
   UniversalProfile__factory,
 } from '../../../build/main/src';
@@ -409,7 +409,7 @@ describe('LSP3UniversalProfile', () => {
         deployedContracts = await testUPDeployment(
           {
             UniversalReceiverDelegate: {
-              byteCode: LSP1UniversalReceiverDelegate__factory.bytecode,
+              byteCode: LSP1UniversalReceiverDelegateUP__factory.bytecode,
             },
           },
           5,

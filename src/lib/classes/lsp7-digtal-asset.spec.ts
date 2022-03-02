@@ -191,14 +191,16 @@ describe('LSP7DigitalAsset', () => {
   describe('lsp7 with passed lsp4Metadata', () => {
     let digitalAsset: LSP7Mintable;
     const controllerAddress = '0xaDa25A4424b08F5337DacD619D4bCb21536a9B95';
+    const name = 'TOKEN';
+    const symbol = 'TKN';
 
     it('should deploy lsp7 with metadata', async () => {
       const lspFactory = new LSPFactory(provider, signer);
       const lsp7DigitalAsset = (await lspFactory.LSP7DigitalAsset.deploy({
         controllerAddress,
         isNFT: false,
-        name: 'TOKEN',
-        symbol: 'TKN',
+        name,
+        symbol,
         digitalAssetMetadata: lsp4DigitalAsset.LSP4Metadata,
       })) as DeployedLSP7DigitalAsset;
 
@@ -210,7 +212,7 @@ describe('LSP7DigitalAsset', () => {
         signer
       );
     });
-    it('should deploy and set LSP3Profile data', async () => {
+    it('should deploy and set LSP4DigitalAsset data', async () => {
       const ownerAddress = await digitalAsset.owner();
       expect(ownerAddress).toEqual(controllerAddress);
 
@@ -219,6 +221,15 @@ describe('LSP7DigitalAsset', () => {
       ]);
 
       expect(data[0].startsWith('0x6f357c6a')).toBe(true);
+    });
+    it('should have correct name and symbol set', async () => {
+      const [retrievedName, retrievedSymbol] = await digitalAsset.getData([
+        '0xdeba1e292f8ba88238e10ab3c7f88bd4be4fac56cad5194b6ecceaf653468af1',
+        '0x2f0a68ab07768e01943a599e73362a0e17a63a72e94dd2e384d2c1d4db932756',
+      ]);
+
+      expect(ethers.utils.toUtf8String(retrievedName)).toEqual(name);
+      expect(ethers.utils.toUtf8String(retrievedSymbol)).toEqual(symbol);
     });
   });
 });

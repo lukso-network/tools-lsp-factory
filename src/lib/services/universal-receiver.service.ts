@@ -5,8 +5,8 @@ import { shareReplay, switchMap } from 'rxjs/operators';
 import {
   DeploymentEventContract,
   DeploymentEventProxyContract,
-  LSP1UniversalReceiverDelegate__factory,
-  LSP1UniversalReceiverDelegateInit__factory,
+  LSP1UniversalReceiverDelegateUP__factory,
+  LSP1UniversalReceiverDelegateUPInit__factory,
 } from '../..';
 import {
   deployContract,
@@ -78,15 +78,15 @@ export function universalReceiverDelegateDeploymentWithBaseContractAddress$(
 export async function deployUniversalReceiverDelegate(signer: Signer, baseContractAddress: string) {
   const deploymentFunction = async () => {
     return baseContractAddress
-      ? new LSP1UniversalReceiverDelegateInit__factory(signer).attach(baseContractAddress)
-      : await new LSP1UniversalReceiverDelegate__factory(signer).deploy({
+      ? new LSP1UniversalReceiverDelegateUPInit__factory(signer).attach(baseContractAddress)
+      : await new LSP1UniversalReceiverDelegateUP__factory(signer).deploy({
           gasLimit: 3_000_000,
         });
   };
 
   return baseContractAddress
     ? deployProxyContract(
-        LSP1UniversalReceiverDelegateInit__factory.abi,
+        LSP1UniversalReceiverDelegateUPInit__factory.abi,
         deploymentFunction,
         ContractNames.UNIVERSAL_RECEIVER,
         signer
@@ -100,7 +100,7 @@ function initializeProxy(
 ) {
   return initialize(
     universalReceiverDelegateReceipt$,
-    new LSP1UniversalReceiverDelegateInit__factory(signer),
+    new LSP1UniversalReceiverDelegateUPInit__factory(signer),
     async () => {
       return [];
     }
