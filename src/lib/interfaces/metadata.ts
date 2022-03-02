@@ -1,4 +1,4 @@
-export interface Image {
+export interface ImageMetadata {
   width: number;
   height: number;
   hashFunction: string;
@@ -6,12 +6,12 @@ export interface Image {
   url: string;
 }
 
-export interface Link {
+export interface LinkMetdata {
   title: string;
   url: string;
 }
 
-export interface Asset {
+export interface AssetMetadata {
   hashFunction: string;
   hash: string;
   url: string;

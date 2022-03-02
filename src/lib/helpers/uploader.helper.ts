@@ -7,7 +7,7 @@ import { create, Options } from 'ipfs-http-client';
 import Jimp from 'jimp';
 
 import { Image, ImageBuffer } from '../interfaces';
-import { Asset, AssetBuffer } from '../interfaces/metadata';
+import { AssetMetadata, AssetBuffer } from '../interfaces/metadata';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 
 export const defaultSizes = [1800, 1024, 640, 320, 180];
@@ -69,7 +69,7 @@ export async function imageUpload(
 export async function assetUpload(
   asset: File | AssetBuffer,
   uploadOptions: UploadOptions
-): Promise<Asset> {
+): Promise<AssetMetadata> {
   let fileBuffer;
   let fileType: string;
 
@@ -120,10 +120,10 @@ export async function prepareMetadataImage(
 }
 
 export async function prepareMetadataAsset(
-  asset: File | AssetBuffer | Asset,
+  asset: File | AssetBuffer | AssetMetadata,
   uploadOptions?: UploadOptions
-): Promise<Asset> {
-  let assetMetadata: Asset | null;
+): Promise<AssetMetadata> {
+  let assetMetadata: AssetMetadata | null;
 
   if ('hashFunction' in asset) {
     assetMetadata = asset ?? null;
