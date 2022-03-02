@@ -1,4 +1,4 @@
-import { Asset, Image, ImageBuffer, Link } from './metadata';
+import { AssetMetadata, ImageMetadata, ImageBuffer, LinkMetdata } from './metadata';
 
 export interface LSP3ProfileJSON {
   LSP3Profile: LSP3Profile;
@@ -7,11 +7,11 @@ export interface LSP3ProfileJSON {
 export interface LSP3Profile {
   name: string;
   description: string;
-  profileImage?: Image[];
-  backgroundImage?: Image[];
+  profileImage?: ImageMetadata[];
+  backgroundImage?: ImageMetadata[];
   tags?: string[];
-  links?: Link[];
-  avatar?: Asset[];
+  links?: LinkMetdata[];
+  avatar?: AssetMetadata[];
 }
 
 /**
@@ -28,11 +28,11 @@ export interface LSP3Profile {
  *```
  */
 export interface ProfileDataBeforeUpload {
-  profileImage?: File | ImageBuffer | Image[];
-  backgroundImage?: File | ImageBuffer | Image[];
+  profileImage?: File | ImageBuffer | ImageMetadata[];
+  backgroundImage?: File | ImageBuffer | ImageMetadata[];
   name: string;
   description: string;
-  links?: Link[];
+  links?: LinkMetdata[];
   tags?: string[];
 }
 
