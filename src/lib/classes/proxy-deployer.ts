@@ -3,8 +3,8 @@ import { Contract } from '@ethersproject/contracts';
 import { NonceManager } from '@ethersproject/experimental';
 
 import {
-  LSP1UniversalReceiverDelegateInit,
-  LSP1UniversalReceiverDelegateInit__factory,
+  LSP1UniversalReceiverDelegateUPInit,
+  LSP1UniversalReceiverDelegateUPInit__factory,
   LSP6KeyManagerInit,
   LSP6KeyManagerInit__factory,
   LSP7MintableInit__factory,
@@ -18,7 +18,7 @@ export class ProxyDeployer {
   signer: Signer;
   baseContracts: {
     universalProfile: UniversalProfileInit;
-    universalReceiverDelegate: LSP1UniversalReceiverDelegateInit;
+    universalReceiverDelegate: LSP1UniversalReceiverDelegateUPInit;
     keyManager: LSP6KeyManagerInit;
   };
 
@@ -28,7 +28,7 @@ export class ProxyDeployer {
 
   async deployUniversalProfileBaseContracts() {
     const universalProfile = await new UniversalProfileInit__factory(this.signer).deploy();
-    const universalReceiverDelegate = await new LSP1UniversalReceiverDelegateInit__factory(
+    const universalReceiverDelegate = await new LSP1UniversalReceiverDelegateUPInit__factory(
       this.signer
     ).deploy();
     const keyManager = await new LSP6KeyManagerInit__factory(this.signer).deploy();

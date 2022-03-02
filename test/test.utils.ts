@@ -5,7 +5,7 @@ import { NonceManager } from '@ethersproject/experimental';
 
 import { UniversalProfile__factory } from '../types/ethers-v5/factories/UniversalProfile__factory';
 import { LSP6KeyManager__factory } from '../types/ethers-v5/factories/LSP6KeyManager__factory';
-import { LSP1UniversalReceiverDelegate__factory } from '../types/ethers-v5/factories/LSP1UniversalReceiverDelegate__factory';
+import { LSP1UniversalReceiverDelegateUP__factory } from '../types/ethers-v5/factories/LSP1UniversalReceiverDelegateUP__factory';
 import { ContractDeploymentOptions, LSPFactory } from '../build/main/src';
 import { DeployedContracts } from '../src/lib/interfaces';
 import { getDeployedByteCode, getProxyByteCode } from '../src/lib/helpers/deployment.helper';
@@ -17,7 +17,7 @@ export async function deployUniversalProfileContracts(signer: Signer, owner: str
 
   let universalProfile = await new UniversalProfile__factory(nonceManager).deploy(signerAddress);
   let keyManager = await new LSP6KeyManager__factory(nonceManager).deploy(universalProfile.address);
-  let universalReceiverDelegate = await new LSP1UniversalReceiverDelegate__factory(
+  let universalReceiverDelegate = await new LSP1UniversalReceiverDelegateUP__factory(
     nonceManager
   ).deploy();
 

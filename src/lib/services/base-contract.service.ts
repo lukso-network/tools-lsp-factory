@@ -6,7 +6,7 @@ import { defaultIfEmpty, last, shareReplay, switchMap, tap } from 'rxjs/operator
 import {
   BaseContractAddresses,
   DeploymentEventContract,
-  LSP1UniversalReceiverDelegateInit__factory,
+  LSP1UniversalReceiverDelegateUPInit__factory,
   LSP6KeyManagerInit__factory,
   LSP7MintableInit__factory,
   LSP8MintableInit__factory,
@@ -40,7 +40,9 @@ export function universalProfileBaseContractsDeployment$(
   const universalReceiverBaseContractDeploymentReceipt$ = deployBaseContract$(
     UniversalProfileContractNames.UNIVERSAL_RECEIVER,
     () => {
-      return new LSP1UniversalReceiverDelegateInit__factory(signer).deploy({ gasPrice: GAS_PRICE });
+      return new LSP1UniversalReceiverDelegateUPInit__factory(signer).deploy({
+        gasPrice: GAS_PRICE,
+      });
     }
   );
 
@@ -82,7 +84,8 @@ export function lsp7BaseContractDeployment$(signer: Signer) {
     const lsp7Init = await new LSP7MintableInit__factory(signer).deploy({
       gasPrice: GAS_PRICE,
     });
-    await lsp7Init['initialize(address)'](NULL_ADDRESS);
+
+    await lsp7Init['initialize(string,string,address,bool)']('', '', NULL_ADDRESS, false);
     return lsp7Init;
   });
 }
@@ -92,7 +95,8 @@ export function lsp8BaseContractDeployment$(signer: Signer) {
     const lsp8Init = await new LSP8MintableInit__factory(signer).deploy({
       gasPrice: GAS_PRICE,
     });
-    await lsp8Init['initialize(address)'](NULL_ADDRESS);
+
+    await lsp8Init['initialize(string,string,address)']('', '', NULL_ADDRESS);
     return lsp8Init;
   });
 }
