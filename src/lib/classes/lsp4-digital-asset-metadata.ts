@@ -27,7 +27,7 @@ export class LSP4DigitalAssetMetadata {
       metaData.assets
         ? Promise.all(metaData.assets?.map((asset) => prepareMetadataAsset(asset, uploadOptions)))
         : null,
-      prepareMetadataImage(uploadOptions, metaData.icon, [256, 180, 80, 32, 16]),
+      prepareMetadataImage(uploadOptions, metaData.icon, [256, 32]),
     ]);
 
     const lsp4Metadata = {
