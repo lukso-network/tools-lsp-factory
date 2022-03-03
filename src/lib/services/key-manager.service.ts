@@ -1,4 +1,4 @@
-import { Signer } from 'ethers';
+import { ContractFactory, Signer } from 'ethers';
 import { concat, EMPTY, forkJoin, from, Observable } from 'rxjs';
 import { shareReplay, switchMap } from 'rxjs/operators';
 
@@ -23,7 +23,8 @@ export type KeyManagerDeploymentEvent = DeploymentEventContract;
 export function keyManagerDeployment$(
   signer: Signer,
   accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
-  baseContractAddress$: Observable<BaseContractAddresses>
+  baseContractAddress$: Observable<BaseContractAddresses>,
+  byteCode?: string
 ): Observable<KeyManagerDeploymentEvent> {
   return forkJoin([accountDeployment$, baseContractAddress$]).pipe(
     switchMap(([{ receipt: lsp3AccountReceipt }, baseContractAddress]) => {
@@ -31,7 +32,8 @@ export function keyManagerDeployment$(
       return keyManagerDeploymentForAccount$(
         signer,
         erc725AccountAddress,
-        baseContractAddress.KeyManager
+        baseContractAddress.KeyManager,
+        byteCode
       );
     }),
     shareReplay()
@@ -41,10 +43,11 @@ export function keyManagerDeployment$(
 function keyManagerDeploymentForAccount$(
   signer: Signer,
   erc725AccountAddress: string,
-  baseContractAddress: string
+  baseContractAddress: string,
+  byteCode?: string
 ): Observable<KeyManagerDeploymentEvent> {
   const keyManagerDeployment$ = from(
-    deployKeyManager(signer, erc725AccountAddress, baseContractAddress)
+    deployKeyManager(signer, erc725AccountAddress, baseContractAddress, byteCode)
   ).pipe(shareReplay());
 
   const keyManagerDeploymentReceipt$ = waitForReceipt<KeyManagerDeploymentEvent>(
@@ -81,14 +84,23 @@ function keyManagerDeploymentForAccount$(
 export async function deployKeyManager(
   signer: Signer,
   lsp3AccountAddress: string,
-  baseContractAddress: string
+  baseContractAddress: string,
+  byteCode?: string
 ) {
   const deploymentFunction = async () => {
-    return baseContractAddress
-      ? new LSP6KeyManagerInit__factory(signer).attach(baseContractAddress)
-      : await new LSP6KeyManager__factory(signer).deploy(lsp3AccountAddress, {
-          gasLimit: 3_000_000,
-        });
+    if (baseContractAddress) {
+      return new LSP6KeyManagerInit__factory(signer).attach(baseContractAddress);
+    }
+
+    if (byteCode) {
+      return new ContractFactory(LSP6KeyManager__factory.abi, byteCode, signer).deploy(
+        lsp3AccountAddress
+      );
+    }
+
+    return await new LSP6KeyManager__factory(signer).deploy(lsp3AccountAddress, {
+      gasLimit: 3_000_000,
+    });
   };
 
   return baseContractAddress
