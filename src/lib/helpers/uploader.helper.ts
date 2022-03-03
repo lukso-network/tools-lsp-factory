@@ -6,7 +6,7 @@ import { ImportCandidate } from 'ipfs-core-types/src/utils';
 import { create, Options } from 'ipfs-http-client';
 import Jimp from 'jimp';
 
-import { Image, ImageBuffer } from '../interfaces';
+import { ImageBuffer, ImageMetadata } from '../interfaces';
 import { AssetBuffer, AssetMetadata } from '../interfaces/metadata';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 
@@ -15,7 +15,7 @@ export async function imageUpload(
   givenFile: File | ImageBuffer,
   uploadOptions: UploadOptions,
   sizes?: number[]
-): Promise<Image[]> {
+): Promise<ImageMetadata[]> {
   const type = 'type' in givenFile ? givenFile.type : givenFile.mimeType;
   const isImage = type?.substr(0, 6) === 'image/';
   if (!isImage) {
@@ -105,10 +105,10 @@ export async function ipfsUpload(file: ImportCandidate, options: Options): Promi
 
 export async function prepareMetadataImage(
   uploadOptions?: UploadOptions,
-  image?: File | ImageBuffer | Image[],
+  image?: File | ImageBuffer | ImageMetadata[],
   sizes?: number[]
-): Promise<Image[]> | null {
-  let metadataImage: Image[] | null;
+): Promise<ImageMetadata[]> | null {
+  let metadataImage: ImageMetadata[] | null;
 
   if (Array.isArray(image)) {
     metadataImage = image ?? null;
