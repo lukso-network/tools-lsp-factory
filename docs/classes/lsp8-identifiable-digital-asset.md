@@ -22,7 +22,7 @@ Deploys a mintable [LSP8 Identifiable Digital Asset](../../../standards/nft-2.0/
    - `symbol` - `string`: The symbol of the token.
    - `ownerAddress` - `string` : The owner of the contract.
    - `digitalAssetMetadata`?: `LSP4MetadataBeforeUpload | string`: [LSP4 Digital Asset Metadata](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-4-DigitalAsset-Metadata.md) to be attached to the smart contract. Can be an encoded hex string, ipfs url or metadata object as defined in (LSP4DigitalAssetMetadata.uploadMetadata)[./lsp4-digital-asset-metadata#uploadMetadata].
-   - `creators?` `string[]`: Array of ERC725Accounnt Addresses that defines the creators of the digital asset. Used to set the [LSP4Creators[]](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-4-DigitalAsset-Metadata.md#lsp4creators) key on the contract.
+   - `creators?` `string[]`: Array of ERC725Account `address`es that defines the creators of the digital asset. Used to set the [LSP4Creators[]](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-4-DigitalAsset-Metadata.md#lsp4creators) key on the contract.
 2. `contractDeploymentOptions?` - `Object`: Same as for [LSP7DigitalAsset deployment](./lsp7-digital-asset)
 
 #### Returns

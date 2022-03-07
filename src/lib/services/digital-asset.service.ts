@@ -22,7 +22,12 @@ import {
   LSP8MintableInit__factory,
 } from '../../';
 import { LSP4DigitalAssetMetadata } from '../classes/lsp4-digital-asset-metadata';
-import { GAS_BUFFER, GAS_PRICE, LSP4_KEYS } from '../helpers/config.helper';
+import {
+  ERC725_ACCOUNT_INTERRFACE,
+  GAS_BUFFER,
+  GAS_PRICE,
+  LSP4_KEYS,
+} from '../helpers/config.helper';
 import { deployContract, deployProxyContract, waitForReceipt } from '../helpers/deployment.helper';
 import { encodeLSP4Metadata } from '../helpers/erc725.helper';
 import { isMetadataEncoded } from '../helpers/uploader.helper';
@@ -455,6 +460,9 @@ async function setData(
   const creatorArrayIndexKeys: string[] = [];
   const creatorArrayIndexValues: string[] = [];
 
+  const creatorsMapKeys: string[] = [];
+  const creatorsMapValues: string[] = [];
+
   creators.forEach((creatorAddress, index) => {
     creatorArrayIndexKeys.push(
       LSP4_KEYS.LSP4_CREATORS_ARRAY.slice(0, 34) +
@@ -462,12 +470,19 @@ async function setData(
     );
 
     creatorArrayIndexValues.push(creatorAddress);
+
+    creatorsMapKeys.push(LSP4_KEYS.LSP4_CREATORS_MAP_PREFIX + creatorAddress.slice(2));
+
+    creatorsMapValues.push(
+      ethers.utils.hexZeroPad(ethers.utils.hexlify([index]), 8) + ERC725_ACCOUNT_INTERRFACE.slice(2)
+    );
   });
 
-  const keysToSet = [LSP4_KEYS.LSP4_CREATORS_ARRAY, ...creatorArrayIndexKeys];
+  const keysToSet = [LSP4_KEYS.LSP4_CREATORS_ARRAY, ...creatorArrayIndexKeys, ...creatorsMapKeys];
   const valuesToSet = [
-    ethers.utils.defaultAbiCoder.encode(['uint256'], [creators.length]),
+    ethers.utils.hexZeroPad(ethers.utils.hexlify([creators.length]), 32),
     ...creatorArrayIndexValues,
+    ...creatorsMapValues,
   ];
 
   if (lsp4Metadata) {

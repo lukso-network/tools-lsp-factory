@@ -10,7 +10,7 @@ import {
   LSPFactory,
 } from '../../../build/main/src/index';
 import { DeployedLSP7DigitalAsset } from '../../../build/main/src/lib/interfaces/digital-asset-deployment';
-import { LSP4_KEYS } from '../helpers/config.helper';
+import { ERC725_ACCOUNT_INTERRFACE, LSP4_KEYS } from '../helpers/config.helper';
 
 import { lsp4DigitalAsset } from './../../../test/lsp4-digital-asset.mock';
 import { ProxyDeployer } from './proxy-deployer';
@@ -277,6 +277,19 @@ describe('LSP7DigitalAsset', () => {
 
       expect(ethers.utils.getAddress(creator1)).toEqual(creators[0]);
       expect(ethers.utils.getAddress(creator2)).toEqual(creators[1]);
+    });
+    it('should have LSP4CreatorsMap set correctly', async () => {
+      const creatorMap = await digitalAsset.getData([
+        LSP4_KEYS.LSP4_CREATORS_MAP_PREFIX + creators[0].slice(2),
+        LSP4_KEYS.LSP4_CREATORS_MAP_PREFIX + creators[1].slice(2),
+      ]);
+
+      expect(creatorMap[0]).toEqual(
+        ethers.utils.hexZeroPad(ethers.utils.hexlify([0]), 8) + ERC725_ACCOUNT_INTERRFACE.slice(2)
+      );
+      expect(creatorMap[1]).toEqual(
+        ethers.utils.hexZeroPad(ethers.utils.hexlify([1]), 8) + ERC725_ACCOUNT_INTERRFACE.slice(2)
+      );
     });
   });
 });
