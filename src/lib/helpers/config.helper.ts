@@ -21,6 +21,7 @@ export const LSP3_UP_KEYS = {
 
 export const LSP4_KEYS = {
   LSP4_METADATA: keccak256(toUtf8Bytes('LSP4Metadata')),
+  LSP4_CREATORS_ARRAY: keccak256(toUtf8Bytes('LSP4Creators[]')),
 };
 
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';

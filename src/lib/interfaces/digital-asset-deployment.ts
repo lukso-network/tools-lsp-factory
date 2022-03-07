@@ -13,6 +13,7 @@ export interface DigitalAssetDeploymentOptions {
   name: string;
   symbol: string;
   digitalAssetMetadata?: LSP4MetadataBeforeUpload | string;
+  creators?: string[];
 }
 
 export interface LSP7DigitalAssetDeploymentOptions extends DigitalAssetDeploymentOptions {

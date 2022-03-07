@@ -1,6 +1,6 @@
 import { Signer } from '@ethersproject/abstract-signer';
 import axios from 'axios';
-import { ContractFactory } from 'ethers';
+import { ContractFactory, ethers } from 'ethers';
 import {
   concat,
   EMPTY,
@@ -54,17 +54,15 @@ export function lsp7DigitalAssetDeployment$(
   signer: Signer,
   digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
   baseContractAddress$: Observable<string>,
-  lsp4Metadata$: Observable<string | null>,
   byteCode?: string
 ) {
-  return forkJoin([baseContractAddress$, lsp4Metadata$]).pipe(
-    switchMap(([baseContractAddress, lsp4Metadata]) => {
+  return baseContractAddress$.pipe(
+    switchMap((baseContractAddress) => {
       return lsp7DigitalAssetDeploymentWithBaseContractAddress$(
         signer,
         digitalAssetDeploymentOptions,
         baseContractAddress,
-        byteCode,
-        lsp4Metadata
+        byteCode
       );
     }),
     shareReplay()
@@ -75,17 +73,10 @@ export function lsp7DigitalAssetDeploymentWithBaseContractAddress$(
   signer: Signer,
   digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
   baseContractAddress?: string,
-  byteCode?: string,
-  lsp4Metadata?: string
+  byteCode?: string
 ) {
   const lsp7Deployment$ = from(
-    deployLSP7DigitalAsset(
-      signer,
-      digitalAssetDeploymentOptions,
-      baseContractAddress,
-      byteCode,
-      lsp4Metadata
-    )
+    deployLSP7DigitalAsset(signer, digitalAssetDeploymentOptions, baseContractAddress, byteCode)
   ).pipe(shareReplay());
 
   const lsp7DeploymentReceipt$ = waitForReceipt<DigitalAssetDeploymentEvent>(lsp7Deployment$).pipe(
@@ -96,8 +87,7 @@ export function lsp7DigitalAssetDeploymentWithBaseContractAddress$(
     ? initializeLSP7Proxy(
         signer,
         lsp7DeploymentReceipt$ as Observable<DeploymentEventProxyContract>,
-        digitalAssetDeploymentOptions,
-        lsp4Metadata
+        digitalAssetDeploymentOptions
       )
     : EMPTY;
 
@@ -112,12 +102,9 @@ async function deployLSP7DigitalAsset(
   signer: Signer,
   digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
   baseContractAddress?: string,
-  byteCode?: string,
-  lsp4Metadata?: string
+  byteCode?: string
 ) {
-  const controllerAddress = lsp4Metadata
-    ? await signer.getAddress()
-    : digitalAssetDeploymentOptions.controllerAddress;
+  const controllerAddress = await signer.getAddress();
 
   const deploymentFunction = async () => {
     if (baseContractAddress) {
@@ -154,8 +141,7 @@ async function deployLSP7DigitalAsset(
 function initializeLSP7Proxy(
   signer: Signer,
   digitalAssetDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
-  digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
-  lsp4Metadata?: string
+  digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions
 ) {
   const { name, symbol, isNFT } = digitalAssetDeploymentOptions;
 
@@ -166,9 +152,7 @@ function initializeLSP7Proxy(
         result.receipt.contractAddress
       );
 
-      const controllerAddress = lsp4Metadata
-        ? await signer.getAddress()
-        : digitalAssetDeploymentOptions.controllerAddress;
+      const controllerAddress = await signer.getAddress();
 
       const gasEstimate = await contract.estimateGas[`initialize(string,string,address,bool)`](
         name,
@@ -211,17 +195,15 @@ export function lsp8IdentifiableDigitalAssetDeployment$(
   signer: Signer,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
   baseContractAddress$: Observable<string>,
-  lsp4MetadataUpload$: Observable<string | null>,
   byteCode?: string
 ) {
-  return forkJoin([baseContractAddress$, lsp4MetadataUpload$]).pipe(
-    switchMap(([baseContractAddress, lsp4Metadata]) => {
+  return baseContractAddress$.pipe(
+    switchMap((baseContractAddress) => {
       return lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
         signer,
         digitalAssetDeploymentOptions,
         baseContractAddress,
-        byteCode,
-        lsp4Metadata
+        byteCode
       );
     }),
     shareReplay()
@@ -232,16 +214,14 @@ export function lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
   signer: Signer,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
   baseContractAddress: string,
-  byteCode?: string,
-  lsp4Metadata?: string
+  byteCode?: string
 ) {
   const lsp8Deployment$ = from(
     deployLSP8IdentifiableDigitalAsset(
       signer,
       digitalAssetDeploymentOptions,
       baseContractAddress,
-      byteCode,
-      lsp4Metadata
+      byteCode
     )
   ).pipe(shareReplay());
 
@@ -251,8 +231,7 @@ export function lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
     ? initializeLSP8Proxy(
         signer,
         lsp8DeploymentReceipt$ as Observable<DeploymentEventProxyContract>,
-        digitalAssetDeploymentOptions,
-        lsp4Metadata
+        digitalAssetDeploymentOptions
       )
     : EMPTY;
 
@@ -267,12 +246,9 @@ async function deployLSP8IdentifiableDigitalAsset(
   signer: Signer,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
   baseContractAddress: string,
-  byteCode?: string,
-  lsp4Metadata?: string
+  byteCode?: string
 ) {
-  const controllerAddress = lsp4Metadata
-    ? await signer.getAddress()
-    : digitalAssetDeploymentOptions.controllerAddress;
+  const controllerAddress = await signer.getAddress();
 
   const deploymentFunction = async () => {
     if (baseContractAddress) {
@@ -311,8 +287,7 @@ async function deployLSP8IdentifiableDigitalAsset(
 function initializeLSP8Proxy(
   signer: Signer,
   digitalAssetDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
-  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
-  lsp4Metadata?: string
+  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions
 ) {
   const { name, symbol } = digitalAssetDeploymentOptions;
 
@@ -323,9 +298,7 @@ function initializeLSP8Proxy(
         result.receipt.contractAddress
       );
 
-      const controllerAddress = lsp4Metadata
-        ? await signer.getAddress()
-        : digitalAssetDeploymentOptions.controllerAddress;
+      const controllerAddress = await signer.getAddress();
 
       const gasEstimate = await contract.estimateGas[`initialize(string,string,address)`](
         name,
@@ -432,16 +405,15 @@ export function setMetadataAndTransferOwnership$(
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
   contractName: string
 ) {
-  return lsp4Metadata$.pipe(
-    switchMap((lsp4Metadata) => {
-      return lsp4Metadata
-        ? concat(
-            setLSP4Metadata$(signer, digitalAsset$, lsp4Metadata$, contractName),
-            transferOwnership$(signer, digitalAsset$, digitalAssetDeploymentOptions, contractName)
-          )
-        : EMPTY;
-    }),
-    shareReplay()
+  return concat(
+    setLSP4Metadata$(
+      signer,
+      digitalAsset$,
+      lsp4Metadata$,
+      contractName,
+      digitalAssetDeploymentOptions
+    ),
+    transferOwnership$(signer, digitalAsset$, digitalAssetDeploymentOptions, contractName)
   );
 }
 
@@ -449,18 +421,18 @@ export function setLSP4Metadata$(
   signer: Signer,
   digitalAsset$: Observable<DigitalAssetDeploymentEvent>,
   lsp4Metadata$: Observable<string | null>,
-  contractName: string
+  contractName: string,
+  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions
 ): Observable<DeploymentEventTransaction> {
   const setDataTransaction$ = forkJoin([digitalAsset$, lsp4Metadata$]).pipe(
     switchMap(([{ receipt: digitalAssetReceipt }, lsp4Metadata]) => {
-      return lsp4Metadata
-        ? setData(
-            signer,
-            digitalAssetReceipt.contractAddress || digitalAssetReceipt.to,
-            lsp4Metadata,
-            contractName
-          )
-        : EMPTY;
+      return setData(
+        signer,
+        digitalAssetReceipt.contractAddress || digitalAssetReceipt.to,
+        lsp4Metadata,
+        digitalAssetDeploymentOptions,
+        contractName
+      );
     }),
     shareReplay()
   );
@@ -473,20 +445,39 @@ async function setData(
   signer: Signer,
   digitalAssetAddress: string,
   lsp4Metadata: string,
+  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
   contractName: string
 ): Promise<DeploymentEventTransaction> {
   const digitalAsset = new LSP7Mintable__factory(signer).attach(digitalAssetAddress);
 
-  const keysToSet = [LSP4_KEYS.LSP4_METADATA];
-  const valuesToSet = [lsp4Metadata];
+  const creators = digitalAssetDeploymentOptions?.creators ?? [];
 
-  const gasEstimate = await digitalAsset.estimateGas.setData(
-    [LSP4_KEYS.LSP4_METADATA],
-    [lsp4Metadata],
-    {
-      gasPrice: GAS_PRICE,
-    }
-  );
+  const creatorArrayIndexKeys: string[] = [];
+  const creatorArrayIndexValues: string[] = [];
+
+  creators.forEach((creatorAddress, index) => {
+    creatorArrayIndexKeys.push(
+      LSP4_KEYS.LSP4_CREATORS_ARRAY.slice(0, 34) +
+        ethers.utils.hexZeroPad(ethers.utils.hexlify([index]), 16).substring(2)
+    );
+
+    creatorArrayIndexValues.push(creatorAddress);
+  });
+
+  const keysToSet = [LSP4_KEYS.LSP4_CREATORS_ARRAY, ...creatorArrayIndexKeys];
+  const valuesToSet = [
+    ethers.utils.defaultAbiCoder.encode(['uint256'], [creators.length]),
+    ...creatorArrayIndexValues,
+  ];
+
+  if (lsp4Metadata) {
+    keysToSet.push(LSP4_KEYS.LSP4_METADATA);
+    valuesToSet.push(lsp4Metadata);
+  }
+
+  const gasEstimate = await digitalAsset.estimateGas.setData(keysToSet, valuesToSet, {
+    gasPrice: GAS_PRICE,
+  });
 
   const transaction = await digitalAsset.setData(keysToSet, valuesToSet, {
     gasLimit: gasEstimate.add(GAS_BUFFER),

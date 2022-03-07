@@ -11,6 +11,7 @@ import {
 } from '../../../build/main/src/index';
 import { DeployedLSP8IdentifiableDigitalAsset } from '../../../build/main/src/lib/interfaces/digital-asset-deployment';
 import { lsp4DigitalAsset } from '../../../test/lsp4-digital-asset.mock';
+import { LSP4_KEYS } from '../helpers/config.helper';
 
 import { ProxyDeployer } from './proxy-deployer';
 
@@ -269,6 +270,50 @@ describe('LSP8IdentifiableDigitalAsset', () => {
 
       expect(ethers.utils.toUtf8String(retrievedName)).toEqual(name);
       expect(ethers.utils.toUtf8String(retrievedSymbol)).toEqual(symbol);
+    });
+  });
+  describe('deploy lsp8 with specified creators', () => {
+    let digitalAsset: LSP8Mintable;
+    const controllerAddress = '0xaDa25A4424b08F5337DacD619D4bCb21536a9B95';
+    const name = 'TOKEN';
+    const symbol = 'TKN';
+    const creators = [
+      '0xFCA72D5763b8cFc686C2285099D5F35a2F094E9f',
+      '0x591c236982b089Ad4B60758C075fA50Ec53CD674',
+    ];
+
+    it('should deploy with specified creators', async () => {
+      const lspFactory = new LSPFactory(provider, signer);
+      const lsp8DigitalAsset = (await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
+        controllerAddress,
+        name,
+        symbol,
+        creators,
+      })) as DeployedLSP8IdentifiableDigitalAsset;
+
+      expect(lsp8DigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
+      expect(Object.keys(lsp8DigitalAsset).length).toEqual(2);
+
+      digitalAsset = LSP8Mintable__factory.connect(
+        lsp8DigitalAsset.LSP8IdentifiableDigitalAsset.address,
+        signer
+      );
+    });
+    it('should have LSP4Creators[] set correctly', async () => {
+      const [creatorArrayLength] = await digitalAsset.getData([LSP4_KEYS.LSP4_CREATORS_ARRAY]);
+      expect(creatorArrayLength).toEqual(
+        '0x0000000000000000000000000000000000000000000000000000000000000002'
+      );
+
+      const [creator1, creator2] = await digitalAsset.getData([
+        LSP4_KEYS.LSP4_CREATORS_ARRAY.slice(0, 34) +
+          ethers.utils.hexZeroPad(ethers.utils.hexlify([0]), 16).substring(2),
+        LSP4_KEYS.LSP4_CREATORS_ARRAY.slice(0, 34) +
+          ethers.utils.hexZeroPad(ethers.utils.hexlify([1]), 16).substring(2),
+      ]);
+
+      expect(ethers.utils.getAddress(creator1)).toEqual(creators[0]);
+      expect(ethers.utils.getAddress(creator2)).toEqual(creators[1]);
     });
   });
 });

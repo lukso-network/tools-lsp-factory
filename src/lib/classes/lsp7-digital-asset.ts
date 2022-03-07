@@ -100,7 +100,6 @@ export class LSP7DigitalAsset {
       this.signer,
       digitalAssetDeploymentOptions,
       baseContractAddress$,
-      lsp4Metadata$,
       contractDeploymentOptions?.byteCode
     );
 
