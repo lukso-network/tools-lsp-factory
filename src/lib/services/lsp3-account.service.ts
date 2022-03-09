@@ -245,8 +245,6 @@ export async function setData(
   controllerAddresses: (string | ControllerOptions)[],
   lsp3Profile?: LSP3ProfileDataForEncoding | string
 ): Promise<DeploymentEventTransaction> {
-  const abiCoder = ethers.utils.defaultAbiCoder;
-
   // TODO: move this to profile upload logic
   let encodedLSP3Profile;
   if (lsp3Profile && typeof lsp3Profile !== 'string') {
@@ -311,7 +309,7 @@ export async function setData(
     universalReceiverDelegateAddress,
     ...signersPermissions,
     SET_DATA_PERMISSION,
-    abiCoder.encode(['uint256'], [signersPermissions.length]),
+    ethers.utils.defaultAbiCoder.encode(['uint256'], [signersPermissions.length]),
     ...signersAddresses,
     universalReceiverDelegateAddress,
   ];

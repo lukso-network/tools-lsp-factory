@@ -99,7 +99,6 @@ export class LSP8IdentifiableDigitalAsset {
       this.signer,
       digitalAssetDeploymentOptions,
       baseContractAddress$,
-      lsp4Metadata$,
       contractDeploymentOptions?.byteCode
     );
 

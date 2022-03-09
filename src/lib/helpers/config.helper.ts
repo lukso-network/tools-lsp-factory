@@ -14,6 +14,8 @@ export const defaultUploadOptions: UploadOptions = {
   ipfsClientOptions: defaultIpfsClientOptions,
 };
 
+export const ERC725_ACCOUNT_INTERRFACE = '0x63cb749b';
+
 export const LSP3_UP_KEYS = {
   UNIVERSAL_RECEIVER_DELEGATE_KEY: keccak256(toUtf8Bytes('LSP1UniversalReceiverDelegate')),
   LSP3_PROFILE: keccak256(toUtf8Bytes('LSP3Profile')),
@@ -21,6 +23,8 @@ export const LSP3_UP_KEYS = {
 
 export const LSP4_KEYS = {
   LSP4_METADATA: keccak256(toUtf8Bytes('LSP4Metadata')),
+  LSP4_CREATORS_ARRAY: keccak256(toUtf8Bytes('LSP4Creators[]')),
+  LSP4_CREATORS_MAP_PREFIX: '0x6de85eaf5d982b4e00000000',
 };
 
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
