@@ -3,7 +3,7 @@ import { TransactionReceipt } from '@ethersproject/providers';
 import axios from 'axios';
 import { BytesLike, Contract, ContractFactory, ethers, Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, from, Observable, of } from 'rxjs';
-import { shareReplay, switchMap } from 'rxjs/operators';
+import { defaultIfEmpty, shareReplay, switchMap } from 'rxjs/operators';
 
 import {
   LSP3UniversalProfile,
@@ -49,14 +49,16 @@ export type LSP3AccountDeploymentEvent = DeploymentEventContract | DeploymentEve
 export function accountDeployment$(
   signer: Signer,
   controllerAddresses: string[],
-  baseContractAddresses$: Observable<BaseContractAddresses>
+  baseContractAddresses$: Observable<BaseContractAddresses>,
+  bytecode?: string
 ) {
   return baseContractAddresses$.pipe(
     switchMap((baseContractAddresses) => {
       return accountDeploymentWithBaseContractAddress$(
         signer,
         controllerAddresses,
-        baseContractAddresses.ERC725Account
+        baseContractAddresses.ERC725Account,
+        bytecode
       );
     }),
     shareReplay()
@@ -66,10 +68,11 @@ export function accountDeployment$(
 export function accountDeploymentWithBaseContractAddress$(
   signer: Signer,
   controllerAddresses: string[],
-  baseContractAddress: string
+  baseContractAddress: string,
+  bytecode?: string
 ): Observable<LSP3AccountDeploymentEvent> {
   const accountDeployment$ = defer(() =>
-    deployLSP3Account(signer, controllerAddresses, baseContractAddress)
+    deployLSP3Account(signer, controllerAddresses, baseContractAddress, bytecode)
   ).pipe(shareReplay());
 
   const accountDeploymentReceipt$ = waitForReceipt<LSP3AccountDeploymentEvent>(
@@ -95,12 +98,21 @@ export function accountDeploymentWithBaseContractAddress$(
 async function deployLSP3Account(
   signer: Signer,
   ownerAddresses: string[],
-  baseContractAddress: string
+  baseContractAddress: string,
+  byteCode?: string
 ): Promise<LSP3AccountDeploymentEvent> {
   const deploymentFunction = async () => {
-    return baseContractAddress
-      ? new UniversalProfileInit__factory(signer).attach(baseContractAddress)
-      : await new UniversalProfile__factory(signer).deploy(ownerAddresses[0]);
+    if (baseContractAddress) {
+      return new UniversalProfileInit__factory(signer).attach(baseContractAddress);
+    }
+
+    if (byteCode) {
+      return new ContractFactory(UniversalProfile__factory.abi, byteCode, signer).deploy(
+        ownerAddresses[0]
+      );
+    }
+
+    return await new UniversalProfile__factory(signer).deploy(ownerAddresses[0]);
   };
 
   return baseContractAddress
@@ -152,9 +164,19 @@ export function setDataTransaction$(
   account$: Observable<LSP3AccountDeploymentEvent>,
   universalReceiver$: Observable<UniversalReveiverDeploymentEvent>,
   controllerAddresses: (string | ControllerOptions)[],
-  lsp3ProfileData$: Observable<LSP3ProfileDataForEncoding | string | null>
+  lsp3ProfileData$: Observable<LSP3ProfileDataForEncoding | string | null>,
+  defaultUniversalReceiverDelegateAddress?: string
 ) {
-  const setDataTransaction$ = forkJoin([account$, universalReceiver$, lsp3ProfileData$]).pipe(
+  const universalReceiverAddress$ = universalReceiver$.pipe(
+    defaultIfEmpty({ receipt: null }),
+    shareReplay()
+  );
+
+  const setDataTransaction$ = forkJoin([
+    account$,
+    universalReceiverAddress$,
+    lsp3ProfileData$,
+  ]).pipe(
     switchMap(
       ([
         { receipt: lsp3AccountReceipt },
@@ -164,7 +186,9 @@ export function setDataTransaction$(
         return setData(
           signer,
           lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to,
-          universalReceiverDelegateReceipt.contractAddress || universalReceiverDelegateReceipt.to,
+          universalReceiverDelegateReceipt?.contractAddress ||
+            universalReceiverDelegateReceipt?.to ||
+            defaultUniversalReceiverDelegateAddress,
           controllerAddresses,
           lsp3ProfileData
         );

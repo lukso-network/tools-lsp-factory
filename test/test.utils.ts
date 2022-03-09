@@ -43,7 +43,7 @@ export async function testUPDeployment(
 
   expect(Object.keys(deployedContracts).length).toEqual(expectedContractNumber);
 
-  const contractNames = ['ERC725Account', 'KeyManager', 'UniversalReceiverDelegate'];
+  const contractNames = ['ERC725Account', 'KeyManager'];
 
   for (const contractName of contractNames) {
     if (
@@ -55,6 +55,15 @@ export async function testUPDeployment(
     } else {
       expect(deployedContracts[`${contractName}BaseContract`]).toBeDefined();
     }
+  }
+
+  if (
+    contractDeploymentOptions.UniversalReceiverDelegate?.deployProxy &&
+    !contractDeploymentOptions.UniversalReceiverDelegate.libAddress
+  ) {
+    expect(deployedContracts[`UniversalReceiverDelegateBaseContract`]).toBeDefined();
+  } else {
+    expect(deployedContracts[`UniversalReceiverDelegateBaseContract`]).toBeUndefined();
   }
 
   return deployedContracts as DeployedContracts;

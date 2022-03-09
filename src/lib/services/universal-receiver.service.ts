@@ -1,5 +1,5 @@
-import { Signer } from 'ethers';
-import { concat, EMPTY, from, Observable } from 'rxjs';
+import { ContractFactory, providers, Signer } from 'ethers';
+import { concat, EMPTY, forkJoin, from, Observable } from 'rxjs';
 import { shareReplay, switchMap } from 'rxjs/operators';
 
 import {
@@ -8,9 +8,11 @@ import {
   LSP1UniversalReceiverDelegateUP__factory,
   LSP1UniversalReceiverDelegateUPInit__factory,
 } from '../..';
+import { NULL_ADDRESS } from '../helpers/config.helper';
 import {
   deployContract,
   deployProxyContract,
+  getDeployedByteCode,
   initialize,
   waitForReceipt,
 } from '../helpers/deployment.helper';
@@ -22,14 +24,31 @@ export type UniversalReveiverDeploymentEvent =
 
 export function universalReceiverDelegateDeployment$(
   signer: Signer,
-  baseContractDeployment$: Observable<BaseContractAddresses>
+  provider: providers.Web3Provider | providers.JsonRpcProvider,
+  baseContractAddresses$: Observable<BaseContractAddresses>,
+  providedUniversalReceiverAddress?: string,
+  defaultUniversalReceiverAddress?: string,
+  byteCode?: string
 ) {
-  return baseContractDeployment$.pipe(
-    switchMap((baseContractAddresses) => {
-      return universalReceiverDelegateDeploymentWithBaseContractAddress$(
-        signer,
-        baseContractAddresses.UniversalReceiverDelegate
-      );
+  const defaultURDBytecode$ = from(
+    getDeployedByteCode(defaultUniversalReceiverAddress ?? NULL_ADDRESS, provider)
+  );
+
+  return forkJoin([defaultURDBytecode$, baseContractAddresses$]).pipe(
+    switchMap(([defaultURDBytecode, baseContractAddresses]) => {
+      if (baseContractAddresses.UniversalReceiverDelegate || byteCode) {
+        return universalReceiverDelegateDeploymentWithBaseContractAddress$(
+          signer,
+          baseContractAddresses.UniversalReceiverDelegate,
+          byteCode
+        );
+      }
+
+      if (providedUniversalReceiverAddress || defaultURDBytecode !== '0x') {
+        return EMPTY;
+      }
+
+      return universalReceiverDelegateDeploymentWithBaseContractAddress$(signer);
     }),
     shareReplay()
   );
@@ -37,10 +56,11 @@ export function universalReceiverDelegateDeployment$(
 
 export function universalReceiverDelegateDeploymentWithBaseContractAddress$(
   signer: Signer,
-  baseContractAddress: string
+  baseContractAddress?: string,
+  byteCode?: string
 ): Observable<UniversalReveiverDeploymentEvent> {
   const universalReceiverDelegateDeployment$ = from(
-    deployUniversalReceiverDelegate(signer, baseContractAddress)
+    deployUniversalReceiverDelegate(signer, baseContractAddress, byteCode)
   ).pipe(shareReplay());
 
   const universalReceiverDelegateStoreReceipt$ = waitForReceipt<UniversalReveiverDeploymentEvent>(
@@ -75,13 +95,27 @@ export function universalReceiverDelegateDeploymentWithBaseContractAddress$(
  * @return {*}  Promise<DeploymentEventStandardContract | DeploymentEventProxyContract>
  * @memberof LSP3UniversalProfile
  */
-export async function deployUniversalReceiverDelegate(signer: Signer, baseContractAddress: string) {
+export async function deployUniversalReceiverDelegate(
+  signer: Signer,
+  baseContractAddress: string,
+  bytecode?: string
+) {
   const deploymentFunction = async () => {
-    return baseContractAddress
-      ? new LSP1UniversalReceiverDelegateUPInit__factory(signer).attach(baseContractAddress)
-      : await new LSP1UniversalReceiverDelegateUP__factory(signer).deploy({
-          gasLimit: 3_000_000,
-        });
+    if (baseContractAddress) {
+      return new LSP1UniversalReceiverDelegateUPInit__factory(signer).attach(baseContractAddress);
+    }
+
+    if (bytecode) {
+      return new ContractFactory(
+        LSP1UniversalReceiverDelegateUP__factory.abi,
+        bytecode,
+        signer
+      ).deploy();
+    }
+
+    return await new LSP1UniversalReceiverDelegateUP__factory(signer).deploy({
+      gasLimit: 3_000_000,
+    });
   };
 
   return baseContractAddress

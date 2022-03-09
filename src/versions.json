@@ -13,7 +13,7 @@
         "baseContract": true
       },
       "UniversalReceiverDelegate": {
-        "versions": { "0.0.1": "0x6533158b042775e2FdFeF3cA1a782EFDbB8EB9b1" },
+        "versions": { "0.0.1": "0xEE495c349eB1ae864bb0e899A71aBD0b660eE4f0" },
         "baseContract": false
       },
       "LSP7Mintable": {

@@ -83,7 +83,7 @@ export class LSP3UniversalProfile {
       contractVersions[this.options.chainId]?.contracts?.ERC725Account?.versions[
         contractDeploymentOptions?.ERC725Account?.version ?? defaultContractVersion
       ];
-    const defaultUniversalReceiverBaseContractAddress =
+    const defaultUniversalReceiverAddress =
       contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress ??
       contractVersions[this.options.chainId]?.contracts?.UniversalReceiverDelegate?.versions[
         contractDeploymentOptions?.UniversalReceiverDelegate?.version ?? defaultContractVersion
@@ -96,9 +96,10 @@ export class LSP3UniversalProfile {
 
     const baseContractsToDeploy$ = shouldDeployUniversalProfileBaseContracts$(
       defaultUPBaseContractAddress,
-      defaultUniversalReceiverBaseContractAddress,
+      defaultUniversalReceiverAddress,
       defaultKeyManagerBaseContractAddress,
       this.options.provider,
+      this.options.chainId,
       contractDeploymentOptions
     );
 
@@ -107,12 +108,17 @@ export class LSP3UniversalProfile {
       baseContractsToDeploy$
     );
 
+    const deployUniversalReceiverProxy =
+      typeof contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy === 'undefined'
+        ? contractVersions[this.options.chainId]?.contracts?.UniversalReceiverDelegate?.baseContract
+        : contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy;
+
     const baseContractAddresses$ = universalProfileBaseContractAddresses$(
       baseContractDeployment$,
       defaultUPBaseContractAddress,
-      defaultUniversalReceiverBaseContractAddress,
       defaultKeyManagerBaseContractAddress,
-      contractDeploymentOptions
+      contractDeploymentOptions,
+      deployUniversalReceiverProxy
     );
 
     const controllerAddresses = profileDeploymentOptions.controllerAddresses.map((controller) => {
@@ -120,15 +126,31 @@ export class LSP3UniversalProfile {
     });
 
     // 1 > deploys ERC725Account
-    const account$ = accountDeployment$(this.signer, controllerAddresses, baseContractAddresses$);
+    const account$ = accountDeployment$(
+      this.signer,
+      controllerAddresses,
+      baseContractAddresses$,
+      contractDeploymentOptions?.ERC725Account?.byteCode
+    );
 
     // 2 > deploys KeyManager
-    const keyManager$ = keyManagerDeployment$(this.signer, account$, baseContractAddresses$);
+    const keyManager$ = keyManagerDeployment$(
+      this.signer,
+      account$,
+      baseContractAddresses$,
+      contractDeploymentOptions?.KeyManager?.byteCode
+    );
 
     // 3 > deploys UniversalReceiverDelegate
     const universalReceiver$ = universalReceiverDelegateDeployment$(
       this.signer,
-      baseContractAddresses$
+      this.options.provider,
+      baseContractAddresses$,
+      contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress,
+      contractVersions[this.options.chainId]?.contracts?.UniversalReceiverDelegate?.versions[
+        contractDeploymentOptions?.UniversalReceiverDelegate?.version ?? defaultContractVersion
+      ],
+      contractDeploymentOptions?.UniversalReceiverDelegate?.byteCode
     );
 
     // 4 > set permissions, profile and universal
@@ -137,7 +159,8 @@ export class LSP3UniversalProfile {
       account$,
       universalReceiver$,
       profileDeploymentOptions.controllerAddresses,
-      lsp3Profile$
+      lsp3Profile$,
+      defaultUniversalReceiverAddress
     );
 
     // 5 > transfersOwnership to KeyManager

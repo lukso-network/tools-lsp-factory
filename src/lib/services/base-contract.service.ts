@@ -14,6 +14,7 @@ import {
   ContractNames as UniversalProfileContractNames,
   UniversalProfileInit__factory,
 } from '../..';
+import contractVersions from '../../versions.json';
 import { GAS_PRICE, NULL_ADDRESS } from '../helpers/config.helper';
 import {
   deployBaseContract,
@@ -120,7 +121,8 @@ function deployBaseContract$(
 
 export function shouldDeployBaseContract$(
   provider: providers.Web3Provider | providers.JsonRpcProvider,
-  deployProxy: boolean,
+  defaultDeployProxy?: boolean,
+  providedDeployProxy?: boolean,
   defaultBaseContractAddress?: string,
   providedBaseContractAddress?: string,
   providedByteCode?: string
@@ -129,13 +131,18 @@ export function shouldDeployBaseContract$(
     getDeployedByteCode(defaultBaseContractAddress ?? NULL_ADDRESS, provider)
   );
 
+  const deployProxy =
+    typeof providedDeployProxy !== 'undefined' ? providedDeployProxy : defaultDeployProxy;
+
   return defaultBaseContractBytecode$.pipe(
     switchMap((defaultBaseContractBytecode) => {
       return of(
-        !providedBaseContractAddress &&
-          !providedByteCode &&
-          deployProxy &&
-          defaultBaseContractBytecode === '0x'
+        (function () {
+          if (deployProxy === false || providedBaseContractAddress || providedByteCode)
+            return false;
+
+          return defaultBaseContractBytecode === '0x';
+        })()
       );
     }),
     shareReplay()
@@ -147,31 +154,30 @@ export function shouldDeployUniversalProfileBaseContracts$(
   defaultUniversalReceiverBaseContractAddress: string,
   defaultKeyManagerBaseContractAddress: string,
   provider: providers.Web3Provider | providers.JsonRpcProvider,
+  chainId: number,
   contractDeploymentOptions?: ProfileContractDeploymentOptions
 ) {
-  const deployERC725AccountProxy = contractDeploymentOptions?.ERC725Account?.deployProxy !== false;
-  const deployUniversalReceiverProxy =
-    contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy !== false;
-  const deployKeyManagerProxy = contractDeploymentOptions?.KeyManager?.deployProxy !== false;
-
   return forkJoin([
     shouldDeployBaseContract$(
       provider,
-      deployERC725AccountProxy,
+      contractVersions[chainId]?.contracts?.ERC725Account?.baseContract,
+      contractDeploymentOptions?.ERC725Account?.deployProxy,
       defaultUPBaseContractAddress,
       contractDeploymentOptions?.ERC725Account?.libAddress,
       contractDeploymentOptions?.ERC725Account?.byteCode
     ),
     shouldDeployBaseContract$(
       provider,
-      deployUniversalReceiverProxy,
+      contractVersions[chainId]?.contracts?.UniversalReceiverDelegate?.baseContract,
+      contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy,
       defaultUniversalReceiverBaseContractAddress,
       contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress,
       contractDeploymentOptions?.UniversalReceiverDelegate?.byteCode
     ),
     shouldDeployBaseContract$(
       provider,
-      deployKeyManagerProxy,
+      contractVersions[chainId]?.contracts?.KeyManager?.baseContract,
+      contractDeploymentOptions?.KeyManager?.deployProxy,
       defaultKeyManagerBaseContractAddress,
       contractDeploymentOptions?.KeyManager?.libAddress,
       contractDeploymentOptions?.KeyManager?.byteCode
@@ -182,9 +188,9 @@ export function shouldDeployUniversalProfileBaseContracts$(
 export function universalProfileBaseContractAddresses$(
   baseContractDeployment$: Observable<DeploymentEventContract>,
   defaultUPBaseContractAddress: string,
-  defaultUniversalReceiverBaseContractAddress: string,
   defaultKeyManagerBaseContractAddress: string,
-  contractDeploymentOptions?: ProfileContractDeploymentOptions
+  contractDeploymentOptions?: ProfileContractDeploymentOptions,
+  deployUniversalReceiverProxy?: boolean
 ) {
   const providedUPBaseContractAddress = contractDeploymentOptions?.ERC725Account?.libAddress;
   const providedUniversalReceiverContractAddress =
@@ -199,10 +205,8 @@ export function universalProfileBaseContractAddresses$(
         ? defaultUPBaseContractAddress
         : null,
     [UniversalProfileContractNames.UNIVERSAL_RECEIVER]:
-      providedUniversalReceiverContractAddress ??
-      (contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy !== false &&
-        !contractDeploymentOptions?.UniversalReceiverDelegate?.byteCode)
-        ? defaultUniversalReceiverBaseContractAddress
+      deployUniversalReceiverProxy && providedUniversalReceiverContractAddress
+        ? providedUniversalReceiverContractAddress
         : null,
     [UniversalProfileContractNames.KEY_MANAGER]:
       providedKeyManagerContractAddress ??
@@ -226,7 +230,7 @@ export function universalProfileBaseContractAddresses$(
 export function waitForBaseContractAddress$(
   baseContractDeployment$: Observable<DeploymentEventContract>,
   defaultBaseContractAddress: string,
-  deployProxy: boolean,
+  deployProxy?: boolean,
   providedByteCode?: string
 ) {
   return baseContractDeployment$.pipe(
@@ -238,7 +242,7 @@ export function waitForBaseContractAddress$(
     }),
     defaultIfEmpty(
       (function () {
-        if (!deployProxy || providedByteCode) return null;
+        if (deployProxy === false || providedByteCode) return null;
         return defaultBaseContractAddress;
       })()
     )
