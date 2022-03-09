@@ -31,6 +31,8 @@ Deploys a mintable [LSP7 Digital Asset](../../../standards/nft-2.0/LSP7-Digital-
     - `libAddress?` - `string`: The address of a Base Contract to be used in deployment as implementation behind a proxy contract (eg: [EIP1167](https://eips.ethereum.org/EIPS/eip-1167).
     - `deployReactive?` - `boolean`: Whether to return an [RxJS Observable](https://rxjs.dev/guide/observable) of deployment events. Defaults to `false`.
     - `deployProxy?` - `boolean`: Whether the contract should be deployed using a proxy contract implementation (eg: [EIP1167](https://eips.ethereum.org/EIPS/eip-1167)). Defaults to true.
+    - `uploadOptions?` - `Object`: Specify how the metadata should be uploaded.
+       - `ipfsClientOptions?` - `Object`: IPFS Client Options as defined by the (ipfs-http-client library)[https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions] used internally.
 
 Read more about `contractDeploymentOptions` specification [here](../deployment/contract-deployment-options.md)
 

@@ -29,8 +29,6 @@ If used on an `LSPFactory` instance the `uploadOptions` passed to LSPFactory on 
    - `images?` - `File | ImageBuffer | ImageMetadata[]`
    - `assets?` - `File | AssetBuffer | AssetMetadata[]`
 2. `uploadOptions?` - `Object`: Specify how the metadata should be uploaded.
-   - `url?` - `string`: Upload URL to be used for simple HTTP uploads.
-   - `port?` - `string`: Port to be used for simple HTTP uploads.
    - `ipfsClientOptions?` - `Object`: IPFS Client Options as defined by the (ipfs-http-client library)[https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions] used internally.
 
 #### Returns
