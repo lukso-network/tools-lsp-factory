@@ -43,6 +43,8 @@ Then, it will:
    - `ERC725Account?` - `Object`: Specify deployment options for ERC725Account contract. See [Contract Deployment Options specification](../deployment/contract-deployment-options#custom-universal-profile-deployment).
    - `UniversalReceiverDelegate?` - `Object`: Specify deployment options for UniversalReceiverDelegate contract. See [Contract Deployment Options specification](../deployment/contract-deployment-options#custom-universal-profile-deployment).
    - `KeyManager?` - `Object`: Specify deployment options for KeyManager contract. See [Contract Deployment Options specification](../deployment/contract-deployment-options#custom-universal-profile-deployment).
+    - `uploadOptions?` - `Object`: Specify how the metadata should be uploaded.
+      - `ipfsClientOptions?` - `Object`: IPFS Client Options as defined by the (ipfs-http-client library)[https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions] used internally.
 
 #### Returns
 
