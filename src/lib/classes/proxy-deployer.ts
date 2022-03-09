@@ -12,6 +12,7 @@ import {
   UniversalProfileInit,
   UniversalProfileInit__factory,
 } from '../../';
+import { NULL_ADDRESS } from '../helpers/config.helper';
 import { getProxyByteCode } from '../helpers/deployment.helper';
 
 export class ProxyDeployer {
@@ -43,11 +44,15 @@ export class ProxyDeployer {
   }
 
   async deployLSP7BaseContract() {
-    return await new LSP7MintableInit__factory(this.signer).deploy();
+    const lsp7Init = await new LSP7MintableInit__factory(this.signer).deploy();
+    await lsp7Init['initialize(string,string,address,bool)']('', '', NULL_ADDRESS, false);
+    return lsp7Init;
   }
 
   async deployLSP8BaseContract() {
-    return await new LSP8MintableInit__factory(this.signer).deploy();
+    const lsp8Init = await new LSP8MintableInit__factory(this.signer).deploy();
+    await lsp8Init['initialize(string,string,address)']('', '', NULL_ADDRESS);
+    return lsp8Init;
   }
 
   async deployProxyContract<T extends Contract>(contract: T) {
