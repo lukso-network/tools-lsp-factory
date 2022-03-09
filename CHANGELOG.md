@@ -2,6 +2,47 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/lukso-network/tools-lsp-factory/compare/v1.0.2-alpha.8...v2.0.0) (2022-03-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove deployBaseContract method
+* split LSP7/LSP8 DigitalAsset classes
+* **lsp3:** rename UP controllerAccounts controllerAddresses
+* Remove deployReactive methods
+
+### Features
+
+* upload and set lsp4 metadata from deploy functions ([6a1ab63](https://github.com/lukso-network/tools-lsp-factory/commit/6a1ab639b7069b4a647cf033396e9c9d88f3958d))
+* add LSP4 metadata class and upload ([ab427a2](https://github.com/lukso-network/tools-lsp-factory/commit/ab427a2b81b0717858403f71a3da02675bc9abc9))
+* add custom uploadOptions param ([4819199](https://github.com/lukso-network/tools-lsp-factory/commit/48191991ec14897d668d5bd05aee43f57936caf4))
+* deploy universal profile contracts with custom bytecode ([435f714](https://github.com/lukso-network/tools-lsp-factory/commit/435f71467a4ff3ddb368aa26458bc507c8ec9b1d))
+* deploy digital asset contracts with custom bytecode ([0e00bcc](https://github.com/lukso-network/tools-lsp-factory/commit/0e00bcc61772e331e57bc20ae37d5b2482986a55))
+* deployProxy flag functionality to UP deployment ([89e4102](https://github.com/lukso-network/tools-lsp-factory/commit/89e4102bc11131a12c3935de38a4d29479216670))
+* add multiple controller addresses on deployment ([fff32f2](https://github.com/lukso-network/tools-lsp-factory/commit/fff32f2545f6205f46cb4ea15ba5b5d89f4dc6d6))
+* init base contracts on deploy ([#24](https://github.com/lukso-network/tools-lsp-factory/issues/24)) ([63821da](https://github.com/lukso-network/tools-lsp-factory/commit/63821da95684c68555075004754ffdde1a3da4b4))
+* upload image to IPFS from buffer ([f17b911](https://github.com/lukso-network/tools-lsp-factory/commit/f17b911820e277cade73089968fb9566e00d832f))
+
+### Bug Fixes
+
+* add missing types files in build ([#25](https://github.com/lukso-network/tools-lsp-factory/issues/25)) ([01eb05d](https://github.com/lukso-network/tools-lsp-factory/commit/01eb05d724ea48729646cf165efa01812cc77016)), closes [/github.com/dethcrypto/TypeChain/issues/430#issuecomment-964314162](https://github.com/lukso-network//github.com/dethcrypto/TypeChain/issues/430/issues/issuecomment-964314162)
+* add zero-left padding for `AddressPermissions[]` length ([#55](https://github.com/lukso-network/tools-lsp-factory/issues/55)) ([c6a65bd](https://github.com/lukso-network/tools-lsp-factory/commit/c6a65bd87bef92cb81b46071f5b657b6ecdc76cf))
+* deploy mintable digital assets ([6b95f07](https://github.com/lukso-network/tools-lsp-factory/commit/6b95f0780290501ad5a4cc788c1e614352ead23a))
+* linter error ([455e9a4](https://github.com/lukso-network/tools-lsp-factory/commit/455e9a43c491b8ae691681b1e0e3851fa9369481))
+* npm publish add .json file ([#15](https://github.com/lukso-network/tools-lsp-factory/issues/15)) ([ab52949](https://github.com/lukso-network/tools-lsp-factory/commit/ab529499b231a9fcf6d44edde6c592192832646d))
+* set UniversalReceiverDelegate key to setData ([#35](https://github.com/lukso-network/tools-lsp-factory/issues/35)) ([4a25e1c](https://github.com/lukso-network/tools-lsp-factory/commit/4a25e1c73ca85d99d289302ac91cda5d4e5100d0))
+* setData tx ([#17](https://github.com/lukso-network/tools-lsp-factory/issues/17)) ([b5b7cd7](https://github.com/lukso-network/tools-lsp-factory/commit/b5b7cd79d11212bad61b1f8bcda63dec24ea4294))
+* use new variable name ([c2fbb84](https://github.com/lukso-network/tools-lsp-factory/commit/c2fbb8416b9d543e3843cfad89cffc5fd36d3dd9))
+
+
+* Add deployProxy flag functionality to LSP7 deployment ([b930747](https://github.com/lukso-network/tools-lsp-factory/commit/b930747be2e4de7dc79e8c3b044be971e9956a9e))
+*  add deployProxy flag functionality to LSP8 deployment ([8402c16](https://github.com/lukso-network/tools-lsp-factory/commit/8402c16900897549fff521085ce966f9f6bcc93f))
+* **lsp3:** rename UP controllerAccounts controllerAddresses ([a2c83b5](https://github.com/lukso-network/tools-lsp-factory/commit/a2c83b53f0b0ddbff3250c6f3cfb413e9b36e97a))
+* remove deployBaseContract method ([92f0501](https://github.com/lukso-network/tools-lsp-factory/commit/92f05010bae81ee12e4d1627f721837fdcb7c21f))
+* split LSP7/LSP8 DigitalAsset classes ([4049478](https://github.com/lukso-network/tools-lsp-factory/commit/404947811dd6e761eb3e0e51572395e1a975ba90))
+* split LSP7/LSP8 DigitalAsset classes ([5c7e9c0](https://github.com/lukso-network/tools-lsp-factory/commit/5c7e9c01416ffeb7fb56055a47f896a037b4931b))
+
 ### [1.1.5](https://github.com/lukso-network/tools-lsp-factory/compare/v1.0.2-alpha.8...v1.1.5) (2021-11-23)
 
 ### Features
