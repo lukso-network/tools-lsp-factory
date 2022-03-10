@@ -7,15 +7,17 @@ title: Reactive Deployment
 
 `lsp-factory.js` uses [RxJS](https://github.com/ReactiveX/rxjs) to deploy contracts. This can be leveraged to achieve reactive deployment of Universal Profiles and Digital Assets.
 
+When deploying a Universal Profile or Digital Asset pass the `deployReactive` flag inside the [ContractDeploymentOptions](../deployment/contract-deployment-options.md) object to receive an RxJS Observable which will emit events as your contract is deployed.
+
 ### Universal Profiles
 
-For Universal Profiles use the `deployReactive()` function and use `subscribe()` to listen for deployment events.
+Use the `deployReactive` flag and use `subscribe()` to listen for deployment events.
 
 ```typescript
 let deploymentEvents = [];
 
 lspFactory.LSP3UniversalProfile
-  .deployReactive(// ... omitted for brevity)
+  .deploy({...}, { deployReactive: true })
   .subscribe({
     next: (deploymentEvent) => {
       deploymentEvents.push(deploymentEvent);
@@ -55,14 +57,14 @@ The function defined in `complete` will be called once after deployment is finis
 
 ### Digtial Assets
 
-For reactive deployment of LSP7 and LSP8 Digital Assets use the `LSP7DigitalAsset.deployReactive` or `LSP8IdentifiableDigitalAsset.deployReactive` functions respectively
+For reactive deployment of LSP7 and LSP8 Digital Assets pass the `deployReactive` flag to `LSP7DigitalAsset.deploy` or `LSP8IdentifiableDigitalAsset.deploy` functions respectively
 
 ```typescript title="LSP7 Deployment"
 // Reactive deplyoyment of LSP7
 let deploymentEvents = [];
 
 lspFactory.LSP7DigitalAsset
-  .deployReactive(// ... omitted for brevity)
+  .deploy({...}, { deployReactive: true })
   .subscribe({
     next: (deploymentEvent) => {
       deploymentEvents.push(deploymentEvent);
@@ -79,7 +81,7 @@ or
 let deploymentEvents = [];
 
 lspFactory.LSP8IdentifiableDigitalAsset
-  .deployReactive(// ... omitted for brevity)
+  .deploy({...}, { deployReactive: true })
   .subscribe({
     next: (deploymentEvent) => {
       deploymentEvents.push(deploymentEvent);
