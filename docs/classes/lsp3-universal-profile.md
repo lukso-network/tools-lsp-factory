@@ -10,21 +10,23 @@ title: LSP3UniversalProfile
 ```javascript
 lspFactory.LSP3UniversalProfile.deploy(
   profileDeploymentOptions,
-  contractDeploymentOptions?);
+  contractDeploymentOptions?
+);
 ```
 
 Deploys and **configures** a [Universal Profile](../../../standards/universal-profile/introduction) to the blockchain. It will deploy the following contracts:
 
 - [LSP0 ERC725 Account](../../../standards/universal-profile/lsp0-erc725account)
-- [LSP1 Universal Receiver Delegate](../../../standards/universal-profile/lsp1-universal-receiver-delegate)
 - [LSP6 Key Manager](../../../standards/universal-profile/lsp6-key-manager)
 
 Then, it will:
 
-- upload to IPFS and set the [LSP3 Universal Profile](../../../standards/universal-profile/lsp3-universal-profile-metadata) metadata.
+- upload metadata to IPFS and set the [LSP3 Universal Profile](../../../standards/universal-profile/lsp3-universal-profile-metadata) metadata.
 - attach the Universal Receiver Delegate to the LSP0 ERC725 Account.
 - set the Key Manager as the owner of the LSP0 ERC725 Account.
 - give all [permissions](../../../standards/universal-profile/lsp6-key-manager#-types-of-permissions) to the `controllingAccounts`.
+
+By default a [LSP1 Universal Receiver Delegate](../../../standards/universal-profile/lsp1-universal-receiver-delegate) contract will not be deployed, instead the `Universal Receiver Delegate` contract specified in the [versions file](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json) will be attached to the Universal Profile. A custom Universal Receiver Delegate can be optionally deployed by passing an address or custom bytecode inside the [ContractDeploymentOptions object](../deployment/contract-deployment-options).
 
 #### Parameters
 
@@ -43,8 +45,8 @@ Then, it will:
    - `ERC725Account?` - `Object`: Specify deployment options for ERC725Account contract. See [Contract Deployment Options specification](../deployment/contract-deployment-options#custom-universal-profile-deployment).
    - `UniversalReceiverDelegate?` - `Object`: Specify deployment options for UniversalReceiverDelegate contract. See [Contract Deployment Options specification](../deployment/contract-deployment-options#custom-universal-profile-deployment).
    - `KeyManager?` - `Object`: Specify deployment options for KeyManager contract. See [Contract Deployment Options specification](../deployment/contract-deployment-options#custom-universal-profile-deployment).
-    - `uploadOptions?` - `Object`: Specify how the metadata should be uploaded.
-      - `ipfsClientOptions?` - `Object`: IPFS Client Options as defined by the (ipfs-http-client library)[https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions] used internally.
+   - `uploadOptions?` - `Object`: Specify how the metadata should be uploaded.
+     - `ipfsClientOptions?` - `Object`: IPFS Client Options as defined by the [ipfs-http-client library](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) used internally.
 
 #### Returns
 

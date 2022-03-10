@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1.2
-title: LSP4
+title: LSP4DigitalAssetMetadata
 ---
 
 # LSP4DigitalAssetMetadata
@@ -11,14 +11,9 @@ title: LSP4
 LSP4DigitalAssetMetadata.uploadMetadata(lsp4Metadata, uploadOptions?);
 ```
 
-Uploads the [LSP4 Digital Asset Metadata](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-4-DigitalAsset-Metadata.md) to the desired endpoint. This can be an `https` URL either pointing to
-a public, centralized storage endpoint or an IPFS Node / Cluster.
+Upload and processes passed images and assets and uploads the [LSP4 Digital Asset Metadata](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-4-DigitalAsset-Metadata.md) to IPFS.
 
-Will upload and process passed images.
-
-Available as a static or non-static function callable on an instance of `LSPFactory`.
-
-If used on an `LSPFactory` instance the `uploadOptions` passed to LSPFactory on instantiation will used if none are passed as second parameter of the `uploadMetadata` function.
+Available as a static or non-static function callable on an instance of `LSPFactory`. If used on an `LSPFactory` instance the `uploadOptions` passed to LSPFactory on instantiation will used if `uploadOptions` are not specified in the function call.
 
 #### Parameters
 
@@ -29,7 +24,7 @@ If used on an `LSPFactory` instance the `uploadOptions` passed to LSPFactory on 
    - `images?` - `File | ImageBuffer | ImageMetadata[]`
    - `assets?` - `File | AssetBuffer | AssetMetadata[]`
 2. `uploadOptions?` - `Object`: Specify how the metadata should be uploaded.
-   - `ipfsClientOptions?` - `Object`: IPFS Client Options as defined by the (ipfs-http-client library)[https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions] used internally.
+   - `ipfsClientOptions?` - `Object`: IPFS Client Options as defined by the [ipfs-http-client library](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) used internally.
 
 #### Returns
 
