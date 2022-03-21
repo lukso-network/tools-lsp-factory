@@ -1,5 +1,5 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat } from 'rxjs';
+import { concat, Observable } from 'rxjs';
 import { concatAll } from 'rxjs/operators';
 
 import contractVersions from '../../versions.json';
@@ -8,12 +8,18 @@ import { defaultUploadOptions } from '../helpers/config.helper';
 import { waitForContractDeployment$ } from '../helpers/deployment.helper';
 import { ipfsUpload, prepareMetadataImage } from '../helpers/uploader.helper';
 import {
+  DeploymentEventContract,
+  DeploymentEventTransaction,
   LSPFactoryOptions,
   ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
 } from '../interfaces';
 import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
-import { ContractDeploymentOptions, DeployedContracts } from '../interfaces/profile-deployment';
+import {
+  ContractDeploymentOptionsNonReactive,
+  ContractDeploymentOptionsReactive,
+  DeployedContracts,
+} from '../interfaces/profile-deployment';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 import {
   shouldDeployUniversalProfileBaseContracts$,
@@ -30,6 +36,12 @@ import {
 } from './../services/lsp3-account.service';
 import { universalReceiverDelegateDeployment$ } from './../services/universal-receiver.service';
 
+type ObservableOrPromise<
+  T extends ContractDeploymentOptionsReactive | ContractDeploymentOptionsNonReactive
+> = T extends ContractDeploymentOptionsReactive
+  ? Observable<DeploymentEventContract | DeploymentEventTransaction>
+  : Promise<DeployedContracts>;
+
 /**
  * Class responsible for deploying UniversalProfiles and uploading LSP3 metadata to IPFS
  *
@@ -37,7 +49,6 @@ import { universalReceiverDelegateDeployment$ } from './../services/universal-re
  * @property {NonceManager} signer
  * @memberof LSPFactory
  */
-
 export class LSP3UniversalProfile {
   options: LSPFactoryOptions;
   signer: NonceManager;
@@ -65,10 +76,14 @@ export class LSP3UniversalProfile {
    *};
    * ```
    */
-  deploy(
+  deploy<
+    T extends
+      | ContractDeploymentOptionsReactive
+      | ContractDeploymentOptionsNonReactive = ContractDeploymentOptionsNonReactive
+  >(
     profileDeploymentOptions: ProfileDeploymentOptions,
-    contractDeploymentOptions?: ContractDeploymentOptions
-  ) {
+    contractDeploymentOptions?: T
+  ): ObservableOrPromise<T> {
     // -1 > Run IPFS upload process in parallel with contract deployment
     const lsp3Profile$ = lsp3ProfileUpload$(
       profileDeploymentOptions.lsp3Profile,
@@ -175,9 +190,9 @@ export class LSP3UniversalProfile {
       transferOwnership$,
     ]).pipe(concatAll());
 
-    if (contractDeploymentOptions?.deployReactive) return deployment$;
+    if (contractDeploymentOptions?.deployReactive) return deployment$ as ObservableOrPromise<T>;
 
-    return waitForContractDeployment$(deployment$) as Promise<DeployedContracts>;
+    return waitForContractDeployment$(deployment$) as ObservableOrPromise<T>;
   }
 
   /**

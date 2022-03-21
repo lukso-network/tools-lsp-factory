@@ -1,12 +1,17 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, concatAll, EMPTY, shareReplay, switchMap } from 'rxjs';
+import { concat, concatAll, EMPTY, Observable, shareReplay, switchMap } from 'rxjs';
 
 import versions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { waitForContractDeployment$ } from '../helpers/deployment.helper';
-import { LSPFactoryOptions } from '../interfaces';
 import {
-  ContractDeploymentOptions,
+  DeploymentEventContract,
+  DeploymentEventTransaction,
+  LSPFactoryOptions,
+} from '../interfaces';
+import {
+  ContractDeploymentOptionsNonReactive,
+  ContractDeploymentOptionsReactive,
   ContractNames,
   DeployedLSP7DigitalAsset,
   LSP7DigitalAssetDeploymentOptions,
@@ -21,6 +26,12 @@ import {
   lsp7DigitalAssetDeployment$,
   setMetadataAndTransferOwnership$,
 } from '../services/digital-asset.service';
+
+type ObservableOrPromise<
+  T extends ContractDeploymentOptionsReactive | ContractDeploymentOptionsNonReactive
+> = T extends ContractDeploymentOptionsReactive
+  ? Observable<DeploymentEventContract | DeploymentEventTransaction>
+  : Promise<DeployedLSP7DigitalAsset>;
 
 /**
  * Class responsible for deploying LSP7 Digital Assets
@@ -57,10 +68,14 @@ export class LSP7DigitalAsset {
    *})
    *```
    */
-  deploy(
+  deploy<
+    T extends
+      | ContractDeploymentOptionsReactive
+      | ContractDeploymentOptionsNonReactive = ContractDeploymentOptionsNonReactive
+  >(
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
-    contractDeploymentOptions?: ContractDeploymentOptions
-  ) {
+    contractDeploymentOptions: T = undefined
+  ): ObservableOrPromise<T> {
     const lsp4Metadata$ = lsp4MetadataUpload$(
       digitalAssetDeploymentOptions.digitalAssetMetadata,
       contractDeploymentOptions?.uploadOptions ?? this.options.uploadOptions
@@ -116,8 +131,10 @@ export class LSP7DigitalAsset {
       setLSP4AndTransferOwnership$,
     ]).pipe(concatAll());
 
-    if (contractDeploymentOptions?.deployReactive) return deployment$;
+    if (contractDeploymentOptions?.deployReactive) return deployment$ as ObservableOrPromise<T>;
 
-    return waitForContractDeployment$(deployment$) as Promise<DeployedLSP7DigitalAsset>;
+    return waitForContractDeployment$(
+      deployment$
+    ) as Promise<DeployedLSP7DigitalAsset> as ObservableOrPromise<T>;
   }
 }

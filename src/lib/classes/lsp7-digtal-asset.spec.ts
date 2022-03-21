@@ -1,7 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
 import { ethers } from 'hardhat';
-import { Observable } from 'rxjs';
 
 import {
   DeploymentEvent,
@@ -9,7 +8,6 @@ import {
   LSP7Mintable__factory,
   LSPFactory,
 } from '../../../build/main/src/index';
-import { DeployedLSP7DigitalAsset } from '../../../build/main/src/lib/interfaces/digital-asset-deployment';
 import { ERC725_ACCOUNT_INTERRFACE, LSP4_KEYS } from '../helpers/config.helper';
 
 import { lsp4DigitalAsset } from './../../../test/lsp4-digital-asset.mock';
@@ -34,12 +32,12 @@ describe('LSP7DigitalAsset', () => {
   it('should deploy LSP7 Digital asset with no passed deployment options', async () => {
     const myLSPFactory = new LSPFactory(provider, signer);
 
-    const lsp7DigitalAsset = (await myLSPFactory.LSP7DigitalAsset.deploy({
+    const lsp7DigitalAsset = await myLSPFactory.LSP7DigitalAsset.deploy({
       controllerAddress: signer.address,
       isNFT: false,
       name: 'TOKEN',
       symbol: 'TKN',
-    })) as DeployedLSP7DigitalAsset;
+    });
 
     expect(lsp7DigitalAsset.LSP7DigitalAsset.address).toBeDefined();
     expect(Object.keys(lsp7DigitalAsset).length).toEqual(2);
@@ -56,7 +54,7 @@ describe('LSP7DigitalAsset', () => {
   it('should deploy LSP7 Digital asset from specified base contract', async () => {
     const myLSPFactory = new LSPFactory(provider, signer);
 
-    const lsp7DigitalAsset = (await myLSPFactory.LSP7DigitalAsset.deploy(
+    const lsp7DigitalAsset = await myLSPFactory.LSP7DigitalAsset.deploy(
       {
         controllerAddress: signer.address,
         isNFT: false,
@@ -66,7 +64,7 @@ describe('LSP7DigitalAsset', () => {
       {
         libAddress: baseContract.address,
       }
-    )) as DeployedLSP7DigitalAsset;
+    );
 
     expect(lsp7DigitalAsset.LSP7DigitalAsset.address).toBeDefined();
     expect(Object.keys(lsp7DigitalAsset).length).toEqual(1);
@@ -83,7 +81,7 @@ describe('LSP7DigitalAsset', () => {
   it('should deploy LSP7 Digital asset without a base contract', async () => {
     const myLSPFactory = new LSPFactory(provider, signer);
 
-    const lsp7DigitalAsset = (await myLSPFactory.LSP7DigitalAsset.deploy(
+    const lsp7DigitalAsset = await myLSPFactory.LSP7DigitalAsset.deploy(
       {
         controllerAddress: signer.address,
         isNFT: false,
@@ -93,7 +91,7 @@ describe('LSP7DigitalAsset', () => {
       {
         deployProxy: false,
       }
-    )) as DeployedLSP7DigitalAsset;
+    );
 
     expect(lsp7DigitalAsset.LSP7DigitalAsset.address).toBeDefined();
     expect(Object.keys(lsp7DigitalAsset).length).toEqual(1);
@@ -121,7 +119,7 @@ describe('LSP7DigitalAsset', () => {
         deployReactive: true,
         deployProxy: true,
       }
-    ) as Observable<DeploymentEvent>;
+    );
 
     let lsp7Address: string;
 
@@ -154,7 +152,7 @@ describe('LSP7DigitalAsset', () => {
 
     const passedBytecode = LSP7Mintable__factory.bytecode;
 
-    const lsp7DigitalAsset = (await lspFactory.LSP7DigitalAsset.deploy(
+    const lsp7DigitalAsset = await lspFactory.LSP7DigitalAsset.deploy(
       {
         controllerAddress: signer.address,
         isNFT: false,
@@ -164,7 +162,7 @@ describe('LSP7DigitalAsset', () => {
       {
         byteCode: passedBytecode,
       }
-    )) as DeployedLSP7DigitalAsset;
+    );
 
     expect(lsp7DigitalAsset.LSP7DigitalAsset.address).toBeDefined();
     expect(Object.keys(lsp7DigitalAsset).length).toEqual(1);
@@ -197,13 +195,13 @@ describe('LSP7DigitalAsset', () => {
 
     it('should deploy lsp7 with metadata', async () => {
       const lspFactory = new LSPFactory(provider, signer);
-      const lsp7DigitalAsset = (await lspFactory.LSP7DigitalAsset.deploy({
+      const lsp7DigitalAsset = await lspFactory.LSP7DigitalAsset.deploy({
         controllerAddress,
         isNFT: false,
         name,
         symbol,
         digitalAssetMetadata: lsp4DigitalAsset.LSP4Metadata,
-      })) as DeployedLSP7DigitalAsset;
+      });
 
       expect(lsp7DigitalAsset.LSP7DigitalAsset.address).toBeDefined();
       expect(Object.keys(lsp7DigitalAsset).length).toEqual(2);
@@ -246,13 +244,13 @@ describe('LSP7DigitalAsset', () => {
 
     it('should deploy with specified creators', async () => {
       const lspFactory = new LSPFactory(provider, signer);
-      const lsp7DigitalAsset = (await lspFactory.LSP7DigitalAsset.deploy({
+      const lsp7DigitalAsset = await lspFactory.LSP7DigitalAsset.deploy({
         controllerAddress,
         name,
         symbol,
         creators,
         isNFT,
-      })) as DeployedLSP7DigitalAsset;
+      });
 
       expect(lsp7DigitalAsset.LSP7DigitalAsset.address).toBeDefined();
       expect(Object.keys(lsp7DigitalAsset).length).toEqual(2);
