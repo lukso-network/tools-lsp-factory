@@ -36,7 +36,7 @@ import {
 } from './../services/lsp3-account.service';
 import { universalReceiverDelegateDeployment$ } from './../services/universal-receiver.service';
 
-type ObservableOrPromise<
+type UniversalProfileObservableOrPromise<
   T extends ContractDeploymentOptionsReactive | ContractDeploymentOptionsNonReactive
 > = T extends ContractDeploymentOptionsReactive
   ? Observable<DeploymentEventContract | DeploymentEventTransaction>
@@ -83,7 +83,7 @@ export class LSP3UniversalProfile {
   >(
     profileDeploymentOptions: ProfileDeploymentOptions,
     contractDeploymentOptions?: T
-  ): ObservableOrPromise<T> {
+  ): UniversalProfileObservableOrPromise<T> {
     // -1 > Run IPFS upload process in parallel with contract deployment
     const lsp3Profile$ = lsp3ProfileUpload$(
       profileDeploymentOptions.lsp3Profile,
@@ -190,9 +190,10 @@ export class LSP3UniversalProfile {
       transferOwnership$,
     ]).pipe(concatAll());
 
-    if (contractDeploymentOptions?.deployReactive) return deployment$ as ObservableOrPromise<T>;
+    if (contractDeploymentOptions?.deployReactive)
+      return deployment$ as UniversalProfileObservableOrPromise<T>;
 
-    return waitForContractDeployment$(deployment$) as ObservableOrPromise<T>;
+    return waitForContractDeployment$(deployment$) as UniversalProfileObservableOrPromise<T>;
   }
 
   /**

@@ -48,22 +48,20 @@ interface ContractOptions {
   libAddress?: string;
 }
 
-export interface ContractDeploymentOptionsReactive {
+interface ContractDeploymentOptionsBase {
   version?: string;
-  deployReactive: true;
   uploadOptions?: UploadOptions;
   ERC725Account?: ContractOptions;
   KeyManager?: ContractOptions;
   UniversalReceiverDelegate?: ContractOptions;
 }
 
-export interface ContractDeploymentOptionsNonReactive {
-  version?: string;
+export interface ContractDeploymentOptionsReactive extends ContractDeploymentOptionsBase {
+  deployReactive: true;
+}
+
+export interface ContractDeploymentOptionsNonReactive extends ContractDeploymentOptionsBase {
   deployReactive?: false;
-  uploadOptions?: UploadOptions;
-  ERC725Account?: ContractOptions;
-  KeyManager?: ContractOptions;
-  UniversalReceiverDelegate?: ContractOptions;
 }
 
 export type ContractDeploymentOptions =
