@@ -27,7 +27,7 @@ import {
   setMetadataAndTransferOwnership$,
 } from '../services/digital-asset.service';
 
-type ObservableOrPromise<
+type LSP7ObservableOrPromise<
   T extends ContractDeploymentOptionsReactive | ContractDeploymentOptionsNonReactive
 > = T extends ContractDeploymentOptionsReactive
   ? Observable<DeploymentEventContract | DeploymentEventTransaction>
@@ -75,7 +75,7 @@ export class LSP7DigitalAsset {
   >(
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
     contractDeploymentOptions: T = undefined
-  ): ObservableOrPromise<T> {
+  ): LSP7ObservableOrPromise<T> {
     const lsp4Metadata$ = lsp4MetadataUpload$(
       digitalAssetDeploymentOptions.digitalAssetMetadata,
       contractDeploymentOptions?.uploadOptions ?? this.options.uploadOptions
@@ -131,10 +131,8 @@ export class LSP7DigitalAsset {
       setLSP4AndTransferOwnership$,
     ]).pipe(concatAll());
 
-    if (contractDeploymentOptions?.deployReactive) return deployment$ as ObservableOrPromise<T>;
+    if (contractDeploymentOptions?.deployReactive) return deployment$ as LSP7ObservableOrPromise<T>;
 
-    return waitForContractDeployment$(
-      deployment$
-    ) as Promise<DeployedLSP7DigitalAsset> as ObservableOrPromise<T>;
+    return waitForContractDeployment$(deployment$) as LSP7ObservableOrPromise<T>;
   }
 }
