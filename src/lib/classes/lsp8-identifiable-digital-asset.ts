@@ -1,12 +1,17 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, concatAll, EMPTY, shareReplay, switchMap } from 'rxjs';
+import { concat, concatAll, EMPTY, Observable, shareReplay, switchMap } from 'rxjs';
 
 import versions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { waitForContractDeployment$ } from '../helpers/deployment.helper';
-import { LSPFactoryOptions } from '../interfaces';
 import {
-  ContractDeploymentOptions,
+  DeploymentEventContract,
+  DeploymentEventTransaction,
+  LSPFactoryOptions,
+} from '../interfaces';
+import {
+  ContractDeploymentOptionsNonReactive,
+  ContractDeploymentOptionsReactive,
   ContractNames,
   DeployedLSP8IdentifiableDigitalAsset,
   DigitalAssetDeploymentOptions,
@@ -21,6 +26,12 @@ import {
   lsp8IdentifiableDigitalAssetDeployment$,
   setMetadataAndTransferOwnership$,
 } from '../services/digital-asset.service';
+
+type ObservableOrPromise<
+  T extends ContractDeploymentOptionsReactive | ContractDeploymentOptionsNonReactive
+> = T extends ContractDeploymentOptionsReactive
+  ? Observable<DeploymentEventContract | DeploymentEventTransaction>
+  : Promise<DeployedLSP8IdentifiableDigitalAsset>;
 
 /**
  * Class responsible for deploying LSP8 Identifiable Digital Assets
@@ -56,10 +67,14 @@ export class LSP8IdentifiableDigitalAsset {
    *})
    *```
    */
-  deploy(
+  deploy<
+    T extends
+      | ContractDeploymentOptionsReactive
+      | ContractDeploymentOptionsNonReactive = ContractDeploymentOptionsNonReactive
+  >(
     digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
-    contractDeploymentOptions?: ContractDeploymentOptions
-  ) {
+    contractDeploymentOptions?: T
+  ): ObservableOrPromise<T> {
     const lsp4Metadata$ = lsp4MetadataUpload$(
       digitalAssetDeploymentOptions.digitalAssetMetadata,
       contractDeploymentOptions?.uploadOptions ?? this.options.uploadOptions
@@ -115,8 +130,8 @@ export class LSP8IdentifiableDigitalAsset {
       setLSP4AndTransferOwnership$,
     ]).pipe(concatAll());
 
-    if (contractDeploymentOptions?.deployReactive) return deployment$;
+    if (contractDeploymentOptions?.deployReactive) return deployment$ as ObservableOrPromise<T>;
 
-    return waitForContractDeployment$(deployment$) as Promise<DeployedLSP8IdentifiableDigitalAsset>;
+    return waitForContractDeployment$(deployment$) as ObservableOrPromise<T>;
   }
 }

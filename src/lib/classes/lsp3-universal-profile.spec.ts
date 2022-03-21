@@ -4,7 +4,6 @@ import UniversalProfileContract from '@lukso/lsp-smart-contracts/artifacts/Unive
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
 import { ethers } from 'hardhat';
-import { Observable } from 'rxjs';
 
 import {
   LSP1UniversalReceiverDelegateUP__factory,
@@ -51,10 +50,10 @@ describe('LSP3UniversalProfile', () => {
     beforeAll(async () => {
       signer = signers[0];
 
-      const { ERC725Account, KeyManager } = (await lspFactory.LSP3UniversalProfile.deploy({
+      const { ERC725Account, KeyManager } = await lspFactory.LSP3UniversalProfile.deploy({
         controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
         lsp3Profile: lsp3ProfileJson,
-      })) as DeployedContracts;
+      });
 
       universalProfile = UniversalProfile__factory.connect(ERC725Account.address, signer);
       keyManager = KeyManager;
@@ -79,7 +78,7 @@ describe('LSP3UniversalProfile', () => {
     beforeAll(async () => {
       signer = signers[0];
 
-      const { ERC725Account, KeyManager } = (await lspFactory.LSP3UniversalProfile.deploy(
+      const { ERC725Account, KeyManager } = await lspFactory.LSP3UniversalProfile.deploy(
         {
           controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
           lsp3Profile: lsp3ProfileJson,
@@ -89,7 +88,7 @@ describe('LSP3UniversalProfile', () => {
             ipfsClientOptions: { host: 'ipfs.infura.io', port: 5001, protocol: 'https' },
           },
         }
-      )) as DeployedContracts;
+      );
 
       universalProfile = UniversalProfile__factory.connect(ERC725Account.address, signer);
       keyManager = KeyManager;
@@ -114,9 +113,9 @@ describe('LSP3UniversalProfile', () => {
     beforeAll(async () => {
       uniqueController = signers[0];
 
-      const { ERC725Account } = (await lspFactory.LSP3UniversalProfile.deploy({
+      const { ERC725Account } = await lspFactory.LSP3UniversalProfile.deploy({
         controllerAddresses: [uniqueController.address],
-      })) as DeployedContracts;
+      });
 
       universalProfile = UniversalProfile__factory.connect(ERC725Account.address, uniqueController);
     });
@@ -151,9 +150,9 @@ describe('LSP3UniversalProfile', () => {
       firstControllerAddress = signers[0].address;
       secondControllerAddress = signers[1].address;
 
-      const { ERC725Account, KeyManager } = (await lspFactory.LSP3UniversalProfile.deploy({
+      const { ERC725Account, KeyManager } = await lspFactory.LSP3UniversalProfile.deploy({
         controllerAddresses: [firstControllerAddress, secondControllerAddress],
-      })) as DeployedContracts;
+      });
 
       universalProfile = new ethers.Contract(
         ERC725Account.address,
@@ -221,7 +220,7 @@ describe('LSP3UniversalProfile', () => {
         {
           deployReactive: true,
         }
-      ) as Observable<DeploymentEvent>;
+      );
 
       let erc725Address: string;
       let keyManagerAddress: string;

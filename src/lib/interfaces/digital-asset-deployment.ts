@@ -28,11 +28,24 @@ export interface DeployedLSP7DigitalAsset {
   LSP7DigitalAsset: DeployedContract;
 }
 
-export interface ContractDeploymentOptions {
+export interface ContractDeploymentOptionsReactive {
   version?: string;
   byteCode?: string;
   libAddress?: string;
-  deployReactive?: boolean;
+  deployReactive: true;
   deployProxy?: boolean;
   uploadOptions?: UploadOptions;
 }
+
+export interface ContractDeploymentOptionsNonReactive {
+  version?: string;
+  byteCode?: string;
+  libAddress?: string;
+  deployReactive?: false;
+  deployProxy?: boolean;
+  uploadOptions?: UploadOptions;
+}
+
+export type ContractDeploymentOptions =
+  | ContractDeploymentOptionsReactive
+  | ContractDeploymentOptionsNonReactive;
