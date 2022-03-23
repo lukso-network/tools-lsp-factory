@@ -24,14 +24,14 @@ Then, it will:
 - upload metadata to IPFS and set the [LSP3 Universal Profile](../../../standards/universal-profile/lsp3-universal-profile-metadata) metadata.
 - attach the Universal Receiver Delegate to the LSP0 ERC725 Account.
 - set the Key Manager as the owner of the LSP0 ERC725 Account.
-- give all [permissions](../../../standards/universal-profile/lsp6-key-manager#-types-of-permissions) to the `controllingAccounts`.
+- give all [permissions](../../../standards/universal-profile/lsp6-key-manager#-types-of-permissions) to the `controllerAddresses`.
 
 By default a [LSP1 Universal Receiver Delegate](../../../standards/universal-profile/lsp1-universal-receiver-delegate) contract will not be deployed, instead the `Universal Receiver Delegate` contract specified in the [versions file](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json) will be attached to the Universal Profile. A custom Universal Receiver Delegate can be optionally deployed by passing an address or custom bytecode inside the [ContractDeploymentOptions object](../deployment/contract-deployment-options).
 
 #### Parameters
 
 1. `profileDeploymentOptions` - `Object`: The options used for deployment.
-   - `controllingAccounts` - `string[]`: A list of accounts (public addresses) which will be granted [all permissions](../../../../../standards/universal-profile/lsp6-key-manager#-address-permissions) on the newly created Universal Profile.
+   - `controllerAddresses` - `string[]`: A list of accounts (public addresses) which will be granted [all permissions](../../../../../standards/universal-profile/lsp6-key-manager#-address-permissions) on the newly created Universal Profile.
    - `lsp3Profile?` - `Object`: If set, the created Universal Profile will be populated with these values.
      - `name` - `string`: The name of the Universal Profile.
      - `description` - `string`: The description of the Universal Profile.
