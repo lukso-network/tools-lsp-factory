@@ -72,13 +72,13 @@ const myUPAddress = myContracts.ERC725Account.address;
 
 ### Using Deployment events
 
-The `deployReactive` method can be used to for real-time frontend updates.
+The `deployReactive` option can be used to for real-time frontend updates.
 
 ```javascript
 const profileDeploymentEvents = [];
 
-const myUPAccount = await lspFactory.LSP3UniversalProfile.deployReactive({
-    ...
+const myUPAccount = await lspFactory.LSP3UniversalProfile.deploy({
+    deployReactive: true
 }).subscribe({
   next: (deploymentEvent: DeploymentEvent) => {
     profileDeploymentEvents.push(deploymentEvent);
