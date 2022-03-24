@@ -26,16 +26,14 @@ Profile Metadata can be passed as either an object contianing the profile detail
 If an object is passed, LSPFactory will process and upload your metadata to IPFS. See [Contract Deployment Options](./contract-deployment-options) for details on how to specify a custom IPFS gateway.
 
 ```javascript title='Setting LSP3 metadata to be uploaded'
-const myUniversalProfileData = {
-  name: 'My Universal Profile',
-  description: 'My cool Universal Profile',
-  tags: ['public-profile'],
-  links: [{ title: 'My Website', url: 'www.my-website.com' }],
-};
-
 await lspFactory.LSP3UniversalProfile.deploy({
     controllingAccounts: ['0x...'],
-    lsp3Profile: myUniversalProfileData
+    lsp3Profile: {
+      name: 'My Universal Profile',
+      description: 'My cool Universal Profile',
+      tags: ['public-profile'],
+      links: [{ title: 'My Website', url: 'www.my-website.com' }],
+    }
   });
 };
 ```
