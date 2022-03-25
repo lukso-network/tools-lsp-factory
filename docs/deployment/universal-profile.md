@@ -20,7 +20,7 @@ await lspFactory.LSP3UniversalProfile.deploy({
 ```
 
 :::info Info
-Profile Metadata can be passed as either an object contianing the profile details you want to upload, or an IPFS url of your previously uploaded metadata.
+Profile Metadata can be passed as either an object containing the profile details you want to upload, or an IPFS url of your previously uploaded metadata.
 :::
 
 If an object is passed, LSPFactory will process and upload your metadata to IPFS. See [Contract Deployment Options](./contract-deployment-options) for details on how to specify a custom IPFS gateway.
