@@ -219,7 +219,7 @@ To upload using a custom IPFS gateway pass the `uploadOptions` object. This is t
 
 ```javascript title="calling uploadProfileData on LSPFactory instance"
 const uploadResult = await myLSPFactory.LSP3UniversalProfile.uploadProfileData(
-  myUniversalProfileData,
+  myUniversalProfileData
 );
 
 const myUniversalProfileMetadataJSON = uploadResult.profile;
@@ -238,7 +238,7 @@ const myUniversalProfileMetadataUrl = uploadResult.url;
 
 ```javascript title="static uploadProfileData call"
 const uploadResult = await LSP3UniversalProfile.uploadProfileData(
-  myUniversalProfileData,
+  myUniversalProfileData
 );
 
 const myUniversalProfileMetadataJSON = uploadResult.profile;
@@ -255,7 +255,7 @@ const myUniversalProfileMetadataUrl = uploadResult.url;
 // 'https://ipfs.lukso.network/ipfs/QmPzUfdKhY6vfcLNDnitwKanpm5GqjYSmw9todNVmi4bqy'
 ```
 
-## Contract Configuration
+## Configuration
 
 A Universal Profile is composed of three contracts. `ERC725Account`, `LSP6KeyManager` and `LSP1UniversalRecieverDelegate`. You can configure how these contracts should be deployed inside the `contractDeploymentOptions` object when deploying a Universal Profile. Each contract can be configured separately, the available options are the same for all contracts.
 
@@ -273,7 +273,7 @@ lspFactory.LSP3UniversalProfile.deploy({...}, {
 })
 ```
 
-### deployProxy
+### Proxy Deployment
 
 Allows you to determine whether your contract should be deployed as a **minimal proxy contract** based on [EIP1167](https://eips.ethereum.org/EIPS/eip-1167) or a full contract with a constructor.
 
@@ -373,7 +373,7 @@ lspFactory.LSP3UniversalProfile.deploy({...}, {
 });
 ```
 
-### uploadOptions
+### IPFS Upload Options
 
 You can specify how you want your profile metadata to be uploaded by passing the `uploadOptions` object. Here you can set the IPFS gateway where you want the profile metadata to be uploaded.
 
@@ -392,4 +392,50 @@ lspFactory.LSP3UniversalProfile.deploy({...}, {
 
 If `uploadOptions` are ommitted, profile metadata will be uploaded according to the `uploadOptions` set during instantiation of LSPFactory. `uploadOptions` passed when deploying a Universal Profile will take precedence over upload configuration set during instantiation.
 
-### Reactive deployment
+### Reactive Deployment
+
+LSPFactory uses [RxJS](https://rxjs.dev/) to deploy contracts. This can be leveraged to achieve reactive deployment of Universal Profiles.
+
+When deploying a Universal Profile pass the `deployReactive` flag inside the `contractDeploymentOptions` object to receive an [RxJS](https://rxjs.dev/) Observable which will emit events as your contract is deployed.
+
+```typescript
+const universalProfileDeploymentObservable = lspFactory.LSP3UniversalProfile.deploy({...}, {
+    deployReactive: true
+  }
+);
+
+universalProfileDeploymentObservable.subscribe({
+  next: (deploymentEvent) => {
+    console.log(deploymentEvent);
+  },
+  complete: () => {
+    console.log('Universal Profile deployment completed');
+  },
+});
+
+/**
+  { type: 'PROXY',        contractName: 'ERC725Account',                                              status: 'PENDING',  transaction:  {} },
+  { type: "PROXY",        contractName: 'ERC725Account',                                              status: 'PENDING',  receipt:      {} },
+  { type: "PROXY",        contractName: 'ERC725Account',           functionName: 'initialize',        status: 'PENDING',  transaction:  {} },
+  { type: "PROXY",        contractName: 'ERC725Account',           functionName: 'initialize',        status: 'COMPLETE', receipt:      {} },
+
+  { type: 'CONTRACT',     contractName: 'KeyManager',                                                 status: 'PENDING',  transaction:  {} },
+  { type: "PROXY",        contractName: 'UniversalReceiver...',                                       status: 'PENDING',  transaction:  {} },
+  { type: 'CONTRACT',     contractName: 'KeyManager',                                                 status: 'COMPLETE', receipt:      {} },
+  { type: "PROXY",        contractName: 'UniversalReceiver...',                                       status: 'PENDING',  receipt:      {} },
+  { type: "PROXY",        contractName: 'UniversalReceiver...',    functionName: 'initialize',        status: 'PENDING',  transaction:  {} },
+  { type: "PROXY",        contractName: 'UniversalReceiver...',    functionName: 'initialize',        status: 'COMPLETE', receipt:      {} },
+
+  { type: 'TRANSACTION',  contractName: 'ERC725Account',           functionName: 'setData',           status: 'PENDING',  transaction:  {} },
+  { type: 'TRANSACTION',  contractName: 'ERC725Account',           functionName: 'setData',           status: 'COMPLETE', receipt:      {} },
+
+  { type: 'TRANSACTION',  contractName: 'ERC725Account',           functionName: 'transferOwnership', status: 'PENDING',  transaction:  {} },
+  { type: 'TRANSACTION',  contractName: 'ERC725Account',           functionName: 'transferOwnership', status: 'COMPLETE', receipt:      {} },
+  Universal Profile deployment completed
+ */
+
+```
+
+The function defined in `next` will be called whenever a new deployment event is created. The function defined in `complete` will be called once after deployment is finished.
+
+Reactive Deployment may be useful for certain front end behaviours to give better feedback to users when they trigger a UP deployment from a user interface. For example you may want to implement a loading bar to tell users how deployment is progressing, or display details and addresses of the contracts as they are deployed
