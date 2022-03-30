@@ -24,7 +24,7 @@ import {
   initialize,
   waitForReceipt,
 } from '../helpers/deployment.helper';
-import { encodeLSP3Profile } from '../helpers/erc725.helper';
+import { erc725EncodeData } from '../helpers/erc725.helper';
 import { isMetadataEncoded } from '../helpers/uploader.helper';
 import {
   BaseContractAddresses,
@@ -39,7 +39,7 @@ import {
   LSP3ProfileJSON,
   ProfileDataBeforeUpload,
 } from '../interfaces';
-import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
+import { LSP3ProfileDataForEncoding, ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 
 import { UniversalReveiverDeploymentEvent } from './universal-receiver.service';
@@ -160,7 +160,7 @@ export function setDataTransaction$(
   account$: Observable<LSP3AccountDeploymentEvent>,
   universalReceiver$: Observable<UniversalReveiverDeploymentEvent>,
   controllerAddresses: (string | ControllerOptions)[],
-  lsp3ProfileData$: Observable<LSP3ProfileDataForEncoding | string | null>,
+  lsp3ProfileData$: Observable<string | null>,
   isSignerUniversalProfile$: Observable<boolean>,
   defaultUniversalReceiverDelegateAddress?: string
 ) {
@@ -213,7 +213,7 @@ export function setDataTransaction$(
 export async function getLsp3ProfileDataUrl(
   lsp3Profile: ProfileDataBeforeUpload | string,
   uploadOptions?: UploadOptions
-): Promise<LSP3ProfileDataForEncoding> {
+): Promise<ProfileDataForEncoding> {
   let lsp3ProfileData: LSP3ProfileDataForEncoding;
 
   if (typeof lsp3Profile === 'string') {
@@ -233,7 +233,7 @@ export async function getLsp3ProfileDataUrl(
 
     lsp3ProfileData = {
       url: lsp3Profile,
-      profile: lsp3ProfileJson as LSP3ProfileJSON,
+      json: lsp3ProfileJson as LSP3ProfileJSON,
     };
   } else {
     lsp3ProfileData = await LSP3UniversalProfile.uploadProfileData(lsp3Profile, uploadOptions);
@@ -242,15 +242,43 @@ export async function getLsp3ProfileDataUrl(
   return lsp3ProfileData;
 }
 
+async function getEncodedLSP3ProfileData(
+  lsp3Profile: ProfileDataBeforeUpload | LSP3ProfileDataForEncoding | string,
+  uploadOptions?: UploadOptions
+): Promise<string> {
+  let lsp3ProfileDataForEncoding: LSP3ProfileDataForEncoding;
+
+  if (typeof lsp3Profile === 'string' || 'name' in lsp3Profile) {
+    lsp3ProfileDataForEncoding = await getLsp3ProfileDataUrl(lsp3Profile, uploadOptions);
+  } else {
+    lsp3ProfileDataForEncoding = lsp3Profile;
+  }
+
+  let encodedDataResult;
+
+  if ('hash' in lsp3ProfileDataForEncoding) {
+    encodedDataResult = erc725EncodeData({ LSP3Profile: lsp3ProfileDataForEncoding });
+  } else {
+    encodedDataResult = erc725EncodeData({
+      LSP3Profile: {
+        json: lsp3ProfileDataForEncoding.json,
+        url: lsp3ProfileDataForEncoding.url,
+      },
+    });
+  }
+
+  return encodedDataResult.LSP3Profile.value;
+}
+
 export function lsp3ProfileUpload$(
-  lsp3Profile: ProfileDataBeforeUpload | string,
+  lsp3Profile: ProfileDataBeforeUpload | LSP3ProfileDataForEncoding | string,
   uploadOptions?: UploadOptions
 ) {
-  let lsp3Profile$: Observable<LSP3ProfileDataForEncoding | string>;
+  let lsp3Profile$: Observable<string>;
 
   if (typeof lsp3Profile !== 'string' || !isMetadataEncoded(lsp3Profile)) {
     lsp3Profile$ = lsp3Profile
-      ? from(getLsp3ProfileDataUrl(lsp3Profile, uploadOptions)).pipe(shareReplay())
+      ? from(getEncodedLSP3ProfileData(lsp3Profile, uploadOptions)).pipe(shareReplay())
       : of(null);
   } else {
     lsp3Profile$ = of(lsp3Profile);
@@ -267,7 +295,7 @@ export function lsp3ProfileUpload$(
  * @param {string} erc725AccountAddress
  * @param {string} universalReceiverDelegateAddress
  * @param {(string | ControllerOptions)[]} controllerAddresses
- * @param {LSP3ProfileDataForEncoding | string} lsp3Profile
+ * @param {LSP3ProfileDataForEncoding | string} encodedLSP3Profile
  *
  * @return {*}  Observable<LSP3AccountDeploymentEvent | DeploymentEventTransaction>
  */
@@ -276,20 +304,8 @@ export async function setData(
   erc725AccountAddress: string,
   universalReceiverDelegateAddress: string,
   controllerAddresses: (string | ControllerOptions)[],
-  lsp3Profile?: LSP3ProfileDataForEncoding | string
+  encodedLSP3Profile?: string
 ): Promise<DeploymentEventTransaction> {
-  // TODO: move this to profile upload logic
-  let encodedLSP3Profile;
-  if (lsp3Profile && typeof lsp3Profile !== 'string') {
-    const encodedDataResult = lsp3Profile
-      ? encodeLSP3Profile(lsp3Profile.profile, lsp3Profile.url)
-      : null;
-
-    encodedLSP3Profile = encodedDataResult.LSP3Profile.value;
-  } else {
-    encodedLSP3Profile = lsp3Profile;
-  }
-
   const erc725Account = new UniversalProfile__factory(signer).attach(erc725AccountAddress);
 
   const signersAddresses: string[] = [];

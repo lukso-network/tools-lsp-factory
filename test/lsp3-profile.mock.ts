@@ -1,4 +1,4 @@
-import { LSP3ProfileJSON } from '../interfaces/lsp3-profile';
+import { LSP3ProfileJSON } from '../src/lib/interfaces/lsp3-profile';
 
 export const lsp3ProfileJson: LSP3ProfileJSON = {
   LSP3Profile: {

@@ -36,7 +36,15 @@ export interface ProfileDataBeforeUpload {
   tags?: string[];
 }
 
-export interface LSP3ProfileDataForEncoding {
-  profile: LSP3ProfileJSON;
+export interface ProfileDataForEncoding {
+  json: LSP3ProfileJSON;
   url: string;
 }
+
+export interface HashedProfileDataForEncoding {
+  hashFunction: string;
+  hash: string;
+  url: string;
+}
+
+export type LSP3ProfileDataForEncoding = ProfileDataForEncoding | HashedProfileDataForEncoding;
