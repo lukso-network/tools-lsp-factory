@@ -20,13 +20,25 @@ npm install @lukso/lsp-factory.js
 ```javascript
 import { LSPFactory } from '@lukso/lsp-factory.js';
 
-
 const provider = 'https://rpc.l14.lukso.network'; // RPC provider url
 
 const lspFactory = new LSPFactory(provider, {
   deployKey: '0x...', // Private key of the account which will deploy any smart contract,
   chainId: 22, // Chain Id of the network you want to deploy to
 });
+```
+
+## Using LSPFactory in a Dapp
+
+If being used in the browser in a Dapp, pass the ethereum window object as the provider paramter to intergrate with a browser extension like MetaMask. This will then prompt users to sign the transactions the LSPFactory sends. In this case the `Signer` field may be left blank.
+
+Promt the user to connect to the Dapp using the ethereum `eth_requestAccounts` method. Then pass the ethereum window object as the provider when instantiating LSPFactory.
+
+The user will then be prompted to confirm transactions sent by LSPFactory inside their browser extension.
+
+```javascript
+await window.ethereum.request({ method: 'eth_requestAccounts' });
+const lspFactory = new LSPFactory(window.ethereum);
 ```
 
 ## Usage
