@@ -30,15 +30,12 @@ const lspFactory = new LSPFactory(provider, {
 
 ## Using LSPFactory in a Dapp
 
-If being used in the browser in a Dapp, pass the ethereum window object as the provider paramter to intergrate with a browser extension like MetaMask. This will then prompt users to sign the transactions the LSPFactory sends. In this case the `Signer` field may be left blank.
-
-Promt the user to connect to the Dapp using the ethereum `eth_requestAccounts` method. Then pass the ethereum window object as the provider when instantiating LSPFactory.
-
-The user will then be prompted to confirm transactions sent by LSPFactory inside their browser extension.
+If being used in the browser in a Dapp, pass the `ethereum` object as the provider parameter to connect to a browser extension like the UniversalProfile Browser extension or MetaMask. This will then prompt users to sign the transactions the LSPFactory deploys smart contracts.
 
 ```javascript
-await window.ethereum.request({ method: 'eth_requestAccounts' });
-const lspFactory = new LSPFactory(window.ethereum);
+await ethereum.request({ method: 'eth_requestAccounts', params: [] });
+
+const lspFactory = new LSPFactory(ethereum);
 ```
 
 ## Usage
