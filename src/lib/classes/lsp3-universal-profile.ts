@@ -136,14 +136,9 @@ export class LSP3UniversalProfile {
       deployUniversalReceiverProxy
     );
 
-    const controllerAddresses = profileDeploymentOptions.controllerAddresses.map((controller) => {
-      return typeof controller === 'string' ? controller : controller.address;
-    });
-
     // 1 > deploys ERC725Account
     const account$ = accountDeployment$(
       this.signer,
-      controllerAddresses,
       baseContractAddresses$,
       contractDeploymentOptions?.ERC725Account?.byteCode
     );

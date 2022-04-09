@@ -433,7 +433,7 @@ export function setLSP4Metadata$(
     switchMap(([{ receipt: digitalAssetReceipt }, lsp4Metadata]) => {
       return setData(
         signer,
-        digitalAssetReceipt.contractAddress || digitalAssetReceipt.to,
+        digitalAssetReceipt.contractAddress || digitalAssetReceipt.logs[0].address, // Check these values when deploying with UP
         lsp4Metadata,
         digitalAssetDeploymentOptions,
         contractName
@@ -518,7 +518,8 @@ export function transferOwnership$(
     switchMap(([{ receipt: digitalAssetDeploymentReceipt }]) => {
       return transferOwnership(
         signer,
-        digitalAssetDeploymentReceipt.contractAddress || digitalAssetDeploymentReceipt.to,
+        digitalAssetDeploymentReceipt.contractAddress ||
+          digitalAssetDeploymentReceipt.logs[0].address, // CHeck this when deploying with UP
         digitalAssetDeploymentOptions.controllerAddress,
         contractName
       );

@@ -48,7 +48,6 @@ export type LSP3AccountDeploymentEvent = DeploymentEventContract | DeploymentEve
 
 export function accountDeployment$(
   signer: Signer,
-  controllerAddresses: string[],
   baseContractAddresses$: Observable<BaseContractAddresses>,
   bytecode?: string
 ) {
@@ -56,7 +55,6 @@ export function accountDeployment$(
     switchMap((baseContractAddresses) => {
       return accountDeploymentWithBaseContractAddress$(
         signer,
-        controllerAddresses,
         baseContractAddresses.ERC725Account,
         bytecode
       );
@@ -67,12 +65,11 @@ export function accountDeployment$(
 
 export function accountDeploymentWithBaseContractAddress$(
   signer: Signer,
-  controllerAddresses: string[],
   baseContractAddress: string,
   bytecode?: string
 ): Observable<LSP3AccountDeploymentEvent> {
   const accountDeployment$ = defer(() =>
-    deployLSP3Account(signer, controllerAddresses, baseContractAddress, bytecode)
+    deployLSP3Account(signer, baseContractAddress, bytecode)
   ).pipe(shareReplay());
 
   const accountDeploymentReceipt$ = waitForReceipt<LSP3AccountDeploymentEvent>(
@@ -97,7 +94,6 @@ export function accountDeploymentWithBaseContractAddress$(
 
 async function deployLSP3Account(
   signer: Signer,
-  ownerAddresses: string[],
   baseContractAddress: string,
   byteCode?: string
 ): Promise<LSP3AccountDeploymentEvent> {
@@ -108,11 +104,11 @@ async function deployLSP3Account(
 
     if (byteCode) {
       return new ContractFactory(UniversalProfile__factory.abi, byteCode, signer).deploy(
-        ownerAddresses[0]
+        await signer.getAddress()
       );
     }
 
-    return await new UniversalProfile__factory(signer).deploy(ownerAddresses[0]);
+    return await new UniversalProfile__factory(signer).deploy(await signer.getAddress());
   };
 
   return baseContractAddress
@@ -185,9 +181,9 @@ export function setDataTransaction$(
       ]) => {
         return setData(
           signer,
-          lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to,
+          lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.logs[0].address,
           universalReceiverDelegateReceipt?.contractAddress ||
-            universalReceiverDelegateReceipt?.to ||
+            universalReceiverDelegateReceipt?.to || // Is this value correct when deploying with a UP?
             defaultUniversalReceiverDelegateAddress,
           controllerAddresses,
           lsp3ProfileData
@@ -402,11 +398,11 @@ export async function transferOwnership(
   try {
     const signerAddress = await signer.getAddress();
     const contract = new UniversalProfile__factory(signer).attach(
-      lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to
+      lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.logs[0].address
     );
 
     const gasEstimate = await contract.estimateGas.transferOwnership(
-      keyManagerReceipt.contractAddress || keyManagerReceipt.to,
+      keyManagerReceipt.contractAddress || keyManagerReceipt.to, // TODO: Fix this value when deploying with a UP
       {
         from: signerAddress,
         gasPrice: GAS_PRICE,
@@ -414,7 +410,7 @@ export async function transferOwnership(
     );
 
     const transaction = await contract.transferOwnership(
-      keyManagerReceipt.contractAddress || keyManagerReceipt.to,
+      keyManagerReceipt.contractAddress || keyManagerReceipt.to, // TODO: Fix this value when deploying with a UP
       {
         from: signerAddress,
         gasLimit: gasEstimate.add(GAS_BUFFER),

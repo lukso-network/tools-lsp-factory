@@ -28,7 +28,8 @@ export function keyManagerDeployment$(
 ): Observable<KeyManagerDeploymentEvent> {
   return forkJoin([accountDeployment$, baseContractAddress$]).pipe(
     switchMap(([{ receipt: lsp3AccountReceipt }, baseContractAddress]) => {
-      const erc725AccountAddress = lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
+      const erc725AccountAddress =
+        lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.logs[0].address;
       return keyManagerDeploymentForAccount$(
         signer,
         erc725AccountAddress,

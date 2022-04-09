@@ -40,7 +40,7 @@ export class LSPFactory {
 
     if (typeof rpcUrlOrProvider === 'string') {
       provider = new ethers.providers.JsonRpcProvider(rpcUrlOrProvider);
-    } else if ('isMetaMask' in rpcUrlOrProvider) {
+    } else if ('chainId' in rpcUrlOrProvider) {
       provider = new ethers.providers.Web3Provider(rpcUrlOrProvider);
     } else if (typeof rpcUrlOrProvider !== 'string') {
       provider = rpcUrlOrProvider as providers.Web3Provider | providers.JsonRpcProvider;
