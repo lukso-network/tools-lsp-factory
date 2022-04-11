@@ -31,6 +31,7 @@ import { keyManagerDeployment$ } from '../services/key-manager.service';
 import {
   accountDeployment$,
   getTransferOwnershipTransaction$,
+  isSignerUniversalProfile$,
   lsp3ProfileUpload$,
   setDataTransaction$,
 } from './../services/lsp3-account.service';
@@ -136,23 +137,21 @@ export class LSP3UniversalProfile {
       deployUniversalReceiverProxy
     );
 
-    const controllerAddresses = profileDeploymentOptions.controllerAddresses.map((controller) => {
-      return typeof controller === 'string' ? controller : controller.address;
-    });
-
     // 1 > deploys ERC725Account
     const account$ = accountDeployment$(
       this.signer,
-      controllerAddresses,
       baseContractAddresses$,
       contractDeploymentOptions?.ERC725Account?.byteCode
     );
+
+    const signerIsUniversalProfile$ = isSignerUniversalProfile$(this.signer);
 
     // 2 > deploys KeyManager
     const keyManager$ = keyManagerDeployment$(
       this.signer,
       account$,
       baseContractAddresses$,
+      signerIsUniversalProfile$,
       contractDeploymentOptions?.KeyManager?.byteCode
     );
 
@@ -175,11 +174,17 @@ export class LSP3UniversalProfile {
       universalReceiver$,
       profileDeploymentOptions.controllerAddresses,
       lsp3Profile$,
+      signerIsUniversalProfile$,
       defaultUniversalReceiverAddress
     );
 
     // 5 > transfersOwnership to KeyManager
-    const transferOwnership$ = getTransferOwnershipTransaction$(this.signer, account$, keyManager$);
+    const transferOwnership$ = getTransferOwnershipTransaction$(
+      this.signer,
+      account$,
+      keyManager$,
+      signerIsUniversalProfile$
+    );
 
     const deployment$ = concat([
       baseContractDeployment$,

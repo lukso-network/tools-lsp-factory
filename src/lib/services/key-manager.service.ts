@@ -24,18 +24,24 @@ export function keyManagerDeployment$(
   signer: Signer,
   accountDeployment$: Observable<LSP3AccountDeploymentEvent>,
   baseContractAddress$: Observable<BaseContractAddresses>,
+  isSignerUniversalProfile$: Observable<boolean>,
   byteCode?: string
 ): Observable<KeyManagerDeploymentEvent> {
-  return forkJoin([accountDeployment$, baseContractAddress$]).pipe(
-    switchMap(([{ receipt: lsp3AccountReceipt }, baseContractAddress]) => {
-      const erc725AccountAddress = lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
-      return keyManagerDeploymentForAccount$(
-        signer,
-        erc725AccountAddress,
-        baseContractAddress.KeyManager,
-        byteCode
-      );
-    }),
+  return forkJoin([accountDeployment$, baseContractAddress$, isSignerUniversalProfile$]).pipe(
+    switchMap(
+      ([{ receipt: lsp3AccountReceipt }, baseContractAddress, isSignerUniversalProfile]) => {
+        const erc725AccountAddress = isSignerUniversalProfile
+          ? lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.logs[0].address
+          : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
+
+        return keyManagerDeploymentForAccount$(
+          signer,
+          erc725AccountAddress,
+          baseContractAddress.KeyManager,
+          byteCode
+        );
+      }
+    ),
     shareReplay()
   );
 }

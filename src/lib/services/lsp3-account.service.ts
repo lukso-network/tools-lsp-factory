@@ -48,7 +48,6 @@ export type LSP3AccountDeploymentEvent = DeploymentEventContract | DeploymentEve
 
 export function accountDeployment$(
   signer: Signer,
-  controllerAddresses: string[],
   baseContractAddresses$: Observable<BaseContractAddresses>,
   bytecode?: string
 ) {
@@ -56,7 +55,6 @@ export function accountDeployment$(
     switchMap((baseContractAddresses) => {
       return accountDeploymentWithBaseContractAddress$(
         signer,
-        controllerAddresses,
         baseContractAddresses.ERC725Account,
         bytecode
       );
@@ -67,12 +65,11 @@ export function accountDeployment$(
 
 export function accountDeploymentWithBaseContractAddress$(
   signer: Signer,
-  controllerAddresses: string[],
   baseContractAddress: string,
   bytecode?: string
 ): Observable<LSP3AccountDeploymentEvent> {
   const accountDeployment$ = defer(() =>
-    deployLSP3Account(signer, controllerAddresses, baseContractAddress, bytecode)
+    deployLSP3Account(signer, baseContractAddress, bytecode)
   ).pipe(shareReplay());
 
   const accountDeploymentReceipt$ = waitForReceipt<LSP3AccountDeploymentEvent>(
@@ -97,7 +94,6 @@ export function accountDeploymentWithBaseContractAddress$(
 
 async function deployLSP3Account(
   signer: Signer,
-  ownerAddresses: string[],
   baseContractAddress: string,
   byteCode?: string
 ): Promise<LSP3AccountDeploymentEvent> {
@@ -108,11 +104,11 @@ async function deployLSP3Account(
 
     if (byteCode) {
       return new ContractFactory(UniversalProfile__factory.abi, byteCode, signer).deploy(
-        ownerAddresses[0]
+        await signer.getAddress()
       );
     }
 
-    return await new UniversalProfile__factory(signer).deploy(ownerAddresses[0]);
+    return await new UniversalProfile__factory(signer).deploy(await signer.getAddress());
   };
 
   return baseContractAddress
@@ -165,6 +161,7 @@ export function setDataTransaction$(
   universalReceiver$: Observable<UniversalReveiverDeploymentEvent>,
   controllerAddresses: (string | ControllerOptions)[],
   lsp3ProfileData$: Observable<LSP3ProfileDataForEncoding | string | null>,
+  isSignerUniversalProfile$: Observable<boolean>,
   defaultUniversalReceiverDelegateAddress?: string
 ) {
   const universalReceiverAddress$ = universalReceiver$.pipe(
@@ -176,19 +173,31 @@ export function setDataTransaction$(
     account$,
     universalReceiverAddress$,
     lsp3ProfileData$,
+    isSignerUniversalProfile$,
   ]).pipe(
     switchMap(
       ([
         { receipt: lsp3AccountReceipt },
         { receipt: universalReceiverDelegateReceipt },
         lsp3ProfileData,
+        isSignerUniversalProfile,
       ]) => {
+        const lsp3AccountAddress = isSignerUniversalProfile
+          ? lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.logs[0].address
+          : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
+
+        const universalReceiverDelegateAddress = isSignerUniversalProfile
+          ? universalReceiverDelegateReceipt?.contractAddress ||
+            universalReceiverDelegateReceipt?.logs[0]?.topics[2]?.slice(26) ||
+            defaultUniversalReceiverDelegateAddress
+          : universalReceiverDelegateReceipt?.contractAddress ||
+            universalReceiverDelegateReceipt?.to ||
+            defaultUniversalReceiverDelegateAddress;
+
         return setData(
           signer,
-          lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to,
-          universalReceiverDelegateReceipt?.contractAddress ||
-            universalReceiverDelegateReceipt?.to ||
-            defaultUniversalReceiverDelegateAddress,
+          lsp3AccountAddress,
+          universalReceiverDelegateAddress,
           controllerAddresses,
           lsp3ProfileData
         );
@@ -368,12 +377,28 @@ export async function setData(
 export function getTransferOwnershipTransaction$(
   signer: Signer,
   accountDeployment$: DeploymentEvent$,
-  keyManagerDeployment$: DeploymentEvent$
+  keyManagerDeployment$: DeploymentEvent$,
+  isSignerUniversalProfile$: Observable<boolean>
 ) {
-  const transferOwnershipTransaction$ = forkJoin([accountDeployment$, keyManagerDeployment$]).pipe(
-    switchMap(([{ receipt: lsp3AccountReceipt }, { receipt: keyManagerContract }]) => {
-      return transferOwnership(signer, lsp3AccountReceipt, keyManagerContract);
-    }),
+  const transferOwnershipTransaction$ = forkJoin([
+    accountDeployment$,
+    keyManagerDeployment$,
+    isSignerUniversalProfile$,
+  ]).pipe(
+    switchMap(
+      ([
+        { receipt: lsp3AccountReceipt },
+        { receipt: keyManagerContract },
+        isSignerUniversalProfile,
+      ]) => {
+        return transferOwnership(
+          signer,
+          lsp3AccountReceipt,
+          keyManagerContract,
+          isSignerUniversalProfile
+        );
+      }
+    ),
     shareReplay()
   );
   const transferOwnershipReceipt$ = waitForReceipt<DeploymentEventTransaction>(
@@ -397,30 +422,32 @@ export function getTransferOwnershipTransaction$(
 export async function transferOwnership(
   signer: Signer,
   lsp3AccountReceipt: TransactionReceipt,
-  keyManagerReceipt: TransactionReceipt
+  keyManagerReceipt: TransactionReceipt,
+  isSignerUniversalProfile: boolean
 ): Promise<DeploymentEventTransaction> {
   try {
     const signerAddress = await signer.getAddress();
-    const contract = new UniversalProfile__factory(signer).attach(
-      lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to
-    );
 
-    const gasEstimate = await contract.estimateGas.transferOwnership(
-      keyManagerReceipt.contractAddress || keyManagerReceipt.to,
-      {
-        from: signerAddress,
-        gasPrice: GAS_PRICE,
-      }
-    );
+    const lsp3Address = isSignerUniversalProfile
+      ? lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.logs[0].address
+      : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
 
-    const transaction = await contract.transferOwnership(
-      keyManagerReceipt.contractAddress || keyManagerReceipt.to,
-      {
-        from: signerAddress,
-        gasLimit: gasEstimate.add(GAS_BUFFER),
-        gasPrice: GAS_PRICE,
-      }
-    );
+    const keyManagerAddress = isSignerUniversalProfile
+      ? keyManagerReceipt.contractAddress || '0x' + keyManagerReceipt.logs[0].topics[2].slice(26)
+      : keyManagerReceipt.contractAddress || keyManagerReceipt.to;
+
+    const contract = new UniversalProfile__factory(signer).attach(lsp3Address);
+
+    const gasEstimate = await contract.estimateGas.transferOwnership(keyManagerAddress, {
+      from: signerAddress,
+      gasPrice: GAS_PRICE,
+    });
+
+    const transaction = await contract.transferOwnership(keyManagerAddress, {
+      from: signerAddress,
+      gasLimit: gasEstimate.add(GAS_BUFFER),
+      gasPrice: GAS_PRICE,
+    });
 
     return {
       type: DeploymentType.TRANSACTION,
@@ -433,4 +460,20 @@ export async function transferOwnership(
     console.error('Error when transferring Ownership', error);
     throw error;
   }
+}
+
+export function isSignerUniversalProfile$(signer: Signer) {
+  return defer(async () => {
+    try {
+      const signerAddress = await signer.getAddress();
+      const universalProfile = UniversalProfile__factory.connect(signerAddress, signer);
+
+      const owner = await universalProfile.owner();
+      return !!owner;
+    } catch (error) {
+      return false;
+    }
+
+    return false;
+  }).pipe(shareReplay());
 }
