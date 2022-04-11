@@ -408,17 +408,28 @@ export function setMetadataAndTransferOwnership$(
   digitalAsset$: Observable<DigitalAssetDeploymentEvent>,
   lsp4Metadata$: Observable<string | null>,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
-  contractName: string
+  contractName: string,
+  isSignerUniversalProfile$: Observable<boolean>
 ) {
   return concat(
-    setLSP4Metadata$(
+    digitalAssetDeploymentOptions?.creators?.length ||
+      digitalAssetDeploymentOptions?.digitalAssetMetadata
+      ? setLSP4Metadata$(
+          signer,
+          digitalAsset$,
+          lsp4Metadata$,
+          contractName,
+          digitalAssetDeploymentOptions,
+          isSignerUniversalProfile$
+        )
+      : EMPTY,
+    transferOwnership$(
       signer,
       digitalAsset$,
-      lsp4Metadata$,
+      digitalAssetDeploymentOptions,
       contractName,
-      digitalAssetDeploymentOptions
-    ),
-    transferOwnership$(signer, digitalAsset$, digitalAssetDeploymentOptions, contractName)
+      isSignerUniversalProfile$
+    )
   );
 }
 
@@ -427,13 +438,22 @@ export function setLSP4Metadata$(
   digitalAsset$: Observable<DigitalAssetDeploymentEvent>,
   lsp4Metadata$: Observable<string | null>,
   contractName: string,
-  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions
+  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
+  isSignerUniversalProfile$: Observable<boolean>
 ): Observable<DeploymentEventTransaction> {
-  const setDataTransaction$ = forkJoin([digitalAsset$, lsp4Metadata$]).pipe(
-    switchMap(([{ receipt: digitalAssetReceipt }, lsp4Metadata]) => {
+  const setDataTransaction$ = forkJoin([
+    digitalAsset$,
+    lsp4Metadata$,
+    isSignerUniversalProfile$,
+  ]).pipe(
+    switchMap(([{ receipt: digitalAssetReceipt }, lsp4Metadata, isSignerUniversalProfile]) => {
+      const digitalAssetAddress = isSignerUniversalProfile
+        ? digitalAssetReceipt.contractAddress || digitalAssetReceipt.logs[0].address
+        : digitalAssetReceipt.contractAddress || digitalAssetReceipt.to;
+
       return setData(
         signer,
-        digitalAssetReceipt.contractAddress || digitalAssetReceipt.to,
+        digitalAssetAddress,
         lsp4Metadata,
         digitalAssetDeploymentOptions,
         contractName
@@ -478,12 +498,18 @@ async function setData(
     );
   });
 
-  const keysToSet = [LSP4_KEYS.LSP4_CREATORS_ARRAY, ...creatorArrayIndexKeys, ...creatorsMapKeys];
-  const valuesToSet = [
-    ethers.utils.hexZeroPad(ethers.utils.hexlify([creators.length]), 32),
-    ...creatorArrayIndexValues,
-    ...creatorsMapValues,
-  ];
+  const keysToSet = [];
+  const valuesToSet = [];
+
+  if (creators.length) {
+    keysToSet.push(LSP4_KEYS.LSP4_CREATORS_ARRAY);
+    keysToSet.push(...creatorArrayIndexKeys);
+    keysToSet.push(...creatorsMapKeys);
+
+    valuesToSet.push(ethers.utils.hexZeroPad(ethers.utils.hexlify([creators.length]), 32));
+    valuesToSet.push(...creatorArrayIndexValues);
+    valuesToSet.push(...creatorsMapValues);
+  }
 
   if (lsp4Metadata) {
     keysToSet.push(LSP4_KEYS.LSP4_METADATA);
@@ -512,13 +538,19 @@ export function transferOwnership$(
   signer: Signer,
   digitalAsset$: DeploymentEvent$,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
-  contractName: string
+  contractName: string,
+  isSignerUniversalProfile$: Observable<boolean>
 ) {
-  const transferOwnershipTransaction$ = forkJoin([digitalAsset$]).pipe(
-    switchMap(([{ receipt: digitalAssetDeploymentReceipt }]) => {
+  const transferOwnershipTransaction$ = forkJoin([digitalAsset$, isSignerUniversalProfile$]).pipe(
+    switchMap(([{ receipt: digitalAssetDeploymentReceipt }, isSignerUniversalProfile]) => {
+      const digitalAssetAddress = isSignerUniversalProfile
+        ? digitalAssetDeploymentReceipt.contractAddress ||
+          digitalAssetDeploymentReceipt.logs[0].address
+        : digitalAssetDeploymentReceipt.contractAddress || digitalAssetDeploymentReceipt.to;
+
       return transferOwnership(
         signer,
-        digitalAssetDeploymentReceipt.contractAddress || digitalAssetDeploymentReceipt.to,
+        digitalAssetAddress,
         digitalAssetDeploymentOptions.controllerAddress,
         contractName
       );

@@ -1,10 +1,8 @@
 import imageCompression from 'browser-image-compression';
 import { keccak256 } from 'ethers/lib/utils';
-import imageSize from 'image-size';
 import { AddResult } from 'ipfs-core-types/src/root';
 import { ImportCandidate } from 'ipfs-core-types/src/utils';
 import { create, Options } from 'ipfs-http-client';
-import Jimp from 'jimp';
 
 import { ImageBuffer, ImageMetadata } from '../interfaces';
 import { AssetBuffer, AssetMetadata } from '../interfaces/metadata';
@@ -29,12 +27,13 @@ export async function imageUpload(
       let imgToUpload, imgBuffer, width: number, height: number;
 
       if ('buffer' in givenFile) {
-        imgBuffer = await resizeBuffer(givenFile.buffer, givenFile.mimeType, size);
-        imgToUpload = imgBuffer;
+        throw new Error('Buffer image upload is depricated');
+        // imgBuffer = await resizeBuffer(givenFile.buffer, givenFile.mimeType, size);
+        // imgToUpload = imgBuffer;
 
-        const resizedDimensions = imageSize(imgBuffer);
-        height = resizedDimensions.height;
-        width = resizedDimensions.width;
+        // const resizedDimensions = imageSize(imgBuffer);
+        // height = resizedDimensions.height;
+        // width = resizedDimensions.width;
       } else {
         imgToUpload = await imageCompression(givenFile, {
           maxWidthOrHeight: size,
@@ -134,10 +133,10 @@ export async function prepareMetadataAsset(
   return assetMetadata;
 }
 
-export async function resizeBuffer(buffer: Buffer, format: string, size: number): Promise<Buffer> {
-  const image = await Jimp.read(buffer);
-  return image.scaleToFit(size, size).getBufferAsync(format);
-}
+// export async function resizeBuffer(buffer: Buffer, format: string, size: number): Promise<Buffer> {
+//   const image = await Jimp.read(buffer);
+//   return image.scaleToFit(size, size).getBufferAsync(format);
+// }
 
 export function isMetadataEncoded(metdata: string): boolean {
   if (!metdata.startsWith('ipfs://') && !metdata.startsWith('https://')) {
