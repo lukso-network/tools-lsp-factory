@@ -26,6 +26,7 @@ import {
   lsp8IdentifiableDigitalAssetDeployment$,
   setMetadataAndTransferOwnership$,
 } from '../services/digital-asset.service';
+import { isSignerUniversalProfile$ } from '../services/lsp3-account.service';
 
 type LSP8ObservableOrPromise<
   T extends ContractDeploymentOptionsReactive | ContractDeploymentOptionsNonReactive
@@ -116,12 +117,15 @@ export class LSP8IdentifiableDigitalAsset {
       contractDeploymentOptions?.byteCode
     );
 
+    const signerIsUniversalProfile$ = isSignerUniversalProfile$(this.signer);
+
     const setLSP4AndTransferOwnership$ = setMetadataAndTransferOwnership$(
       this.signer,
       digitalAsset$,
       lsp4Metadata$,
       digitalAssetDeploymentOptions,
-      ContractNames.LSP8_DIGITAL_ASSET
+      ContractNames.LSP8_DIGITAL_ASSET,
+      signerIsUniversalProfile$
     );
 
     const deployment$ = concat([
