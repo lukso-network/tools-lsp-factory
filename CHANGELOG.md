@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/lukso-network/tools-lsp-factory/compare/v2.0.0...v2.1.0) (2022-04-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove jjmp and imge-size
+
+### Features
+
+* allow passing window.ethereum object during instantiation ([649f9d7](https://github.com/lukso-network/tools-lsp-factory/commit/649f9d7ff32239b74383bbea4394389ccb5bff88))
+
+
+* remove jjmp and imge-size ([5bf8c03](https://github.com/lukso-network/tools-lsp-factory/commit/5bf8c03e073bb2bff590c8055b90c2dbd01b2a62))
+
 ## [2.0.0](https://github.com/lukso-network/tools-lsp-factory/compare/v1.0.2-alpha.8...v2.0.0) (2022-03-09)
 
 
