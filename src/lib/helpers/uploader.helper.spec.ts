@@ -4,14 +4,10 @@
  * Necessary due to JSDOM not providing TextDecoder
  * https://stackoverflow.com/a/57713960
  */
-import axios from 'axios';
 import imageCompression from 'browser-image-compression';
-import imageSize from 'image-size';
 import { create } from 'ipfs-http-client';
 
-import { SupportedImageBufferFormats } from '../interfaces/metadata';
-
-import { imageUpload, ipfsUpload, resizeBuffer } from './uploader.helper';
+import { imageUpload, ipfsUpload } from './uploader.helper';
 
 jest.mock('ipfs-http-client');
 jest.mock('browser-image-compression');
@@ -66,39 +62,37 @@ describe('uploader.helper.spec.ts', () => {
       expect(drawFileInCanvasSpy).toBeCalledTimes(5);
     });
 
-    it('should accept images as buffer', async () => {
-      const { addMock } = await mockDependencies();
+    // it('should accept images as buffer', async () => {
+    //   const { addMock } = await mockDependencies();
 
-      const imageResponse = await axios.get('https://picsum.photos/200/300', {
-        responseType: 'arraybuffer',
-      });
-      const buffer = Buffer.from(imageResponse.data as string, 'binary');
+    //   const imageResponse = await axios.get('https://picsum.photos/200/300', {
+    //     responseType: 'arraybuffer',
+    //   });
+    //   const buffer = Buffer.from(imageResponse.data as string, 'binary');
 
-      const result = await imageUpload(
-        { buffer, mimeType: SupportedImageBufferFormats.MIME_JPEG },
-        { ipfsClientOptions: {} }
-      );
+    //   const result = await imageUpload(
+    //     { buffer, mimeType: SupportedImageBufferFormats.MIME_JPEG },
+    //     { ipfsClientOptions: {} }
+    //   );
 
-      expect(addMock).toHaveBeenCalled();
+    //   expect(addMock).toHaveBeenCalled();
 
-      expect(result.length === 5);
-      expect(result[0]).toHaveProperty('width');
-      expect(result[0]).toHaveProperty('height');
-      expect(result[0]).toHaveProperty('hashFunction');
-      expect(result[0]).toHaveProperty('hash');
-      expect(result[0]).toHaveProperty('url');
-    });
+    //   expect(result.length === 5);
+    //   expect(result[0]).toHaveProperty('width');
+    //   expect(result[0]).toHaveProperty('height');
+    //   expect(result[0]).toHaveProperty('hashFunction');
+    //   expect(result[0]).toHaveProperty('hash');
+    //   expect(result[0]).toHaveProperty('url');
+    // });
   });
 
   it('should accept custom IPFS client options', async () => {
     const { addMock } = await mockDependencies();
-    const imageResponse = await axios.get('https://picsum.photos/200/300', {
-      responseType: 'arraybuffer',
-    });
-    const buffer = Buffer.from(imageResponse.data as string, 'binary');
 
     const result = await imageUpload(
-      { buffer, mimeType: SupportedImageBufferFormats.MIME_JPEG },
+      new File(['sdfasdf'], 'file-name', {
+        type: 'image/zip',
+      }),
       {
         ipfsClientOptions: { host: 'ipfs.infura.io', port: 5001, protocol: 'https' },
       }
@@ -114,24 +108,24 @@ describe('uploader.helper.spec.ts', () => {
     expect(result[0]).toHaveProperty('url');
   });
 
-  describe('#resizeBuffer', () => {
-    it('should resize buffer images', async () => {
-      const imageResponse = await axios.get('https://picsum.photos/200/300', {
-        responseType: 'arraybuffer',
-      });
-      const buffer = Buffer.from(imageResponse.data as string, 'binary');
+  // describe('#resizeBuffer', () => {
+  //   it('should resize buffer images', async () => {
+  //     const imageResponse = await axios.get('https://picsum.photos/200/300', {
+  //       responseType: 'arraybuffer',
+  //     });
+  //     const buffer = Buffer.from(imageResponse.data as string, 'binary');
 
-      const size = 10;
-      const result = await resizeBuffer(buffer as Buffer, 'image/jpeg', size);
+  //     const size = 10;
+  //     const result = await resizeBuffer(buffer as Buffer, 'image/jpeg', size);
 
-      expect(result.byteLength < buffer.byteLength);
+  //     expect(result.byteLength < buffer.byteLength);
 
-      const resizedDimensions = imageSize(result);
+  //     const resizedDimensions = imageSize(result);
 
-      expect(resizedDimensions.height <= size);
-      expect(resizedDimensions.width <= size);
-    });
-  });
+  //     expect(resizedDimensions.height <= size);
+  //     expect(resizedDimensions.width <= size);
+  //   });
+  // });
 });
 
 async function mockDependencies() {
