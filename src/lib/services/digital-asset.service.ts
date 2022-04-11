@@ -412,14 +412,17 @@ export function setMetadataAndTransferOwnership$(
   isSignerUniversalProfile$: Observable<boolean>
 ) {
   return concat(
-    setLSP4Metadata$(
-      signer,
-      digitalAsset$,
-      lsp4Metadata$,
-      contractName,
-      digitalAssetDeploymentOptions,
-      isSignerUniversalProfile$
-    ),
+    digitalAssetDeploymentOptions?.creators?.length ||
+      digitalAssetDeploymentOptions?.digitalAssetMetadata
+      ? setLSP4Metadata$(
+          signer,
+          digitalAsset$,
+          lsp4Metadata$,
+          contractName,
+          digitalAssetDeploymentOptions,
+          isSignerUniversalProfile$
+        )
+      : EMPTY,
     transferOwnership$(
       signer,
       digitalAsset$,
@@ -495,12 +498,18 @@ async function setData(
     );
   });
 
-  const keysToSet = [LSP4_KEYS.LSP4_CREATORS_ARRAY, ...creatorArrayIndexKeys, ...creatorsMapKeys];
-  const valuesToSet = [
-    ethers.utils.hexZeroPad(ethers.utils.hexlify([creators.length]), 32),
-    ...creatorArrayIndexValues,
-    ...creatorsMapValues,
-  ];
+  const keysToSet = [];
+  const valuesToSet = [];
+
+  if (creators.length) {
+    keysToSet.push(LSP4_KEYS.LSP4_CREATORS_ARRAY);
+    keysToSet.push(...creatorArrayIndexKeys);
+    keysToSet.push(...creatorsMapKeys);
+
+    valuesToSet.push(ethers.utils.hexZeroPad(ethers.utils.hexlify([creators.length]), 32));
+    valuesToSet.push(...creatorArrayIndexValues);
+    valuesToSet.push(...creatorsMapValues);
+  }
 
   if (lsp4Metadata) {
     keysToSet.push(LSP4_KEYS.LSP4_METADATA);
