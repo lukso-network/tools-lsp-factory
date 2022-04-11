@@ -412,14 +412,17 @@ export function setMetadataAndTransferOwnership$(
   isSignerUniversalProfile$: Observable<boolean>
 ) {
   return concat(
-    setLSP4Metadata$(
-      signer,
-      digitalAsset$,
-      lsp4Metadata$,
-      contractName,
-      digitalAssetDeploymentOptions,
-      isSignerUniversalProfile$
-    ),
+    digitalAssetDeploymentOptions?.creators?.length ||
+      digitalAssetDeploymentOptions?.digitalAssetMetadata
+      ? setLSP4Metadata$(
+          signer,
+          digitalAsset$,
+          lsp4Metadata$,
+          contractName,
+          digitalAssetDeploymentOptions,
+          isSignerUniversalProfile$
+        )
+      : EMPTY,
     transferOwnership$(
       signer,
       digitalAsset$,
