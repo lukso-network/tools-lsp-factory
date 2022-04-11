@@ -420,7 +420,13 @@ export function setMetadataAndTransferOwnership$(
       digitalAssetDeploymentOptions,
       isSignerUniversalProfile$
     ),
-    transferOwnership$(signer, digitalAsset$, digitalAssetDeploymentOptions, contractName)
+    transferOwnership$(
+      signer,
+      digitalAsset$,
+      digitalAssetDeploymentOptions,
+      contractName,
+      isSignerUniversalProfile$
+    )
   );
 }
 
@@ -523,14 +529,19 @@ export function transferOwnership$(
   signer: Signer,
   digitalAsset$: DeploymentEvent$,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
-  contractName: string
+  contractName: string,
+  isSignerUniversalProfile$: Observable<boolean>
 ) {
-  const transferOwnershipTransaction$ = forkJoin([digitalAsset$]).pipe(
-    switchMap(([{ receipt: digitalAssetDeploymentReceipt }]) => {
+  const transferOwnershipTransaction$ = forkJoin([digitalAsset$, isSignerUniversalProfile$]).pipe(
+    switchMap(([{ receipt: digitalAssetDeploymentReceipt }, isSignerUniversalProfile]) => {
+      const digitalAssetAddress = isSignerUniversalProfile
+        ? digitalAssetDeploymentReceipt.contractAddress ||
+          digitalAssetDeploymentReceipt.logs[0].address
+        : digitalAssetDeploymentReceipt.contractAddress || digitalAssetDeploymentReceipt.to;
+
       return transferOwnership(
         signer,
-        digitalAssetDeploymentReceipt.contractAddress ||
-          digitalAssetDeploymentReceipt.logs[0].address, // CHeck this when deploying with UP
+        digitalAssetAddress,
         digitalAssetDeploymentOptions.controllerAddress,
         contractName
       );
