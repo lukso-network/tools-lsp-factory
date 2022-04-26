@@ -14,7 +14,7 @@ LSP4DigitalAssetMetadata.uploadMetadata(lsp4Metadata, uploadOptions?);
 Uploads and processes passed assets and images, and uploads the [LSP4 Digital Asset Metadata](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-4-DigitalAsset-Metadata.md) to IPFS.
 The `uploadMetadata` function is available as a static or non-static function callable on the `LSPFactory` library instance.
 
-If `uploadOptions` are not specified in the function call, and the function is used on an `LSPFactory` instance, the specified options in `uploadOptions` that were passed to the LSPFactory will be used.
+If `uploadOptions` are not specified in the function call, and the function is used on an `LSPFactory` instance, the specified options in `uploadOptions` that were passed to the LSPFactory during instantiation will be used.
 
 #### Parameters
 

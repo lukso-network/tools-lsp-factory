@@ -32,7 +32,7 @@ The property `ipfsClientOptions` is an optional parameter and so may be omitted.
 If you do not want your contract to use proxy deployment, you can set the `deployProxy` property to `false`, which will deploy a standalone contract with a constructor rather than a proxy deployment with an initializer.
 
 :::info Info
-LSPFactory stores the base contract addresses for different versions [internally](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json) and uses the latest available version if no one is specified.
+LSPFactory stores the base contract addresses for different versions [internally](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json) and uses the latest available version if none is specified.
 :::
 
 ## Custom Bytecode

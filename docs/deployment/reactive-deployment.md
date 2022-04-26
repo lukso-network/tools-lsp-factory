@@ -7,7 +7,7 @@ title: Reactive Deployment
 
 The `lsp-factory.js` uses the [RxJS](https://github.com/ReactiveX/rxjs) library to deploy contracts. Developers can leverage this to achieve reactive deployment of Universal Profiles and Digital Assets.
 
-When deploying a Universal Profile or Digital Asset, pass the `deployReactive` flag inside the [ContractDeploymentOptions](../deployment/05-contract-deployment-options.md) object to receive an RxJS Observable, which will emit events as your contract is deployed.
+When deploying a Universal Profile or Digital Asset, pass the `deployReactive` flag inside the [ContractDeploymentOptions](../deployment/contract-deployment-options.md) object to receive an RxJS Observable, which will emit events as your contract is deployed.
 
 ### Universal Profiles
 
@@ -73,7 +73,7 @@ lspFactory.LSP7DigitalAsset
 
 #### Example LSP8 Deployment
 
-```typescript title="Deploying as LSP8 Contract"
+```typescript title="Deploying an LSP8 Contract"
 let deploymentEvents = [];
 lspFactory.LSP8IdentifiableDigitalAsset
   .deploy({...}, { deployReactive: true })
