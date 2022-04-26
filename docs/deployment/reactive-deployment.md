@@ -33,98 +33,20 @@ The function defined in `complete` will be called once after the deployment is f
 
 ```typescript title="Output from calling the console.log(deploymentEvents) function"
 [
-  {
-    type: 'PROXY',
-    contractName: 'ERC725Account',
-    status: 'PENDING',
-    transaction: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'ERC725Account',
-    status: 'PENDING',
-    receipt: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'ERC725Account',
-    functionName: 'initialize',
-    status: 'PENDING',
-    transaction: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'ERC725Account',
-    functionName: 'initialize',
-    status: 'COMPLETE',
-    receipt: {},
-  },
-  {
-    type: 'CONTRACT',
-    contractName: 'KeyManager',
-    status: 'PENDING',
-    transaction: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'UniversalReceiver...',
-    status: 'PENDING',
-    transaction: {},
-  },
-  {
-    type: 'CONTRACT',
-    contractName: 'KeyManager',
-    status: 'COMPLETE',
-    receipt: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'UniversalReceiver...',
-    status: 'PENDING',
-    receipt: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'UniversalReceiver...',
-    functionName: 'initialize',
-    status: 'PENDING',
-    transaction: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'UniversalReceiver...',
-    functionName: 'initialize',
-    status: 'COMPLETE',
-    receipt: {},
-  },
-  {
-    type: 'TRANSACTION',
-    contractName: 'ERC725Account',
-    functionName: 'setData',
-    status: 'PENDING',
-    transaction: {},
-  },
-  {
-    type: 'TRANSACTION',
-    contractName: 'ERC725Account',
-    functionName: 'setData',
-    status: 'COMPLETE',
-    receipt: {},
-  },
-  {
-    type: 'TRANSACTION',
-    contractName: 'ERC725Account',
-    functionName: 'transferOwnership',
-    status: 'PENDING',
-    transaction: {},
-  },
-  {
-    type: 'TRANSACTION',
-    contractName: 'ERC725Account',
-    functionName: 'transferOwnership',
-    status: 'COMPLETE',
-    receipt: {},
-  },
+  { type: 'PROXY',        contractName: 'ERC725Account',                                           status: 'PENDING',  transaction:  {} },
+  { type: "PROXY",        contractName: 'ERC725Account',                                           status: 'PENDING',  receipt:      {} },
+  { type: "PROXY",        contractName: 'ERC725Account',        functionName: 'initialize',        status: 'PENDING',  transaction:  {} },
+  { type: "PROXY",        contractName: 'ERC725Account',        functionName: 'initialize',        status: 'COMPLETE', receipt:      {} },
+  { type: 'CONTRACT',     contractName: 'KeyManager',                                              status: 'PENDING',  transaction:  {} },
+  { type: "PROXY",        contractName: 'UniversalReceiver...',                                    status: 'PENDING',  transaction:  {} },
+  { type: 'CONTRACT',     contractName: 'KeyManager',                                              status: 'COMPLETE', receipt:      {} },
+  { type: "PROXY",        contractName: 'UniversalReceiver...',                                    status: 'PENDING',  receipt:      {} },
+  { type: "PROXY",        contractName: 'UniversalReceiver...', functionName: 'initialize',        status: 'PENDING',  transaction:  {} },
+  { type: "PROXY",        contractName: 'UniversalReceiver...', functionName: 'initialize',        status: 'COMPLETE', receipt:      {} },
+  { type: 'TRANSACTION',  contractName: 'ERC725Account',        functionName: 'setData',           status: 'PENDING',  transaction:  {} },
+  { type: 'TRANSACTION',  contractName: 'ERC725Account',        functionName: 'setData',           status: 'COMPLETE', receipt:      {} },
+  { type: 'TRANSACTION',  contractName: 'ERC725Account',        functionName: 'transferOwnership', status: 'PENDING',  transaction:  {} },
+  { type: 'TRANSACTION',  contractName: 'ERC725Account',        functionName: 'transferOwnership', status: 'COMPLETE', receipt:      {} },
 ];
 ```
 
@@ -169,32 +91,10 @@ lspFactory.LSP8IdentifiableDigitalAsset
 
 ```typescript
 [
-  {
-    type: 'PROXY',
-    contractName: 'LSP7DigitalAsset',
-    status: 'PENDING',
-    transaction: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'LSP7DigitalAsset',
-    status: 'PENDING',
-    receipt: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'LSP7DigitalAsset',
-    functionName: 'initialize',
-    status: 'PENDING',
-    transaction: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'LSP7DigitalAsset',
-    functionName: 'initialize',
-    status: 'COMPLETE',
-    receipt: {},
-  },
+  { type: 'PROXY', contractName: 'LSP7DigitalAsset',                             status: 'PENDING',  transaction:  {} },
+  { type: "PROXY", contractName: 'LSP7DigitalAsset',                             status: 'PENDING',  receipt:      {} },
+  { type: "PROXY", contractName: 'LSP7DigitalAsset', functionName: 'initialize', status: 'PENDING',  transaction:  {} },
+  { type: "PROXY", contractName: 'LSP7DigitalAsset', functionName: 'initialize', status: 'COMPLETE', receipt:      {} },
 ];
 ```
 
@@ -202,106 +102,10 @@ lspFactory.LSP8IdentifiableDigitalAsset
 
 ```typescript
 [
-  {
-    type: 'PROXY',
-    contractName: 'LSP8IdentifiableDigitalAsset',
-    status: 'PENDING',
-    transaction: {},
-  },
-  contractName: 'LSP7DigitalAsset',
-    status: 'PENDING',
-    transaction: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'LSP7DigitalAsset',
-    status: 'PENDING',
-    receipt: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'LSP7DigitalAsset',
-    functionName: 'initialize',
-    status: 'PENDING',
-    transaction: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'LSP7DigitalAsset',
-    functionName: 'initialize',
-    status: 'COMPLETE',
-    receipt: {},
-  },
-];
-```
-
-#### LSP8 Deployment Events
-
-```typescript
-[
-  {
-    type: 'PROXY',
-    contractName: 'LSP8IdentifiableDigitalAsset',
-    status: 'PENDING',
-    transaction: {},
-  },
-  contractName: 'LSP7DigitalAsset',
-    status: 'PENDING',
-    transaction: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'LSP7DigitalAsset',
-    status: 'PENDING',
-    receipt: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'LSP7DigitalAsset',
-    functionName: 'initialize',
-    status: 'PENDING',
-    transaction: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'LSP7DigitalAsset',
-    functionName: 'initialize',
-    status: 'COMPLETE',
-    receipt: {},
-  },
-];
-```
-
-#### LSP8 Deployment Events
-
-```typescript
-[
-  {
-    type: 'PROXY',
-    contractName: 'LSP8IdentifiableDigitalAsset',
-    status: 'PENDING',
-    transaction: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'LSP8IdentifiableDigitalAsset',
-    status: 'PENDING',
-    receipt: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'LSP8IdentifiableDigitalAsset',
-    functionName: 'initialize',
-    status: 'PENDING',
-    transaction: {},
-  },
-  {
-    type: 'PROXY',
-    contractName: 'LSP8IdentifiableDigitalAsset',
-    functionName: 'initialize',
-    status: 'COMPLETE',
-    receipt: {},
-  },
+  { type: 'PROXY', contractName: 'LSP8IdentifiableDigitalAsset',                             status: 'PENDING',  transaction:  {} },
+  { type: "PROXY", contractName: 'LSP8IdentifiableDigitalAsset',                             status: 'PENDING',  receipt:      {} },
+  { type: "PROXY", contractName: 'LSP8IdentifiableDigitalAsset', functionName: 'initialize', status: 'PENDING',  transaction:  {} },
+  { type: "PROXY", contractName: 'LSP8IdentifiableDigitalAsset', functionName: 'initialize', status: 'COMPLETE', receipt:      {} },
 ];
 ```
 
