@@ -254,18 +254,7 @@ async function getEncodedLSP3ProfileData(
     lsp3ProfileDataForEncoding = lsp3Profile;
   }
 
-  let encodedDataResult;
-
-  if ('hash' in lsp3ProfileDataForEncoding) {
-    encodedDataResult = erc725EncodeData({ LSP3Profile: lsp3ProfileDataForEncoding });
-  } else {
-    encodedDataResult = erc725EncodeData({
-      LSP3Profile: {
-        json: lsp3ProfileDataForEncoding.json,
-        url: lsp3ProfileDataForEncoding.url,
-      },
-    });
-  }
+  const encodedDataResult = erc725EncodeData({ LSP3Profile: lsp3ProfileDataForEncoding });
 
   return encodedDataResult.LSP3Profile.value;
 }

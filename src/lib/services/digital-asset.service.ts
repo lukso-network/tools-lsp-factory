@@ -401,20 +401,9 @@ export async function getEncodedLSP4Metadata(
     lsp4MetadataForEncoding = lsp4Metadata;
   }
 
-  let encodedLSP4Metadata;
-
-  if ('hash' in lsp4MetadataForEncoding) {
-    encodedLSP4Metadata = erc725EncodeData({
-      LSP4Metadata: lsp4MetadataForEncoding,
-    });
-  } else {
-    encodedLSP4Metadata = erc725EncodeData({
-      LSP4Metadata: {
-        json: lsp4MetadataForEncoding.json,
-        url: lsp4MetadataForEncoding.url,
-      },
-    });
-  }
+  const encodedLSP4Metadata = erc725EncodeData({
+    LSP4Metadata: lsp4MetadataForEncoding,
+  });
 
   return encodedLSP4Metadata.LSP4Metadata.value;
 }

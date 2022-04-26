@@ -1,6 +1,9 @@
 import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
 import { providers } from 'ethers';
 
+import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
+import { LSP4MetadataForEncoding } from '../interfaces/lsp4-digital-asset';
+
 export const schema: ERC725JSONSchema[] = [
   {
     name: 'LSP3Profile',
@@ -26,7 +29,11 @@ export function getERC725(address?: string, provider?: providers.Web3Provider) {
   return new ERC725(schema);
 }
 
-export function erc725EncodeData(lsp3Profile) {
+export function erc725EncodeData(
+  lsp3Profile:
+    | { LSP4Metadata: LSP4MetadataForEncoding }
+    | { LSP3Profile: LSP3ProfileDataForEncoding }
+) {
   const myERC725 = getERC725();
   return myERC725.encodeData(lsp3Profile);
 }
