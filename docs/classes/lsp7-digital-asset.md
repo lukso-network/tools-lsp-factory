@@ -25,14 +25,14 @@ Deploys a mintable [LSP7 Digital Asset](../../../standards/nft-2.0/LSP7-Digital-
 
 #### Parameters of `digitalAssetDeploymentOptions`
 
-| Name                    | Type                               | Description                                                           |
-| :---------------------- | :--------------------------------- | :-------------------------------------------------------------------- |
-| `name`                  | string                             | The name of the token.                                                |
-| `symbol`                | string                             | The symbol of the token.                                              |
-| `controllerAddress`     | string                             | The owner of the contract.                                            |
-| `isNFT`                 | boolean                            | Specify if the contract represent a fungible or a non-fungible token. |
-| `digitalAssetMetadata?` | LSP4MetadataBeforeUpload or string | The [LSP4] metadata to be attached to the smart contract.             |
-| `creators?`             | string[&nbsp;]                     | The [LSP4] metadata to be attached to the smart contract.             |
+| Name                    | Type                               | Description                                                                         |
+| :---------------------- | :--------------------------------- | :---------------------------------------------------------------------------------- |
+| `name`                  | string                             | The name of the token.                                                              |
+| `symbol`                | string                             | The symbol of the token.                                                            |
+| `controllerAddress`     | string                             | The owner of the contract.                                                          |
+| `isNFT`                 | boolean                            | Specify if the token should be fungible by setting the [LSP7 decimals] value to 18. |
+| `digitalAssetMetadata?` | LSP4MetadataBeforeUpload or string | The [LSP4] metadata to be attached to the smart contract.                           |
+| `creators?`             | string[&nbsp;]                     | The [LSP4] metadata to be attached to the smart contract.                           |
 
 :::info
 The property `digitalAssetMetadata?` can be:
@@ -174,3 +174,4 @@ Deployment Complete
 [eip1167]: https://eips.ethereum.org/EIPS/eip-1167
 [rxjs observable]: https://rxjs.dev/guide/observable
 [ipfs-http-client]: https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions
+[lsp7 decimals]: https://github.com/lukso-network/lsp-smart-contracts/blob/develop/docs/ILSP7DigitalAsset.md#decimals
