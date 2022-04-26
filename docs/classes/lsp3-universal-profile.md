@@ -59,10 +59,10 @@ See the [configuration specification](../deployment/universal-profile#configurat
 
 #### Returns
 
-| Name         | Type              | Description                                                                                                       |
-| :----------- | :---------------- | :---------------------------------------------------------------------------------------------------------------- |
-| `Promise`    | &ltObject&gt      | An object containing deployed contract details by default.                                                        |
-| `Observable` | RxJS &ltObject&gt | An [RxJS Observable] object, if `deployReactive` flag is set to `true` in the `contractDeploymentOptions?` object |
+| Name         | Type           | Description                                                                                                       |
+| :----------- | :------------- | :---------------------------------------------------------------------------------------------------------------- |
+| `Promise`    | <Object/>      | An object containing deployed contract details by default.                                                        |
+| `Observable` | RxJS <Object/> | An [RxJS Observable] object, if `deployReactive` flag is set to `true` in the `contractDeploymentOptions?` object |
 
 :::note
 The Observable is an object containing deployment events.
@@ -315,9 +315,9 @@ Will upload and process passed images.
 
 #### Returns
 
-| Name      | Type                             | Description                           |
-| :-------- | :------------------------------- | :------------------------------------ |
-| `Promise` | &ltLSP3ProfileDataForEncoding&gt | Processed [LSP3] data and upload URL. |
+| Name      | Type                          | Description                           |
+| :-------- | :---------------------------- | :------------------------------------ |
+| `Promise` | <LSP3ProfileDataForEncoding\> | Processed [LSP3] data and upload URL. |
 
 #### Uploading Profile Data Example
 

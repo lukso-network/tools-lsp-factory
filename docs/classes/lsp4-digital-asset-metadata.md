@@ -41,9 +41,9 @@ If `uploadOptions` are not specified in the function call, and the function is u
 
 #### Returns
 
-| Name      | Type                          | Description                               |
-| :-------- | :---------------------------- | :---------------------------------------- |
-| `Promise` | &ltLSP4MetadataForEncoding&gt | The processed [LSP4] data and upload URL. |
+| Name      | Type                       | Description                               |
+| :-------- | :------------------------- | :---------------------------------------- |
+| `Promise` | <LSP4MetadataForEncoding\> | The processed [LSP4] data and upload URL. |
 
 #### Upload LSP4 Metadata Example
 

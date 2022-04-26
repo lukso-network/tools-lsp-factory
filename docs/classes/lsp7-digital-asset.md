@@ -61,10 +61,10 @@ You can read more about the `contractDeploymentOptions?` specification on [its o
 
 #### Returns
 
-| Name         | Type                                                                 | Description                                                 |
-| :----------- | :------------------------------------------------------------------- | :---------------------------------------------------------- |
-| `Promise`    | &ltDeployedLSP7DigitalAsset&gt, or &ltDigitalAssetDeploymentEvent&gt | An object containing deployed contract details.             |
-| `Observable` | RxJS &ltObject&gt                                                    | An [RxJS Observable], if `deployReactive` is set to `true`. |
+| Name         | Type                                                           | Description                                                 |
+| :----------- | :------------------------------------------------------------- | :---------------------------------------------------------- |
+| `Promise`    | <DeployedLSP7DigitalAsset\>, or <DigitalAssetDeploymentEvent\> | An object containing deployed contract details.             |
+| `Observable` | RxJS <Object\>                                                 | An [RxJS Observable], if `deployReactive` is set to `true`. |
 
 :::info
 The `deployReactive` flag can be set in the `ContractDeploymentOptions` object, and returns an [RxJS Observable] of deployment events.

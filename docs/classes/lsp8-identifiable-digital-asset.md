@@ -34,10 +34,10 @@ Deploys a mintable [LSP8 Identifiable Digital Asset](../../../standards/nft-2.0/
 
 #### Returns
 
-| Name         | Type                                                                 | Description                                                |
-| :----------- | :------------------------------------------------------------------- | :--------------------------------------------------------- |
-| `Promise`    | &ltDeployedLSP8DigitalAsset&gt, or &ltDigitalAssetDeploymentEvent&gt | An object containing deployed contract details.            |
-| `Observable` | RxJS &ltObject&gt                                                    | An [RxJS Observable], if `deployReactive` is set to `true` |
+| Name         | Type                                                           | Description                                                |
+| :----------- | :------------------------------------------------------------- | :--------------------------------------------------------- |
+| `Promise`    | <DeployedLSP8DigitalAsset\>, or <DigitalAssetDeploymentEvent\> | An object containing deployed contract details.            |
+| `Observable` | RxJS <Object\>                                                 | An [RxJS Observable], if `deployReactive` is set to `true` |
 
 :::info
 The `deployReactive` flag can be set in the `ContractDeploymentOptions` object, and returns an [RxJS Observable] of deployment events.
