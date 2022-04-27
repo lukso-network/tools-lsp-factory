@@ -139,7 +139,11 @@ export async function prepareMetadataAsset(
 // }
 
 export function isMetadataEncoded(metdata: string): boolean {
-  if (!metdata.startsWith('ipfs://') && !metdata.startsWith('https://')) {
+  if (
+    metdata.startsWith('0x') &&
+    !metdata.startsWith('ipfs://') &&
+    !metdata.startsWith('https://')
+  ) {
     return true;
   }
 

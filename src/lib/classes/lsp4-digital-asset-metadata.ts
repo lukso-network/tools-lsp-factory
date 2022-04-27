@@ -3,7 +3,7 @@ import { ipfsUpload, prepareMetadataAsset, prepareMetadataImage } from '../helpe
 import { LSPFactoryOptions } from '../interfaces';
 import {
   LSP4MetadataBeforeUpload,
-  LSP4MetadataForEncoding,
+  LSP4MetadataUrlForEncoding,
 } from '../interfaces/lsp4-digital-asset';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 
@@ -17,7 +17,7 @@ export class LSP4DigitalAssetMetadata {
   static async uploadMetadata(
     metaData: LSP4MetadataBeforeUpload,
     uploadOptions?: UploadOptions
-  ): Promise<LSP4MetadataForEncoding> {
+  ): Promise<LSP4MetadataUrlForEncoding> {
     uploadOptions = uploadOptions || defaultUploadOptions;
 
     const [images, assets, icon] = await Promise.all([
@@ -51,7 +51,7 @@ export class LSP4DigitalAssetMetadata {
     }
 
     return {
-      lsp4Metadata: lsp4Metadata,
+      json: lsp4Metadata,
       url: uploadResponse.cid ? 'ipfs://' + uploadResponse.cid : 'https upload TBD',
     };
   }

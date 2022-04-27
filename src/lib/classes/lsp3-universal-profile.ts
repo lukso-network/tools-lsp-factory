@@ -14,7 +14,7 @@ import {
   ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
 } from '../interfaces';
-import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
+import { ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import {
   ContractDeploymentOptionsNonReactive,
   ContractDeploymentOptionsReactive,
@@ -224,7 +224,7 @@ export class LSP3UniversalProfile {
   static async uploadProfileData(
     profileData: ProfileDataBeforeUpload,
     uploadOptions?: UploadOptions
-  ): Promise<LSP3ProfileDataForEncoding> {
+  ): Promise<ProfileDataForEncoding> {
     uploadOptions = uploadOptions || defaultUploadOptions;
     const [profileImage, backgroundImage] = await Promise.all([
       prepareMetadataImage(uploadOptions, profileData.profileImage),
@@ -247,7 +247,7 @@ export class LSP3UniversalProfile {
     }
 
     return {
-      profile,
+      json: profile,
       url: uploadResponse.cid ? 'ipfs://' + uploadResponse.cid : 'https upload TBD',
     };
   }
