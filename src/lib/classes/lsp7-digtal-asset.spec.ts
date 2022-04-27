@@ -62,7 +62,7 @@ describe('LSP7DigitalAsset', () => {
         symbol: 'TKN',
       },
       {
-        libAddress: baseContract.address,
+        version: baseContract.address,
       }
     );
 
@@ -160,7 +160,7 @@ describe('LSP7DigitalAsset', () => {
         symbol: 'TKN',
       },
       {
-        byteCode: passedBytecode,
+        version: passedBytecode,
       }
     );
 

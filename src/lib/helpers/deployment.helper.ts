@@ -1,4 +1,5 @@
 import { Contract, ContractFactory, ContractInterface, providers, Signer } from 'ethers';
+import { getAddress } from 'ethers/lib/utils';
 import { lastValueFrom, Observable } from 'rxjs';
 import { catchError, scan, shareReplay, switchMap, takeLast } from 'rxjs/operators';
 
@@ -200,4 +201,13 @@ export function waitForContractDeployment$(deployment$: Observable<DeploymentEve
       shareReplay()
     )
   );
+}
+
+export function isAddress(testAddress: string) {
+  try {
+    getAddress(testAddress);
+    return true;
+  } catch {
+    return false;
+  }
 }

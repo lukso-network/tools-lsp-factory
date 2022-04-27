@@ -28,7 +28,12 @@ import {
   GAS_PRICE,
   LSP4_KEYS,
 } from '../helpers/config.helper';
-import { deployContract, deployProxyContract, waitForReceipt } from '../helpers/deployment.helper';
+import {
+  deployContract,
+  deployProxyContract,
+  isAddress,
+  waitForReceipt,
+} from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
 import { isMetadataEncoded } from '../helpers/uploader.helper';
 import {
@@ -40,7 +45,9 @@ import {
   DeploymentType,
 } from '../interfaces';
 import {
+  ContractDeploymentOptions,
   ContractNames,
+  DigitalAssetConfiguration,
   DigitalAssetDeploymentOptions,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
@@ -602,4 +609,34 @@ async function transferOwnership(
     console.error('Error when transferring ownership');
     throw error;
   }
+}
+
+export function convertConfigurationObject(
+  contractDeploymentOptions?: ContractDeploymentOptions
+): DigitalAssetConfiguration {
+  let version: string;
+  let byteCode: string;
+  let libAddress: string;
+
+  if (
+    contractDeploymentOptions?.version &&
+    contractDeploymentOptions?.version.slice(0, 2) === '0x'
+  ) {
+    if (isAddress(contractDeploymentOptions?.version)) {
+      libAddress = contractDeploymentOptions?.version;
+    } else {
+      byteCode = contractDeploymentOptions?.version;
+    }
+  } else if (contractDeploymentOptions?.version) {
+    version = contractDeploymentOptions?.version;
+  }
+
+  return {
+    deployProxy: contractDeploymentOptions?.deployProxy,
+    uploadOptions: contractDeploymentOptions?.uploadOptions,
+    deployReactive: contractDeploymentOptions?.deployReactive,
+    version,
+    byteCode,
+    libAddress,
+  };
 }

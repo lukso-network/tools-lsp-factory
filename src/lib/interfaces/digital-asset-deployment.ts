@@ -30,8 +30,6 @@ export interface DeployedLSP7DigitalAsset {
 
 interface ContractDeploymentOptionsBase {
   version?: string;
-  byteCode?: string;
-  libAddress?: string;
   deployProxy?: boolean;
   uploadOptions?: UploadOptions;
 }
@@ -46,3 +44,12 @@ export interface ContractDeploymentOptionsNonReactive extends ContractDeployment
 export type ContractDeploymentOptions =
   | ContractDeploymentOptionsReactive
   | ContractDeploymentOptionsNonReactive;
+
+export interface DigitalAssetConfiguration {
+  version?: string;
+  byteCode?: string;
+  libAddress?: string;
+  deployProxy?: boolean;
+  uploadOptions?: UploadOptions;
+  deployReactive: boolean;
+}
