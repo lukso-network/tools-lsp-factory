@@ -5,7 +5,7 @@ title: Universal Profile
 
 # Deploying a Universal Profile
 
-LSPFactory allows you to quickly deploy and configure a Universal Profile consisting of an [LSP0 ERC725 Account](../../../standards/universal-profile/lsp0-erc725account), an [LSP6 Key Manager](../../../standards/universal-profile/lsp6-key-manager), and an [LSP1-UniversalReceiver](../../../standards/generic-standards/02-lsp1-universal-receiver.md) smart contract:
+LSPFactory allows you to quickly deploy and configure a Universal Profile consisting of an [LSP0 ERC725 Account](../../../standards/universal-profile/lsp0-erc725account), an [LSP6 Key Manager](../../../standards/universal-profile/lsp6-key-manager), and an [LSP1-UniversalReceiver](../../../standards/generic-standards/lsp1-universal-receiver.md) smart contract:
 
 ```javascript
 await lspFactory.UniversalProfile.deploy(profileProperties [, options]);
@@ -15,7 +15,7 @@ This will deploy the following contracts:
 
 - [LSP0 ERC725 Account](../../../standards/universal-profile/lsp0-erc725account)
 - [LSP6 Key Manager](../../../standards/universal-profile/lsp6-key-manager)
-- And link to a pre-deployed [LSP1 Universal Receiver](../../../standards/generic-standards/02-lsp1-universal-receiver.md)
+- And link to a pre-deployed [LSP1 Universal Receiver](../../../standards/generic-standards/lsp1-universal-receiver.md)
 
 After, it will:
 
@@ -32,7 +32,7 @@ Inside the `profileProperties` object, you can set profile configuration options
 
 ### Controller Addresses
 
-You can set the addresses which should be able to control your Universal Profile initially by passing in the `controllerAddresses`. The addresses that were passed here will be given all LSP6 KeyManager permissions except `DELEGATECALL` to [prevent accidental misuse](https://solidity-by-example.org/hacks/delegatecall/). If your controller keys require `DELEGATECALL`, you can [change the permission after deployment](../../../guides/key-manager/01-give-permissions.md).
+You can set the addresses which should be able to control your Universal Profile initially by passing in the `controllerAddresses`. The addresses that were passed here will be given all LSP6 KeyManager permissions except `DELEGATECALL` to [prevent accidental misuse](https://solidity-by-example.org/hacks/delegatecall/). If your controller keys require `DELEGATECALL`, you can [change the permission after deployment](../../../guides/key-manager/give-permissions.md).
 
 The property `controllerAddresses` can be filled with addresses of externally owned accounts (EOAs) or another smart contract that can call the `execute(calldata)` function on the KeyManager.
 
@@ -285,7 +285,7 @@ await UniversalProfile.uploadMetaData(myLSP3MetaData);
 
 ## Deployment Configuration
 
-A Universal Profile is composed of three smart contracts. [LSP0 ERC725 Account](../../../standards/universal-profile/lsp0-erc725account), [LSP6 Key Manager](../../../standards/universal-profile/lsp6-key-manager), and [LSP1-UniversalReceiver](../../../standards/generic-standards/02-lsp1-universal-receiver.md).
+A Universal Profile is composed of three smart contracts. [LSP0 ERC725 Account](../../../standards/universal-profile/lsp0-erc725account), [LSP6 Key Manager](../../../standards/universal-profile/lsp6-key-manager), and [LSP1-UniversalReceiver](../../../standards/generic-standards/lsp1-universal-receiver.md).
 When deploying a Universal Profile, you can configure how developers should deploy these contracts inside the `contractDeploymentOptions` object. Builders can configure each contract separately. The available options are the same for all contracts.
 
 ```javascript
