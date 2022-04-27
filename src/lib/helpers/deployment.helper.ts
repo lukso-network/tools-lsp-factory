@@ -211,3 +211,19 @@ export function isAddress(testAddress: string) {
     return false;
   }
 }
+
+export function convertContractDeploymentOptionsVersion(providedVersion?: string) {
+  let version: string, byteCode: string, libAddress: string;
+
+  if (providedVersion && providedVersion.startsWith('0x')) {
+    if (isAddress(providedVersion)) {
+      libAddress = providedVersion;
+    } else {
+      byteCode = providedVersion;
+    }
+  } else if (providedVersion) {
+    version = providedVersion;
+  }
+
+  return { version, byteCode, libAddress };
+}

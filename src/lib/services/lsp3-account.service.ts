@@ -19,6 +19,7 @@ import {
   PREFIX_PERMISSIONS,
 } from '../helpers/config.helper';
 import {
+  convertContractDeploymentOptionsVersion,
   deployContract,
   getProxyByteCode,
   initialize,
@@ -28,6 +29,7 @@ import { erc725EncodeData } from '../helpers/erc725.helper';
 import { isMetadataEncoded } from '../helpers/uploader.helper';
 import {
   BaseContractAddresses,
+  ContractDeploymentOptions,
   ContractNames,
   ControllerOptions,
   DeploymentEvent$,
@@ -38,6 +40,7 @@ import {
   DeploymentType,
   LSP3ProfileJSON,
   ProfileDataBeforeUpload,
+  UniversalProfileDeploymentConfiguration,
 } from '../interfaces';
 import { LSP3ProfileDataForEncoding, ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import { UploadOptions } from '../interfaces/profile-upload-options';
@@ -481,4 +484,52 @@ export function isSignerUniversalProfile$(signer: Signer) {
 
     return false;
   }).pipe(shareReplay());
+}
+
+export function convertUniversalProfileConfigurationObject(
+  contractDeploymentOptions: ContractDeploymentOptions
+): UniversalProfileDeploymentConfiguration {
+  const {
+    version: erc725AccountVersion,
+    byteCode: erc725AccountBytecode,
+    libAddress: erc725AccountLibAddress,
+  } = convertContractDeploymentOptionsVersion(contractDeploymentOptions?.ERC725Account?.version);
+
+  const {
+    version: keyManagerVersion,
+    byteCode: keyManagerBytecode,
+    libAddress: keyManagerLibAddress,
+  } = convertContractDeploymentOptionsVersion(contractDeploymentOptions?.KeyManager?.version);
+
+  const {
+    version: universalReceiverDelegateVersion,
+    byteCode: universalReceiverDelegateBytecode,
+    libAddress: universalReceiverDelegateLibAddress,
+  } = convertContractDeploymentOptionsVersion(
+    contractDeploymentOptions?.UniversalReceiverDelegate?.version
+  );
+
+  return {
+    version: contractDeploymentOptions?.version,
+    uploadOptions: contractDeploymentOptions?.uploadOptions,
+    ERC725Account: {
+      version: erc725AccountVersion,
+      byteCode: erc725AccountBytecode,
+      libAddress: erc725AccountLibAddress,
+      deployProxy: contractDeploymentOptions?.ERC725Account?.deployProxy,
+    },
+    KeyManager: {
+      version: keyManagerVersion,
+      byteCode: keyManagerBytecode,
+      libAddress: keyManagerLibAddress,
+      deployProxy: contractDeploymentOptions?.KeyManager?.deployProxy,
+    },
+    UniversalReceiverDelegate: {
+      version: universalReceiverDelegateVersion,
+      byteCode: universalReceiverDelegateBytecode,
+      libAddress: universalReceiverDelegateLibAddress,
+      deployProxy: contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy,
+    },
+    deployReactive: contractDeploymentOptions?.deployReactive,
+  };
 }

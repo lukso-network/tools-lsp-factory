@@ -29,9 +29,9 @@ import {
   LSP4_KEYS,
 } from '../helpers/config.helper';
 import {
+  convertContractDeploymentOptionsVersion,
   deployContract,
   deployProxyContract,
-  isAddress,
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
@@ -611,25 +611,12 @@ async function transferOwnership(
   }
 }
 
-export function convertConfigurationObject(
+export function convertDigitalAssetConfigurationObject(
   contractDeploymentOptions?: ContractDeploymentOptions
 ): DigitalAssetConfiguration {
-  let version: string;
-  let byteCode: string;
-  let libAddress: string;
-
-  if (
-    contractDeploymentOptions?.version &&
-    contractDeploymentOptions?.version.slice(0, 2) === '0x'
-  ) {
-    if (isAddress(contractDeploymentOptions?.version)) {
-      libAddress = contractDeploymentOptions?.version;
-    } else {
-      byteCode = contractDeploymentOptions?.version;
-    }
-  } else if (contractDeploymentOptions?.version) {
-    version = contractDeploymentOptions?.version;
-  }
+  const { version, byteCode, libAddress } = convertContractDeploymentOptionsVersion(
+    contractDeploymentOptions?.version
+  );
 
   return {
     deployProxy: contractDeploymentOptions?.deployProxy,

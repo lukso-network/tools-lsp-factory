@@ -30,6 +30,7 @@ import { keyManagerDeployment$ } from '../services/key-manager.service';
 
 import {
   accountDeployment$,
+  convertUniversalProfileConfigurationObject,
   getTransferOwnershipTransaction$,
   isSignerUniversalProfile$,
   lsp3ProfileUpload$,
@@ -85,29 +86,32 @@ export class LSP3UniversalProfile {
     profileDeploymentOptions: ProfileDeploymentOptions,
     contractDeploymentOptions?: T
   ): UniversalProfileObservableOrPromise<T> {
+    const deploymentConfiguration =
+      convertUniversalProfileConfigurationObject(contractDeploymentOptions);
+
     // -1 > Run IPFS upload process in parallel with contract deployment
     const lsp3Profile$ = lsp3ProfileUpload$(
       profileDeploymentOptions.lsp3Profile,
-      contractDeploymentOptions?.uploadOptions ?? this.options.uploadOptions
+      deploymentConfiguration?.uploadOptions ?? this.options.uploadOptions
     );
 
-    const defaultContractVersion = contractDeploymentOptions?.version ?? DEFAULT_CONTRACT_VERSION;
+    const defaultContractVersion = deploymentConfiguration?.version ?? DEFAULT_CONTRACT_VERSION;
 
     // 0 > Check for existing base contracts and deploy
     const defaultUPBaseContractAddress =
-      contractDeploymentOptions?.ERC725Account?.libAddress ??
+      deploymentConfiguration?.ERC725Account?.libAddress ??
       contractVersions[this.options.chainId]?.contracts?.ERC725Account?.versions[
-        contractDeploymentOptions?.ERC725Account?.version ?? defaultContractVersion
+        deploymentConfiguration?.ERC725Account?.version ?? defaultContractVersion
       ];
     const defaultUniversalReceiverAddress =
-      contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress ??
+      deploymentConfiguration?.UniversalReceiverDelegate?.libAddress ??
       contractVersions[this.options.chainId]?.contracts?.UniversalReceiverDelegate?.versions[
-        contractDeploymentOptions?.UniversalReceiverDelegate?.version ?? defaultContractVersion
+        deploymentConfiguration?.UniversalReceiverDelegate?.version ?? defaultContractVersion
       ];
     const defaultKeyManagerBaseContractAddress =
-      contractDeploymentOptions?.KeyManager?.libAddress ??
+      deploymentConfiguration?.KeyManager?.libAddress ??
       contractVersions[this.options.chainId]?.contracts?.KeyManager?.versions[
-        contractDeploymentOptions?.KeyManager?.version ?? defaultContractVersion
+        deploymentConfiguration?.KeyManager?.version ?? defaultContractVersion
       ];
 
     const baseContractsToDeploy$ = shouldDeployUniversalProfileBaseContracts$(
@@ -116,7 +120,7 @@ export class LSP3UniversalProfile {
       defaultKeyManagerBaseContractAddress,
       this.options.provider,
       this.options.chainId,
-      contractDeploymentOptions
+      deploymentConfiguration
     );
 
     const baseContractDeployment$ = universalProfileBaseContractsDeployment$(
@@ -125,15 +129,15 @@ export class LSP3UniversalProfile {
     );
 
     const deployUniversalReceiverProxy =
-      typeof contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy === 'undefined'
+      typeof deploymentConfiguration?.UniversalReceiverDelegate?.deployProxy === 'undefined'
         ? contractVersions[this.options.chainId]?.contracts?.UniversalReceiverDelegate?.baseContract
-        : contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy;
+        : deploymentConfiguration?.UniversalReceiverDelegate?.deployProxy;
 
     const baseContractAddresses$ = universalProfileBaseContractAddresses$(
       baseContractDeployment$,
       defaultUPBaseContractAddress,
       defaultKeyManagerBaseContractAddress,
-      contractDeploymentOptions,
+      deploymentConfiguration,
       deployUniversalReceiverProxy
     );
 
@@ -141,7 +145,7 @@ export class LSP3UniversalProfile {
     const account$ = accountDeployment$(
       this.signer,
       baseContractAddresses$,
-      contractDeploymentOptions?.ERC725Account?.byteCode
+      deploymentConfiguration?.ERC725Account?.byteCode
     );
 
     const signerIsUniversalProfile$ = isSignerUniversalProfile$(this.signer);
@@ -152,7 +156,7 @@ export class LSP3UniversalProfile {
       account$,
       baseContractAddresses$,
       signerIsUniversalProfile$,
-      contractDeploymentOptions?.KeyManager?.byteCode
+      deploymentConfiguration?.KeyManager?.byteCode
     );
 
     // 3 > deploys UniversalReceiverDelegate
@@ -160,11 +164,11 @@ export class LSP3UniversalProfile {
       this.signer,
       this.options.provider,
       baseContractAddresses$,
-      contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress,
+      deploymentConfiguration?.UniversalReceiverDelegate?.libAddress,
       contractVersions[this.options.chainId]?.contracts?.UniversalReceiverDelegate?.versions[
-        contractDeploymentOptions?.UniversalReceiverDelegate?.version ?? defaultContractVersion
+        deploymentConfiguration?.UniversalReceiverDelegate?.version ?? defaultContractVersion
       ],
-      contractDeploymentOptions?.UniversalReceiverDelegate?.byteCode
+      deploymentConfiguration?.UniversalReceiverDelegate?.byteCode
     );
 
     // 4 > set permissions, profile and universal
@@ -195,7 +199,7 @@ export class LSP3UniversalProfile {
       transferOwnership$,
     ]).pipe(concatAll());
 
-    if (contractDeploymentOptions?.deployReactive)
+    if (deploymentConfiguration?.deployReactive)
       return deployment$ as UniversalProfileObservableOrPromise<T>;
 
     return waitForContractDeployment$(deployment$) as UniversalProfileObservableOrPromise<T>;

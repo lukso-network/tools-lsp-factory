@@ -10,6 +10,7 @@ import { ContractDeploymentOptions, LSPFactory } from '../build/main/src';
 import { DeployedContracts } from '../src/lib/interfaces';
 import { getDeployedByteCode, getProxyByteCode } from '../src/lib/helpers/deployment.helper';
 import { providers } from 'ethers';
+import { getAddress } from 'ethers/lib/utils';
 
 export async function deployUniversalProfileContracts(signer: Signer, owner: string) {
   let nonceManager = new NonceManager(signer);
@@ -47,8 +48,7 @@ export async function testUPDeployment(
 
   for (const contractName of contractNames) {
     if (
-      contractDeploymentOptions[contractName]?.libAddress ||
-      contractDeploymentOptions[contractName]?.byteCode ||
+      contractDeploymentOptions[contractName]?.version?.startsWith('0x') ||
       contractDeploymentOptions[contractName]?.deployProxy === false
     ) {
       expect(deployedContracts[`${contractName}BaseContract`]).toBeUndefined();
@@ -58,8 +58,8 @@ export async function testUPDeployment(
   }
 
   if (
-    contractDeploymentOptions.UniversalReceiverDelegate?.deployProxy &&
-    !contractDeploymentOptions.UniversalReceiverDelegate.libAddress
+    contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy &&
+    !isAddress(contractDeploymentOptions?.UniversalReceiverDelegate.version)
   ) {
     expect(deployedContracts[`UniversalReceiverDelegateBaseContract`]).toBeDefined();
   } else {
@@ -67,6 +67,15 @@ export async function testUPDeployment(
   }
 
   return deployedContracts as DeployedContracts;
+}
+
+function isAddress(address: string) {
+  try {
+    getAddress(address);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function testSetData(upAddress: string, keyManagerAddress: string, signer: Signer) {

@@ -22,7 +22,7 @@ import {
   waitForBaseContractAddress$,
 } from '../services/base-contract.service';
 import {
-  convertConfigurationObject,
+  convertDigitalAssetConfigurationObject,
   lsp4MetadataUpload$,
   lsp8IdentifiableDigitalAssetDeployment$,
   setMetadataAndTransferOwnership$,
@@ -78,7 +78,7 @@ export class LSP8IdentifiableDigitalAsset {
     contractDeploymentOptions?: T
   ): LSP8ObservableOrPromise<T> {
     const digitalAssetConfiguration = contractDeploymentOptions
-      ? convertConfigurationObject(contractDeploymentOptions)
+      ? convertDigitalAssetConfigurationObject(contractDeploymentOptions)
       : null;
 
     const lsp4Metadata$ = lsp4MetadataUpload$(
