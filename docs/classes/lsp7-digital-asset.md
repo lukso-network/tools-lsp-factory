@@ -1,6 +1,6 @@
+---
 sidebar_position: 3
 title: LSP7DigitalAsset
-
 ---
 
 # LSP7DigitalAsset
@@ -118,7 +118,7 @@ await lspFactory.LSP7DigitalAsset.deploy(
   },
   {
     deployReactive: true,
-  }
+  },
 ).subscribe({
   next: (deploymentEvent) => {
     console.log(deploymentEvent);

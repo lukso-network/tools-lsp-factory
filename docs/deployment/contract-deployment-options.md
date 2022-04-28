@@ -11,10 +11,8 @@ The `deploy` function takes an object `contractDeploymentOptions` as its second 
 
 The `contractDeploymentOptions?` is an `Object` with the following properties:
 
-- `version?`: The smart contract's version you want to deploy as `string`.
-- `byteCode?`: The custom bytecode to be deployed as `string`.
+- `version?`: The smart contract's version you want to deploy as `string`. Can be a version number, a base contract address or custom bytecode.
 - `deployProxy?`: `boolean` indicator used to determine if the contract will be deployed using a proxy contract (e.g., [EIP1167](https://eips.ethereum.org/EIPS/eip-1167)).
-- `libAddress?`: The address of a base contract for proxy deployment as `string` (e.g., [EIP1167](https://eips.ethereum.org/EIPS/eip-1167)).
 - `uploadOptions?`: Specification `Object` how the metadata should be uploaded.
 - `ipfsClientOptions?`: Optional IPFS Client Options as `Object` defined by the [IPFS-HTTP Client](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) library used internally.
 
@@ -37,15 +35,15 @@ LSPFactory stores the base contract addresses for different versions [internally
 
 ## Custom Bytecode
 
-You can specify the bytecode you want your contract to use by providing the `byteCode` parameter. This will deploy a standalone contract from your custom bytecode without using a proxy.
+You can specify the bytecode you want your contract to use by providing custom bytecode to the `version` parameter. This will deploy a standalone contract from the supplied bytecode without using proxy deployment.
 
 For example, you could deploy a Universal Profile with a Key Manager that uses your custom bytecode:
 
-```javascript title="Deploying a Universal Profile with a custom Key Manager base contract"
+```javascript title="Deploying a Universal Profile with a custom Key Manager implementation"
 lspFactory.LSP3UniversalProfile.deploy({...}, {
     version: '0.4.1'
     KeyManager: {
-        bytecode: '0x...',
+        version: '0x...',
     }
 })
 ```
@@ -71,7 +69,7 @@ lspFactory.LSP3UniversalProfile.deploy({...}, {
 })
 ```
 
-You can also use a combination of the properties `libAddress`, `bytecode` and `version`.
+You can also use a combination of configurations for the Universal Profile deployment by passing a version number, custom bytecode or a custom base contract address to the version parameter.
 
 ```javascript title="Deploying a Universal Profile with specific contract deployment options"
 lspFactory.LSP3UniversalProfile.deploy({...}, {
@@ -79,10 +77,10 @@ lspFactory.LSP3UniversalProfile.deploy({...}, {
         version: '0.4.1',
     }
     UniversalRecieverDelegate: {
-        baseContract: '0x...'
+        version: '0x...'
     }
     KeyManager: {
-        libAddress: '0x6c1F3Ed2F99054C88897e2f32187ef15c62dC560'
+        version: '0x6c1F3Ed2F99054C88897e2f32187ef15c62dC560'
     }
 })
 ```
@@ -93,7 +91,7 @@ Because deploying an [`LSP7DigitalAsset`](../classes/lsp7-digital-asset) or an [
 
 ```javascript title="Deploying an LSP7 Digital Asset with a specified base contract address"
 lspFactory.LSP7DigitalAsset.deploy({...}, {
-    libAddress: '0xdD373889355d37D6cb9A5028Ce74cDBacC7CF782'
+    version: '0xdD373889355d37D6cb9A5028Ce74cDBacC7CF782'
 })
 ```
 
@@ -105,6 +103,6 @@ lspFactory.LSP8IdentifiableDigitalAsset.deploy({...}, {
 
 ```javascript title="Deploying specific bytecode for LSP8 Identifiable Digital Asset base contract"
 lspFactory.LSP8IdentifiableDigitalAsset.deploy({...}, {
-    bytecode: '0x...'
+    version: '0x...'
 })
 ```
