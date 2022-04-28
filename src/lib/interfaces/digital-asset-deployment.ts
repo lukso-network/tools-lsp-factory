@@ -1,4 +1,4 @@
-import { LSP4MetadataBeforeUpload } from './lsp4-digital-asset';
+import { LSP4MetadataBeforeUpload, LSP4MetadataForEncoding } from './lsp4-digital-asset';
 import { UploadOptions } from './profile-upload-options';
 
 import { DeployedContract } from '.';
@@ -12,7 +12,7 @@ export interface DigitalAssetDeploymentOptions {
   controllerAddress: string;
   name: string;
   symbol: string;
-  digitalAssetMetadata?: LSP4MetadataBeforeUpload | string;
+  digitalAssetMetadata?: LSP4MetadataBeforeUpload | LSP4MetadataForEncoding | string;
   creators?: string[];
 }
 

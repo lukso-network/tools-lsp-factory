@@ -29,7 +29,7 @@ import {
   LSP4_KEYS,
 } from '../helpers/config.helper';
 import { deployContract, deployProxyContract, waitForReceipt } from '../helpers/deployment.helper';
-import { encodeLSP4Metadata } from '../helpers/erc725.helper';
+import { erc725EncodeData } from '../helpers/erc725.helper';
 import { isMetadataEncoded } from '../helpers/uploader.helper';
 import {
   DeploymentEvent$,
@@ -48,6 +48,7 @@ import {
   LSP4DigitalAssetJSON,
   LSP4MetadataBeforeUpload,
   LSP4MetadataForEncoding,
+  LSP4MetadataUrlForEncoding,
 } from '../interfaces/lsp4-digital-asset';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 
@@ -338,7 +339,7 @@ function initializeLSP8Proxy(
 }
 
 export function lsp4MetadataUpload$(
-  lsp4Metadata: LSP4MetadataBeforeUpload | string,
+  lsp4Metadata: LSP4MetadataBeforeUpload | LSP4MetadataForEncoding | string,
   uploadOptions?: UploadOptions
 ) {
   let lsp4Metadata$: Observable<string>;
@@ -357,8 +358,8 @@ export function lsp4MetadataUpload$(
 export async function getLSP4MetadataUrl(
   lsp4Metadata: LSP4MetadataBeforeUpload | string,
   uploadOptions: UploadOptions
-): Promise<LSP4MetadataForEncoding> {
-  let lsp4MetadataForEncoding: LSP4MetadataForEncoding;
+): Promise<LSP4MetadataUrlForEncoding> {
+  let lsp4MetadataForEncoding: LSP4MetadataUrlForEncoding;
 
   if (typeof lsp4Metadata === 'string') {
     let lsp4JsonUrl = lsp4Metadata;
@@ -377,7 +378,7 @@ export async function getLSP4MetadataUrl(
 
     lsp4MetadataForEncoding = {
       url: lsp4Metadata,
-      lsp4Metadata: lsp4MetadataJSON as LSP4DigitalAssetJSON,
+      json: lsp4MetadataJSON as LSP4DigitalAssetJSON,
     };
   } else {
     lsp4MetadataForEncoding = await LSP4DigitalAssetMetadata.uploadMetadata(
@@ -390,15 +391,19 @@ export async function getLSP4MetadataUrl(
 }
 
 export async function getEncodedLSP4Metadata(
-  lsp4Metadata: LSP4MetadataBeforeUpload | string,
+  lsp4Metadata: LSP4MetadataBeforeUpload | LSP4MetadataForEncoding | string,
   uploadOptions: UploadOptions
 ): Promise<string> {
-  const lsp4MetadataForEncoding = await getLSP4MetadataUrl(lsp4Metadata, uploadOptions);
+  let lsp4MetadataForEncoding: LSP4MetadataForEncoding;
+  if (typeof lsp4Metadata === 'string' || 'description' in lsp4Metadata) {
+    lsp4MetadataForEncoding = await getLSP4MetadataUrl(lsp4Metadata, uploadOptions);
+  } else {
+    lsp4MetadataForEncoding = lsp4Metadata;
+  }
 
-  const encodedLSP4Metadata = encodeLSP4Metadata(
-    lsp4MetadataForEncoding.lsp4Metadata,
-    lsp4MetadataForEncoding.url
-  );
+  const encodedLSP4Metadata = erc725EncodeData({
+    LSP4Metadata: lsp4MetadataForEncoding,
+  });
 
   return encodedLSP4Metadata.LSP4Metadata.value;
 }

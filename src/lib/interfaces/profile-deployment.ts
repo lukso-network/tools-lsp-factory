@@ -1,6 +1,6 @@
 import { DeployedContract } from '../..';
 
-import { ProfileDataBeforeUpload } from './lsp3-profile';
+import { LSP3ProfileDataForEncoding, ProfileDataBeforeUpload } from './lsp3-profile';
 import { UploadOptions } from './profile-upload-options';
 
 export enum ContractNames {
@@ -19,7 +19,7 @@ export interface ControllerOptions {
  */
 export interface ProfileDeploymentOptions {
   controllerAddresses: (string | ControllerOptions)[];
-  lsp3Profile?: ProfileDataBeforeUpload | string;
+  lsp3Profile?: ProfileDataBeforeUpload | LSP3ProfileDataForEncoding | string;
   baseContractAddresses?: {
     erc725Account?: string;
     universalReceiverDelegate?: string;

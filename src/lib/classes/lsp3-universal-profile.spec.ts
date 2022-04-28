@@ -45,29 +45,34 @@ describe('LSP3UniversalProfile', () => {
   describe('Deploying with LSP3Profile Metadata', () => {
     let signer: SignerWithAddress;
     let universalProfile;
-    let keyManager;
+    const expectedLSP3Value =
+      '0x6f357c6a5af8bb903787236579aff8a6518c022fe655646fded5e1ea23ca7aedddb221a4697066733a2f2f516d624b76435645655069444b78756f7579747939624d73574241785a444772326a68786434704c474c78393544';
 
-    beforeAll(async () => {
-      signer = signers[0];
+    const allowedLSP3Formats = [
+      lsp3ProfileJson.LSP3Profile,
+      { json: lsp3ProfileJson, url: 'ipfs://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D' },
+    ];
 
-      const { ERC725Account, KeyManager } = await lspFactory.LSP3UniversalProfile.deploy({
-        controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
-        lsp3Profile: lsp3ProfileJson,
+    allowedLSP3Formats.forEach((lsp3ProfileMetadata) => {
+      describe('passing metadata to be uploaded', () => {
+        it('should deploy and set LSP3Profile data', async () => {
+          signer = signers[0];
+
+          const { ERC725Account } = await lspFactory.LSP3UniversalProfile.deploy({
+            controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
+            lsp3Profile: lsp3ProfileMetadata,
+          });
+
+          universalProfile = UniversalProfile__factory.connect(ERC725Account.address, signer);
+
+          const data = await universalProfile.getData([
+            '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+          ]);
+
+          expect(data[0].startsWith('0x6f357c6a')).toBe(true);
+          expect(data[0]).toEqual(expectedLSP3Value);
+        });
       });
-
-      universalProfile = UniversalProfile__factory.connect(ERC725Account.address, signer);
-      keyManager = KeyManager;
-    });
-
-    it('should deploy and set LSP3Profile data', async () => {
-      const ownerAddress = await universalProfile.owner();
-      expect(ownerAddress).toEqual(keyManager.address);
-
-      const data = await universalProfile.getData([
-        '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-      ]);
-
-      expect(data[0].startsWith('0x6f357c6a')).toBe(true);
     });
   });
   describe('Deploying with LSP3Profile Metadata with specified IPFS client options', () => {
@@ -81,7 +86,7 @@ describe('LSP3UniversalProfile', () => {
       const { ERC725Account, KeyManager } = await lspFactory.LSP3UniversalProfile.deploy(
         {
           controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
-          lsp3Profile: lsp3ProfileJson,
+          lsp3Profile: lsp3ProfileJson.LSP3Profile,
         },
         {
           uploadOptions: {
@@ -215,7 +220,7 @@ describe('LSP3UniversalProfile', () => {
       const deployments$ = lspFactory.LSP3UniversalProfile.deploy(
         {
           controllerAddresses: [signers[0].address],
-          lsp3Profile: lsp3ProfileJson,
+          lsp3Profile: lsp3ProfileJson.LSP3Profile,
         },
         {
           deployReactive: true,

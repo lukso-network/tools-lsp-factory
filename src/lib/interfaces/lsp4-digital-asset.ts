@@ -20,7 +20,15 @@ export interface LSP4MetadataBeforeUpload {
   assets?: (File | AssetBuffer | AssetMetadata)[];
 }
 
-export interface LSP4MetadataForEncoding {
-  lsp4Metadata: LSP4DigitalAssetJSON;
+export interface LSP4MetadataUrlForEncoding {
+  json: LSP4DigitalAssetJSON;
   url: string;
 }
+
+export interface HashedLSP4MetadataForEncoding {
+  hashFunction: string;
+  hash: string;
+  url: string;
+}
+
+export type LSP4MetadataForEncoding = LSP4MetadataUrlForEncoding | HashedLSP4MetadataForEncoding;

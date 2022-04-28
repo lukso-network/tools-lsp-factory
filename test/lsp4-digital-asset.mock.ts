@@ -42,5 +42,8 @@ export const lsp4DigitalAsset: LSP4DigitalAssetJSON = {
         },
       ],
     ],
+    links: [],
+    assets: [],
+    icon: [],
   },
 };
