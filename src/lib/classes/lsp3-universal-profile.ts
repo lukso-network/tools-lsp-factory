@@ -1,11 +1,11 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, Observable } from 'rxjs';
+import { concat, lastValueFrom, Observable } from 'rxjs';
 import { concatAll } from 'rxjs/operators';
 
 import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { defaultUploadOptions } from '../helpers/config.helper';
-import { waitForContractDeployment$ } from '../helpers/deployment.helper';
+import { emitContractsOnCompletion } from '../helpers/deployment.helper';
 import { ipfsUpload, prepareMetadataImage } from '../helpers/uploader.helper';
 import {
   DeploymentEventContract,
@@ -190,19 +190,21 @@ export class LSP3UniversalProfile {
       signerIsUniversalProfile$
     );
 
-    const deployment$ = concat([
-      baseContractDeployment$,
-      account$,
-      universalReceiver$,
-      keyManager$,
-      setData$,
-      transferOwnership$,
-    ]).pipe(concatAll());
+    const deployment$ = emitContractsOnCompletion(
+      concat([
+        baseContractDeployment$,
+        account$,
+        universalReceiver$,
+        keyManager$,
+        setData$,
+        transferOwnership$,
+      ]).pipe(concatAll())
+    );
 
     if (deploymentConfiguration?.deployReactive)
       return deployment$ as UniversalProfileObservableOrPromise<T>;
 
-    return waitForContractDeployment$(deployment$) as UniversalProfileObservableOrPromise<T>;
+    return lastValueFrom(deployment$) as UniversalProfileObservableOrPromise<T>;
   }
 
   /**

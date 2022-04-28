@@ -1,7 +1,7 @@
 import { Contract, ContractFactory, ContractInterface, providers, Signer } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
-import { lastValueFrom, Observable } from 'rxjs';
-import { catchError, scan, shareReplay, switchMap, takeLast } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { catchError, endWith, shareReplay, switchMap, takeLast, tap } from 'rxjs/operators';
 
 import {
   DeploymentEvent,
@@ -174,32 +174,29 @@ export function getDeployedByteCode(
   return provider.getCode(contractAddress);
 }
 
-export function waitForContractDeployment$(deployment$: Observable<DeploymentEvent>) {
-  return lastValueFrom(
-    deployment$.pipe(
-      scan((accumulator, deploymentEvent: DeploymentEvent) => {
-        if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
-          return accumulator;
-        }
+export function emitContractsOnCompletion(deployment$: Observable<DeploymentEvent>) {
+  const contractAccumulator = {};
+  return deployment$.pipe(
+    tap((deploymentEvent) => {
+      if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
+        return;
+      }
 
-        if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
-          accumulator[`${deploymentEvent.contractName}BaseContract`] = {
-            address: deploymentEvent.receipt.contractAddress,
-            receipt: deploymentEvent.receipt,
-            type: deploymentEvent.type,
-          };
-        } else {
-          accumulator[deploymentEvent.contractName] = {
-            address: deploymentEvent.receipt.contractAddress,
-            receipt: deploymentEvent.receipt,
-            type: deploymentEvent.type,
-          };
-        }
-
-        return accumulator;
-      }, {}),
-      shareReplay()
-    )
+      if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
+        contractAccumulator[`${deploymentEvent.contractName}BaseContract`] = {
+          address: deploymentEvent.receipt.contractAddress,
+          receipt: deploymentEvent.receipt,
+          type: deploymentEvent.type,
+        };
+      } else {
+        contractAccumulator[deploymentEvent.contractName] = {
+          address: deploymentEvent.receipt.contractAddress,
+          receipt: deploymentEvent.receipt,
+          type: deploymentEvent.type,
+        };
+      }
+    }),
+    endWith(contractAccumulator)
   );
 }
 
