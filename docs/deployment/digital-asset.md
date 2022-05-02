@@ -157,7 +157,7 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
 });
 ```
 
-Alternatively `digitalAssetMetadata` can be passed as a url where the LSP4Metadata JSON file is stored. LSPFactory will download the JSON file before hashing it and generate the [JSONURL](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#JSONURL) value to be stored on the token contract's `LSP4Metadata` [ERC725Y] key.
+Alternatively `digitalAssetMetadata` can be passed as a URL where the LSP4Metadata JSON file is stored. LSPFactory will download the JSON file before hashing it and generate the [JSONURL](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#JSONURL) value to be stored on the token contract's `LSP4Metadata` [ERC725Y] key.
 
 ```javascript title='Providing a previously uploaded LSP4 metadata IPFS URL'
 await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
@@ -175,7 +175,7 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
 
 You can also provide the JSON file yourself to generate the hash value:
 
-```javascript title='Providing a previously uploaded LSP4 metadata url and JSON file itself'
+```javascript title='Providing a previously uploaded LSP4 metadata URL and JSON file itself'
 await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
   digitalAssetMetadata: {
     json: lsp3ProfileJson,
@@ -187,7 +187,7 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
 
 Or you can provide the hash value and then uploaded file URL:
 
-```javascript title='Providing a previously uploaded LSP4 metadata url and hash values'
+```javascript title='Providing a previously uploaded LSP4 metadata URL and hash values'
 await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
   digitalAssetMetadata: {
     hash: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
@@ -200,11 +200,9 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
 
 ### Adding Images and Assets
 
-Images and assets can also be included in the LSP4 Metadata file. These can be added by passing the
+Images and assets can be included in the LSP4 Metadata file by passing them to the `images` and `assets` parameters of the `digitalAssetMetadata` object.
 
-Alternatively, the javascript `File` object can be passed if being used in a browser.
-
-#### Pre-uploaded Images and Assets
+#### Pre-uploaded Images
 
 If you already have images and assets uploaded to IPFS, you can pass the metadata directly inside the `digitalAssetMetadata` object. This metadata will then be set in the LSP4DigitalAsset metadata JSON file and uploaded to IPFS.
 
@@ -255,9 +253,9 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
 });
 ```
 
-#### Passing Asset Metadata
+#### Pre-uploaded Assets
 
-Assets can be passed in the `assets` parameter as an array of asset metadata.
+Previously uploaded assets can be included by passing an array of asset metadata in the `assets` parameter.
 
 ```javascript
 await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
@@ -276,12 +274,12 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
 });
 ```
 
-#### Passing Javascript File Object
+#### Passing JavaScript File Object
 
-Javascript offers a `File` object for easy handling of files inside a browser. Developers can pass this to the `images`, `assets` and `icon` fields to allow easy drag and drop of images from a user interface.
+JavaScript offers a `File` object for easy handling of files inside a browser. Developers can pass this to the `images`, `assets` and `icon` fields to allow easy drag and drop of images from a user interface.
 
 :::caution
-Javascript's `File` object is only available when using javascript in the browser. If using LSPFactory in a Node environment, image metadata should be passed.
+JavaScript's `File` object is only available when using JavaScript in the browser. If using LSPFactory in a Node.js environment, image metadata should be passed.
 :::
 
 ```javascript
