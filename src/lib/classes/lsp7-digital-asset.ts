@@ -22,6 +22,7 @@ import {
   waitForBaseContractAddress$,
 } from '../services/base-contract.service';
 import {
+  convertDigitalAssetConfigurationObject,
   lsp4MetadataUpload$,
   lsp7DigitalAssetDeployment$,
   setMetadataAndTransferOwnership$,
@@ -77,24 +78,28 @@ export class LSP7DigitalAsset {
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
     contractDeploymentOptions: T = undefined
   ): LSP7ObservableOrPromise<T> {
+    const digitalAssetConfiguration = contractDeploymentOptions
+      ? convertDigitalAssetConfigurationObject(contractDeploymentOptions)
+      : null;
+
     const lsp4Metadata$ = lsp4MetadataUpload$(
       digitalAssetDeploymentOptions.digitalAssetMetadata,
-      contractDeploymentOptions?.uploadOptions ?? this.options.uploadOptions
+      digitalAssetConfiguration?.uploadOptions ?? this.options.uploadOptions
     );
 
     const defaultBaseContractAddress: string | undefined =
-      contractDeploymentOptions?.libAddress ??
+      digitalAssetConfiguration?.libAddress ??
       versions[this.options.chainId]?.contracts.LSP7Mintable?.versions[
-        contractDeploymentOptions?.version ?? DEFAULT_CONTRACT_VERSION
+        digitalAssetConfiguration?.version ?? DEFAULT_CONTRACT_VERSION
       ];
 
     const deployBaseContract$ = shouldDeployBaseContract$(
       this.options.provider,
       versions[this.options.chainId]?.contracts.LSP7Mintable?.baseContract,
-      contractDeploymentOptions?.deployProxy,
+      digitalAssetConfiguration?.deployProxy,
       defaultBaseContractAddress,
-      contractDeploymentOptions?.libAddress,
-      contractDeploymentOptions?.byteCode
+      digitalAssetConfiguration?.libAddress,
+      digitalAssetConfiguration?.byteCode
     );
 
     const baseContractDeployment$ = deployBaseContract$.pipe(
@@ -107,15 +112,15 @@ export class LSP7DigitalAsset {
     const baseContractAddress$ = waitForBaseContractAddress$(
       baseContractDeployment$,
       defaultBaseContractAddress,
-      contractDeploymentOptions?.deployProxy,
-      contractDeploymentOptions?.byteCode
+      digitalAssetConfiguration?.deployProxy,
+      digitalAssetConfiguration?.byteCode
     );
 
     const digitalAsset$ = lsp7DigitalAssetDeployment$(
       this.signer,
       digitalAssetDeploymentOptions,
       baseContractAddress$,
-      contractDeploymentOptions?.byteCode
+      digitalAssetConfiguration?.byteCode
     );
 
     const signerIsUniversalProfile$ = isSignerUniversalProfile$(this.signer);
@@ -135,7 +140,7 @@ export class LSP7DigitalAsset {
       setLSP4AndTransferOwnership$,
     ]).pipe(concatAll());
 
-    if (contractDeploymentOptions?.deployReactive) return deployment$ as LSP7ObservableOrPromise<T>;
+    if (digitalAssetConfiguration?.deployReactive) return deployment$ as LSP7ObservableOrPromise<T>;
 
     return waitForContractDeployment$(deployment$) as LSP7ObservableOrPromise<T>;
   }

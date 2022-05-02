@@ -1,6 +1,6 @@
 import { DeployedContract } from '../..';
 
-import { LSP3ProfileDataForEncoding, ProfileDataBeforeUpload } from './lsp3-profile';
+import { ProfileDataBeforeUpload } from './lsp3-profile';
 import { UploadOptions } from './profile-upload-options';
 
 export enum ContractNames {
@@ -19,12 +19,12 @@ export interface ControllerOptions {
  */
 export interface ProfileDeploymentOptions {
   controllerAddresses: (string | ControllerOptions)[];
-  lsp3Profile?: ProfileDataBeforeUpload | LSP3ProfileDataForEncoding | string;
   baseContractAddresses?: {
     erc725Account?: string;
     universalReceiverDelegate?: string;
     keyManager?: string;
   };
+  lsp3Profile?: ProfileDataBeforeUpload | string;
 }
 export interface DeployedContracts {
   ERC725Account?: DeployedContract;
@@ -43,9 +43,7 @@ export interface BaseContractAddresses {
 
 interface ContractOptions {
   version?: string;
-  byteCode?: string;
   deployProxy?: boolean;
-  libAddress?: string;
 }
 
 interface ContractDeploymentOptionsBase {
@@ -67,3 +65,19 @@ export interface ContractDeploymentOptionsNonReactive extends ContractDeployment
 export type ContractDeploymentOptions =
   | ContractDeploymentOptionsReactive
   | ContractDeploymentOptionsNonReactive;
+
+interface ContractConfiguration {
+  version?: string;
+  byteCode?: string;
+  libAddress?: string;
+  deployProxy?: boolean;
+}
+
+export interface UniversalProfileDeploymentConfiguration {
+  version?: string;
+  uploadOptions?: UploadOptions;
+  ERC725Account?: ContractConfiguration;
+  KeyManager?: ContractConfiguration;
+  UniversalReceiverDelegate?: ContractConfiguration;
+  deployReactive: boolean;
+}

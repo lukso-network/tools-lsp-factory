@@ -10,8 +10,8 @@ import {
   LSP6KeyManagerInit__factory,
   LSP7MintableInit__factory,
   LSP8MintableInit__factory,
-  ContractDeploymentOptions as ProfileContractDeploymentOptions,
   ContractNames as UniversalProfileContractNames,
+  UniversalProfileDeploymentConfiguration,
   UniversalProfileInit__factory,
 } from '../..';
 import contractVersions from '../../versions.json';
@@ -155,7 +155,7 @@ export function shouldDeployUniversalProfileBaseContracts$(
   defaultKeyManagerBaseContractAddress: string,
   provider: providers.Web3Provider | providers.JsonRpcProvider,
   chainId: number,
-  contractDeploymentOptions?: ProfileContractDeploymentOptions
+  contractDeploymentOptions?: UniversalProfileDeploymentConfiguration
 ) {
   return forkJoin([
     shouldDeployBaseContract$(
@@ -189,7 +189,7 @@ export function universalProfileBaseContractAddresses$(
   baseContractDeployment$: Observable<DeploymentEventContract>,
   defaultUPBaseContractAddress: string,
   defaultKeyManagerBaseContractAddress: string,
-  contractDeploymentOptions?: ProfileContractDeploymentOptions,
+  contractDeploymentOptions?: UniversalProfileDeploymentConfiguration,
   deployUniversalReceiverProxy?: boolean
 ) {
   const providedUPBaseContractAddress = contractDeploymentOptions?.ERC725Account?.libAddress;

@@ -47,7 +47,7 @@ await lspFactory.UniversalProfile.deploy({
 
 ### Adding LSP3 Metadata
 
-When deploying a Universal Profile with LSP Factory, you can specify your Universal Profile metadata using the `lsp3Profile` key in the `profileProperties` object:
+When deploying a Universal Profile with LSPFactory, you can specify your Universal Profile metadata using the `lsp3Profile` key in the `profileProperties` object:
 
 ```javascript
 await lspFactory.UniversalProfile.deploy({
@@ -108,7 +108,7 @@ await lspFactory.UniversalProfile.deploy({
     controllerAddresses: ['0x...'],
     lsp3Profile: {
       json: lsp3ProfileJson,
-      urlf: 'https://mycoolserver.com/myProfile.json'
+      url: 'https://mycoolserver.com/myProfile.json'
     }
   });
 };
@@ -180,7 +180,7 @@ await lspFactory.UniversalProfile.deploy({
 Javascript offers a `File` object for easy handling of files inside a browser. Developers can pass these to `profileImage` and `backgroundImage` fields to allow easy drag and drop of images from a user interface.
 
 :::caution
-Javascript's `File` object is only available when using javascript in the browser. If using LSPFactory in a Node environment, images should be uploaded as an [ImageBuffer](./universal-profile#using-image-buffer)
+Javascript's `File` object is only available when using javascript in the browser. If using LSPFactory in a Node environment, images should be uploaded as an [ImageBuffer](./universal-profile#using-image-buffers)
 :::
 
 ```javascript
@@ -248,9 +248,7 @@ await lspFactory.UniversalProfile.deploy({
 
 ### Uploading LSP3 metadata to IPFS
 
-You can upload your LSP3 metadata before deploying a Universal Profile using the `uploadMetaData()` method. The function uses the same [`lsp3Profile` object schema](./universal-profile#adding-lsp3-metadata) defined above when deploying a Universal Profile and eturns an object containing the IPFS upload location of your metadata, and your LSP3 Metdata as a javascript object.
-
-Returns an object containing the IPFS upload location of your metadata, and your lsp3metdata as a javascript object.
+You can upload your LSP3 metadata before deploying a Universal Profile using the `uploadMetaData()` method. The function uses the same [`lsp3Profile` object schema](./universal-profile#adding-lsp3-metadata) defined above when deploying a Universal Profile. Returns an object containing the IPFS upload location of your metadata and your `lsp3Metdata` as a javascript object.
 
 ```javascript
 await myLSPFactory.UniversalProfile.uploadMetaData(lsp3Profile [, options]);
@@ -288,16 +286,18 @@ await UniversalProfile.uploadMetaData(myLSP3MetaData);
 A Universal Profile is composed of three smart contracts. [LSP0 ERC725 Account](../../../standards/universal-profile/lsp0-erc725account), [LSP6 Key Manager](../../../standards/universal-profile/lsp6-key-manager), and [LSP1-UniversalReceiver](../../../standards/generic-standards/lsp1-universal-receiver.md).
 When deploying a Universal Profile, you can configure how developers should deploy these contracts inside the `contractDeploymentOptions` object. Builders can configure each contract separately. The available options are the same for all contracts.
 
+Under the `version` key developers can pass a [version number](./universal-profile#contract-versions), [custom bytecode](./universal-profile#deploying-custom-bytecode) or a [base contract address](./universal-profile#using-a-custom-address) to be used during deployment.
+
 ```javascript
 await lspFactory.UniversalProfile.deploy({...}, {
   ERC725Account: {
-    version: '0.4.1',
+    version: '0.4.1', // Version number
   },
   UniversalReceiverDelegate: {
-    baseContract: '0x...'
+    version: '0x...' // Custom bytecode
   },
   KeyManager: {
-    libAddress: '0x6c1F3Ed2F99054C88897e2f32187ef15c62dC560'
+    version: '0x6c1F3Ed2F99054C88897e2f32187ef15c62dC560' // Base contract address
   }
 })
 ```
@@ -330,46 +330,49 @@ LSPFactory stores base contract addresses for different versions [internally](ht
 
 :::
 
-`deployProxy` defaults to `true` for `ERC725Account` and `LSP6KeyManager` and `false` for `UniversalReceiverDelegate`.
-
 When using proxy deployment, LSPFactory will check that there is some bytecode deployed at the base contract address before deploying. A new base contract will be deployed and referenced in the proxy contract if there is none. This process is helpful when using LSPFactory on a local development network like Hardhat, where there will be no pre-deployed base contracts.
 
 #### Universal Receiver Delegate Proxy Deployment
 
-The `UniversalReceiverDelegate` is a logic contract that writes to the Universal Profile when it receives some asset. This procedure is not specific to any particular Universal Profile, so developers can use the same `UniversalReceiverDelegate` contract for multiple different Universal Profile deployments.
+The `UniversalReceiverDelegate` is a logic contract that writes to the Universal Profile when it receives some asset. This operation is not specific to any particular Universal Profile, so developers can use the same `UniversalReceiverDelegate` contract for multiple different Universal Profile deployments.
 
-By default, LSPFactory will use the latest available version of the `UniversalReceiverDelegate` version stored in the [version file](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json). This address is used directly on the Universal Profile and is given the `SETDATA` LSP6 permission. Having everything compact means that no `UniversalReceiverDelegate` contract needs to be deployed when deploying a Universal Profile which further reduces the gas cost of Universal Profile deployment.
+By default, LSPFactory will use the latest available version of the `UniversalReceiverDelegate` version stored in the [version file](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json). This address is used directly on the Universal Profile and is given the `SETDATA` LSP6 permission.
 
-To specify that your Universal Profile should use proxy deployment when deploying the `UniversalReceiverDelegate` contract, set the property `deployProxy` to `true`.
+Reusing the `UniversalReceiverDelegate` address means that no `UniversalReceiverDelegate` contract needs to be deployed when deploying a Universal Profile which further reduces the gas cost of Universal Profile deployment.
+
+To specify that your `UniversalReceiverDelegate` contract should use proxy deployment, set the property `deployProxy` to `true`. If no base contract address is specified in the `version` parameter a new `UniversalReceiverDelegate` base contract will be deployed.
 
 ```javascript
 lspFactory.UniversalProfile.deploy({...}, {
     UniversalReceiverDelegate: {
         deployProxy: true,
+        version: '0x00b1d454Eb5d917253FD6cb4D5560dEC30b0960c',
     },
 })
 ```
 
 ### Using a Custom Address
 
-You can specify the base contract address by passing the `libAddress` parameter, which allows you to customarily implement a contract by using a custom base contract you have previously deployed. A custom base contract that developers will pass here must adhere to the relevant LSP contract standard it is being used for deployment.
+When using proxy deployment you can specify the base contract address by passing the `version` parameter. This allows you to deploy a specific contract implementation by using a custom base contract you have deployed.
 
-```javascript title="Deploying a Universal Profile with a custom base contract implementation of an ERC725Account"
+Any base contract address that developers pass here must adhere to the relevant LSP contract standard it is being used for.
+
+```javascript title="Deploying a Universal Profile using a custom ERC725Account base contract implementation"
 lspFactory.UniversalProfile.deploy({...}, {
     ERC725Account: {
-        libAddress: '0x00b1d454Eb5d917253FD6cb4D5560dEC30b0960c',
+        version: '0x00b1d454Eb5d917253FD6cb4D5560dEC30b0960c',
     },
 })
 ```
 
 :::info
-The `UniversalReceiverDelegate` contract does not use proxy deployment by default. When setting the `UniversalReceiverDelegate` `libAddress`, if `deployProxy` is not set to `true`, LSPFactory will use the provided address directly. The provided address will be given the `SETDATA` LSP6 permission and set as the [LSP1UniversalReceiverDelegate key](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-0-ERC725Account.md#lsp1universalreceiverdelegate) on the ERC725Account. You can read more in the [section above](./universal-profile#universal-receiver-delegate-proxy-deployment).
+The `UniversalReceiverDelegate` contract does not use proxy deployment by default. If an address is passed to the `UniversalReceiverDelegate` `version` parameter and `deployProxy` is not set to `true`, LSPFactory will set the provided address directly on the ERC725Account as the [LSP1UniversalReceiverDelegate key](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-0-ERC725Account.md#lsp1universalreceiverdelegate) and given the `SETDATA` LSP6 permission. You can read more in the [section above](./universal-profile#universal-receiver-delegate-proxy-deployment).
 :::
 
 ```javascript title="Using a custom UniversalReceiverDelegate address"
 lspFactory.UniversalProfile.deploy({...}, {
     UniversalReceiverDelegate: {
-        libAddress: '0x00b1d454Eb5d917253FD6cb4D5560dEC30b0960c',
+        version: '0x00b1d454Eb5d917253FD6cb4D5560dEC30b0960c',
         deployProxy: false
     },
 })
@@ -377,7 +380,9 @@ lspFactory.UniversalProfile.deploy({...}, {
 
 ### Contract Versions
 
-The `version` of all three contracts can be set at once by passing the global version parameter. The go will set all contracts to use the same base contract version. The version can also be set per contract, which will take precedence over the global parameter.
+LSPFactory stores the addresses of different base contract versions [internally](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json). By specifying a `version` number, developers can specify which base contract implementation should be used during deployment.
+
+The `version` of all three contracts can be set at once by passing the global version parameter. The version can also be set per contract, which will take precedence over the global parameter.
 
 ```javascript title="Deploying a Universal Profile with all contracts set to version 0.5.0"
 await lspFactory.UniversalProfile.deploy({...}, {
@@ -396,7 +401,7 @@ await lspFactory.UniversalProfile.deploy({...}, {
 
 ### Deploying Custom Bytecode
 
-When deploying a Universal Profile, you can use your custom contract implementation when passing the compiled creation bytecode of a contract you have written as the `bytecode` parameter. The `bytecode` parameter can be the instantiation byte code of a custom contract implementation you have registered according to your use case. The implementation must meet the relevant LSP standard requirements.
+When deploying a Universal Profile, you can use your custom contract implementation by passing the compiled creation bytecode of a contract you have written as the `version` parameter. The `bytecode` parameter can be the instantiation bytecode of a custom contract implementation you have written according to your use case. The implementation must meet the relevant LSP standard requirements.
 
 :::note
 The custom bytecode will be deployed and used as part of the Universal Profile. Contracts deployed from custom bytecode will not use any proxy contract deployment.
@@ -405,7 +410,7 @@ The custom bytecode will be deployed and used as part of the Universal Profile. 
 ```javascript title="Deploying a Universal Profile with a custom KeyManager implementation"
 lspFactory.UniversalProfile.deploy({...}, {
     KeyManager: {
-      bytecode: '0x...'
+      version: '0x...'
     }
 });
 ```
@@ -415,7 +420,7 @@ lspFactory.UniversalProfile.deploy({...}, {
 You can specify how you want your profile metadata to be uploaded while passing the options object. Here you can set the IPFS gateway where you want the profile's metadata to be uploaded.
 
 :::note
-The procedure takes an `ipfsClientOptions` object as defined by the [IPFS-HTTP Client](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) library which is used internally to interact with IPFS.
+The procedure takes an `ipfsClientOptions` object as defined by the [IPFS-HTTP Client](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) library which is used internally to interact with the specified IPFS node.
 :::
 
 ```javascript
@@ -428,11 +433,11 @@ lspFactory.UniversalProfile.deploy({...}, {
 })
 ```
 
-If the `options` object is provided, it will override the `options` object passed at the instantiation of the LSPFactory.
+If the `options` object is provided, it will override the `options` object passed during the instantiation of the LSPFactory.
 
 ### Reactive Deployment
 
-The LSP Factory uses [RxJS](https://rxjs.dev/) library to deploy contracts. Developers can leverage the process to achieve reactive deployment of Universal Profiles.
+The LSPFactory uses [RxJS](https://rxjs.dev/) library to deploy contracts. Developers can leverage the process to achieve reactive deployment of Universal Profiles.
 When deploying a Universal Profile, pass the `deployReactive` flag inside the `contractDeploymentOptions` object to receive an [RxJS](https://rxjs.dev/) Observable, which will emit events as your contract is deployed.
 
 ```typescript
