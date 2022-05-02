@@ -56,7 +56,7 @@ The property `digitalAssetMetadata?` can be:
 | `ipfsClientOptions?` | Object  | The IPFS client options as defined by the [IPFS-HTTP-Client] used internally.                                        |
 
 :::info
-You can read more about the `contractDeploymentOptions?` specification on [its official page](../deployment/05-contract-deployment-options.md).
+You can read more about the `contractDeploymentOptions?` specification on [its official page](../deployment/digital-asset.md).
 :::
 
 #### Returns
@@ -167,7 +167,7 @@ Deployment Complete
 ```
 
 [constructor parameters]: ../../../../../standards/smart-contracts/lsp7-digital-asset#constructor
-[contract deployment options]: ../deployment/contract-deployment-options
+[contract deployment options]: ../deployment/digital-asset.md
 [lsp4]: https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-4-DigitalAsset-Metadata.md
 [uploading lsp4 digital asset metadata]: ./lsp4-digital-asset-metadata#uploadMetadata
 [lsp-smart-contracts]: https://github.com/lukso-network/lsp-smart-contracts
