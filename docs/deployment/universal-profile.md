@@ -47,7 +47,7 @@ await lspFactory.UniversalProfile.deploy({
 
 ### Adding LSP3 Metadata
 
-When deploying a Universal Profile with LSP Factory, you can specify your Universal Profile metadata using the `lsp3Profile` key in the `profileProperties` object:
+When deploying a Universal Profile with LSPFactory, you can specify your Universal Profile metadata using the `lsp3Profile` key in the `profileProperties` object:
 
 ```javascript
 await lspFactory.UniversalProfile.deploy({
@@ -57,7 +57,7 @@ await lspFactory.UniversalProfile.deploy({
 ```
 
 :::info Info
-Profile Metadata can be passed as either a JSON object containing the [LSP3Metadata](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-3-UniversalProfile-Metadata.md#lsp3profile) you want to upload or an IPFS URL of your previously uploaded metadata.
+Profile Metadata can be passed as either a JSON object containing the [LSP3Metadata](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-3-UniversalProfile-Metadata.md#lsp3profile) you want to upload or a URL of your previously uploaded metadata.
 :::
 
 If an LSP3MetaData object is passed, LSPFactory will process and upload your metadata to IPFS.
@@ -83,9 +83,9 @@ await lspFactory.UniversalProfile.deploy({
 };
 ```
 
-The following two will download the JSON file before hashing it and generating the proper [JSONURL](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#JSONURL) value.
+The following two examples will download the JSON file before hashing it and generating the proper [JSONURL](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#JSONURL) value.
 
-```javascript title='Providing an already uploaded LSP3 metadata IPFS URL'
+```javascript title='Providing a previously uploaded LSP3 metadata IPFS URL'
 await lspFactory.UniversalProfile.deploy({
     controllerAddresses: ['0x...'],
     lsp3Profile: 'ipfs://QmQ7Wq4y2gWiuzB4a4Wd6UiidKNpzCJRpgzFqQwzyq6SsV'
@@ -93,7 +93,7 @@ await lspFactory.UniversalProfile.deploy({
 };
 ```
 
-```javascript title='Providing an already uploaded LSP3 metadata URL'
+```javascript title='Providing a previously uploaded LSP3 metadata URL'
 await lspFactory.UniversalProfile.deploy({
     controllerAddresses: ['0x...'],
     lsp3Profile: 'https://mycoolserver.com/myProfile.json'
@@ -105,32 +105,30 @@ You can also provide the JSON file yourself to generate the hash value:
 
 ```javascript title='Providing an already uploaded LSP3 metadata  url and JSON file itself'
 await lspFactory.UniversalProfile.deploy({
-    controllerAddresses: ['0x...'],
-    lsp3Profile: {
-      json: lsp3ProfileJson,
-      urlf: 'https://mycoolserver.com/myProfile.json'
-    }
-  });
-};
+  controllerAddresses: ['0x...'],
+  lsp3Profile: {
+    json: lsp3ProfileJson,
+    url: 'https://mycoolserver.com/myProfile.json',
+  },
+});
 ```
 
 Or you can provide the hash value and then uploaded file URL:
 
 ```javascript title='Providing an already uploaded LSP3 metadata  url and hash values'
 await lspFactory.UniversalProfile.deploy({
-    controllerAddresses: ['0x...'],
-    lsp3Profile: {
-      hash: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
-      hashFunction: 'keccak256(utf8)',
-      url: 'https://mycoolserver.com/file.json'
-    }
-  });
-};
+  controllerAddresses: ['0x...'],
+  lsp3Profile: {
+    hash: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
+    hashFunction: 'keccak256(utf8)',
+    url: 'https://mycoolserver.com/file.json',
+  },
+});
 ```
 
 ### Setting Images in LSP3MetaData
 
-The properies `profileImage` and `backgroundImage` can be passed inside the `lsp3Profile` object. These can be given as an object containing previously uploaded image Metadata, a Javascript `File` object if used client-side, or `ImageBuffer` if the library is used in the Node environment.
+The properies `profileImage` and `backgroundImage` can be passed inside the `lsp3Profile` object. These can be given as an object containing previously uploaded image Metadata, a Javascript `File` object if used client-side.
 
 #### Pre-uploaded Images
 
@@ -180,7 +178,7 @@ await lspFactory.UniversalProfile.deploy({
 Javascript offers a `File` object for easy handling of files inside a browser. Developers can pass these to `profileImage` and `backgroundImage` fields to allow easy drag and drop of images from a user interface.
 
 :::caution
-Javascript's `File` object is only available when using javascript in the browser. If using LSPFactory in a Node environment, images should be uploaded as an [ImageBuffer](./universal-profile#using-image-buffer)
+Javascript's `File` object is only available when using javascript in the browser. If using LSPFactory in a Node environment, image metadata should be passed.
 :::
 
 ```javascript
@@ -211,7 +209,7 @@ Javascript's `File` object is only available when using javascript in the browse
 
 LSPFactory will create five resized versions of the passed image, with max sizes of `1800x1800`, `1024x1024`, `640x640`, `320x320`, `180x180`. These resized images will be set inside the `LSP3Metadata` and attached to the `ERC725Account`.
 
-#### Using Image Buffers
+<!-- #### Using Image Buffers
 
 If using LSPFactory in a Node environment where Javascript `File` object is unavailable, `profileImage` and `backgroundImage` can be uploaded by passing a File Buffer directly.
 
@@ -244,13 +242,11 @@ await lspFactory.UniversalProfile.deploy({
   controllingAccounts: ['0x...'],
   lsp3Profile: myUniversalProfileData,
 });
-```
+``` -->
 
 ### Uploading LSP3 metadata to IPFS
 
-You can upload your LSP3 metadata before deploying a Universal Profile using the `uploadMetaData()` method. The function uses the same [`lsp3Profile` object schema](./universal-profile#adding-lsp3-metadata) defined above when deploying a Universal Profile and eturns an object containing the IPFS upload location of your metadata, and your LSP3 Metdata as a javascript object.
-
-Returns an object containing the IPFS upload location of your metadata, and your lsp3metdata as a javascript object.
+You can upload your LSP3 metadata before deploying a Universal Profile using the `uploadMetaData()` method. The function uses the same [`lsp3Profile` object schema](./universal-profile#adding-lsp3-metadata) defined above when deploying a Universal Profile. Returns an object containing the IPFS upload location of your metadata and your `lsp3Metdata` as a javascript object.
 
 ```javascript
 await myLSPFactory.UniversalProfile.uploadMetaData(lsp3Profile [, options]);
@@ -288,16 +284,18 @@ await UniversalProfile.uploadMetaData(myLSP3MetaData);
 A Universal Profile is composed of three smart contracts. [LSP0 ERC725 Account](../../../standards/universal-profile/lsp0-erc725account), [LSP6 Key Manager](../../../standards/universal-profile/lsp6-key-manager), and [LSP1-UniversalReceiver](../../../standards/generic-standards/lsp1-universal-receiver.md).
 When deploying a Universal Profile, you can configure how developers should deploy these contracts inside the `contractDeploymentOptions` object. Builders can configure each contract separately. The available options are the same for all contracts.
 
+Under the `version` key developers can pass a [version number](./universal-profile#contract-versions), [custom bytecode](./universal-profile#deploying-custom-bytecode) or a [base contract address](./universal-profile#using-a-custom-address) to be used during deployment.
+
 ```javascript
 await lspFactory.UniversalProfile.deploy({...}, {
   ERC725Account: {
-    version: '0.4.1',
+    version: '0.4.1', // Version number
   },
   UniversalReceiverDelegate: {
-    baseContract: '0x...'
+    version: '0x...' // Custom bytecode
   },
   KeyManager: {
-    libAddress: '0x6c1F3Ed2F99054C88897e2f32187ef15c62dC560'
+    version: '0x6c1F3Ed2F99054C88897e2f32187ef15c62dC560' // Base contract address
   }
 })
 ```
@@ -330,46 +328,49 @@ LSPFactory stores base contract addresses for different versions [internally](ht
 
 :::
 
-`deployProxy` defaults to `true` for `ERC725Account` and `LSP6KeyManager` and `false` for `UniversalReceiverDelegate`.
-
 When using proxy deployment, LSPFactory will check that there is some bytecode deployed at the base contract address before deploying. A new base contract will be deployed and referenced in the proxy contract if there is none. This process is helpful when using LSPFactory on a local development network like Hardhat, where there will be no pre-deployed base contracts.
 
 #### Universal Receiver Delegate Proxy Deployment
 
-The `UniversalReceiverDelegate` is a logic contract that writes to the Universal Profile when it receives some asset. This procedure is not specific to any particular Universal Profile, so developers can use the same `UniversalReceiverDelegate` contract for multiple different Universal Profile deployments.
+The `UniversalReceiverDelegate` is a logic contract that writes to the Universal Profile when it receives some asset. This operation is not specific to any particular Universal Profile, so developers can use the same `UniversalReceiverDelegate` contract for multiple different Universal Profile deployments.
 
-By default, LSPFactory will use the latest available version of the `UniversalReceiverDelegate` version stored in the [version file](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json). This address is used directly on the Universal Profile and is given the `SETDATA` LSP6 permission. Having everything compact means that no `UniversalReceiverDelegate` contract needs to be deployed when deploying a Universal Profile which further reduces the gas cost of Universal Profile deployment.
+By default, LSPFactory will use the latest available version of the `UniversalReceiverDelegate` version stored in the [version file](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json). This address is used directly on the Universal Profile and is given the `SETDATA` LSP6 permission.
 
-To specify that your Universal Profile should use proxy deployment when deploying the `UniversalReceiverDelegate` contract, set the property `deployProxy` to `true`.
+Reusing the `UniversalReceiverDelegate` address means that no `UniversalReceiverDelegate` contract needs to be deployed when deploying a Universal Profile which further reduces the gas cost of Universal Profile deployment.
+
+To specify that your `UniversalReceiverDelegate` contract should use proxy deployment, set the property `deployProxy` to `true`. If no base contract address is specified in the `version` parameter a new `UniversalReceiverDelegate` base contract will be deployed.
 
 ```javascript
 lspFactory.UniversalProfile.deploy({...}, {
     UniversalReceiverDelegate: {
         deployProxy: true,
+        version: '0x00b1d454Eb5d917253FD6cb4D5560dEC30b0960c',
     },
 })
 ```
 
 ### Using a Custom Address
 
-You can specify the base contract address by passing the `libAddress` parameter, which allows you to customarily implement a contract by using a custom base contract you have previously deployed. A custom base contract that developers will pass here must adhere to the relevant LSP contract standard it is being used for deployment.
+When using proxy deployment you can specify the base contract address by passing the `version` parameter. This allows you to deploy a specific contract implementation by using a custom base contract you have deployed.
 
-```javascript title="Deploying a Universal Profile with a custom base contract implementation of an ERC725Account"
+Any base contract address that developers pass here must adhere to the relevant LSP contract standard it is being used for.
+
+```javascript title="Deploying a Universal Profile using a custom ERC725Account base contract implementation"
 lspFactory.UniversalProfile.deploy({...}, {
     ERC725Account: {
-        libAddress: '0x00b1d454Eb5d917253FD6cb4D5560dEC30b0960c',
+        version: '0x00b1d454Eb5d917253FD6cb4D5560dEC30b0960c',
     },
 })
 ```
 
 :::info
-The `UniversalReceiverDelegate` contract does not use proxy deployment by default. When setting the `UniversalReceiverDelegate` `libAddress`, if `deployProxy` is not set to `true`, LSPFactory will use the provided address directly. The provided address will be given the `SETDATA` LSP6 permission and set as the [LSP1UniversalReceiverDelegate key](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-0-ERC725Account.md#lsp1universalreceiverdelegate) on the ERC725Account. You can read more in the [section above](./universal-profile#universal-receiver-delegate-proxy-deployment).
+The `UniversalReceiverDelegate` contract does not use proxy deployment by default. If an address is passed to the `UniversalReceiverDelegate` `version` parameter and `deployProxy` is not set to `true`, LSPFactory will set the provided address directly on the ERC725Account as the [LSP1UniversalReceiverDelegate key](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-0-ERC725Account.md#lsp1universalreceiverdelegate) and given the `SETDATA` LSP6 permission. You can read more in the [section above](./universal-profile#universal-receiver-delegate-proxy-deployment).
 :::
 
 ```javascript title="Using a custom UniversalReceiverDelegate address"
 lspFactory.UniversalProfile.deploy({...}, {
     UniversalReceiverDelegate: {
-        libAddress: '0x00b1d454Eb5d917253FD6cb4D5560dEC30b0960c',
+        version: '0x00b1d454Eb5d917253FD6cb4D5560dEC30b0960c',
         deployProxy: false
     },
 })
@@ -377,7 +378,9 @@ lspFactory.UniversalProfile.deploy({...}, {
 
 ### Contract Versions
 
-The `version` of all three contracts can be set at once by passing the global version parameter. The go will set all contracts to use the same base contract version. The version can also be set per contract, which will take precedence over the global parameter.
+LSPFactory stores the addresses of different base contract versions [internally](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json). By specifying a `version` number, developers can specify which base contract implementation should be used during deployment.
+
+The `version` of all three contracts can be set at once by passing the global version parameter. The version can also be set per contract, which will take precedence over the global parameter.
 
 ```javascript title="Deploying a Universal Profile with all contracts set to version 0.5.0"
 await lspFactory.UniversalProfile.deploy({...}, {
@@ -396,7 +399,7 @@ await lspFactory.UniversalProfile.deploy({...}, {
 
 ### Deploying Custom Bytecode
 
-When deploying a Universal Profile, you can use your custom contract implementation when passing the compiled creation bytecode of a contract you have written as the `bytecode` parameter. The `bytecode` parameter can be the instantiation byte code of a custom contract implementation you have registered according to your use case. The implementation must meet the relevant LSP standard requirements.
+When deploying a Universal Profile, you can use your custom contract implementation by passing the compiled creation bytecode of a contract you have written as the `version` parameter. The `bytecode` parameter can be the instantiation bytecode of a custom contract implementation you have written according to your use case. The implementation must meet the relevant LSP standard requirements.
 
 :::note
 The custom bytecode will be deployed and used as part of the Universal Profile. Contracts deployed from custom bytecode will not use any proxy contract deployment.
@@ -405,7 +408,7 @@ The custom bytecode will be deployed and used as part of the Universal Profile. 
 ```javascript title="Deploying a Universal Profile with a custom KeyManager implementation"
 lspFactory.UniversalProfile.deploy({...}, {
     KeyManager: {
-      bytecode: '0x...'
+      version: '0x...'
     }
 });
 ```
@@ -415,7 +418,7 @@ lspFactory.UniversalProfile.deploy({...}, {
 You can specify how you want your profile metadata to be uploaded while passing the options object. Here you can set the IPFS gateway where you want the profile's metadata to be uploaded.
 
 :::note
-The procedure takes an `ipfsClientOptions` object as defined by the [IPFS-HTTP Client](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) library which is used internally to interact with IPFS.
+The procedure takes an `ipfsClientOptions` object as defined by the [IPFS-HTTP Client](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) library which is used internally to interact with the specified IPFS node.
 :::
 
 ```javascript
@@ -428,53 +431,40 @@ lspFactory.UniversalProfile.deploy({...}, {
 })
 ```
 
-If the `options` object is provided, it will override the `options` object passed at the instantiation of the LSPFactory.
+If the `ipfsClientOptions` object is provided, it will override the `ipfsClientOptions` object passed during the instantiation of the LSPFactory.
 
 ### Reactive Deployment
 
-The LSP Factory uses [RxJS](https://rxjs.dev/) library to deploy contracts. Developers can leverage the process to achieve reactive deployment of Universal Profiles.
-When deploying a Universal Profile, pass the `deployReactive` flag inside the `contractDeploymentOptions` object to receive an [RxJS](https://rxjs.dev/) Observable, which will emit events as your contract is deployed.
+LSPFactory uses [RxJS](https://rxjs.dev/) to deploy smart contracts. This can be leveraged for reactive deployment of Universal Profiles. [Read more here](../getting-started.md#reactive-deployment).
 
-```typescript
-const universalProfileDeploymentObservable = lspFactory.UniversalProfile.deploy({...}, {
-    deployReactive: true
-  }
-);
+When `deployReactive` is set to `true`, an [RxJS Observable](https://rxjs.dev/guide/observable) will be returned which will emit events as the deployment progresses.
 
-universalProfileDeploymentObservable.subscribe({
-  next: (deploymentEvent) => {
-    console.log(deploymentEvent);
-  },
-  complete: () => {
-    console.log('Universal Profile deployment completed');
-  },
+```typescript title="Reactive deployment of a Universal Profile"
+const observable = await lspFactory.UniversalProfile.deploy({...}, {
+  deployReactive: true
 });
 
-/**
-  { type: 'PROXY',        contractName: 'ERC725Account',                                              status: 'PENDING',  transaction:  {} },
-  { type: "PROXY",        contractName: 'ERC725Account',                                              status: 'PENDING',  receipt:      {} },
-  { type: "PROXY",        contractName: 'ERC725Account',           functionName: 'initialize',        status: 'PENDING',  transaction:  {} },
-  { type: "PROXY",        contractName: 'ERC725Account',           functionName: 'initialize',        status: 'COMPLETE', receipt:      {} },
-
-  { type: 'CONTRACT',     contractName: 'KeyManager',                                                 status: 'PENDING',  transaction:  {} },
-  { type: "PROXY",        contractName: 'UniversalReceiver...',                                       status: 'PENDING',  transaction:  {} },
-  { type: 'CONTRACT',     contractName: 'KeyManager',                                                 status: 'COMPLETE', receipt:      {} },
-  { type: "PROXY",        contractName: 'UniversalReceiver...',                                       status: 'PENDING',  receipt:      {} },
-  { type: "PROXY",        contractName: 'UniversalReceiver...',    functionName: 'initialize',        status: 'PENDING',  transaction:  {} },
-  { type: "PROXY",        contractName: 'UniversalReceiver...',    functionName: 'initialize',        status: 'COMPLETE', receipt:      {} },
-
-  { type: 'TRANSACTION',  contractName: 'ERC725Account',           functionName: 'setData',           status: 'PENDING',  transaction:  {} },
-  { type: 'TRANSACTION',  contractName: 'ERC725Account',           functionName: 'setData',           status: 'COMPLETE', receipt:      {} },
-
-  { type: 'TRANSACTION',  contractName: 'ERC725Account',           functionName: 'transferOwnership', status: 'PENDING',  transaction:  {} },
-  { type: 'TRANSACTION',  contractName: 'ERC725Account',           functionName: 'transferOwnership', status: 'COMPLETE', receipt:      {} },
-  Universal Profile deployment completed
- */
-
+observable.subscribe();
 ```
 
-:::note
-The function defined in `next` will be called whenever a new deployment event is created. The entire described process will be called once after deployment is finished.
-:::
+The following events will be emitted:
 
-Reactive deployment may be helpful in certain front-end behaviors to give better feedback to users when they trigger a Universal Profile deployment from a user interface. For example, you may want to implement a loading bar to tell users how deployment is progressing or display details and addresses of the contracts as they are deployed.
+```typescript
+  { type: 'PROXY', contractName: 'ERC725Account', status: 'PENDING',  transaction: {} },
+  { type: "PROXY", contractName: 'ERC725Account', status: 'PENDING',  receipt:     {} },
+  { type: "PROXY", contractName: 'ERC725Account', functionName: 'initialize', status: 'PENDING',  transaction: {} },
+  { type: "PROXY", contractName: 'ERC725Account', functionName: 'initialize', status: 'COMPLETE', receipt:     {} },
+
+  { type: 'CONTRACT', contractName: 'KeyManager',           status: 'PENDING',  transaction:  {} },
+  { type: "PROXY",    contractName: 'UniversalReceiver...', status: 'PENDING',  transaction:  {} },
+  { type: 'CONTRACT', contractName: 'KeyManager',           status: 'COMPLETE', receipt:      {} },
+  { type: "PROXY",    contractName: 'UniversalReceiver...', status: 'PENDING',  receipt:      {} },
+  { type: "PROXY",    contractName: 'UniversalReceiver...', functionName: 'initialize', status: 'PENDING',  transaction: {}},
+  { type: "PROXY",    contractName: 'UniversalReceiver...', functionName: 'initialize', status: 'COMPLETE', receipt: {}},
+
+  { type: 'TRANSACTION',  contractName: 'ERC725Account', functionName: 'setData', status: 'PENDING',  transaction: {}},
+  { type: 'TRANSACTION',  contractName: 'ERC725Account', functionName: 'setData', status: 'COMPLETE', receipt: {}},
+
+  { type: 'TRANSACTION',  contractName: 'ERC725Account', functionName: 'transferOwnership', status: 'PENDING', transaction: {}},
+  { type: 'TRANSACTION',  contractName: 'ERC725Account', functionName: 'transferOwnership', status: 'COMPLETE', receipt: {}},
+```

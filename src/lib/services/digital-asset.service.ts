@@ -28,7 +28,12 @@ import {
   GAS_PRICE,
   LSP4_KEYS,
 } from '../helpers/config.helper';
-import { deployContract, deployProxyContract, waitForReceipt } from '../helpers/deployment.helper';
+import {
+  convertContractDeploymentOptionsVersion,
+  deployContract,
+  deployProxyContract,
+  waitForReceipt,
+} from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
 import { isMetadataEncoded } from '../helpers/uploader.helper';
 import {
@@ -40,7 +45,9 @@ import {
   DeploymentType,
 } from '../interfaces';
 import {
+  ContractDeploymentOptions,
   ContractNames,
+  DigitalAssetConfiguration,
   DigitalAssetDeploymentOptions,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
@@ -602,4 +609,21 @@ async function transferOwnership(
     console.error('Error when transferring ownership');
     throw error;
   }
+}
+
+export function convertDigitalAssetConfigurationObject(
+  contractDeploymentOptions?: ContractDeploymentOptions
+): DigitalAssetConfiguration {
+  const { version, byteCode, libAddress } = convertContractDeploymentOptionsVersion(
+    contractDeploymentOptions?.version
+  );
+
+  return {
+    deployProxy: contractDeploymentOptions?.deployProxy,
+    uploadOptions: contractDeploymentOptions?.uploadOptions,
+    deployReactive: contractDeploymentOptions?.deployReactive,
+    version,
+    byteCode,
+    libAddress,
+  };
 }

@@ -371,7 +371,7 @@ describe('LSP3UniversalProfile', () => {
         deployedContracts = await testUPDeployment(
           {
             ERC725Account: {
-              byteCode: UniversalProfile__factory.bytecode,
+              version: UniversalProfile__factory.bytecode,
             },
           },
           4,
@@ -403,7 +403,7 @@ describe('LSP3UniversalProfile', () => {
 
         deployedContracts = await testUPDeployment(
           {
-            KeyManager: { byteCode: LSP6KeyManager__factory.bytecode },
+            KeyManager: { version: LSP6KeyManager__factory.bytecode },
           },
           4,
           lspFactory,
@@ -430,7 +430,7 @@ describe('LSP3UniversalProfile', () => {
         deployedContracts = await testUPDeployment(
           {
             UniversalReceiverDelegate: {
-              byteCode: LSP1UniversalReceiverDelegateUP__factory.bytecode,
+              version: LSP1UniversalReceiverDelegateUP__factory.bytecode,
             },
           },
           5,
@@ -471,7 +471,7 @@ describe('LSP3UniversalProfile', () => {
       it('should not deploy UP base contract', async () => {
         deployedContracts = await testUPDeployment(
           {
-            ERC725Account: { libAddress: baseContracts.universalProfile.address },
+            ERC725Account: { version: baseContracts.universalProfile.address },
           },
           4,
           lspFactory,
@@ -500,7 +500,7 @@ describe('LSP3UniversalProfile', () => {
       it('should not deploy KeyManager base contract', async () => {
         deployedContracts = await testUPDeployment(
           {
-            KeyManager: { libAddress: baseContracts.keyManager.address },
+            KeyManager: { version: baseContracts.keyManager.address },
           },
           4,
           lspFactory,
@@ -529,7 +529,7 @@ describe('LSP3UniversalProfile', () => {
         deployedContracts = await testUPDeployment(
           {
             UniversalReceiverDelegate: {
-              libAddress: baseContracts.universalReceiverDelegate.address,
+              version: baseContracts.universalReceiverDelegate.address,
             },
           },
           4,
@@ -561,7 +561,7 @@ describe('LSP3UniversalProfile', () => {
         deployedContracts = await testUPDeployment(
           {
             UniversalReceiverDelegate: {
-              libAddress: baseContracts.universalReceiverDelegate.address,
+              version: baseContracts.universalReceiverDelegate.address,
               deployProxy: true,
             },
           },

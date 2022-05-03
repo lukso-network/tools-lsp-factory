@@ -37,8 +37,10 @@ jobs:
         uses: EndBug/version-check@v1
         if: github.event_name == 'push'
         id: check
+
       - name: 🔄 Check if should release
         run: echo "SHOULD_RELEASE=${{ steps.check.outputs.changed == 'true' || github.event_name == 'workflow_dispatch' }}" >> $GITHUB_ENV
+
       - name: 📝 Set Version
         if: env.SHOULD_RELEASE == 'true'
         run: |-
@@ -87,8 +89,8 @@ jobs:
           echo ${PR_BODY}|cat - RELEASENOTES.md > /tmp/out && mv /tmp/out RELEASENOTES.md
 
       - name: 🚀 Create GitHub release
-        uses: ncipollo/release-action@v1
         if: env.SHOULD_RELEASE == 'true'
+        uses: ncipollo/release-action@v1
         with:
           bodyFile: 'RELEASENOTES.md'
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -96,6 +98,7 @@ jobs:
 
       # Publish to NPM
       - name: Publish
+        if: env.SHOULD_RELEASE == 'true'
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
