@@ -620,7 +620,9 @@ export function convertDigitalAssetConfigurationObject(
 
   return {
     deployProxy: contractDeploymentOptions?.deployProxy,
-    uploadOptions: contractDeploymentOptions?.uploadOptions,
+    uploadOptions: contractDeploymentOptions?.ipfsClientOptions
+      ? { ipfsClientOptions: contractDeploymentOptions?.ipfsClientOptions }
+      : undefined,
     deployReactive: contractDeploymentOptions?.deployReactive,
     version,
     byteCode,

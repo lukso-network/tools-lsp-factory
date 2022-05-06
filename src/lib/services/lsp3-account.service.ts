@@ -511,7 +511,9 @@ export function convertUniversalProfileConfigurationObject(
 
   return {
     version: contractDeploymentOptions?.version,
-    uploadOptions: contractDeploymentOptions?.uploadOptions,
+    uploadOptions: contractDeploymentOptions?.ipfsClientOptions
+      ? { ipfsClientOptions: contractDeploymentOptions?.ipfsClientOptions }
+      : undefined,
     ERC725Account: {
       version: erc725AccountVersion,
       byteCode: erc725AccountBytecode,

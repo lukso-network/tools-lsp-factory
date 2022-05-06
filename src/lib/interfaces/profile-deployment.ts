@@ -1,3 +1,5 @@
+import { Options as IPFSClientOptions } from 'ipfs-http-client';
+
 import { DeployedContract } from '../..';
 
 import { ProfileDataBeforeUpload } from './lsp3-profile';
@@ -48,7 +50,7 @@ interface ContractOptions {
 
 interface ContractDeploymentOptionsBase {
   version?: string;
-  uploadOptions?: UploadOptions;
+  ipfsClientOptions?: IPFSClientOptions;
   ERC725Account?: ContractOptions;
   KeyManager?: ContractOptions;
   UniversalReceiverDelegate?: ContractOptions;

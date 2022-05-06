@@ -1,9 +1,8 @@
 import { providers, Signer } from 'ethers';
+import { Options as IPFSClientOptions } from 'ipfs-http-client';
 
 import { UploadOptions } from './profile-upload-options';
-/**
- * TDB
- */
+
 export interface LSPFactoryOptions {
   provider: providers.Web3Provider | providers.JsonRpcProvider;
   chainId: number;
@@ -11,8 +10,7 @@ export interface LSPFactoryOptions {
   uploadOptions: UploadOptions;
 }
 
-export interface SignerOptions {
-  deployKey: string;
-  chainId: number;
-  uploadOptions?: UploadOptions;
+export interface InstantiationOptions {
+  chainId?: number;
+  ipfsClientOptions?: IPFSClientOptions;
 }
