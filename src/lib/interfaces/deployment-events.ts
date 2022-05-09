@@ -3,10 +3,10 @@ import { ContractTransaction } from 'ethers';
 import { Observable } from 'rxjs';
 
 export enum DeploymentType {
-  CONTRACT = 'CONTRACT',
+  CONTRACT = 'DEPLOYMENT',
   TRANSACTION = 'TRANSACTION',
-  PROXY = 'PROXY',
-  BASE_CONTRACT = 'BASE_CONTRACT',
+  PROXY = 'PROXY_DEPLOYMENT',
+  BASE_CONTRACT = 'BASE_CONTRACT_DEPLOYMENT',
 }
 
 export enum DeploymentStatus {

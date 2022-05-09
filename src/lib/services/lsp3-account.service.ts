@@ -154,7 +154,8 @@ function initializeProxy(
     async () => {
       const signerAddress = await signer.getAddress();
       return [signerAddress];
-    }
+    },
+    'initialize(address)'
   ).pipe(shareReplay());
 }
 

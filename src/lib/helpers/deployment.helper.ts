@@ -25,14 +25,12 @@ import { GAS_BUFFER, GAS_PRICE } from './config.helper';
 export function waitForReceipt<T>(deploymentEvent$): Observable<T> {
   return deploymentEvent$.pipe(
     switchMap(async (deploymentEvent: DeploymentEvent) => {
-      let status, functionName;
-
-      status = DeploymentStatus.COMPLETE;
+      let functionName;
 
       switch (deploymentEvent.type) {
         case DeploymentType.PROXY:
           functionName = deploymentEvent.functionName;
-          status = functionName ? DeploymentStatus.COMPLETE : DeploymentStatus.PENDING;
+
           break;
         case DeploymentType.TRANSACTION:
           functionName = deploymentEvent.functionName;
@@ -43,7 +41,10 @@ export function waitForReceipt<T>(deploymentEvent$): Observable<T> {
         type: deploymentEvent.type,
         contractName: deploymentEvent.contractName,
         ...(functionName && { functionName }),
-        status,
+        status: DeploymentStatus.COMPLETE,
+        ...(deploymentEvent.type === DeploymentType.PROXY && {
+          contractAddress: receipt.contractAddress,
+        }),
         receipt,
       };
     }),
@@ -57,7 +58,8 @@ export function waitForReceipt<T>(deploymentEvent$): Observable<T> {
 export function initialize(
   deploymentEvent$: Observable<DeploymentEvent>,
   factory: ContractFactory,
-  initArguments: (result) => Promise<unknown[]>
+  initArguments: (result) => Promise<unknown[]>,
+  initializeFunctionSignature: string
 ): Observable<DeploymentEventProxyContract> {
   const initialize$ = deploymentEvent$.pipe(
     takeLast(1),
@@ -72,10 +74,10 @@ export function initialize(
         gasPrice: GAS_PRICE,
       });
       return {
-        type: result.type,
+        type: DeploymentType.TRANSACTION,
         contractName: result.contractName,
-        functionName: 'initialize',
-        status: result.status,
+        functionName: initializeFunctionSignature,
+        status: DeploymentStatus.PENDING,
         transaction,
       };
     }),

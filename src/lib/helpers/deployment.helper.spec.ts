@@ -1,7 +1,7 @@
 import { of } from 'rxjs';
 
 import { defaultDeploymentEvents } from '../../../test/deployment-events.mock';
-import { DeploymentStatus } from '../interfaces';
+import { DeploymentStatus, DeploymentType } from '../interfaces';
 
 import { waitForReceipt } from './deployment.helper';
 
@@ -11,7 +11,8 @@ describe('waitForReceipt', () => {
   });
   describe('with type PROXY', () => {
     it('should return a new deployment event with the receipt', (done) => {
-      const expectedDeploymentEvent = defaultDeploymentEvents.PROXY.ERC725Account.deployment;
+      const expectedDeploymentEvent =
+        defaultDeploymentEvents[DeploymentType.PROXY].ERC725Account.deployment;
       const deploymentEvent$ = of(expectedDeploymentEvent);
       const receipt$ = waitForReceipt(deploymentEvent$);
 
@@ -28,7 +29,8 @@ describe('waitForReceipt', () => {
     });
 
     it('should return a new deployment event with the receipt, functionName', (done) => {
-      const expectedDeploymentEvent = defaultDeploymentEvents.PROXY.ERC725Account.initialize;
+      const expectedDeploymentEvent =
+        defaultDeploymentEvents[DeploymentType.PROXY].ERC725Account.initialize;
       const expectedDeploymentEvent$ = of(expectedDeploymentEvent);
       const receipt$ = waitForReceipt(expectedDeploymentEvent$);
 
@@ -46,7 +48,9 @@ describe('waitForReceipt', () => {
     });
 
     it('should throw an error incase transaction.wait() fails/errors', (done) => {
-      const expectedDeploymentEvent$ = of(defaultDeploymentEvents.PROXY.ERC725Account.error);
+      const expectedDeploymentEvent$ = of(
+        defaultDeploymentEvents[DeploymentType.PROXY].ERC725Account.error
+      );
       const receipt$ = waitForReceipt(expectedDeploymentEvent$);
 
       receipt$.subscribe({

@@ -189,10 +189,10 @@ function initializeLSP7Proxy(
       );
 
       return {
-        type: result.type,
+        type: DeploymentType.TRANSACTION,
         contractName: result.contractName,
-        functionName: 'initialize',
-        status: result.status,
+        functionName: 'initialize(string,string,address,bool)',
+        status: DeploymentStatus.PENDING,
         transaction,
       };
     }),
@@ -332,10 +332,10 @@ function initializeLSP8Proxy(
         }
       );
       return {
-        type: result.type,
+        type: DeploymentType.TRANSACTION,
         contractName: result.contractName,
-        functionName: 'initialize',
-        status: result.status,
+        functionName: 'initialize(string,string,address)',
+        status: DeploymentStatus.PENDING,
         transaction,
       };
     }),
@@ -540,7 +540,7 @@ async function setData(
   return {
     type: DeploymentType.TRANSACTION,
     contractName,
-    functionName: 'setData',
+    functionName: 'setData(bytes32[],bytes[])',
     status: DeploymentStatus.PENDING,
     transaction,
   };
@@ -602,7 +602,7 @@ async function transferOwnership(
       type: DeploymentType.TRANSACTION,
       status: DeploymentStatus.PENDING,
       contractName,
-      functionName: 'transferOwnership',
+      functionName: 'transferOwnership(address)',
       transaction,
     };
   } catch (error) {
