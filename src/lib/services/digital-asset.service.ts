@@ -59,7 +59,6 @@ import {
   LSP4MetadataUrlForEncoding,
 } from '../interfaces/lsp4-digital-asset';
 import { UploadOptions } from '../interfaces/profile-upload-options';
-import { universalProfileBaseContractsDeployment$ } from './base-contract.service';
 
 export type DigitalAssetDeploymentEvent = DeploymentEventContract | DeploymentEventProxyContract;
 
