@@ -13,7 +13,7 @@ import { ERC725_ACCOUNT_INTERRFACE, LSP4_KEYS } from '../helpers/config.helper';
 import { lsp4DigitalAsset } from './../../../test/lsp4-digital-asset.mock';
 import { ProxyDeployer } from './proxy-deployer';
 
-jest.setTimeout(30000);
+jest.setTimeout(60000);
 jest.useRealTimers();
 
 describe('LSP7DigitalAsset', () => {
