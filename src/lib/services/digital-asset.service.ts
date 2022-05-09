@@ -3,6 +3,7 @@ import axios from 'axios';
 import { ContractFactory, ethers } from 'ethers';
 import {
   concat,
+  defer,
   EMPTY,
   forkJoin,
   from,
@@ -58,6 +59,7 @@ import {
   LSP4MetadataUrlForEncoding,
 } from '../interfaces/lsp4-digital-asset';
 import { UploadOptions } from '../interfaces/profile-upload-options';
+import { universalProfileBaseContractsDeployment$ } from './base-contract.service';
 
 export type DigitalAssetDeploymentEvent = DeploymentEventContract | DeploymentEventProxyContract;
 
@@ -423,9 +425,13 @@ export function setMetadataAndTransferOwnership$(
   contractName: string,
   isSignerUniversalProfile$: Observable<boolean>
 ) {
-  return concat(
+  const singerAddress$ = defer(async () => {
+    return signer.getAddress();
+  });
+
+  const setData$ =
     digitalAssetDeploymentOptions?.creators?.length ||
-      digitalAssetDeploymentOptions?.digitalAssetMetadata
+    digitalAssetDeploymentOptions?.digitalAssetMetadata
       ? setLSP4Metadata$(
           signer,
           digitalAsset$,
@@ -434,15 +440,23 @@ export function setMetadataAndTransferOwnership$(
           digitalAssetDeploymentOptions,
           isSignerUniversalProfile$
         )
-      : EMPTY,
-    transferOwnership$(
-      signer,
-      digitalAsset$,
-      digitalAssetDeploymentOptions,
-      contractName,
-      isSignerUniversalProfile$
-    )
+      : EMPTY;
+
+  const transferOwnershipTransaction$ = singerAddress$.pipe(
+    switchMap((signerAddress) => {
+      return signerAddress !== digitalAssetDeploymentOptions.controllerAddress
+        ? transferOwnership$(
+            signer,
+            digitalAsset$,
+            digitalAssetDeploymentOptions,
+            contractName,
+            isSignerUniversalProfile$
+          )
+        : EMPTY;
+    })
   );
+
+  return concat(setData$, transferOwnershipTransaction$);
 }
 
 export function setLSP4Metadata$(
