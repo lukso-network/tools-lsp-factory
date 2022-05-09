@@ -5,7 +5,7 @@ import { concatAll } from 'rxjs/operators';
 import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { defaultUploadOptions } from '../helpers/config.helper';
-import { emitContractsOnCompletion } from '../helpers/deployment.helper';
+import { deploymentWithContractsOnCompletion$ } from '../helpers/deployment.helper';
 import { ipfsUpload, prepareMetadataImage } from '../helpers/uploader.helper';
 import {
   DeploymentEventContract,
@@ -190,7 +190,7 @@ export class LSP3UniversalProfile {
       signerIsUniversalProfile$
     );
 
-    const deployment$ = emitContractsOnCompletion(
+    const deployment$ = deploymentWithContractsOnCompletion$(
       concat([
         baseContractDeployment$,
         account$,

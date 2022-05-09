@@ -3,7 +3,7 @@ import { concat, concatAll, EMPTY, lastValueFrom, Observable, shareReplay, switc
 
 import versions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
-import { emitContractsOnCompletion } from '../helpers/deployment.helper';
+import { deploymentWithContractsOnCompletion$ } from '../helpers/deployment.helper';
 import {
   DeploymentEventContract,
   DeploymentEventTransaction,
@@ -133,7 +133,7 @@ export class LSP8IdentifiableDigitalAsset {
       signerIsUniversalProfile$
     );
 
-    const deployment$ = emitContractsOnCompletion(
+    const deployment$ = deploymentWithContractsOnCompletion$(
       concat([baseContractDeployment$, digitalAsset$, setLSP4AndTransferOwnership$]).pipe(
         concatAll()
       )
