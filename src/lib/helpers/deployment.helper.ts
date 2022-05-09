@@ -103,7 +103,7 @@ export async function deployContract(
     const contract: Contract = await deployContractFunction();
 
     return {
-      type: DeploymentType.CONTRACT,
+      type: DeploymentType.DEPLOYMENT,
       status: DeploymentStatus.PENDING,
       contractName: name,
       transaction: contract.deployTransaction,
