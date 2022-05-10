@@ -89,7 +89,7 @@ describe('LSP3UniversalProfile', () => {
           lsp3Profile: lsp3ProfileJson.LSP3Profile,
         },
         {
-          ipfsClientOptions: { host: 'ipfs.infura.io', port: 5001, protocol: 'https' },
+          ipfsGateway: { host: 'ipfs.infura.io', port: 5001, protocol: 'https' },
         }
       );
 

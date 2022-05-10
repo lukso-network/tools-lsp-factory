@@ -35,7 +35,7 @@ import {
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
-import { isMetadataEncoded } from '../helpers/uploader.helper';
+import { formatIPFSUrl, isMetadataEncoded } from '../helpers/uploader.helper';
 import {
   DeploymentEvent$,
   DeploymentEventContract,
@@ -373,11 +373,7 @@ export async function getLSP4MetadataUrl(
     const isIPFSUrl = lsp4Metadata.startsWith('ipfs://');
 
     if (isIPFSUrl) {
-      // TODO: Handle simple HTTP upload
-      const protocol = uploadOptions.ipfsClientOptions.host ?? 'https';
-      const host = uploadOptions.ipfsClientOptions.host ?? 'ipfs.lukso.network';
-
-      lsp4JsonUrl = `${[protocol]}://${host}/ipfs/${lsp4Metadata.split('/').at(-1)}`;
+      lsp4JsonUrl = formatIPFSUrl(uploadOptions.ipfsGateway, lsp4Metadata.split('/').at(-1));
     }
 
     const ipfsResponse = await axios.get(lsp4JsonUrl);
@@ -620,8 +616,8 @@ export function convertDigitalAssetConfigurationObject(
 
   return {
     deployProxy: contractDeploymentOptions?.deployProxy,
-    uploadOptions: contractDeploymentOptions?.ipfsClientOptions
-      ? { ipfsClientOptions: contractDeploymentOptions?.ipfsClientOptions }
+    uploadOptions: contractDeploymentOptions?.ipfsGateway
+      ? { ipfsGateway: contractDeploymentOptions?.ipfsGateway }
       : undefined,
     deployReactive: contractDeploymentOptions?.deployReactive,
     version,

@@ -418,12 +418,12 @@ lspFactory.UniversalProfile.deploy({...}, {
 You can specify how you want your profile metadata to be uploaded while passing the options object. Here you can set the IPFS gateway where you want the profile's metadata to be uploaded.
 
 :::note
-The procedure takes an `ipfsClientOptions` object as defined by the [IPFS-HTTP Client](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) library which is used internally to interact with the specified IPFS node.
+The procedure takes an `ipfsGateway` object as defined by the [IPFS-HTTP Client](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) library which is used internally to interact with the specified IPFS node.
 :::
 
 ```javascript
 lspFactory.UniversalProfile.deploy({...}, {
-  ipfsClientOptions: {
+  ipfsGateway: {
     host: 'ipfs.infura.io',
     port: 5001,
     protocol: 'https',
@@ -431,7 +431,7 @@ lspFactory.UniversalProfile.deploy({...}, {
 })
 ```
 
-If the `ipfsClientOptions` object is provided, it will override the `ipfsClientOptions` object passed during the instantiation of the LSPFactory.
+If the `ipfsGateway` object is provided, it will override the `ipfsGateway` object passed during the instantiation of the LSPFactory.
 
 ### Reactive Deployment
 

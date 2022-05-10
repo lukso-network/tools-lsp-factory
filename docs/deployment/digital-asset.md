@@ -379,15 +379,15 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({...}, {
 
 ### IPFS Upload Options
 
-You can specify how you want your profile metadata to be uploaded by passing the `ipfsClientOptions` inside the `options` object. Here you can set the IPFS gateway where you want the metadata to be uploaded.
+You can specify how you want your profile metadata to be uploaded by passing the `ipfsGateway` inside the `options` object. Here you can set the IPFS gateway where you want the metadata to be uploaded.
 
 :::note
-The options object takes an `ipfsClientOptions` object as defined by the [IPFS-HTTP Client](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) library which is used internally to interact with the specified IPFS node.
+The options object takes an `ipfsGateway` object as defined by the [IPFS-HTTP Client](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) library which is used internally to interact with the specified IPFS node.
 :::
 
 ```javascript
 await lspFactory.LSP7DigitalAsset.deploy({...}, {
-  ipfsClientOptions: {
+  ipfsGateway: {
     host: 'ipfs.infura.io',
     port: 5001,
     protocol: 'https',
@@ -395,7 +395,7 @@ await lspFactory.LSP7DigitalAsset.deploy({...}, {
 });
 ```
 
-If the `ipfsClientOptions` object is provided, it will override the `ipfsClientOptions` object passed during the instantiation of the LSPFactory.
+If the `ipfsGateway` object is provided, it will override the `ipfsGateway` object passed during the instantiation of the LSPFactory.
 
 ### Reactive Deployment
 

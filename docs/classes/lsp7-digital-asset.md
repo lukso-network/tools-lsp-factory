@@ -53,7 +53,7 @@ The property `digitalAssetMetadata?` can be:
 | `deployReactive?`    | boolean | Whether to return an [RxJS Observable] of deployment events. Defaults to `false`.                                    |
 | `deployProxy?`       | boolean | Whether the contract should be deployed using a proxy contract implementation (e.g., [EIP1167]). Defaults to `true`. |
 | `uploadOptions?`     | Object  | The Specification of how the metadata should be uploaded.                                                            |
-| `ipfsClientOptions?` | Object  | The IPFS client options as defined by the [IPFS-HTTP-Client] used internally.                                        |
+| `ipfsGateway?`       | Object or String | ipfsGateway URL string or IPFS Client Options as defined by the [ipfs-http-client library] used internally. |
 
 :::info
 You can read more about the `contractDeploymentOptions?` specification on [its official page](../deployment/digital-asset.md).

@@ -36,8 +36,6 @@ export class LSPFactory {
   ) {
     let signer: Signer;
     let provider: providers.Web3Provider | providers.JsonRpcProvider;
-    const ipfsClientOptions = options?.ipfsClientOptions;
-    const chainId = options?.chainId || 22;
 
     if (typeof rpcUrlOrProvider === 'string') {
       provider = new ethers.providers.JsonRpcProvider(rpcUrlOrProvider);
@@ -55,11 +53,14 @@ export class LSPFactory {
       signer = provider.getSigner();
     }
 
+    const chainId = options?.chainId || 22;
+    const ipfsGateway = options?.ipfsGateway;
+
     this.options = {
       signer,
       provider,
       chainId,
-      uploadOptions: ipfsClientOptions ? { ipfsClientOptions } : undefined,
+      uploadOptions: ipfsGateway ? { ipfsGateway } : undefined,
     };
 
     this.LSP3UniversalProfile = new LSP3UniversalProfile(this.options);

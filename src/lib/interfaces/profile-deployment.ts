@@ -1,9 +1,7 @@
-import { Options as IPFSClientOptions } from 'ipfs-http-client';
-
 import { DeployedContract } from '../..';
 
 import { LSP3ProfileDataForEncoding, ProfileDataBeforeUpload } from './lsp3-profile';
-import { UploadOptions } from './profile-upload-options';
+import { IPFSGateway, UploadOptions } from './profile-upload-options';
 
 export enum ContractNames {
   ERC725_Account = 'ERC725Account',
@@ -50,7 +48,7 @@ interface ContractOptions {
 
 interface ContractDeploymentOptionsBase {
   version?: string;
-  ipfsClientOptions?: IPFSClientOptions;
+  ipfsGateway?: IPFSGateway;
   ERC725Account?: ContractOptions;
   KeyManager?: ContractOptions;
   UniversalReceiverDelegate?: ContractOptions;

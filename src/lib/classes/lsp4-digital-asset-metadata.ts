@@ -44,10 +44,7 @@ export class LSP4DigitalAssetMetadata {
     if (uploadOptions.url) {
       // TODO: implement simple HTTP upload
     } else {
-      uploadResponse = await ipfsUpload(
-        JSON.stringify(lsp4Metadata),
-        uploadOptions.ipfsClientOptions
-      );
+      uploadResponse = await ipfsUpload(JSON.stringify(lsp4Metadata), uploadOptions.ipfsGateway);
     }
 
     return {

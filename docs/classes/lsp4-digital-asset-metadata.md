@@ -37,7 +37,7 @@ If `uploadOptions` are not specified in the function call, and the function is u
 
 | Name                 | Type   | Description                                                                       |
 | :------------------- | :----- | :-------------------------------------------------------------------------------- |
-| `ipfsClientOptions?` | Object | IPFS Client Options as defined by the [ipfs-http-client library] used internally. |
+| `ipfsGateway?` | Object or String | ipfsGateway URL string or IPFS Client Options as defined by the [ipfs-http-client library] used internally. |
 
 #### Returns
 
@@ -118,7 +118,7 @@ const lspFactory = new LSPFactory(provider, {
   deployKey: myDeployKey,
   chainId: myChainId,
   uploadOptions: {
-    ipfsClientOptions: {
+    ipfsGateway: {
       host: 'ipfs.infura.io',
       port: 5001,
       protocol: 'https',

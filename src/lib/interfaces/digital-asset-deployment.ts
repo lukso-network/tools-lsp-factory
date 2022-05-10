@@ -1,7 +1,5 @@
-import { Options as IPFSClientOptions } from 'ipfs-http-client';
-
 import { LSP4MetadataBeforeUpload, LSP4MetadataForEncoding } from './lsp4-digital-asset';
-import { UploadOptions } from './profile-upload-options';
+import { IPFSGateway, UploadOptions } from './profile-upload-options';
 
 import { DeployedContract } from '.';
 
@@ -33,7 +31,7 @@ export interface DeployedLSP7DigitalAsset {
 interface ContractDeploymentOptionsBase {
   version?: string;
   deployProxy?: boolean;
-  ipfsClientOptions?: IPFSClientOptions;
+  ipfsGateway?: IPFSGateway;
 }
 export interface ContractDeploymentOptionsReactive extends ContractDeploymentOptionsBase {
   deployReactive: true;
