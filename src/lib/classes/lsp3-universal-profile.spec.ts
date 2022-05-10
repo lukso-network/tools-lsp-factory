@@ -28,7 +28,7 @@ import { lsp3ProfileJson } from './../../../test/lsp3-profile.mock';
 import { DeployedContracts, DeploymentEvent } from './../interfaces';
 import { ProxyDeployer } from './proxy-deployer';
 
-jest.setTimeout(120000);
+jest.setTimeout(60000);
 jest.useRealTimers();
 describe('LSP3UniversalProfile', () => {
   let signers: SignerWithAddress[];
