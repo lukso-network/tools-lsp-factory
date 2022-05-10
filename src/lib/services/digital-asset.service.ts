@@ -6,6 +6,7 @@ import {
   EMPTY,
   forkJoin,
   from,
+  merge,
   Observable,
   of,
   shareReplay,
@@ -423,9 +424,9 @@ export function setMetadataAndTransferOwnership$(
   contractName: string,
   isSignerUniversalProfile$: Observable<boolean>
 ) {
-  return concat(
+  const setDataTransaction$ =
     digitalAssetDeploymentOptions?.creators?.length ||
-      digitalAssetDeploymentOptions?.digitalAssetMetadata
+    digitalAssetDeploymentOptions?.digitalAssetMetadata
       ? setLSP4Metadata$(
           signer,
           digitalAsset$,
@@ -434,14 +435,30 @@ export function setMetadataAndTransferOwnership$(
           digitalAssetDeploymentOptions,
           isSignerUniversalProfile$
         )
-      : EMPTY,
-    transferOwnership$(
-      signer,
-      digitalAsset$,
-      digitalAssetDeploymentOptions,
-      contractName,
-      isSignerUniversalProfile$
-    )
+      : EMPTY;
+
+  const transferOwnershipTransaction$ = transferOwnership$(
+    signer,
+    digitalAsset$,
+    digitalAssetDeploymentOptions,
+    contractName,
+    isSignerUniversalProfile$
+  );
+
+  const setDataAndTransferOwnershipTransactions$ = concat(
+    setDataTransaction$,
+    transferOwnershipTransaction$
+  );
+
+  const transferOwnershipReceipt$ = waitForReceipt<DeploymentEventTransaction>(
+    transferOwnershipTransaction$
+  );
+  const setDataReceipt$ = waitForReceipt<DeploymentEventTransaction>(setDataTransaction$);
+
+  return merge(
+    setDataAndTransferOwnershipTransactions$,
+    transferOwnershipReceipt$,
+    setDataReceipt$
   );
 }
 
@@ -453,11 +470,7 @@ export function setLSP4Metadata$(
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
   isSignerUniversalProfile$: Observable<boolean>
 ): Observable<DeploymentEventTransaction> {
-  const setDataTransaction$ = forkJoin([
-    digitalAsset$,
-    lsp4Metadata$,
-    isSignerUniversalProfile$,
-  ]).pipe(
+  return forkJoin([digitalAsset$, lsp4Metadata$, isSignerUniversalProfile$]).pipe(
     switchMap(([{ receipt: digitalAssetReceipt }, lsp4Metadata, isSignerUniversalProfile]) => {
       const digitalAssetAddress = isSignerUniversalProfile
         ? digitalAssetReceipt.contractAddress || digitalAssetReceipt.logs[0].address
@@ -473,9 +486,6 @@ export function setLSP4Metadata$(
     }),
     shareReplay()
   );
-
-  const setDataReceipt$ = waitForReceipt<DeploymentEventTransaction>(setDataTransaction$);
-  return concat(setDataTransaction$, setDataReceipt$);
 }
 
 async function setData(
@@ -553,7 +563,7 @@ export function transferOwnership$(
   contractName: string,
   isSignerUniversalProfile$: Observable<boolean>
 ) {
-  const transferOwnershipTransaction$ = forkJoin([digitalAsset$, isSignerUniversalProfile$]).pipe(
+  return forkJoin([digitalAsset$, isSignerUniversalProfile$]).pipe(
     switchMap(([{ receipt: digitalAssetDeploymentReceipt }, isSignerUniversalProfile]) => {
       const digitalAssetAddress = isSignerUniversalProfile
         ? digitalAssetDeploymentReceipt.contractAddress ||
@@ -569,12 +579,6 @@ export function transferOwnership$(
     }),
     shareReplay()
   );
-
-  const transferOwnershipReceipt$ = waitForReceipt<DeploymentEventTransaction>(
-    transferOwnershipTransaction$
-  );
-
-  return concat(transferOwnershipTransaction$, transferOwnershipReceipt$);
 }
 
 async function transferOwnership(

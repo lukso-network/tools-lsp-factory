@@ -2,7 +2,7 @@ import { ERC725 } from '@erc725/erc725.js';
 import { TransactionReceipt } from '@ethersproject/providers';
 import axios from 'axios';
 import { BytesLike, Contract, ContractFactory, ethers, Signer } from 'ethers';
-import { concat, defer, EMPTY, forkJoin, from, Observable, of } from 'rxjs';
+import { concat, defer, EMPTY, forkJoin, from, merge, Observable, of } from 'rxjs';
 import { defaultIfEmpty, shareReplay, switchMap } from 'rxjs/operators';
 
 import {
@@ -158,6 +158,45 @@ function initializeProxy(
   ).pipe(shareReplay());
 }
 
+export function setDataAndTransferOwnershipTransactions$(
+  signer: Signer,
+  account$: Observable<LSP3AccountDeploymentEvent>,
+  universalReceiver$: Observable<UniversalReveiverDeploymentEvent>,
+  controllerAddresses: (string | ControllerOptions)[],
+  lsp3ProfileData$: Observable<string | null>,
+  isSignerUniversalProfile$: Observable<boolean>,
+  keyManagerDeployment$: DeploymentEvent$,
+  defaultUniversalReceiverDelegateAddress?: string
+) {
+  const setData$ = setDataTransaction$(
+    signer,
+    account$,
+    universalReceiver$,
+    controllerAddresses,
+    lsp3ProfileData$,
+    isSignerUniversalProfile$,
+    defaultUniversalReceiverDelegateAddress
+  );
+
+  const transferOwnership$ = transferOwnershipTransaction$(
+    signer,
+    account$,
+    keyManagerDeployment$,
+    isSignerUniversalProfile$
+  );
+
+  const setDataAndTransferOwnershipTransactions$ = concat(setData$, transferOwnership$);
+
+  const setDataReceipt$ = waitForReceipt<DeploymentEventTransaction>(setData$);
+  const transferOwnershipReceipt$ = waitForReceipt<DeploymentEventTransaction>(transferOwnership$);
+
+  return merge(
+    setDataAndTransferOwnershipTransactions$,
+    setDataReceipt$,
+    transferOwnershipReceipt$
+  );
+}
+
 export function setDataTransaction$(
   signer: Signer,
   account$: Observable<LSP3AccountDeploymentEvent>,
@@ -172,7 +211,7 @@ export function setDataTransaction$(
     shareReplay()
   );
 
-  const setDataTransaction$ = forkJoin([
+  return forkJoin([
     account$,
     universalReceiverAddress$,
     lsp3ProfileData$,
@@ -208,9 +247,6 @@ export function setDataTransaction$(
     ),
     shareReplay()
   );
-
-  const setDataReceipt$ = waitForReceipt<DeploymentEventTransaction>(setDataTransaction$);
-  return concat(setDataTransaction$, setDataReceipt$);
 }
 
 export async function getLsp3ProfileDataUrl(
@@ -382,17 +418,13 @@ export async function setData(
   };
 }
 
-export function getTransferOwnershipTransaction$(
+export function transferOwnershipTransaction$(
   signer: Signer,
   accountDeployment$: DeploymentEvent$,
   keyManagerDeployment$: DeploymentEvent$,
   isSignerUniversalProfile$: Observable<boolean>
 ) {
-  const transferOwnershipTransaction$ = forkJoin([
-    accountDeployment$,
-    keyManagerDeployment$,
-    isSignerUniversalProfile$,
-  ]).pipe(
+  return forkJoin([accountDeployment$, keyManagerDeployment$, isSignerUniversalProfile$]).pipe(
     switchMap(
       ([
         { receipt: lsp3AccountReceipt },
@@ -409,10 +441,6 @@ export function getTransferOwnershipTransaction$(
     ),
     shareReplay()
   );
-  const transferOwnershipReceipt$ = waitForReceipt<DeploymentEventTransaction>(
-    transferOwnershipTransaction$
-  );
-  return concat(transferOwnershipTransaction$, transferOwnershipReceipt$);
 }
 
 /**
