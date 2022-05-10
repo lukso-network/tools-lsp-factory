@@ -9,7 +9,8 @@ export interface LSPFactoryOptions {
   uploadOptions: UploadOptions;
 }
 
-export interface InstantiationOptions {
+export interface SignerOptions {
+  deployKey?: string | Signer;
   chainId?: number;
   ipfsGateway?: IPFSGateway;
 }

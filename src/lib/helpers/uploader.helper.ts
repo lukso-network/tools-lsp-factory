@@ -51,7 +51,7 @@ export async function imageUpload(
       if (uploadOptions.url) {
         // TODO: add simple HTTP upload
       } else {
-        uploadResponse = await ipfsUpload(imgToUpload, uploadOptions.ipfsGateway);
+        uploadResponse = await ipfsUpload(imgToUpload, uploadOptions?.ipfsGateway);
       }
 
       return {
@@ -84,7 +84,7 @@ export async function assetUpload(
   if (uploadOptions.url) {
     // TODO: Simple HTTP upload
   } else {
-    ipfsResult = await ipfsUpload(fileBuffer, uploadOptions.ipfsGateway);
+    ipfsResult = await ipfsUpload(fileBuffer, uploadOptions?.ipfsGateway);
   }
 
   return {
@@ -102,7 +102,19 @@ export async function ipfsUpload(
   let ipfs: IPFSHTTPClient;
 
   if (typeof ipfsGateway === 'string') {
-    ipfs = create({ url: ipfsGateway });
+    const isPortProvided = ipfsGateway.split(':').length > 2;
+
+    let url: string;
+
+    if (ipfsGateway.endsWith('/')) {
+      url = isPortProvided
+        ? ipfsGateway
+        : `${ipfsGateway.slice(0, ipfsGateway.length - 1)}:${5001}`;
+    } else {
+      url = isPortProvided ? ipfsGateway : `${ipfsGateway}:${5001}`;
+    }
+
+    ipfs = create({ url });
   } else {
     ipfs = create(ipfsGateway);
   }
@@ -164,18 +176,12 @@ export function formatIPFSUrl(ipfsGateway: IPFSGateway, ipfsHash: string) {
   let ipfsUrl: string;
 
   if (typeof ipfsGateway === 'string') {
-    const hasIPFSSuffix = ipfsGateway.endsWith('/ipfs') || ipfsGateway.endsWith('/ipfs/');
-
-    if (hasIPFSSuffix) {
-      ipfsUrl = ipfsGateway.endsWith('/')
-        ? `${ipfsGateway}${ipfsHash}`
-        : `${ipfsGateway}/${ipfsHash}`;
-    } else {
-      ipfsUrl = `${ipfsGateway}/ipfs/${ipfsHash}`;
-    }
+    ipfsUrl = ipfsGateway.endsWith('/')
+      ? `${ipfsGateway}${ipfsHash}`
+      : `${ipfsGateway}/${ipfsHash}`;
   } else {
-    const protocol = ipfsGateway.host ?? 'https';
-    const host = ipfsGateway.host ?? 'ipfs.lukso.network';
+    const protocol = ipfsGateway?.host ?? 'https';
+    const host = ipfsGateway?.host ?? 'ipfs.lukso.network';
 
     ipfsUrl = `${[protocol]}://${host}/ipfs/${ipfsHash}`;
   }

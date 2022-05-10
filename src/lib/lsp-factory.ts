@@ -6,7 +6,7 @@ import { LSP7DigitalAsset } from './classes/lsp7-digital-asset';
 import { LSP8IdentifiableDigitalAsset } from './classes/lsp8-identifiable-digital-asset';
 import { ProxyDeployer } from './classes/proxy-deployer';
 import { EthersExternalProvider, LSPFactoryOptions } from './interfaces';
-import { InstantiationOptions } from './interfaces/lsp-factory-options';
+import { SignerOptions } from './interfaces/lsp-factory-options';
 
 /**
  * Factory for creating UniversalProfiles and Digital Assets
@@ -21,8 +21,7 @@ export class LSPFactory {
   /**
    *
    * @param {string | providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider } rpcUrlOrProvider
-   * @param {string | Signer} privateKeyOrSigner
-   * @param { InstantiationOptions } options
+   * @param {string | Signer | SignerOptions} privateKeyOrSigner
    * @param {number} [chainId=22] Lukso Testnet - 22 (0x16)
    */
   constructor(
@@ -31,11 +30,12 @@ export class LSPFactory {
       | providers.Web3Provider
       | providers.JsonRpcProvider
       | EthersExternalProvider,
-    privateKeyOrSigner?: string | Signer,
-    options?: InstantiationOptions
+    privateKeyOrSigner?: string | Signer | SignerOptions
   ) {
     let signer: Signer;
     let provider: providers.Web3Provider | providers.JsonRpcProvider;
+    let ipfsGateway;
+    let chainId;
 
     if (typeof rpcUrlOrProvider === 'string') {
       provider = new ethers.providers.JsonRpcProvider(rpcUrlOrProvider);
@@ -49,17 +49,23 @@ export class LSPFactory {
       signer = privateKeyOrSigner;
     } else if (typeof privateKeyOrSigner === 'string') {
       signer = new ethers.Wallet(privateKeyOrSigner, provider);
-    } else if (!privateKeyOrSigner) {
-      signer = provider.getSigner();
-    }
+    } else {
+      if (privateKeyOrSigner?.deployKey instanceof Signer) {
+        signer = privateKeyOrSigner.deployKey;
+      } else if (typeof privateKeyOrSigner?.deployKey === 'string') {
+        signer = new ethers.Wallet(privateKeyOrSigner.deployKey, provider);
+      } else {
+        signer = provider.getSigner();
+      }
 
-    const chainId = options?.chainId || 22;
-    const ipfsGateway = options?.ipfsGateway;
+      chainId = privateKeyOrSigner?.chainId;
+      ipfsGateway = privateKeyOrSigner?.ipfsGateway;
+    }
 
     this.options = {
       signer,
       provider,
-      chainId,
+      chainId: chainId || 22,
       uploadOptions: ipfsGateway ? { ipfsGateway } : undefined,
     };
 

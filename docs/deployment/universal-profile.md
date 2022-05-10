@@ -418,10 +418,24 @@ lspFactory.UniversalProfile.deploy({...}, {
 You can specify how you want your profile metadata to be uploaded while passing the options object. Here you can set the IPFS gateway where you want the profile's metadata to be uploaded.
 
 :::note
-The procedure takes an `ipfsGateway` object as defined by the [IPFS-HTTP Client](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) library which is used internally to interact with the specified IPFS node.
+The procedure takes a URL string or an object as defined by the [IPFS-HTTP Client](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) library which is used internally to interact with the specified IPFS node.
 :::
 
-```javascript
+If a URL is passed and no port is specified, the standard 5001 port will be used.
+
+```javascript title="Passing ipfsGateway URL"
+lspFactory.UniversalProfile.deploy({...}, {
+  ipfsGateway: 'https://ipfs.infura.io:5001'
+})
+```
+
+```javascript title="Passing ipfsGateway URL string with port set"
+lspFactory.UniversalProfile.deploy({...}, {
+  ipfsGateway: 'https://ipfs.infura.io' // No port set. Port 5001 will be used
+})
+```
+
+```javascript title="Passing ipfsGateway options as an object"
 lspFactory.UniversalProfile.deploy({...}, {
   ipfsGateway: {
     host: 'ipfs.infura.io',
@@ -431,7 +445,7 @@ lspFactory.UniversalProfile.deploy({...}, {
 })
 ```
 
-If the `ipfsGateway` object is provided, it will override the `ipfsGateway` object passed during the instantiation of the LSPFactory.
+If the `ipfsGateway` parameter is provided, it will override the `ipfsGateway` object passed during the instantiation of the LSPFactory for this function call only.
 
 ### Reactive Deployment
 

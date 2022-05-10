@@ -159,7 +159,7 @@ await lspFactory.LSP3UniversalProfile.deploy(
   },
   {
     deployReactive: true,
-  }
+  },
 ).subscribe({
   next: (deploymentEvent) => {
     console.log(deploymentEvent);
@@ -299,7 +299,7 @@ Deployment Complete
 ## uploadProfileData
 
 ```js
-LSP3UniversalProfile.uploadProfileData(profileData, uploadOptions?);
+LSP3UniversalProfile.uploadProfileData(profileData, options?);
 ```
 
 Uploads the [LSP3Profile](../../../standards/universal-profile/lsp3-universal-profile-metadata) data to the desired endpoint. The endpoint can be a `HTTPS` URL pointing to a public or private storage solution, an IPFS node, or a cluster.
@@ -308,10 +308,10 @@ Will upload and process passed images.
 
 #### Parameters
 
-| Name             | Type   | Description                                                           |
-| :--------------- | :----- | :-------------------------------------------------------------------- |
-| `profileData`    | Object | An object containing the profile data to upload.                      |
-| `uploadOptions?` | Object | An object containing special options used for uploading profile data. |
+| Name          | Type   | Description                                                   |
+| :------------ | :----- | :------------------------------------------------------------ |
+| `profileData` | Object | An object containing the profile data to upload.              |
+| `options?`    | Object | An object containing options used for uploading profile data. |
 
 #### Returns
 
@@ -346,6 +346,54 @@ await LSP3UniversalProfile.uploadProfileData({
     },
   ],
 });
+
+/**
+{
+  profile: {
+    LSP3Profile: {
+      name: 'My Universal Profile',
+      description: 'My cool Universal Profile',
+      tags: [Array],
+      links: [Array],
+      profileImage: [Array],
+      backgroundImage: [Array]
+    }
+  },
+  url: 'ipfs://QmS7NCnoXub7ju13HZuDzJpWqWq15Nev4CC18821qBNbkx'
+}
+*/
+```
+
+```javascript title="Uploading profile data using a custom IPFS gateway"
+await LSP3UniversalProfile.uploadProfileData(
+  {
+    name: 'My Universal Profile',
+    description: 'My cool Universal Profile',
+    tags: ['Fashion', 'Design'],
+    links: [{ title: 'My Website', url: 'www.my-website.com' }],
+    profileImage: [
+      {
+        width: 500,
+        height: 500,
+        hashFunction: 'keccak256(bytes)',
+        hash: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
+        url: 'ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp',
+      },
+    ],
+    backgroundImage: [
+      {
+        width: 500,
+        height: 500,
+        hashFunction: 'keccak256(bytes)',
+        hash: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
+        url: 'ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp',
+      },
+    ],
+  },
+  {
+    ipfsGateway: 'https://ipfs.infura.io',
+  },
+);
 
 /**
 {

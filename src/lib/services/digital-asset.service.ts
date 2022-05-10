@@ -373,7 +373,7 @@ export async function getLSP4MetadataUrl(
     const isIPFSUrl = lsp4Metadata.startsWith('ipfs://');
 
     if (isIPFSUrl) {
-      lsp4JsonUrl = formatIPFSUrl(uploadOptions.ipfsGateway, lsp4Metadata.split('/').at(-1));
+      lsp4JsonUrl = formatIPFSUrl(uploadOptions?.ipfsGateway, lsp4Metadata.split('/').at(-1));
     }
 
     const ipfsResponse = await axios.get(lsp4JsonUrl);

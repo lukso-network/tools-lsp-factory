@@ -224,7 +224,7 @@ export async function getLsp3ProfileDataUrl(
     const isIPFSUrl = lsp3Profile.startsWith('ipfs://');
 
     if (isIPFSUrl) {
-      lsp3JsonUrl = formatIPFSUrl(uploadOptions.ipfsGateway, lsp3Profile.split('/').at(-1));
+      lsp3JsonUrl = formatIPFSUrl(uploadOptions?.ipfsGateway, lsp3Profile.split('/').at(-1));
     }
 
     const ipfsResponse = await axios.get(lsp3JsonUrl);
