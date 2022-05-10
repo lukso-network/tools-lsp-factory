@@ -377,7 +377,7 @@ export async function setData(
   return {
     type: DeploymentType.TRANSACTION,
     contractName: ContractNames.ERC725_Account,
-    functionName: 'setData',
+    functionName: 'setData(bytes32[],bytes[])',
     status: DeploymentStatus.PENDING,
     transaction,
   };
@@ -462,7 +462,7 @@ export async function transferOwnership(
       type: DeploymentType.TRANSACTION,
       status: DeploymentStatus.PENDING,
       contractName: ContractNames.ERC725_Account,
-      functionName: 'transferOwnership',
+      functionName: 'transferOwnership(address)',
       transaction,
     };
   } catch (error) {
