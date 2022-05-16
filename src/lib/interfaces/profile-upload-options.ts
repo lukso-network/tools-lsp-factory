@@ -3,13 +3,15 @@ import { Options } from 'ipfs-http-client';
 export interface UploadOptionsHTTP {
   url: string;
   port?: number;
-  ipfsClientOptions?: never;
+  ipfsGateway?: never;
 }
 
 export interface UploadOptionsIPFS {
   url?: never;
   port?: never;
-  ipfsClientOptions: Options;
+  ipfsGateway: IPFSGateway;
 }
+
+export type IPFSGateway = Options | string;
 
 export type UploadOptions = UploadOptionsHTTP | UploadOptionsIPFS;

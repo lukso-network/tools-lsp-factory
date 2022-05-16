@@ -41,7 +41,7 @@ describe('uploader.helper.spec.ts', () => {
             type: 'zip',
           }),
           {
-            ipfsClientOptions: {},
+            ipfsGateway: {},
           }
         )
       ).rejects.toThrowError("File type: 'zip' does not start with 'image/'");
@@ -49,14 +49,14 @@ describe('uploader.helper.spec.ts', () => {
 
     it('should pin files when using IPFS', async () => {
       const { file, addMock } = await mockDependencies();
-      await imageUpload(file, { ipfsClientOptions: {} });
+      await imageUpload(file, { ipfsGateway: {} });
 
       expect(addMock).toHaveBeenCalledWith(file, { pin: true });
     });
 
     it('should resize images', async () => {
       const { file, drawFileInCanvasSpy } = await mockDependencies();
-      await imageUpload(file, { ipfsClientOptions: {} });
+      await imageUpload(file, { ipfsGateway: {} });
 
       expect(imageCompression).toHaveBeenCalledTimes(5);
       expect(drawFileInCanvasSpy).toBeCalledTimes(5);
@@ -94,7 +94,29 @@ describe('uploader.helper.spec.ts', () => {
         type: 'image/zip',
       }),
       {
-        ipfsClientOptions: { host: 'ipfs.infura.io', port: 5001, protocol: 'https' },
+        ipfsGateway: { host: 'ipfs.infura.io', port: 5001, protocol: 'https' },
+      }
+    );
+
+    expect(addMock).toHaveBeenCalled();
+
+    expect(result.length === 5);
+    expect(result[0]).toHaveProperty('width');
+    expect(result[0]).toHaveProperty('height');
+    expect(result[0]).toHaveProperty('hashFunction');
+    expect(result[0]).toHaveProperty('hash');
+    expect(result[0]).toHaveProperty('url');
+  });
+
+  it('should accept IPFS url', async () => {
+    const { addMock } = await mockDependencies();
+
+    const result = await imageUpload(
+      new File(['sdfasdf'], 'file-name', {
+        type: 'image/zip',
+      }),
+      {
+        ipfsGateway: 'https://api.ipfs.lukso.network',
       }
     );
 

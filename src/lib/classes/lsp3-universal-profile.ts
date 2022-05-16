@@ -247,7 +247,7 @@ export class LSP3UniversalProfile {
     if (uploadOptions.url) {
       // TODO: simple HTTP upload
     } else {
-      uploadResponse = await ipfsUpload(JSON.stringify(profile), uploadOptions.ipfsClientOptions);
+      uploadResponse = await ipfsUpload(JSON.stringify(profile), uploadOptions?.ipfsGateway);
     }
 
     return {

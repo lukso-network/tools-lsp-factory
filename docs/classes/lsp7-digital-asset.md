@@ -45,18 +45,15 @@ The property `digitalAssetMetadata?` can be:
 
 #### Parameters of `contractDeploymentOptions?`
 
-| Name                 | Type    | Description                                                                                                          |
-| :------------------- | :------ | :------------------------------------------------------------------------------------------------------------------- |
-| `version?`           | string  | The contract version you want to deploy. Defaults to latest version of the [lsp-smart-contracts] library.            |
-| `byteCode?`          | string  | The creation + runtime bytecode of the contract to deploy.                                                           |
-| `libAddress?`        | string  | The address of a base contract to be used in deployment as implementation behind a proxy contract (e.g., [EIP1167]). |
-| `deployReactive?`    | boolean | Whether to return an [RxJS Observable] of deployment events. Defaults to `false`.                                    |
-| `deployProxy?`       | boolean | Whether the contract should be deployed using a proxy contract implementation (e.g., [EIP1167]). Defaults to `true`. |
-| `uploadOptions?`     | Object  | The Specification of how the metadata should be uploaded.                                                            |
-| `ipfsClientOptions?` | Object  | The IPFS client options as defined by the [IPFS-HTTP-Client] used internally.                                        |
+| Name              | Type             | Description                                                                                                          |
+| :---------------- | :--------------- | :------------------------------------------------------------------------------------------------------------------- |
+| `version?`        | string           | The contract version you want to deploy. Defaults to latest version of the [lsp-smart-contracts] library.            |
+| `deployReactive?` | boolean          | Whether to return an [RxJS Observable] of deployment events. Defaults to `false`.                                    |
+| `deployProxy?`    | boolean          | Whether the contract should be deployed using a proxy contract implementation (e.g., [EIP1167]). Defaults to `true`. |
+| `ipfsGateway?`    | Object or String | ipfsGateway URL string or IPFS Client Options as defined by the [ipfs-http-client library] used internally.          |
 
 :::info
-You can read more about the `contractDeploymentOptions?` specification on [its official page](../deployment/digital-asset.md).
+You can read more about the `contractDeploymentOptions?` specification on [its official page](../deployment/digital-asset.md)
 :::
 
 #### Returns

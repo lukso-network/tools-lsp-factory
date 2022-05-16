@@ -26,7 +26,7 @@ import {
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
-import { isMetadataEncoded } from '../helpers/uploader.helper';
+import { formatIPFSUrl, isMetadataEncoded } from '../helpers/uploader.helper';
 import {
   BaseContractAddresses,
   ContractDeploymentOptions,
@@ -224,11 +224,7 @@ export async function getLsp3ProfileDataUrl(
     const isIPFSUrl = lsp3Profile.startsWith('ipfs://');
 
     if (isIPFSUrl) {
-      // TODO: Handle simple HTTP upload
-      const protocol = uploadOptions.ipfsClientOptions.host ?? 'https';
-      const host = uploadOptions.ipfsClientOptions.host ?? 'ipfs.lukso.network';
-
-      lsp3JsonUrl = `${[protocol]}://${host}/ipfs/${lsp3Profile.split('/').at(-1)}`;
+      lsp3JsonUrl = formatIPFSUrl(uploadOptions?.ipfsGateway, lsp3Profile.split('/').at(-1));
     }
 
     const ipfsResponse = await axios.get(lsp3JsonUrl);
@@ -511,7 +507,9 @@ export function convertUniversalProfileConfigurationObject(
 
   return {
     version: contractDeploymentOptions?.version,
-    uploadOptions: contractDeploymentOptions?.uploadOptions,
+    uploadOptions: contractDeploymentOptions?.ipfsGateway
+      ? { ipfsGateway: contractDeploymentOptions?.ipfsGateway }
+      : undefined,
     ERC725Account: {
       version: erc725AccountVersion,
       byteCode: erc725AccountBytecode,

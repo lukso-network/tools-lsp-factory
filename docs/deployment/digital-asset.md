@@ -379,15 +379,29 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({...}, {
 
 ### IPFS Upload Options
 
-You can specify how you want your profile metadata to be uploaded by passing the `ipfsClientOptions` inside the `options` object. Here you can set the IPFS gateway where you want the metadata to be uploaded.
+You can specify how you want your profile metadata to be uploaded by passing the `ipfsGateway` inside the `options` object. Here you can set the IPFS gateway where you want the metadata to be uploaded.
 
 :::note
-The options object takes an `ipfsClientOptions` object as defined by the [IPFS-HTTP Client](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) library which is used internally to interact with the specified IPFS node.
+The procedure takes a URL string or an object as defined by the [IPFS-HTTP Client](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) library which is used internally to interact with the specified IPFS node.
 :::
+
+If a URL is passed and no port is specified, the standard 5001 port will be used.
+
+```javascript title="Passing ipfsGateway URL"
+lspFactory.LSP7DigitalAsset.deploy({...}, {
+  ipfsGateway: 'https://ipfs.infura.io:5001'
+})
+```
+
+```javascript title="Passing ipfsGateway URL string with port set"
+lspFactory.LSP7DigitalAsset.deploy({...}, {
+  ipfsGateway: 'https://ipfs.infura.io' // No port set. Port 5001 will be used
+})
+```
 
 ```javascript
 await lspFactory.LSP7DigitalAsset.deploy({...}, {
-  ipfsClientOptions: {
+  ipfsGateway: {
     host: 'ipfs.infura.io',
     port: 5001,
     protocol: 'https',
@@ -395,7 +409,7 @@ await lspFactory.LSP7DigitalAsset.deploy({...}, {
 });
 ```
 
-If the `ipfsClientOptions` object is provided, it will override the `ipfsClientOptions` object passed during the instantiation of the LSPFactory.
+If the `ipfsGateway` parameter is provided, it will override the `ipfsGateway` object passed during the instantiation of the LSPFactory for this function call only.
 
 ### Reactive Deployment
 

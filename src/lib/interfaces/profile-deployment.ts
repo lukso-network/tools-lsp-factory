@@ -1,7 +1,7 @@
 import { DeployedContract } from '../..';
 
-import { ProfileDataBeforeUpload } from './lsp3-profile';
-import { UploadOptions } from './profile-upload-options';
+import { LSP3ProfileDataForEncoding, ProfileDataBeforeUpload } from './lsp3-profile';
+import { IPFSGateway, UploadOptions } from './profile-upload-options';
 
 export enum ContractNames {
   ERC725_Account = 'ERC725Account',
@@ -24,7 +24,7 @@ export interface ProfileDeploymentOptions {
     universalReceiverDelegate?: string;
     keyManager?: string;
   };
-  lsp3Profile?: ProfileDataBeforeUpload | string;
+  lsp3Profile?: ProfileDataBeforeUpload | LSP3ProfileDataForEncoding | string;
 }
 export interface DeployedContracts {
   ERC725Account?: DeployedContract;
@@ -48,7 +48,7 @@ interface ContractOptions {
 
 interface ContractDeploymentOptionsBase {
   version?: string;
-  uploadOptions?: UploadOptions;
+  ipfsGateway?: IPFSGateway;
   ERC725Account?: ContractOptions;
   KeyManager?: ContractOptions;
   UniversalReceiverDelegate?: ContractOptions;

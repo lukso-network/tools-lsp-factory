@@ -8,20 +8,20 @@ title: LSP4DigitalAssetMetadata
 ## uploadMetadata
 
 ```js
-LSP4DigitalAssetMetadata.uploadMetadata(lsp4Metadata, uploadOptions?);
+LSP4DigitalAssetMetadata.uploadMetadata(lsp4Metadata, options?);
 ```
 
 Uploads and processes passed assets and images, and uploads the [LSP4 Digital Asset Metadata](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-4-DigitalAsset-Metadata.md) to IPFS.
 The `uploadMetadata` function is available as a static or non-static function callable on the `LSPFactory` library instance.
 
-If `uploadOptions` are not specified in the function call, and the function is used on an `LSPFactory` instance, the specified options in `uploadOptions` that were passed to the LSPFactory during instantiation will be used.
+If `options` are not specified in the function call, and the function is used on an `LSPFactory` instance, the specified options in `options` that were passed to the LSPFactory during instantiation will be used.
 
 #### Parameters
 
-| Name             | Type   | Description                                            |
-| :--------------- | :----- | :----------------------------------------------------- |
-| `metaData`       | Object | The metadata to be uploaded.                           |
-| `uploadOptions?` | Object | The specification how the metadata should be uploaded. |
+| Name       | Type   | Description                                            |
+| :--------- | :----- | :----------------------------------------------------- |
+| `metaData` | Object | The metadata to be uploaded.                           |
+| `options?` | Object | The specification how the metadata should be uploaded. |
 
 #### Parameters of `metaData`
 
@@ -33,11 +33,11 @@ If `uploadOptions` are not specified in the function call, and the function is u
 | `images?`     | File, AssetBuffer, or AssetMetadata[&nbsp;]      | The images of the digital asset.    |
 | `assets?`     | File, AssetBuffer, or AssetMetadata[&nbsp;]      | The assets of the digital asset.    |
 
-#### Parameters of `uploadOptions?`
+#### Parameters of `options?`
 
-| Name                 | Type   | Description                                                                       |
-| :------------------- | :----- | :-------------------------------------------------------------------------------- |
-| `ipfsClientOptions?` | Object | IPFS Client Options as defined by the [ipfs-http-client library] used internally. |
+| Name           | Type             | Description                                                                                                 |
+| :------------- | :--------------- | :---------------------------------------------------------------------------------------------------------- |
+| `ipfsGateway?` | Object or String | ipfsGateway URL string or IPFS Client Options as defined by the [ipfs-http-client library] used internally. |
 
 #### Returns
 
@@ -78,7 +78,7 @@ await LSP4DigitalAssetMetadata.uploadMetadata(
 
 #### Upload Custom LSP4 Metadata Example
 
-```javascript title="Uploading LSP4Metadata using custom uploadOptions"
+```javascript title="Uploading LSP4Metadata using custom upload options"
 await LSP4DigitalAssetMetadata.uploadMetadata(
   {
     description: 'Digital Asset',
@@ -88,12 +88,12 @@ await LSP4DigitalAssetMetadata.uploadMetadata(
     links: [{ title: 'Cool', url: 'cool.com' }],
   },
   {
-    ipfsUploadOptions: {
+    ipfsGateway: {
       host: 'ipfs.infura.io',
       port: 5001,
       protocol: 'https',
     },
-  }
+  },
 );
 /**
 {
@@ -113,18 +113,17 @@ await LSP4DigitalAssetMetadata.uploadMetadata(
 
 #### Upload Custom LSP4 Metadata with LSP Factory Example
 
-```javascript title="Uploading LSP4Metadata using uploadOptions passed when instantiating LSPFactory"
+```javascript title="Uploading LSP4Metadata using upload options passed when instantiating LSPFactory"
 const lspFactory = new LSPFactory(provider, {
   deployKey: myDeployKey,
   chainId: myChainId,
-  uploadOptions: {
-    ipfsClientOptions: {
-      host: 'ipfs.infura.io',
-      port: 5001,
-      protocol: 'https',
-    },
+  ipfsGateway: {
+    host: 'ipfs.infura.io',
+    port: 5001,
+    protocol: 'https',
   },
 });
+
 await lspFactory.LSP4DigitalAssetMetadata.uploadMetadata({
   description: 'Digital Asset',
   assets: [asset],
