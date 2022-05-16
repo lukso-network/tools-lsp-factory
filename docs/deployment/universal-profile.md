@@ -464,21 +464,124 @@ observable.subscribe();
 The following events will be emitted:
 
 ```typescript
-  { type: 'PROXY', contractName: 'ERC725Account', status: 'PENDING',  transaction: {} },
-  { type: "PROXY", contractName: 'ERC725Account', status: 'PENDING',  receipt:     {} },
-  { type: "PROXY", contractName: 'ERC725Account', functionName: 'initialize', status: 'PENDING',  transaction: {} },
-  { type: "PROXY", contractName: 'ERC725Account', functionName: 'initialize', status: 'COMPLETE', receipt:     {} },
-
-  { type: 'CONTRACT', contractName: 'KeyManager',           status: 'PENDING',  transaction:  {} },
-  { type: "PROXY",    contractName: 'UniversalReceiver...', status: 'PENDING',  transaction:  {} },
-  { type: 'CONTRACT', contractName: 'KeyManager',           status: 'COMPLETE', receipt:      {} },
-  { type: "PROXY",    contractName: 'UniversalReceiver...', status: 'PENDING',  receipt:      {} },
-  { type: "PROXY",    contractName: 'UniversalReceiver...', functionName: 'initialize', status: 'PENDING',  transaction: {}},
-  { type: "PROXY",    contractName: 'UniversalReceiver...', functionName: 'initialize', status: 'COMPLETE', receipt: {}},
-
-  { type: 'TRANSACTION',  contractName: 'ERC725Account', functionName: 'setData', status: 'PENDING',  transaction: {}},
-  { type: 'TRANSACTION',  contractName: 'ERC725Account', functionName: 'setData', status: 'COMPLETE', receipt: {}},
-
-  { type: 'TRANSACTION',  contractName: 'ERC725Account', functionName: 'transferOwnership', status: 'PENDING', transaction: {}},
-  { type: 'TRANSACTION',  contractName: 'ERC725Account', functionName: 'transferOwnership', status: 'COMPLETE', receipt: {}},
+  {
+  type: 'PROXY_DEPLOYMENT',
+  contractName: 'ERC725Account',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'PROXY_DEPLOYMENT',
+  contractName: 'ERC725Account',
+  status: 'COMPLETE',
+  contractAddress: '0xa7b2ab323cD2504689637A0b503262A337ab87d6',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'ERC725Account',
+  functionName: 'initialize(address)',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'ERC725Account',
+  functionName: 'initialize(address)',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'PROXY_DEPLOYMENT',
+  contractName: 'KeyManager',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'PROXY_DEPLOYMENT',
+  contractName: 'KeyManager',
+  status: 'COMPLETE',
+  contractAddress: '0x8fE3f0fd1bc2aCDA6cf3712Cd9C7858B8195DC8E',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'KeyManager',
+  functionName: 'initialize(address)',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'KeyManager',
+  functionName: 'initialize(address)',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'ERC725Account',
+  functionName: 'setData(bytes32[],bytes[])',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'ERC725Account',
+  functionName: 'setData(bytes32[],bytes[])',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  status: 'PENDING',
+  contractName: 'ERC725Account',
+  functionName: 'transferOwnership(address)',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'ERC725Account',
+  functionName: 'transferOwnership(address)',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  ERC725Account: {
+    address: '0xa7b2ab323cD2504689637A0b503262A337ab87d6',
+    receipt: {
+      ...
+    }
+  },
+  KeyManager: {
+    address: '0x8fE3f0fd1bc2aCDA6cf3712Cd9C7858B8195DC8E',
+    receipt: {
+      ...
+    }
+  }
+}
 ```

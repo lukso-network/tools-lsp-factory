@@ -105,37 +105,82 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy(
 });
 /**
 {
-  type: 'PROXY',
+  type: 'PROXY_DEPLOYMENT',
   contractName: 'LSP8IdentifiableDigitalAsset',
   status: 'PENDING',
   transaction: {
-     ...
+    ...
   }
 }
 {
-  type: 'PROXY',
+  type: 'PROXY_DEPLOYMENT',
   contractName: 'LSP8IdentifiableDigitalAsset',
-  status: 'PENDING',
+  status: 'COMPLETE',
+  contractAddress: '0x2cA038832c15E61b83d47414Eb53818a45e0E142',
   receipt: {
     ...
   }
 }
 {
-  type: 'PROXY',
+  type: 'TRANSACTION',
   contractName: 'LSP8IdentifiableDigitalAsset',
-  functionName: 'initialize',
+  functionName: 'initialize(string,string,address)',
   status: 'PENDING',
   transaction: {
     ...
   }
 }
 {
-  type: 'PROXY',
+  type: 'TRANSACTION',
   contractName: 'LSP8IdentifiableDigitalAsset',
-  functionName: 'initialize',
+  functionName: 'initialize(string,string,address)',
   status: 'COMPLETE',
   receipt: {
     ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'setData(bytes32[],bytes[])',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'setData(bytes32[],bytes[])',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  status: 'PENDING',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'transferOwnership(address)',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'transferOwnership(address)',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  LSP8IdentifiableDigitalAsset: {
+    address: '0x2cA038832c15E61b83d47414Eb53818a45e0E142',
+    receipt: {
+      ...
+    },
   }
 }
 */

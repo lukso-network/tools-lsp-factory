@@ -429,20 +429,170 @@ The following events will be emitted:
 
 #### LSP7 Deployment Events
 
-```typescript
-{ type: 'PROXY', contractName: 'LSP7DigitalAsset', status: 'PENDING',  transaction:  {} },
-{ type: "PROXY", contractName: 'LSP7DigitalAsset', status: 'PENDING',  receipt:      {} },
-{ type: "PROXY", contractName: 'LSP7DigitalAsset', functionName: 'initialize', status: 'PENDING',  transaction:  {} },
-{ type: "PROXY", contractName: 'LSP7DigitalAsset', functionName: 'initialize', status: 'COMPLETE', receipt:      {} },
+```typescript title="LSP7 Deployment Events"
+{
+  type: 'PROXY_DEPLOYMENT',
+  contractName: 'LSP7DigitalAsset',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'PROXY_DEPLOYMENT',
+  contractName: 'LSP7DigitalAsset',
+  status: 'COMPLETE',
+  contractAddress: '0x97053C386eaa49d6eAD7477220ca04EFcD857dde',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'initialize(string,string,address,bool)',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'initialize(string,string,address,bool)',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'setData(bytes32[],bytes[])',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'setData(bytes32[],bytes[])',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  status: 'PENDING',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'transferOwnership(address)',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'transferOwnership(address)',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  LSP7DigitalAsset: {
+    address: '0x97053C386eaa49d6eAD7477220ca04EFcD857dde',
+    receipt: {
+      ...
+    },
+  }
+}
 ```
 
 #### LSP8 Deployment Events
 
-```typescript
-{ type: 'PROXY', contractName: 'LSP8IdentifiableDigitalAsset', status: 'PENDING',  transaction: {}},
-{ type: "PROXY", contractName: 'LSP8IdentifiableDigitalAsset', status: 'PENDING',  receipt: {}},
-{ type: "PROXY", contractName: 'LSP8IdentifiableDigitalAsset', functionName: 'initialize', status: 'PENDING',  transaction: {}},
-{ type: "PROXY", contractName: 'LSP8IdentifiableDigitalAsset', functionName: 'initialize', status: 'COMPLETE', receipt: {}},
+```typescript title="LSP8 Deployment Events"
+{
+  type: 'PROXY_DEPLOYMENT',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'PROXY_DEPLOYMENT',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  status: 'COMPLETE',
+  contractAddress: '0x2cA038832c15E61b83d47414Eb53818a45e0E142',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'initialize(string,string,address)',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'initialize(string,string,address)',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'setData(bytes32[],bytes[])',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'setData(bytes32[],bytes[])',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  status: 'PENDING',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'transferOwnership(address)',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'transferOwnership(address)',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  LSP8IdentifiableDigitalAsset: {
+    address: '0x2cA038832c15E61b83d47414Eb53818a45e0E142',
+    receipt: {
+      ...
+    },
+  }
+}
 ```
 
 [lsp7]: ../../../standards/nft-2.0/LSP7-Digital-Asset

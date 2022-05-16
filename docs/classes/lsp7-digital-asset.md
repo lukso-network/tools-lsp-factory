@@ -126,7 +126,7 @@ await lspFactory.LSP7DigitalAsset.deploy(
 });
 /**
 {
-  type: 'PROXY',
+  type: 'PROXY_DEPLOYMENT',
   contractName: 'LSP7DigitalAsset',
   status: 'PENDING',
   transaction: {
@@ -134,29 +134,74 @@ await lspFactory.LSP7DigitalAsset.deploy(
   }
 }
 {
-  type: 'PROXY',
+  type: 'PROXY_DEPLOYMENT',
   contractName: 'LSP7DigitalAsset',
-  status: 'PENDING',
+  status: 'COMPLETE',
+  contractAddress: '0x97053C386eaa49d6eAD7477220ca04EFcD857dde',
   receipt: {
     ...
   }
 }
 {
-  type: 'PROXY',
+  type: 'TRANSACTION',
   contractName: 'LSP7DigitalAsset',
-  functionName: 'initialize',
+  functionName: 'initialize(string,string,address,bool)',
   status: 'PENDING',
   transaction: {
     ...
   }
 }
 {
-  type: 'PROXY',
+  type: 'TRANSACTION',
   contractName: 'LSP7DigitalAsset',
-  functionName: 'initialize',
+  functionName: 'initialize(string,string,address,bool)',
   status: 'COMPLETE',
   receipt: {
     ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'setData(bytes32[],bytes[])',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'setData(bytes32[],bytes[])',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  status: 'PENDING',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'transferOwnership(address)',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'transferOwnership(address)',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  LSP7DigitalAsset: {
+    address: '0x97053C386eaa49d6eAD7477220ca04EFcD857dde',
+    receipt: {
+      ...
+    },
   }
 }
 Deployment Complete
