@@ -137,6 +137,7 @@ function initializeProxy(
     new LSP1UniversalReceiverDelegateUPInit__factory(signer),
     async () => {
       return [];
-    }
+    },
+    'initialize()'
   );
 }

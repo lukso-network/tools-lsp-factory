@@ -3,6 +3,7 @@ import axios from 'axios';
 import { ContractFactory, ethers } from 'ethers';
 import {
   concat,
+  defer,
   EMPTY,
   forkJoin,
   from,
@@ -189,10 +190,10 @@ function initializeLSP7Proxy(
       );
 
       return {
-        type: result.type,
+        type: DeploymentType.TRANSACTION,
         contractName: result.contractName,
-        functionName: 'initialize',
-        status: result.status,
+        functionName: 'initialize(string,string,address,bool)',
+        status: DeploymentStatus.PENDING,
         transaction,
       };
     }),
@@ -332,10 +333,10 @@ function initializeLSP8Proxy(
         }
       );
       return {
-        type: result.type,
+        type: DeploymentType.TRANSACTION,
         contractName: result.contractName,
-        functionName: 'initialize',
-        status: result.status,
+        functionName: 'initialize(string,string,address)',
+        status: DeploymentStatus.PENDING,
         transaction,
       };
     }),
@@ -419,9 +420,13 @@ export function setMetadataAndTransferOwnership$(
   contractName: string,
   isSignerUniversalProfile$: Observable<boolean>
 ) {
-  return concat(
+  const singerAddress$ = defer(async () => {
+    return signer.getAddress();
+  });
+
+  const setData$ =
     digitalAssetDeploymentOptions?.creators?.length ||
-      digitalAssetDeploymentOptions?.digitalAssetMetadata
+    digitalAssetDeploymentOptions?.digitalAssetMetadata
       ? setLSP4Metadata$(
           signer,
           digitalAsset$,
@@ -430,15 +435,23 @@ export function setMetadataAndTransferOwnership$(
           digitalAssetDeploymentOptions,
           isSignerUniversalProfile$
         )
-      : EMPTY,
-    transferOwnership$(
-      signer,
-      digitalAsset$,
-      digitalAssetDeploymentOptions,
-      contractName,
-      isSignerUniversalProfile$
-    )
+      : EMPTY;
+
+  const transferOwnershipTransaction$ = singerAddress$.pipe(
+    switchMap((signerAddress) => {
+      return signerAddress !== digitalAssetDeploymentOptions.controllerAddress
+        ? transferOwnership$(
+            signer,
+            digitalAsset$,
+            digitalAssetDeploymentOptions,
+            contractName,
+            isSignerUniversalProfile$
+          )
+        : EMPTY;
+    })
   );
+
+  return concat(setData$, transferOwnershipTransaction$);
 }
 
 export function setLSP4Metadata$(
@@ -536,7 +549,7 @@ async function setData(
   return {
     type: DeploymentType.TRANSACTION,
     contractName,
-    functionName: 'setData',
+    functionName: 'setData(bytes32[],bytes[])',
     status: DeploymentStatus.PENDING,
     transaction,
   };
@@ -598,7 +611,7 @@ async function transferOwnership(
       type: DeploymentType.TRANSACTION,
       status: DeploymentStatus.PENDING,
       contractName,
-      functionName: 'transferOwnership',
+      functionName: 'transferOwnership(address)',
       transaction,
     };
   } catch (error) {

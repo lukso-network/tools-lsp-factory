@@ -129,6 +129,7 @@ function initializeProxy(
     new LSP6KeyManagerInit__factory(signer),
     async () => {
       return [accountAddress];
-    }
+    },
+    'initialize(address)'
   );
 }

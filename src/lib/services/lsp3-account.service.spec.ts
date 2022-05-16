@@ -40,7 +40,7 @@ describe('LSP3Account Service', () => {
         universalReceiverDelegate.address,
         [signers[0].address]
       );
-      expect(transaction.functionName).toEqual('setData');
+      expect(transaction.functionName).toEqual('setData(bytes32[],bytes[])');
 
       // AddressPermissions[] array length should be 1
       const [totalPermissionsSet] = await universalProfile.getData([ADDRESS_PERMISSIONS_ARRAY_KEY]);
@@ -75,7 +75,7 @@ describe('LSP3Account Service', () => {
         universalReceiverDelegate.address,
         controllerAddresses
       );
-      expect(transaction.functionName).toEqual('setData');
+      expect(transaction.functionName).toEqual('setData(bytes32[],bytes[])');
 
       // AddressPermissions[] array length should be 2
       const [totalPermissionsSet] = await universalProfile.getData([ADDRESS_PERMISSIONS_ARRAY_KEY]);
@@ -113,7 +113,7 @@ describe('LSP3Account Service', () => {
         universalReceiverDelegate.address,
         controllerAddresses
       );
-      expect(transaction.functionName).toEqual('setData');
+      expect(transaction.functionName).toEqual('setData(bytes32[],bytes[])');
 
       // AddressPermissions[] array length should be 10
       const [totalPermissionsSet] = await universalProfile.getData([ADDRESS_PERMISSIONS_ARRAY_KEY]);

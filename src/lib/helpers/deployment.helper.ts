@@ -1,7 +1,7 @@
 import { Contract, ContractFactory, ContractInterface, providers, Signer } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
-import { lastValueFrom, Observable } from 'rxjs';
-import { catchError, scan, shareReplay, switchMap, takeLast } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { catchError, endWith, shareReplay, switchMap, takeLast, tap } from 'rxjs/operators';
 
 import {
   DeploymentEvent,
@@ -25,14 +25,12 @@ import { GAS_BUFFER, GAS_PRICE } from './config.helper';
 export function waitForReceipt<T>(deploymentEvent$): Observable<T> {
   return deploymentEvent$.pipe(
     switchMap(async (deploymentEvent: DeploymentEvent) => {
-      let status, functionName;
-
-      status = DeploymentStatus.COMPLETE;
+      let functionName;
 
       switch (deploymentEvent.type) {
         case DeploymentType.PROXY:
           functionName = deploymentEvent.functionName;
-          status = functionName ? DeploymentStatus.COMPLETE : DeploymentStatus.PENDING;
+
           break;
         case DeploymentType.TRANSACTION:
           functionName = deploymentEvent.functionName;
@@ -43,7 +41,10 @@ export function waitForReceipt<T>(deploymentEvent$): Observable<T> {
         type: deploymentEvent.type,
         contractName: deploymentEvent.contractName,
         ...(functionName && { functionName }),
-        status,
+        status: DeploymentStatus.COMPLETE,
+        ...(deploymentEvent.type === DeploymentType.PROXY && {
+          contractAddress: receipt.contractAddress,
+        }),
         receipt,
       };
     }),
@@ -57,7 +58,8 @@ export function waitForReceipt<T>(deploymentEvent$): Observable<T> {
 export function initialize(
   deploymentEvent$: Observable<DeploymentEvent>,
   factory: ContractFactory,
-  initArguments: (result) => Promise<unknown[]>
+  initArguments: (result) => Promise<unknown[]>,
+  initializeFunctionSignature: string
 ): Observable<DeploymentEventProxyContract> {
   const initialize$ = deploymentEvent$.pipe(
     takeLast(1),
@@ -72,10 +74,10 @@ export function initialize(
         gasPrice: GAS_PRICE,
       });
       return {
-        type: result.type,
+        type: DeploymentType.TRANSACTION,
         contractName: result.contractName,
-        functionName: 'initialize',
-        status: result.status,
+        functionName: initializeFunctionSignature,
+        status: DeploymentStatus.PENDING,
         transaction,
       };
     }),
@@ -101,7 +103,7 @@ export async function deployContract(
     const contract: Contract = await deployContractFunction();
 
     return {
-      type: DeploymentType.CONTRACT,
+      type: DeploymentType.DEPLOYMENT,
       status: DeploymentStatus.PENDING,
       contractName: name,
       transaction: contract.deployTransaction,
@@ -174,32 +176,29 @@ export function getDeployedByteCode(
   return provider.getCode(contractAddress);
 }
 
-export function waitForContractDeployment$(deployment$: Observable<DeploymentEvent>) {
-  return lastValueFrom(
-    deployment$.pipe(
-      scan((accumulator, deploymentEvent: DeploymentEvent) => {
-        if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
-          return accumulator;
-        }
+export function deploymentWithContractsOnCompletion$(deployment$: Observable<DeploymentEvent>) {
+  const contractAccumulator = {};
+  return deployment$.pipe(
+    tap((deploymentEvent) => {
+      if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
+        return;
+      }
 
-        if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
-          accumulator[`${deploymentEvent.contractName}BaseContract`] = {
-            address: deploymentEvent.receipt.contractAddress,
-            receipt: deploymentEvent.receipt,
-            type: deploymentEvent.type,
-          };
-        } else {
-          accumulator[deploymentEvent.contractName] = {
-            address: deploymentEvent.receipt.contractAddress,
-            receipt: deploymentEvent.receipt,
-            type: deploymentEvent.type,
-          };
-        }
-
-        return accumulator;
-      }, {}),
-      shareReplay()
-    )
+      if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
+        contractAccumulator[`${deploymentEvent.contractName}BaseContract`] = {
+          address: deploymentEvent.receipt.contractAddress,
+          receipt: deploymentEvent.receipt,
+          type: deploymentEvent.type,
+        };
+      } else {
+        contractAccumulator[deploymentEvent.contractName] = {
+          address: deploymentEvent.receipt.contractAddress,
+          receipt: deploymentEvent.receipt,
+          type: deploymentEvent.type,
+        };
+      }
+    }),
+    endWith(contractAccumulator)
   );
 }
 
