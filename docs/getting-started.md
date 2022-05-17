@@ -170,6 +170,11 @@ The LSPFactory uses [RxJS](https://rxjs.dev/) library to deploy contracts. This 
 
 When deploying, pass the `deployReactive` flag inside the `options` object when deploying an LSP smart contract to receive an [RxJS](https://rxjs.dev/) `Observable`, which will emit events as your contract is deployed.
 
+:::info
+When deployment is completed, an event containing the final contract addresses will be emitted.
+
+:::
+
 ```typescript title="Reactive deployment of a Universal Profile"
 const observable = await lspFactory.UniversalProfile.deploy({...}, {
   deployReactive: true

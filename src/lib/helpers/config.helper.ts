@@ -5,7 +5,7 @@ import { Options } from 'ipfs-http-client';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 
 const defaultIpfsGateway: Options = {
-  host: 'api.ipfs.lukso.network',
+  host: 'api.2eff.lukso.dev',
   port: 443,
   protocol: 'https',
 };

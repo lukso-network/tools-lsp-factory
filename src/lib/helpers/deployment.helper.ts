@@ -188,13 +188,11 @@ export function deploymentWithContractsOnCompletion$(deployment$: Observable<Dep
         contractAccumulator[`${deploymentEvent.contractName}BaseContract`] = {
           address: deploymentEvent.receipt.contractAddress,
           receipt: deploymentEvent.receipt,
-          type: deploymentEvent.type,
         };
       } else {
         contractAccumulator[deploymentEvent.contractName] = {
           address: deploymentEvent.receipt.contractAddress,
           receipt: deploymentEvent.receipt,
-          type: deploymentEvent.type,
         };
       }
     }),

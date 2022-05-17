@@ -159,7 +159,7 @@ await lspFactory.LSP3UniversalProfile.deploy(
   },
   {
     deployReactive: true,
-  },
+  }
 ).subscribe({
   next: (deploymentEvent) => {
     console.log(deploymentEvent);
@@ -171,7 +171,7 @@ await lspFactory.LSP3UniversalProfile.deploy(
 
 /**
 {
-  type: 'PROXY',
+  type: 'PROXY_DEPLOYMENT',
   contractName: 'ERC725Account',
   status: 'PENDING',
   transaction: {
@@ -179,76 +179,62 @@ await lspFactory.LSP3UniversalProfile.deploy(
   }
 }
 {
-  type: 'PROXY',
+  type: 'PROXY_DEPLOYMENT',
   contractName: 'ERC725Account',
-  status: 'PENDING',
+  status: 'COMPLETE',
+  contractAddress: '0x805761959e7B94090fedD51776C63AB474a76A95',
   receipt: {
-    ...
+   ...
   }
 }
 {
-  type: 'PROXY',
+  type: 'TRANSACTION',
   contractName: 'ERC725Account',
-  functionName: 'initialize',
+  functionName: 'initialize(address)',
   status: 'PENDING',
   transaction: {
-    ...
+   ...
   }
 }
 {
-  type: 'PROXY',
+  type: 'TRANSACTION',
   contractName: 'ERC725Account',
-  functionName: 'initialize',
+  functionName: 'initialize(address)',
   status: 'COMPLETE',
   receipt: {
-    ...
+   ...
   }
 }
 {
-  type: 'CONTRACT',
-  status: 'PENDING',
+  type: 'PROXY_DEPLOYMENT',
   contractName: 'KeyManager',
-  transaction: {
-    ...
-  }
-}
-{
-  type: 'PROXY',
-  contractName: 'UniversalReceiverDelegate',
   status: 'PENDING',
   transaction: {
     ...
   }
 }
 {
-  type: 'CONTRACT',
+  type: 'PROXY_DEPLOYMENT',
   contractName: 'KeyManager',
   status: 'COMPLETE',
+  contractAddress: '0x04952ED68B5386Ff0a9891A10E2B1F204f98e209',
   receipt: {
     ...
   }
 }
 {
-  type: 'PROXY',
-  contractName: 'UniversalReceiverDelegate',
-  status: 'PENDING',
-  receipt: {
-    ...
-  }
-}
-{
-  type: 'PROXY',
-  contractName: 'UniversalReceiverDelegate',
-  functionName: 'initialize',
+  type: 'TRANSACTION',
+  contractName: 'KeyManager',
+  functionName: 'initialize(address)',
   status: 'PENDING',
   transaction: {
     ...
   }
 }
 {
-  type: 'PROXY',
-  contractName: 'UniversalReceiverDelegate',
-  functionName: 'initialize',
+  type: 'TRANSACTION',
+  contractName: 'KeyManager',
+  functionName: 'initialize(address)',
   status: 'COMPLETE',
   receipt: {
     ...
@@ -257,8 +243,26 @@ await lspFactory.LSP3UniversalProfile.deploy(
 {
   type: 'TRANSACTION',
   contractName: 'ERC725Account',
-  functionName: 'setData',
+  functionName: 'setData(bytes32[],bytes[])',
   status: 'PENDING',
+  transaction: {
+   ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'ERC725Account',
+  functionName: 'setData(bytes32[],bytes[])',
+  status: 'COMPLETE',
+  receipt: {
+   ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  status: 'PENDING',
+  contractName: 'ERC725Account',
+  functionName: 'transferOwnership(address)',
   transaction: {
     ...
   }
@@ -266,28 +270,24 @@ await lspFactory.LSP3UniversalProfile.deploy(
 {
   type: 'TRANSACTION',
   contractName: 'ERC725Account',
-  functionName: 'setData',
+  functionName: 'transferOwnership(address)',
   status: 'COMPLETE',
   receipt: {
     ...
   }
 }
 {
-  type: 'TRANSACTION',
-  status: 'PENDING',
-  contractName: 'ERC725Account',
-  functionName: 'transferOwnership',
-  transaction: {
-    ...
-  }
-}
-{
-  type: 'TRANSACTION',
-  contractName: 'ERC725Account',
-  functionName: 'transferOwnership',
-  status: 'COMPLETE',
-  receipt: {
-    ...
+  ERC725Account: {
+    address: '0x805761959e7B94090fedD51776C63AB474a76A95',
+    receipt: {
+     ...
+    },
+  },
+  KeyManager: {
+    address: '0x04952ED68B5386Ff0a9891A10E2B1F204f98e209',
+    receipt: {
+      ...
+    },
   }
 }
 Deployment Complete
@@ -392,7 +392,7 @@ await LSP3UniversalProfile.uploadProfileData(
   },
   {
     ipfsGateway: 'https://ipfs.infura.io',
-  },
+  }
 );
 
 /**
