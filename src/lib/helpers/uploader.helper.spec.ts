@@ -116,7 +116,7 @@ describe('uploader.helper.spec.ts', () => {
         type: 'image/zip',
       }),
       {
-        ipfsGateway: 'https://api.ipfs.lukso.network',
+        ipfsGateway: 'https://api.2eff.lukso.dev',
       }
     );
 

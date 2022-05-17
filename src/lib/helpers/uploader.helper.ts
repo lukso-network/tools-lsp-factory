@@ -181,7 +181,7 @@ export function formatIPFSUrl(ipfsGateway: IPFSGateway, ipfsHash: string) {
       : `${ipfsGateway}/${ipfsHash}`;
   } else {
     const protocol = ipfsGateway?.host ?? 'https';
-    const host = ipfsGateway?.host ?? 'ipfs.lukso.network';
+    const host = ipfsGateway?.host ?? '2eff.lukso.dev';
 
     ipfsUrl = `${[protocol]}://${host}/ipfs/${ipfsHash}`;
   }
