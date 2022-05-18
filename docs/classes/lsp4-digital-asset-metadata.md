@@ -8,49 +8,45 @@ title: LSP4DigitalAssetMetadata
 ## uploadMetadata
 
 ```js
-LSP4DigitalAssetMetadata.uploadMetadata(lsp4Metadata, options?);
+LSP4DigitalAssetMetadata.uploadMetadata(lsp4Metadata [, options]);
 ```
 
 Uploads and processes passed assets and images, and uploads the [LSP4 Digital Asset Metadata](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-4-DigitalAsset-Metadata.md) to IPFS.
 The `uploadMetadata` function is available as a static or non-static function callable on the `LSPFactory` library instance.
 
-If `options` are not specified in the function call, and the function is used on an `LSPFactory` instance, the specified options in `options` that were passed to the LSPFactory during instantiation will be used.
+If `options` are not specified in the function call, and the function is used on an `LSPFactory` instance, the specified `options` that were passed to the LSPFactory during instantiation will be used.
 
-#### Parameters
+### Parameters
 
-| Name       | Type   | Description                                            |
-| :--------- | :----- | :----------------------------------------------------- |
-| `metaData` | Object | The metadata to be uploaded.                           |
-| `options?` | Object | The specification how the metadata should be uploaded. |
+#### 1. `metaData` - Object (optional)
 
-#### Parameters of `metaData`
+| Name                | Type          | Description                                                                                                                                          |
+| :------------------ | :------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `description`       | String        | A description of the digital asset.                                                                                                                  |
+| `links` (optional)  | Array         | An Array of Objects containing title and url parameters.                                                                                             |
+| `icon` (optional)   | File \| Array | The icon of the digital asset passed as a JavaScript File object or an Array of image metadata objects for different sizes of the same image.        |
+| `images` (optional) | Array         | An Array of images where each image element is a JavaScript File object or an Array of image metadata Objects for different sizes of the same image. |
+| `assets` (optional) | Array         | An Array of assets where each asset is a JavaScript File object or an asset metadata Object.                                                         |
 
-| Name          | Type                                             | Description                         |
-| :------------ | :----------------------------------------------- | :---------------------------------- |
-| `description` | string                                           | A description of the digital asset. |
-| `links?`      | {&nbsp;title: string, url: string&nbsp;}[&nbsp;] | The links of the digital asset.     |
-| `icon?`       | File, AssetBuffer, or AssetMetadata[&nbsp;]      | The icon of the digital asset.      |
-| `images?`     | File, AssetBuffer, or AssetMetadata[&nbsp;]      | The images of the digital asset.    |
-| `assets?`     | File, AssetBuffer, or AssetMetadata[&nbsp;]      | The assets of the digital asset.    |
+#### 2. `options` - Object (optional)
 
-#### Parameters of `options?`
-
-| Name           | Type             | Description                                                                                                 |
-| :------------- | :--------------- | :---------------------------------------------------------------------------------------------------------- |
-| `ipfsGateway?` | Object or String | ipfsGateway URL string or IPFS Client Options as defined by the [ipfs-http-client library] used internally. |
+| Name                                                                        | Type             | Description                                                                                                 |
+| :-------------------------------------------------------------------------- | :--------------- | :---------------------------------------------------------------------------------------------------------- |
+| [`ipfsGateway`](../deployment/digital-asset#ipfs-upload-options) (optional) | String \| Object | ipfsGateway URL string or IPFS Client Options as defined by the [ipfs-http-client library] used internally. |
 
 #### Returns
 
-| Name      | Type                       | Description                               |
-| :-------- | :------------------------- | :---------------------------------------- |
-| `Promise` | <LSP4MetadataForEncoding\> | The processed [LSP4] data and upload URL. |
+| Type      | Description                               |
+| :-------- | :---------------------------------------- |
+| `Promise` | The processed [LSP4] data and upload URL. |
 
-#### Upload LSP4 Metadata Example
+### Example
 
 ```javascript title="Uploading LSP4Metadata"
 const image = new File();
 const icon = new File();
 const asset = new File();
+
 await LSP4DigitalAssetMetadata.uploadMetadata(
     {
         description: "Digital Asset",
