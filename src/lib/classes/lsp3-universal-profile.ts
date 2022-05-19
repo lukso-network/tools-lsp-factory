@@ -1,11 +1,11 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, merge, Observable } from 'rxjs';
+import { concat, lastValueFrom, merge, Observable } from 'rxjs';
 import { concatAll } from 'rxjs/operators';
 
 import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { defaultUploadOptions } from '../helpers/config.helper';
-import { waitForContractDeployment$ } from '../helpers/deployment.helper';
+import { deploymentWithContractsOnCompletion$ } from '../helpers/deployment.helper';
 import { ipfsUpload, prepareMetadataImage } from '../helpers/uploader.helper';
 import {
   DeploymentEventContract,
@@ -182,17 +182,19 @@ export class LSP3UniversalProfile {
       defaultUniversalReceiverAddress
     );
 
-    const deployment$ = concat([
-      baseContractDeployment$,
-      account$,
-      merge(universalReceiver$, keyManager$),
-      setDataAndTransferOwnership$,
-    ]).pipe(concatAll());
+    const deployment$ = deploymentWithContractsOnCompletion$(
+      concat([
+        baseContractDeployment$,
+        account$,
+        merge(universalReceiver$, keyManager$),
+        setDataAndTransferOwnership$,
+      ]).pipe(concatAll())
+    );
 
     if (deploymentConfiguration?.deployReactive)
       return deployment$ as UniversalProfileObservableOrPromise<T>;
 
-    return waitForContractDeployment$(deployment$) as UniversalProfileObservableOrPromise<T>;
+    return lastValueFrom(deployment$) as UniversalProfileObservableOrPromise<T>;
   }
 
   /**
@@ -237,7 +239,7 @@ export class LSP3UniversalProfile {
     if (uploadOptions.url) {
       // TODO: simple HTTP upload
     } else {
-      uploadResponse = await ipfsUpload(JSON.stringify(profile), uploadOptions.ipfsClientOptions);
+      uploadResponse = await ipfsUpload(JSON.stringify(profile), uploadOptions?.ipfsGateway);
     }
 
     return {

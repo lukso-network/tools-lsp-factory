@@ -37,7 +37,7 @@ import {
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
-import { isMetadataEncoded } from '../helpers/uploader.helper';
+import { formatIPFSUrl, isMetadataEncoded } from '../helpers/uploader.helper';
 import {
   DeploymentEvent$,
   DeploymentEventContract,
@@ -191,10 +191,10 @@ function initializeLSP7Proxy(
       );
 
       return {
-        type: result.type,
+        type: DeploymentType.TRANSACTION,
         contractName: result.contractName,
-        functionName: 'initialize',
-        status: result.status,
+        functionName: 'initialize(string,string,address,bool)',
+        status: DeploymentStatus.PENDING,
         transaction,
       };
     }),
@@ -334,10 +334,10 @@ function initializeLSP8Proxy(
         }
       );
       return {
-        type: result.type,
+        type: DeploymentType.TRANSACTION,
         contractName: result.contractName,
-        functionName: 'initialize',
-        status: result.status,
+        functionName: 'initialize(string,string,address)',
+        status: DeploymentStatus.PENDING,
         transaction,
       };
     }),
@@ -375,11 +375,7 @@ export async function getLSP4MetadataUrl(
     const isIPFSUrl = lsp4Metadata.startsWith('ipfs://');
 
     if (isIPFSUrl) {
-      // TODO: Handle simple HTTP upload
-      const protocol = uploadOptions.ipfsClientOptions.host ?? 'https';
-      const host = uploadOptions.ipfsClientOptions.host ?? '2eff.lukso.dev';
-
-      lsp4JsonUrl = `${[protocol]}://${host}/ipfs/${lsp4Metadata.split('/').at(-1)}`;
+      lsp4JsonUrl = formatIPFSUrl(uploadOptions?.ipfsGateway, lsp4Metadata.split('/').at(-1));
     }
 
     const ipfsResponse = await axios.get(lsp4JsonUrl);
@@ -546,7 +542,7 @@ export async function sendSetDataAndTransferOwnershipTransactions(
       type: DeploymentType.TRANSACTION,
       status: DeploymentStatus.PENDING,
       contractName,
-      functionName: 'transferOwnership',
+      functionName: 'transferOwnership(address)',
       pendingTransaction: transferOwnershipTransaction,
     });
   }
@@ -659,7 +655,9 @@ export function convertDigitalAssetConfigurationObject(
 
   return {
     deployProxy: contractDeploymentOptions?.deployProxy,
-    uploadOptions: contractDeploymentOptions?.uploadOptions,
+    uploadOptions: contractDeploymentOptions?.ipfsGateway
+      ? { ipfsGateway: contractDeploymentOptions?.ipfsGateway }
+      : undefined,
     deployReactive: contractDeploymentOptions?.deployReactive,
     version,
     byteCode,

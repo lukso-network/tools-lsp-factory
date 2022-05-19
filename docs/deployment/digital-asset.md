@@ -379,15 +379,29 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({...}, {
 
 ### IPFS Upload Options
 
-You can specify how you want your profile metadata to be uploaded by passing the `ipfsClientOptions` inside the `options` object. Here you can set the IPFS gateway where you want the metadata to be uploaded.
+You can specify how you want your profile metadata to be uploaded by passing the `ipfsGateway` inside the `options` object. Here you can set the IPFS gateway where you want the metadata to be uploaded.
 
 :::note
-The options object takes an `ipfsClientOptions` object as defined by the [IPFS-HTTP Client](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) library which is used internally to interact with the specified IPFS node.
+The procedure takes a URL string or an object as defined by the [IPFS-HTTP Client](https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#createoptions) library which is used internally to interact with the specified IPFS node.
 :::
+
+If a URL is passed and no port is specified, the standard 5001 port will be used.
+
+```javascript title="Passing ipfsGateway URL"
+lspFactory.LSP7DigitalAsset.deploy({...}, {
+  ipfsGateway: 'https://ipfs.infura.io:5001'
+})
+```
+
+```javascript title="Passing ipfsGateway URL string with port set"
+lspFactory.LSP7DigitalAsset.deploy({...}, {
+  ipfsGateway: 'https://ipfs.infura.io' // No port set. Port 5001 will be used
+})
+```
 
 ```javascript
 await lspFactory.LSP7DigitalAsset.deploy({...}, {
-  ipfsClientOptions: {
+  ipfsGateway: {
     host: 'ipfs.infura.io',
     port: 5001,
     protocol: 'https',
@@ -395,7 +409,7 @@ await lspFactory.LSP7DigitalAsset.deploy({...}, {
 });
 ```
 
-If the `ipfsClientOptions` object is provided, it will override the `ipfsClientOptions` object passed during the instantiation of the LSPFactory.
+If the `ipfsGateway` parameter is provided, it will override the `ipfsGateway` object passed during the instantiation of the LSPFactory for this function call only.
 
 ### Reactive Deployment
 
@@ -415,20 +429,170 @@ The following events will be emitted:
 
 #### LSP7 Deployment Events
 
-```typescript
-{ type: 'PROXY', contractName: 'LSP7DigitalAsset', status: 'PENDING',  transaction:  {} },
-{ type: "PROXY", contractName: 'LSP7DigitalAsset', status: 'PENDING',  receipt:      {} },
-{ type: "PROXY", contractName: 'LSP7DigitalAsset', functionName: 'initialize', status: 'PENDING',  transaction:  {} },
-{ type: "PROXY", contractName: 'LSP7DigitalAsset', functionName: 'initialize', status: 'COMPLETE', receipt:      {} },
+```typescript title="LSP7 Deployment Events"
+{
+  type: 'PROXY_DEPLOYMENT',
+  contractName: 'LSP7DigitalAsset',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'PROXY_DEPLOYMENT',
+  contractName: 'LSP7DigitalAsset',
+  status: 'COMPLETE',
+  contractAddress: '0x97053C386eaa49d6eAD7477220ca04EFcD857dde',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'initialize(string,string,address,bool)',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'initialize(string,string,address,bool)',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'setData(bytes32[],bytes[])',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'setData(bytes32[],bytes[])',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  status: 'PENDING',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'transferOwnership(address)',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP7DigitalAsset',
+  functionName: 'transferOwnership(address)',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  LSP7DigitalAsset: {
+    address: '0x97053C386eaa49d6eAD7477220ca04EFcD857dde',
+    receipt: {
+      ...
+    },
+  }
+}
 ```
 
 #### LSP8 Deployment Events
 
-```typescript
-{ type: 'PROXY', contractName: 'LSP8IdentifiableDigitalAsset', status: 'PENDING',  transaction: {}},
-{ type: "PROXY", contractName: 'LSP8IdentifiableDigitalAsset', status: 'PENDING',  receipt: {}},
-{ type: "PROXY", contractName: 'LSP8IdentifiableDigitalAsset', functionName: 'initialize', status: 'PENDING',  transaction: {}},
-{ type: "PROXY", contractName: 'LSP8IdentifiableDigitalAsset', functionName: 'initialize', status: 'COMPLETE', receipt: {}},
+```typescript title="LSP8 Deployment Events"
+{
+  type: 'PROXY_DEPLOYMENT',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'PROXY_DEPLOYMENT',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  status: 'COMPLETE',
+  contractAddress: '0x2cA038832c15E61b83d47414Eb53818a45e0E142',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'initialize(string,string,address)',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'initialize(string,string,address)',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'setData(bytes32[],bytes[])',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'setData(bytes32[],bytes[])',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  status: 'PENDING',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'transferOwnership(address)',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP8IdentifiableDigitalAsset',
+  functionName: 'transferOwnership(address)',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  LSP8IdentifiableDigitalAsset: {
+    address: '0x2cA038832c15E61b83d47414Eb53818a45e0E142',
+    receipt: {
+      ...
+    },
+  }
+}
 ```
 
 [lsp7]: ../../../standards/nft-2.0/LSP7-Digital-Asset

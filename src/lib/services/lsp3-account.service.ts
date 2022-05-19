@@ -25,7 +25,7 @@ import {
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
-import { isMetadataEncoded } from '../helpers/uploader.helper';
+import { formatIPFSUrl, isMetadataEncoded } from '../helpers/uploader.helper';
 import {
   BaseContractAddresses,
   ContractDeploymentOptions,
@@ -153,7 +153,8 @@ function initializeProxy(
     async () => {
       const signerAddress = await signer.getAddress();
       return [signerAddress];
-    }
+    },
+    'initialize(address)'
   ).pipe(shareReplay());
 }
 
@@ -291,11 +292,7 @@ export async function getLsp3ProfileDataUrl(
     const isIPFSUrl = lsp3Profile.startsWith('ipfs://');
 
     if (isIPFSUrl) {
-      // TODO: Handle simple HTTP upload
-      const protocol = uploadOptions.ipfsClientOptions.host ?? 'https';
-      const host = uploadOptions.ipfsClientOptions.host ?? '2eff.lukso.dev';
-
-      lsp3JsonUrl = `${[protocol]}://${host}/ipfs/${lsp3Profile.split('/').at(-1)}`;
+      lsp3JsonUrl = formatIPFSUrl(uploadOptions?.ipfsGateway, lsp3Profile.split('/').at(-1));
     }
 
     const ipfsResponse = await axios.get(lsp3JsonUrl);
@@ -472,15 +469,15 @@ export async function sendSetDataAndTransferOwnershipTransactions(
     {
       type: DeploymentType.TRANSACTION,
       contractName: ContractNames.ERC725_Account,
-      functionName: 'setData',
       status: DeploymentStatus.PENDING,
+      functionName: 'setData(bytes32[],bytes[])',
       pendingTransaction: setDataTransaction,
     },
     {
       type: DeploymentType.TRANSACTION,
-      status: DeploymentStatus.PENDING,
       contractName: ContractNames.ERC725_Account,
-      functionName: 'transferOwnership',
+      status: DeploymentStatus.PENDING,
+      functionName: 'transferOwnership(address)',
       pendingTransaction: transferOwnershipTransaction,
     },
   ];
@@ -556,7 +553,9 @@ export function convertUniversalProfileConfigurationObject(
 
   return {
     version: contractDeploymentOptions?.version,
-    uploadOptions: contractDeploymentOptions?.uploadOptions,
+    uploadOptions: contractDeploymentOptions?.ipfsGateway
+      ? { ipfsGateway: contractDeploymentOptions?.ipfsGateway }
+      : undefined,
     ERC725Account: {
       version: erc725AccountVersion,
       byteCode: erc725AccountBytecode,

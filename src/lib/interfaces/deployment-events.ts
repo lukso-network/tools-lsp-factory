@@ -3,10 +3,10 @@ import { ContractTransaction } from 'ethers';
 import { Observable } from 'rxjs';
 
 export enum DeploymentType {
-  CONTRACT = 'CONTRACT',
+  DEPLOYMENT = 'DEPLOYMENT',
   TRANSACTION = 'TRANSACTION',
-  PROXY = 'PROXY',
-  BASE_CONTRACT = 'BASE_CONTRACT',
+  PROXY = 'PROXY_DEPLOYMENT',
+  BASE_CONTRACT = 'BASE_CONTRACT_DEPLOYMENT',
 }
 
 export enum DeploymentStatus {
@@ -28,7 +28,7 @@ export interface DeploymentEventBase {
 }
 
 export interface DeploymentEventStandardContract extends DeploymentEventBase {
-  type: DeploymentType.CONTRACT;
+  type: DeploymentType.DEPLOYMENT;
 }
 export interface DeploymentEventBaseContract extends DeploymentEventBase {
   type: DeploymentType.BASE_CONTRACT;

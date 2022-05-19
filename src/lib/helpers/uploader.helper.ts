@@ -2,11 +2,11 @@ import imageCompression from 'browser-image-compression';
 import { keccak256 } from 'ethers/lib/utils';
 import { AddResult } from 'ipfs-core-types/src/root';
 import { ImportCandidate } from 'ipfs-core-types/src/utils';
-import { create, Options } from 'ipfs-http-client';
+import { create, IPFSHTTPClient } from 'ipfs-http-client';
 
 import { ImageBuffer, ImageMetadata } from '../interfaces';
 import { AssetBuffer, AssetMetadata } from '../interfaces/metadata';
-import { UploadOptions } from '../interfaces/profile-upload-options';
+import { IPFSGateway, UploadOptions } from '../interfaces/profile-upload-options';
 
 export const defaultSizes = [1800, 1024, 640, 320, 180];
 export async function imageUpload(
@@ -51,7 +51,7 @@ export async function imageUpload(
       if (uploadOptions.url) {
         // TODO: add simple HTTP upload
       } else {
-        uploadResponse = await ipfsUpload(imgToUpload, uploadOptions.ipfsClientOptions);
+        uploadResponse = await ipfsUpload(imgToUpload, uploadOptions?.ipfsGateway);
       }
 
       return {
@@ -84,7 +84,7 @@ export async function assetUpload(
   if (uploadOptions.url) {
     // TODO: Simple HTTP upload
   } else {
-    ipfsResult = await ipfsUpload(fileBuffer, uploadOptions.ipfsClientOptions);
+    ipfsResult = await ipfsUpload(fileBuffer, uploadOptions?.ipfsGateway);
   }
 
   return {
@@ -95,8 +95,30 @@ export async function assetUpload(
   };
 }
 
-export async function ipfsUpload(file: ImportCandidate, options: Options): Promise<AddResult> {
-  const ipfs = create(options);
+export async function ipfsUpload(
+  file: ImportCandidate,
+  ipfsGateway: IPFSGateway
+): Promise<AddResult> {
+  let ipfs: IPFSHTTPClient;
+
+  if (typeof ipfsGateway === 'string') {
+    const isPortProvided = ipfsGateway.split(':').length > 2;
+
+    let url: string;
+
+    if (ipfsGateway.endsWith('/')) {
+      url = isPortProvided
+        ? ipfsGateway
+        : `${ipfsGateway.slice(0, ipfsGateway.length - 1)}:${5001}`;
+    } else {
+      url = isPortProvided ? ipfsGateway : `${ipfsGateway}:${5001}`;
+    }
+
+    ipfs = create({ url });
+  } else {
+    ipfs = create(ipfsGateway);
+  }
+
   return await ipfs.add(file, {
     pin: true,
   });
@@ -148,4 +170,21 @@ export function isMetadataEncoded(metdata: string): boolean {
   }
 
   return false;
+}
+
+export function formatIPFSUrl(ipfsGateway: IPFSGateway, ipfsHash: string) {
+  let ipfsUrl: string;
+
+  if (typeof ipfsGateway === 'string') {
+    ipfsUrl = ipfsGateway.endsWith('/')
+      ? `${ipfsGateway}${ipfsHash}`
+      : `${ipfsGateway}/${ipfsHash}`;
+  } else {
+    const protocol = ipfsGateway?.host ?? 'https';
+    const host = ipfsGateway?.host ?? '2eff.lukso.dev';
+
+    ipfsUrl = `${[protocol]}://${host}/ipfs/${ipfsHash}`;
+  }
+
+  return ipfsUrl;
 }

@@ -19,7 +19,6 @@ export class LSPFactory {
   LSP8IdentifiableDigitalAsset: LSP8IdentifiableDigitalAsset;
   ProxyDeployer: ProxyDeployer;
   /**
-   * TBD
    *
    * @param {string | providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider } rpcUrlOrProvider
    * @param {string | Signer | SignerOptions} privateKeyOrSigner
@@ -35,8 +34,8 @@ export class LSPFactory {
   ) {
     let signer: Signer;
     let provider: providers.Web3Provider | providers.JsonRpcProvider;
-    let chainId = 22;
-    let uploadOptions;
+    let ipfsGateway;
+    let chainId;
 
     if (typeof rpcUrlOrProvider === 'string') {
       provider = new ethers.providers.JsonRpcProvider(rpcUrlOrProvider);
@@ -50,19 +49,24 @@ export class LSPFactory {
       signer = privateKeyOrSigner;
     } else if (typeof privateKeyOrSigner === 'string') {
       signer = new ethers.Wallet(privateKeyOrSigner, provider);
-    } else if (!privateKeyOrSigner) {
-      signer = provider.getSigner();
     } else {
-      signer = new ethers.Wallet(privateKeyOrSigner.deployKey, provider);
-      chainId = privateKeyOrSigner.chainId;
-      uploadOptions = privateKeyOrSigner.uploadOptions;
+      if (privateKeyOrSigner?.deployKey instanceof Signer) {
+        signer = privateKeyOrSigner.deployKey;
+      } else if (typeof privateKeyOrSigner?.deployKey === 'string') {
+        signer = new ethers.Wallet(privateKeyOrSigner.deployKey, provider);
+      } else {
+        signer = provider.getSigner();
+      }
+
+      chainId = privateKeyOrSigner?.chainId;
+      ipfsGateway = privateKeyOrSigner?.ipfsGateway;
     }
 
     this.options = {
       signer,
       provider,
-      chainId,
-      uploadOptions,
+      chainId: chainId || 22,
+      uploadOptions: ipfsGateway ? { ipfsGateway } : undefined,
     };
 
     this.LSP3UniversalProfile = new LSP3UniversalProfile(this.options);

@@ -3,7 +3,7 @@ import { ContractNames, DeploymentStatus, DeploymentType } from '../src';
 const proxyDeploymentEventBase = {
   type: DeploymentType.PROXY,
   contractName: ContractNames.ERC725_Account,
-  status: DeploymentStatus.PENDING,
+  status: DeploymentStatus.COMPLETE,
   transaction: {
     wait: async () => {
       return 'fake receipt';
