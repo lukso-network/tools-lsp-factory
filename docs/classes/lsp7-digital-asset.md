@@ -107,6 +107,9 @@ await lspFactory.LSP7DigitalAsset.deploy(
   next: (deploymentEvent) => {
     console.log(deploymentEvent);
   },
+  error: (error) => {
+    console.error(error);
+  },
   complete: () => {
     console.log('Deployment Complete');
   },

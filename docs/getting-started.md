@@ -184,6 +184,9 @@ observable.subscribe({
   next: (deploymentEvent) => {
     console.log(deploymentEvent);
   },
+  error: (error) => {
+    console.error(error);
+  },
   complete: () => {
     console.log('Universal Profile deployment completed');
   },
@@ -198,6 +201,9 @@ const observable = await lspFactory.LSP7DigitalAsset.deploy({...}, {
 observable.subscribe({
   next: (deploymentEvent) => {
     console.log(deploymentEvent);
+  },
+  error: (error) => {
+    console.error(error);
   },
   complete: () => {
     console.log('Digital Asset deployment completed');
