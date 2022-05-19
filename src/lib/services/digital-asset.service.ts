@@ -376,7 +376,7 @@ export async function getLSP4MetadataUrl(
     if (isIPFSUrl) {
       // TODO: Handle simple HTTP upload
       const protocol = uploadOptions.ipfsClientOptions.host ?? 'https';
-      const host = uploadOptions.ipfsClientOptions.host ?? 'ipfs.lukso.network';
+      const host = uploadOptions.ipfsClientOptions.host ?? '2eff.lukso.dev';
 
       lsp4JsonUrl = `${[protocol]}://${host}/ipfs/${lsp4Metadata.split('/').at(-1)}`;
     }
