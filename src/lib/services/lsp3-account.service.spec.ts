@@ -9,7 +9,7 @@ import {
   PREFIX_PERMISSIONS,
 } from '../helpers/config.helper';
 
-import { setData } from './lsp3-account.service';
+import { prepareSetDataParameters } from './lsp3-account.service';
 
 jest.setTimeout(60000);
 jest.useRealTimers();
@@ -20,7 +20,7 @@ describe('LSP3Account Service', () => {
     signers = await ethers.getSigners();
   });
 
-  describe('setData', () => {
+  describe('prepareSetDataParameters', () => {
     let abiCoder;
     let universalProfile, universalReceiverDelegate;
 
@@ -34,24 +34,22 @@ describe('LSP3Account Service', () => {
     });
 
     it('should set one controller address', async () => {
-      const transaction = await setData(
-        signers[0],
+      const { keysToSet, valuesToSet, erc725AccountAddress } = await prepareSetDataParameters(
         universalProfile.address,
         universalReceiverDelegate.address,
         [signers[0].address]
       );
-      expect(transaction.functionName).toEqual('setData(bytes32[],bytes[])');
+
+      expect(universalProfile.address).toEqual(erc725AccountAddress);
 
       // AddressPermissions[] array length should be 1
-      const [totalPermissionsSet] = await universalProfile.getData([ADDRESS_PERMISSIONS_ARRAY_KEY]);
+      const totalPermissionsSet = valuesToSet[keysToSet.indexOf(ADDRESS_PERMISSIONS_ARRAY_KEY)];
       const expectedLength = abiCoder.encode(['uint256'], [1]);
       expect(totalPermissionsSet).toEqual(expectedLength);
 
       // controller address should have default permissions set
       const controllerPermissionsKey = PREFIX_PERMISSIONS + signers[0].address.substring(2);
-      const [controllerPermissionsValue] = await universalProfile.getData([
-        controllerPermissionsKey,
-      ]);
+      const controllerPermissionsValue = valuesToSet[keysToSet.indexOf(controllerPermissionsKey)];
       const expectedPermissions = ERC725.encodePermissions(DEFAULT_PERMISSIONS);
       expect(controllerPermissionsValue).toEqual(expectedPermissions);
 
@@ -61,7 +59,7 @@ describe('LSP3Account Service', () => {
       const rightSideKey = ethers.utils.hexZeroPad(hexIndex, 16);
       const addressPermissionArrayIndexKey = leftSideKey + rightSideKey.substring(2);
 
-      const [result] = await universalProfile.getData([addressPermissionArrayIndexKey]);
+      const result = valuesToSet[keysToSet.indexOf(addressPermissionArrayIndexKey)];
       const checkedsumResult = ethers.utils.getAddress(result);
       expect(checkedsumResult).toEqual(signers[0].address);
     });
@@ -69,16 +67,14 @@ describe('LSP3Account Service', () => {
     it('should set 2 x controller addresses', async () => {
       const controllerAddresses = [signers[0].address, signers[0].address];
 
-      const transaction = await setData(
-        signers[0],
+      const { keysToSet, valuesToSet } = await prepareSetDataParameters(
         universalProfile.address,
         universalReceiverDelegate.address,
         controllerAddresses
       );
-      expect(transaction.functionName).toEqual('setData(bytes32[],bytes[])');
 
       // AddressPermissions[] array length should be 2
-      const [totalPermissionsSet] = await universalProfile.getData([ADDRESS_PERMISSIONS_ARRAY_KEY]);
+      const totalPermissionsSet = valuesToSet[keysToSet.indexOf(ADDRESS_PERMISSIONS_ARRAY_KEY)];
       const expectedLength = abiCoder.encode(['uint256'], [controllerAddresses.length]);
       expect(totalPermissionsSet).toEqual(expectedLength);
 
@@ -87,9 +83,8 @@ describe('LSP3Account Service', () => {
 
         // controller address should have default permissions set
         const controllerPermissionsKey = PREFIX_PERMISSIONS + controllerAddress.substring(2);
-        const [controllerPermissionsValue] = await universalProfile.getData([
-          controllerPermissionsKey,
-        ]);
+        const controllerPermissionsValue = valuesToSet[keysToSet.indexOf(controllerPermissionsKey)];
+
         const expectedPermissions = ERC725.encodePermissions(DEFAULT_PERMISSIONS);
         expect(controllerPermissionsValue).toEqual(expectedPermissions);
 
@@ -99,7 +94,7 @@ describe('LSP3Account Service', () => {
         const rightSideKey = ethers.utils.hexZeroPad(hexIndex, 16);
         const addressPermissionArrayIndexKey = leftSideKey + rightSideKey.substring(2);
 
-        const [result] = await universalProfile.getData([addressPermissionArrayIndexKey]);
+        const result = valuesToSet[keysToSet.indexOf(addressPermissionArrayIndexKey)];
         const checkedsumResult = ethers.utils.getAddress(result);
         expect(checkedsumResult).toEqual(controllerAddress);
       }
@@ -107,16 +102,14 @@ describe('LSP3Account Service', () => {
     it('should set 10 x controller addresses', async () => {
       const controllerAddresses = signers.slice(0, 10).map((signer) => signer.address);
 
-      const transaction = await setData(
-        signers[0],
+      const { keysToSet, valuesToSet } = await prepareSetDataParameters(
         universalProfile.address,
         universalReceiverDelegate.address,
         controllerAddresses
       );
-      expect(transaction.functionName).toEqual('setData(bytes32[],bytes[])');
 
       // AddressPermissions[] array length should be 10
-      const [totalPermissionsSet] = await universalProfile.getData([ADDRESS_PERMISSIONS_ARRAY_KEY]);
+      const totalPermissionsSet = valuesToSet[keysToSet.indexOf(ADDRESS_PERMISSIONS_ARRAY_KEY)];
       const expectedLength = abiCoder.encode(['uint256'], [controllerAddresses.length]);
       expect(totalPermissionsSet).toEqual(expectedLength);
 
@@ -125,9 +118,8 @@ describe('LSP3Account Service', () => {
 
         // controller address should have default permissions set
         const controllerPermissionsKey = PREFIX_PERMISSIONS + controllerAddress.substring(2);
-        const [controllerPermissionsValue] = await universalProfile.getData([
-          controllerPermissionsKey,
-        ]);
+        const controllerPermissionsValue = valuesToSet[keysToSet.indexOf(controllerPermissionsKey)];
+
         const expectedPermissions = ERC725.encodePermissions(DEFAULT_PERMISSIONS);
         expect(controllerPermissionsValue).toEqual(expectedPermissions);
 
@@ -137,7 +129,7 @@ describe('LSP3Account Service', () => {
         const rightSideKey = ethers.utils.hexZeroPad(hexIndex, 16);
         const addressPermissionArrayIndexKey = leftSideKey + rightSideKey.substring(2);
 
-        const [result] = await universalProfile.getData([addressPermissionArrayIndexKey]);
+        const result = valuesToSet[keysToSet.indexOf(addressPermissionArrayIndexKey)];
         const checkedsumResult = ethers.utils.getAddress(result);
         expect(checkedsumResult).toEqual(controllerAddress);
       }
