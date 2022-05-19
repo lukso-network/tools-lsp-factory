@@ -26,7 +26,7 @@ After, it will:
 
 These smart contracts linked with some [LSP3 Universal Profile Metadata](../../../standards/universal-profile/lsp3-universal-profile-metadata) form a Universal Profile. The metadata is the 'face' of your profile and contains information such as your name, description, and profile image.
 
-## Profile Options
+## Profile Properties
 
 Inside the `profileProperties` object, you can set profile configuration options such as the controller addresses and LSP3 metadata.
 
