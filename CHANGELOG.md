@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/lukso-network/tools-lsp-factory/compare/v2.1.0...v2.2.0) (2022-05-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* flatten upload options object to just ipfsClientOptions
+* use version key for UP contract config options
+* use version key for digital asset contract config options
+
+### Features
+
+* allow passing lsp3 data straight to erc725.js for encoding ([a431360](https://github.com/lukso-network/tools-lsp-factory/commit/a4313602d16d8f6828c3db9e798c60a6cc0e1f4a))
+* allow passing lsp4metadata to erc725 js for encoding ([02ed239](https://github.com/lukso-network/tools-lsp-factory/commit/02ed2399e03c4efe43152ec15f8a69ea4d3c26f9))
+* improve reactive deployment events
+* batch requests for setData and transferOwnership transactions
+
+
 ## [2.1.0](https://github.com/lukso-network/tools-lsp-factory/compare/v2.0.0...v2.1.0) (2022-04-11)
 
 
