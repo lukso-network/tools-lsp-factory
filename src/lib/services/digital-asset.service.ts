@@ -3,10 +3,11 @@ import axios from 'axios';
 import { ContractFactory, ethers } from 'ethers';
 import {
   concat,
-  defer,
+  defaultIfEmpty,
   EMPTY,
   forkJoin,
   from,
+  mergeMap,
   Observable,
   of,
   shareReplay,
@@ -419,61 +420,150 @@ export function setMetadataAndTransferOwnership$(
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
   contractName: string,
   isSignerUniversalProfile$: Observable<boolean>
-) {
-  const singerAddress$ = defer(async () => {
-    return signer.getAddress();
-  });
-
-  const setData$ =
+): Observable<DeploymentEventTransaction> {
+  const setDataParameters$ =
     digitalAssetDeploymentOptions?.creators?.length ||
     digitalAssetDeploymentOptions?.digitalAssetMetadata
-      ? setLSP4Metadata$(
-          signer,
+      ? prepareLSP4SetDataTransaction$(
           digitalAsset$,
           lsp4Metadata$,
           contractName,
           digitalAssetDeploymentOptions,
           isSignerUniversalProfile$
         )
-      : EMPTY;
+      : EMPTY.pipe(defaultIfEmpty({ keysToSet: null, valuesToSet: null }), shareReplay());
 
-  const transferOwnershipTransaction$ = singerAddress$.pipe(
-    switchMap((signerAddress) => {
-      return signerAddress !== digitalAssetDeploymentOptions.controllerAddress
-        ? transferOwnership$(
-            signer,
-            digitalAsset$,
-            digitalAssetDeploymentOptions,
-            contractName,
-            isSignerUniversalProfile$
-          )
-        : EMPTY;
-    })
+  const digitalAssetContractAddress$ = digitalAssetAddress$(
+    digitalAsset$,
+    isSignerUniversalProfile$
   );
 
-  return concat(setData$, transferOwnershipTransaction$);
+  const pendingTransactionArray$ = forkJoin([
+    setDataParameters$,
+    digitalAssetContractAddress$,
+  ]).pipe(
+    switchMap(([{ keysToSet, valuesToSet }, digitalAssetAddress]) => {
+      return sendSetDataAndTransferOwnershipTransactions(
+        signer,
+        digitalAssetAddress,
+        keysToSet,
+        valuesToSet,
+        digitalAssetDeploymentOptions.controllerAddress,
+        contractName
+      );
+    }),
+    shareReplay()
+  );
+
+  const transactions$ = pendingTransactionArray$.pipe(
+    switchMap((transactions) => {
+      return from(transactions);
+    }),
+    mergeMap(async (transaction) => {
+      return {
+        type: transaction.type,
+        contractName: transaction.contractName,
+        functionName: transaction.functionName,
+        status: transaction.status,
+        transaction: await transaction.pendingTransaction,
+      } as DeploymentEventTransaction;
+    }),
+    shareReplay()
+  );
+
+  const receipt$ = transactions$.pipe(
+    mergeMap(async (deploymentEvent) => {
+      return {
+        type: deploymentEvent.type,
+        contractName: deploymentEvent.contractName,
+        functionName: deploymentEvent.functionName,
+        status: DeploymentStatus.COMPLETE,
+        receipt: await deploymentEvent.transaction.wait(),
+      } as DeploymentEventTransaction;
+    }),
+    shareReplay()
+  );
+
+  return concat(transactions$, receipt$);
 }
 
-export function setLSP4Metadata$(
+export async function sendSetDataAndTransferOwnershipTransactions(
   signer: Signer,
+  digitalAssetAddress: string,
+  keysToSet: string[],
+  valuesToSet: string[],
+  controllerAddress: string,
+  contractName: string
+) {
+  const digitalAsset = new LSP7Mintable__factory(signer).attach(digitalAssetAddress);
+
+  let setDataTransaction: Promise<ethers.ContractTransaction>;
+  let transferOwnershipTransaction: Promise<ethers.ContractTransaction>;
+
+  const signerAddress = await signer.getAddress();
+
+  const transactionsArray = [];
+
+  if (keysToSet && valuesToSet) {
+    const setDataEstimate = await digitalAsset.estimateGas.setData(keysToSet, valuesToSet, {
+      gasPrice: GAS_PRICE,
+    });
+
+    setDataTransaction = digitalAsset.setData(keysToSet, valuesToSet, {
+      gasLimit: setDataEstimate.add(GAS_BUFFER),
+      gasPrice: GAS_PRICE,
+    });
+
+    transactionsArray.push({
+      type: DeploymentType.TRANSACTION,
+      contractName,
+      functionName: 'setData',
+      status: DeploymentStatus.PENDING,
+      pendingTransaction: setDataTransaction,
+    });
+  }
+
+  if (signerAddress !== controllerAddress) {
+    const transferOwnershipEstimate = await digitalAsset.estimateGas.transferOwnership(
+      controllerAddress,
+      {
+        from: signerAddress,
+        gasPrice: GAS_PRICE,
+      }
+    );
+
+    transferOwnershipTransaction = digitalAsset.transferOwnership(controllerAddress, {
+      from: signerAddress,
+      gasPrice: GAS_PRICE,
+      gasLimit: transferOwnershipEstimate.add(GAS_BUFFER),
+    });
+
+    transactionsArray.push({
+      type: DeploymentType.TRANSACTION,
+      status: DeploymentStatus.PENDING,
+      contractName,
+      functionName: 'transferOwnership(address)',
+      pendingTransaction: transferOwnershipTransaction,
+    });
+  }
+
+  return transactionsArray;
+}
+
+export function prepareLSP4SetDataTransaction$(
   digitalAsset$: Observable<DigitalAssetDeploymentEvent>,
   lsp4Metadata$: Observable<string | null>,
   contractName: string,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
   isSignerUniversalProfile$: Observable<boolean>
-): Observable<DeploymentEventTransaction> {
-  const setDataTransaction$ = forkJoin([
-    digitalAsset$,
-    lsp4Metadata$,
-    isSignerUniversalProfile$,
-  ]).pipe(
+) {
+  return forkJoin([digitalAsset$, lsp4Metadata$, isSignerUniversalProfile$]).pipe(
     switchMap(([{ receipt: digitalAssetReceipt }, lsp4Metadata, isSignerUniversalProfile]) => {
       const digitalAssetAddress = isSignerUniversalProfile
         ? digitalAssetReceipt.contractAddress || digitalAssetReceipt.logs[0].address
         : digitalAssetReceipt.contractAddress || digitalAssetReceipt.to;
 
-      return setData(
-        signer,
+      return prepareSetDataTransaction(
         digitalAssetAddress,
         lsp4Metadata,
         digitalAssetDeploymentOptions,
@@ -482,20 +572,14 @@ export function setLSP4Metadata$(
     }),
     shareReplay()
   );
-
-  const setDataReceipt$ = waitForReceipt<DeploymentEventTransaction>(setDataTransaction$);
-  return concat(setDataTransaction$, setDataReceipt$);
 }
 
-async function setData(
-  signer: Signer,
+async function prepareSetDataTransaction(
   digitalAssetAddress: string,
   lsp4Metadata: string,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
   contractName: string
-): Promise<DeploymentEventTransaction> {
-  const digitalAsset = new LSP7Mintable__factory(signer).attach(digitalAssetAddress);
-
+) {
   const creators = digitalAssetDeploymentOptions?.creators ?? [];
 
   const creatorArrayIndexKeys: string[] = [];
@@ -519,8 +603,8 @@ async function setData(
     );
   });
 
-  const keysToSet = [];
-  const valuesToSet = [];
+  const keysToSet: string[] = [];
+  const valuesToSet: string[] = [];
 
   if (creators.length) {
     keysToSet.push(LSP4_KEYS.LSP4_CREATORS_ARRAY);
@@ -537,87 +621,29 @@ async function setData(
     valuesToSet.push(lsp4Metadata);
   }
 
-  const gasEstimate = await digitalAsset.estimateGas.setData(keysToSet, valuesToSet, {
-    gasPrice: GAS_PRICE,
-  });
-
-  const transaction = await digitalAsset.setData(keysToSet, valuesToSet, {
-    gasLimit: gasEstimate.add(GAS_BUFFER),
-    gasPrice: GAS_PRICE,
-  });
-
   return {
-    type: DeploymentType.TRANSACTION,
+    digitalAssetAddress,
     contractName,
-    functionName: 'setData(bytes32[],bytes[])',
-    status: DeploymentStatus.PENDING,
-    transaction,
+    keysToSet,
+    valuesToSet,
   };
 }
 
-export function transferOwnership$(
-  signer: Signer,
+export function digitalAssetAddress$(
   digitalAsset$: DeploymentEvent$,
-  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
-  contractName: string,
   isSignerUniversalProfile$: Observable<boolean>
 ) {
-  const transferOwnershipTransaction$ = forkJoin([digitalAsset$, isSignerUniversalProfile$]).pipe(
+  return forkJoin([digitalAsset$, isSignerUniversalProfile$]).pipe(
     switchMap(([{ receipt: digitalAssetDeploymentReceipt }, isSignerUniversalProfile]) => {
       const digitalAssetAddress = isSignerUniversalProfile
         ? digitalAssetDeploymentReceipt.contractAddress ||
           digitalAssetDeploymentReceipt.logs[0].address
         : digitalAssetDeploymentReceipt.contractAddress || digitalAssetDeploymentReceipt.to;
 
-      return transferOwnership(
-        signer,
-        digitalAssetAddress,
-        digitalAssetDeploymentOptions.controllerAddress,
-        contractName
-      );
+      return of(digitalAssetAddress);
     }),
     shareReplay()
   );
-
-  const transferOwnershipReceipt$ = waitForReceipt<DeploymentEventTransaction>(
-    transferOwnershipTransaction$
-  );
-
-  return concat(transferOwnershipTransaction$, transferOwnershipReceipt$);
-}
-
-async function transferOwnership(
-  signer: Signer,
-  digitalAssetAddress: string,
-  controllerAddress: string,
-  contractName: string
-): Promise<DeploymentEventTransaction> {
-  try {
-    const signerAddress = await signer.getAddress();
-    const digitalAsset = new LSP7Mintable__factory(signer).attach(digitalAssetAddress);
-
-    const gasEstimate = await digitalAsset.estimateGas.transferOwnership(controllerAddress, {
-      from: signerAddress,
-      gasPrice: GAS_PRICE,
-    });
-
-    const transaction = await digitalAsset.transferOwnership(controllerAddress, {
-      from: signerAddress,
-      gasPrice: GAS_PRICE,
-      gasLimit: gasEstimate.add(GAS_BUFFER),
-    });
-
-    return {
-      type: DeploymentType.TRANSACTION,
-      status: DeploymentStatus.PENDING,
-      contractName,
-      functionName: 'transferOwnership(address)',
-      transaction,
-    };
-  } catch (error) {
-    console.error('Error when transferring ownership');
-    throw error;
-  }
 }
 
 export function convertDigitalAssetConfigurationObject(

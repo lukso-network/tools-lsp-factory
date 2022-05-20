@@ -1,5 +1,5 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, lastValueFrom, Observable } from 'rxjs';
+import { concat, lastValueFrom, merge, Observable } from 'rxjs';
 import { concatAll } from 'rxjs/operators';
 
 import contractVersions from '../../versions.json';
@@ -31,10 +31,9 @@ import { keyManagerDeployment$ } from '../services/key-manager.service';
 import {
   accountDeployment$,
   convertUniversalProfileConfigurationObject,
-  getTransferOwnershipTransaction$,
   isSignerUniversalProfile$,
   lsp3ProfileUpload$,
-  setDataTransaction$,
+  setDataAndTransferOwnershipTransactions$,
 } from './../services/lsp3-account.service';
 import { universalReceiverDelegateDeployment$ } from './../services/universal-receiver.service';
 
@@ -171,33 +170,24 @@ export class LSP3UniversalProfile {
       deploymentConfiguration?.UniversalReceiverDelegate?.byteCode
     );
 
-    // 4 > set permissions, profile and universal
-    const setData$ = setDataTransaction$(
+    // 4 set permissions, profile and universal receiver + transfer ownership to KeyManager
+    const setDataAndTransferOwnership$ = setDataAndTransferOwnershipTransactions$(
       this.signer,
       account$,
       universalReceiver$,
       profileDeploymentOptions.controllerAddresses,
       lsp3Profile$,
       signerIsUniversalProfile$,
-      defaultUniversalReceiverAddress
-    );
-
-    // 5 > transfersOwnership to KeyManager
-    const transferOwnership$ = getTransferOwnershipTransaction$(
-      this.signer,
-      account$,
       keyManager$,
-      signerIsUniversalProfile$
+      defaultUniversalReceiverAddress
     );
 
     const deployment$ = deploymentWithContractsOnCompletion$(
       concat([
         baseContractDeployment$,
         account$,
-        universalReceiver$,
-        keyManager$,
-        setData$,
-        transferOwnership$,
+        merge(universalReceiver$, keyManager$),
+        setDataAndTransferOwnership$,
       ]).pipe(concatAll())
     );
 
