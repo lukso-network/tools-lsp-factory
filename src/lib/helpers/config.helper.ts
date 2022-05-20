@@ -4,14 +4,14 @@ import { Options } from 'ipfs-http-client';
 
 import { UploadOptions } from '../interfaces/profile-upload-options';
 
-const defaultIpfsClientOptions: Options = {
-  host: 'api.ipfs.lukso.network',
+const defaultIpfsGateway: Options = {
+  host: 'api.2eff.lukso.dev',
   port: 443,
   protocol: 'https',
 };
 
 export const defaultUploadOptions: UploadOptions = {
-  ipfsClientOptions: defaultIpfsClientOptions,
+  ipfsGateway: defaultIpfsGateway,
 };
 
 export const ERC725_ACCOUNT_INTERRFACE = '0x63cb749b';

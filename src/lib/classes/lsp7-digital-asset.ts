@@ -1,9 +1,9 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, concatAll, EMPTY, Observable, shareReplay, switchMap } from 'rxjs';
+import { concat, concatAll, EMPTY, lastValueFrom, Observable, shareReplay, switchMap } from 'rxjs';
 
 import versions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
-import { waitForContractDeployment$ } from '../helpers/deployment.helper';
+import { deploymentWithContractsOnCompletion$ } from '../helpers/deployment.helper';
 import {
   DeploymentEventContract,
   DeploymentEventTransaction,
@@ -134,14 +134,14 @@ export class LSP7DigitalAsset {
       signerIsUniversalProfile$
     );
 
-    const deployment$ = concat([
-      baseContractDeployment$,
-      digitalAsset$,
-      setLSP4AndTransferOwnership$,
-    ]).pipe(concatAll());
+    const deployment$ = deploymentWithContractsOnCompletion$(
+      concat([baseContractDeployment$, digitalAsset$, setLSP4AndTransferOwnership$]).pipe(
+        concatAll()
+      )
+    );
 
     if (digitalAssetConfiguration?.deployReactive) return deployment$ as LSP7ObservableOrPromise<T>;
 
-    return waitForContractDeployment$(deployment$) as LSP7ObservableOrPromise<T>;
+    return lastValueFrom(deployment$) as LSP7ObservableOrPromise<T>;
   }
 }

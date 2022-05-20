@@ -1,11 +1,11 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, Observable } from 'rxjs';
+import { concat, lastValueFrom, merge, Observable } from 'rxjs';
 import { concatAll } from 'rxjs/operators';
 
 import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { defaultUploadOptions } from '../helpers/config.helper';
-import { waitForContractDeployment$ } from '../helpers/deployment.helper';
+import { deploymentWithContractsOnCompletion$ } from '../helpers/deployment.helper';
 import { ipfsUpload, prepareMetadataImage } from '../helpers/uploader.helper';
 import {
   DeploymentEventContract,
@@ -31,10 +31,9 @@ import { keyManagerDeployment$ } from '../services/key-manager.service';
 import {
   accountDeployment$,
   convertUniversalProfileConfigurationObject,
-  getTransferOwnershipTransaction$,
   isSignerUniversalProfile$,
   lsp3ProfileUpload$,
-  setDataTransaction$,
+  setDataAndTransferOwnershipTransactions$,
 } from './../services/lsp3-account.service';
 import { universalReceiverDelegateDeployment$ } from './../services/universal-receiver.service';
 
@@ -171,38 +170,31 @@ export class LSP3UniversalProfile {
       deploymentConfiguration?.UniversalReceiverDelegate?.byteCode
     );
 
-    // 4 > set permissions, profile and universal
-    const setData$ = setDataTransaction$(
+    // 4 set permissions, profile and universal receiver + transfer ownership to KeyManager
+    const setDataAndTransferOwnership$ = setDataAndTransferOwnershipTransactions$(
       this.signer,
       account$,
       universalReceiver$,
       profileDeploymentOptions.controllerAddresses,
       lsp3Profile$,
       signerIsUniversalProfile$,
+      keyManager$,
       defaultUniversalReceiverAddress
     );
 
-    // 5 > transfersOwnership to KeyManager
-    const transferOwnership$ = getTransferOwnershipTransaction$(
-      this.signer,
-      account$,
-      keyManager$,
-      signerIsUniversalProfile$
+    const deployment$ = deploymentWithContractsOnCompletion$(
+      concat([
+        baseContractDeployment$,
+        account$,
+        merge(universalReceiver$, keyManager$),
+        setDataAndTransferOwnership$,
+      ]).pipe(concatAll())
     );
-
-    const deployment$ = concat([
-      baseContractDeployment$,
-      account$,
-      universalReceiver$,
-      keyManager$,
-      setData$,
-      transferOwnership$,
-    ]).pipe(concatAll());
 
     if (deploymentConfiguration?.deployReactive)
       return deployment$ as UniversalProfileObservableOrPromise<T>;
 
-    return waitForContractDeployment$(deployment$) as UniversalProfileObservableOrPromise<T>;
+    return lastValueFrom(deployment$) as UniversalProfileObservableOrPromise<T>;
   }
 
   /**
@@ -247,7 +239,7 @@ export class LSP3UniversalProfile {
     if (uploadOptions.url) {
       // TODO: simple HTTP upload
     } else {
-      uploadResponse = await ipfsUpload(JSON.stringify(profile), uploadOptions.ipfsClientOptions);
+      uploadResponse = await ipfsUpload(JSON.stringify(profile), uploadOptions?.ipfsGateway);
     }
 
     return {

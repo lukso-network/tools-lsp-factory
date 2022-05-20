@@ -76,38 +76,44 @@ describe('LSP3UniversalProfile', () => {
     });
   });
   describe('Deploying with LSP3Profile Metadata with specified IPFS client options', () => {
-    let signer;
-    let universalProfile;
-    let keyManager;
+    const allowedIPFSGatewayFormats = [
+      { host: 'ipfs.infura.io', port: 5001, protocol: 'https' },
+      'https://ipfs.infura.io:5001',
+      'https://ipfs.infura.io',
+    ];
 
-    beforeAll(async () => {
-      signer = signers[0];
+    allowedIPFSGatewayFormats.forEach((allowedGatewayFormat) => {
+      let signer;
+      let universalProfile;
+      let keyManager;
 
-      const { ERC725Account, KeyManager } = await lspFactory.LSP3UniversalProfile.deploy(
-        {
-          controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
-          lsp3Profile: lsp3ProfileJson.LSP3Profile,
-        },
-        {
-          uploadOptions: {
-            ipfsClientOptions: { host: 'ipfs.infura.io', port: 5001, protocol: 'https' },
+      beforeAll(async () => {
+        signer = signers[0];
+
+        const { ERC725Account, KeyManager } = await lspFactory.LSP3UniversalProfile.deploy(
+          {
+            controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
+            lsp3Profile: lsp3ProfileJson.LSP3Profile,
           },
-        }
-      );
+          {
+            ipfsGateway: allowedGatewayFormat,
+          }
+        );
 
-      universalProfile = UniversalProfile__factory.connect(ERC725Account.address, signer);
-      keyManager = KeyManager;
-    });
+        universalProfile = UniversalProfile__factory.connect(ERC725Account.address, signer);
+        keyManager = KeyManager;
+      });
 
-    it('should deploy and set LSP3Profile data', async () => {
-      const ownerAddress = await universalProfile.owner();
-      expect(ownerAddress).toEqual(keyManager.address);
+      it('should deploy and set LSP3Profile data', async () => {
+        const ownerAddress = await universalProfile.owner();
+        expect(ownerAddress).toEqual(keyManager.address);
 
-      const data = await universalProfile.getData([
-        '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-      ]);
+        const data = await universalProfile.getData([
+          '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+        ]);
 
-      expect(data[0].startsWith('0x6f357c6a')).toBe(true);
+        expect(data[0].startsWith('0x6f357c6a')).toBe(true);
+      });
     });
   });
 
