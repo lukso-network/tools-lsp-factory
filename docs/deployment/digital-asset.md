@@ -130,6 +130,11 @@ The `name` and `symbol` keys are passed as deployment constructor parameters. Th
 
 Addresses passed inside the `creators` array will be set under the [LSP4Creators[]](../../../standards/nft-2.0/LSP4-Digital-Asset-Metadata#lsp4creators) [ERC725Y] key.
 
+:::warning
+LSPFactory does not set the [LSP3IssuedAssets key](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-3-UniversalProfile-Metadata.md#lsp3issuedassets) on any Universal Profile when deploying a digital asset. This key will have to be updated seperately.
+
+:::
+
 #### Digital Asset Metadata
 
 Further Digital Asset metadata can be added by passing the `digitalAssetMetadata` parameter. This is metadata stored as JSON on a server and referenced from the contract by the [`LSP4Metadata`](../../../standards/nft-2.0/LSP4-Digital-Asset-Metadata.md#lsp4metadata) [ERC725Y] key.
