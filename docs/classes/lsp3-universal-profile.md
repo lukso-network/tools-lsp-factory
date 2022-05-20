@@ -156,10 +156,13 @@ await lspFactory.LSP3UniversalProfile.deploy(
   },
   {
     deployReactive: true,
-  },
+  }
 ).subscribe({
   next: (deploymentEvent) => {
     console.log(deploymentEvent);
+  },
+  error: (error) => {
+    console.error(error);
   },
   complete: () => {
     console.log('Deployment Complete');
@@ -412,7 +415,7 @@ await LSP3UniversalProfile.uploadProfileData(
   },
   {
     ipfsGateway: 'https://ipfs.infura.io',
-  },
+  }
 );
 
 /**
@@ -446,7 +449,7 @@ await LSP3UniversalProfile.uploadProfileData(
       port: 5001,
       protocol: 'https',
     },
-  },
+  }
 );
 
 /**

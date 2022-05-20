@@ -109,6 +109,9 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy(
   next: (deploymentEvent) => {
     console.log(deploymentEvent);
   },
+  error: (error) => {
+    console.error(error);
+  },
   complete: () => {
     console.log('Deployment Complete');
   },
