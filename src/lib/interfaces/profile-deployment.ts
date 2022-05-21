@@ -1,4 +1,4 @@
-import { DeployedContract } from '../..';
+import { ContractOptions, DeployedContract } from '../..';
 
 import { LSP3ProfileDataForEncoding, ProfileDataBeforeUpload } from './lsp3-profile';
 import { IPFSGateway, UploadOptions } from './profile-upload-options';
@@ -39,11 +39,6 @@ export interface BaseContractAddresses {
   [ContractNames.ERC725_Account]?: string;
   [ContractNames.KEY_MANAGER]?: string;
   [ContractNames.UNIVERSAL_RECEIVER]?: string;
-}
-
-interface ContractOptions {
-  version?: string;
-  deployProxy?: boolean;
 }
 
 interface ContractDeploymentOptionsBase {

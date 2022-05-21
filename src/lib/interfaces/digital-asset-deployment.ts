@@ -1,7 +1,7 @@
 import { LSP4MetadataBeforeUpload, LSP4MetadataForEncoding } from './lsp4-digital-asset';
 import { IPFSGateway, UploadOptions } from './profile-upload-options';
 
-import { DeployedContract } from '.';
+import { ContractOptions, DeployedContract } from '.';
 
 export enum ContractNames {
   LSP7_DIGITAL_ASSET = 'LSP7DigitalAsset',
@@ -29,21 +29,45 @@ export interface DeployedLSP7DigitalAsset {
 }
 
 interface ContractDeploymentOptionsBase {
-  version?: string;
-  deployProxy?: boolean;
   ipfsGateway?: IPFSGateway;
 }
-export interface ContractDeploymentOptionsReactive extends ContractDeploymentOptionsBase {
+
+interface LSP7ContractDeploymentOptionsBase extends ContractDeploymentOptionsBase {
+  LSP7DigitalAsset?: ContractOptions;
+}
+
+export interface LSP7ContractDeploymentOptionsReactive extends LSP7ContractDeploymentOptionsBase {
   deployReactive: true;
 }
 
-export interface ContractDeploymentOptionsNonReactive extends ContractDeploymentOptionsBase {
+export interface LSP7ContractDeploymentOptionsNonReactive
+  extends LSP7ContractDeploymentOptionsBase {
   deployReactive?: false;
 }
 
+export type LSP7ContractDeploymentOptions =
+  | LSP7ContractDeploymentOptionsReactive
+  | LSP7ContractDeploymentOptionsNonReactive;
+
+interface LSP8ContractDeploymentOptionsBase extends ContractDeploymentOptionsBase {
+  LSP8IdentifiableDigitalAsset?: ContractOptions;
+}
+export interface LSP8ContractDeploymentOptionsReactive extends LSP8ContractDeploymentOptionsBase {
+  deployReactive: true;
+}
+
+export interface LSP8ContractDeploymentOptionsNonReactive
+  extends LSP8ContractDeploymentOptionsBase {
+  deployReactive?: false;
+}
+
+export type LSP8ContractDeploymentOptions =
+  | LSP8ContractDeploymentOptionsReactive
+  | LSP8ContractDeploymentOptionsNonReactive;
+
 export type ContractDeploymentOptions =
-  | ContractDeploymentOptionsReactive
-  | ContractDeploymentOptionsNonReactive;
+  | LSP7ContractDeploymentOptions
+  | LSP8ContractDeploymentOptions;
 
 export interface DigitalAssetConfiguration {
   version?: string;
