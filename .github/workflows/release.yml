@@ -10,9 +10,6 @@ jobs:
   release:
     name: 📦 Create GitHub release and publish to NPM
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - name: Ensure main branch
