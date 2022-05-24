@@ -45,14 +45,15 @@ Object containing profile properties set during Universal Profile deployment.
 
 Object which specifies how the [UniversalProfile](../../../standards/universal-profile/lsp0-erc725account.md), [KeyManager](../../../standards/universal-profile/lsp6-key-manager.md) and [UniversalReceiverDelegate](../../../standards/universal-profile/lsp1-universal-receiver-delegate.md) smart contracts will be deployed.
 
-| Name                                                                               | Type             | Description                                                                                                                                                       |
-| :--------------------------------------------------------------------------------- | :--------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`ERC725Account`](../deployment/options.md) (optional)                             | Object           | Generic contract configuration object. Takes [`version`](../deployment/options.md#version) and [`deployProxy`](../deployment/options.md#deploy-proxy) parameters. |
-| [`LSP6Keymanager`](../deployment/options.md) (optional)                            | Object           | Generic contract configuration object. Takes [`version`](../deployment/options.md#version) and [`deployProxy`](../deployment/options.md#deploy-proxy) parameters. |
-| [`LSP1UniversalReceiverDelegate`](../deployment/options.md) (optional)             | Object           | Generic contract configuration object. Takes [`version`](../deployment/options.md#version) and [`deployProxy`](../deployment/options.md#deploy-proxy) parameters. |
-| [`version`](../deployment/universal-profile#contract-versions) (optional)          | String           | Sets the global contract version. All contracts will be deployed with this version if set.                                                                        |
-| [`deployReactive`](../deployment/universal-profile#reactive-deployment) (optional) | Boolean          | Specify whether a Promise or Observable should be returned.                                                                                                       |
-| [`ipfsGateway`](../deployment/universal-profile#ipfs-upload-options) (optional)    | String \| Object | IPFS gateway url or an object containing IPFS gateway options.                                                                                                    |
+| Name                                                                               | Type             | Description                                                                                                                                                                                                   |
+| :--------------------------------------------------------------------------------- | :--------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`LSP0ERC725Account`](../deployment/options.md) (optional)                         | Object           | Generic contract configuration object. Takes [`version`](../deployment/options.md#version) and [`deployProxy`](../deployment/options.md#deploy-proxy) parameters.                                             |
+| [`ERC725Account`](../deployment/options.md) (optional)                             | Object           | Generic contract configuration object. Can be used instead of `LSP0ERC725Account`. Takes [`version`](../deployment/options.md#version) and [`deployProxy`](../deployment/options.md#deploy-proxy) parameters. |
+| [`LSP6Keymanager`](../deployment/options.md) (optional)                            | Object           | Generic contract configuration object. Takes [`version`](../deployment/options.md#version) and [`deployProxy`](../deployment/options.md#deploy-proxy) parameters.                                             |
+| [`LSP1UniversalReceiverDelegate`](../deployment/options.md) (optional)             | Object           | Generic contract configuration object. Takes [`version`](../deployment/options.md#version) and [`deployProxy`](../deployment/options.md#deploy-proxy) parameters.                                             |
+| [`version`](../deployment/universal-profile#contract-versions) (optional)          | String           | Sets the global contract version. All contracts will be deployed with this version if set.                                                                                                                    |
+| [`deployReactive`](../deployment/universal-profile#reactive-deployment) (optional) | Boolean          | Specify whether a Promise or Observable should be returned.                                                                                                                                                   |
+| [`ipfsGateway`](../deployment/universal-profile#ipfs-upload-options) (optional)    | String \| Object | IPFS gateway url or an object containing IPFS gateway options.                                                                                                                                                |
 
 :::info Contract Deployment Details
 See the [configuration specification](../deployment/universal-profile#configuration) for more information about the `options` property.
@@ -80,7 +81,7 @@ await lspFactory.LSP3UniversalProfile.deploy({
 
 /**
 {
-  ERC725Account: {
+  LSP0ERC725Account: {
     address: '0xaEc61B848954e4d69B1283810df8A7fB9bA23BF2',
     receipt: {
       to: null,
@@ -101,7 +102,7 @@ await lspFactory.LSP3UniversalProfile.deploy({
       events: []
     }
   },
-  UniversalReceiverDelegate: {
+  LSP1UniversalReceiverDelegate: {
     address: '0xd92C7cA9c493aFC0DF51cE480ec7bB7DC8394549',
     receipt: {
       to: null,
@@ -122,7 +123,7 @@ await lspFactory.LSP3UniversalProfile.deploy({
       events: []
     }
   },
-  KeyManager: {
+  LSP6KeyManager: {
     address: '0xdbD3297B9bD80cA20cA75a644b1Fa903B05A2Fc3',
     receipt: {
       to: null,
@@ -156,7 +157,7 @@ await lspFactory.LSP3UniversalProfile.deploy(
   },
   {
     deployReactive: true,
-  },
+  }
 ).subscribe({
   next: (deploymentEvent) => {
     console.log(deploymentEvent);
@@ -172,33 +173,33 @@ await lspFactory.LSP3UniversalProfile.deploy(
 /**
 {
   type: 'PROXY_DEPLOYMENT',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   status: 'PENDING',
   transaction: {
     ...
   }
-}
+},
 {
   type: 'PROXY_DEPLOYMENT',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   status: 'COMPLETE',
   contractAddress: '0x805761959e7B94090fedD51776C63AB474a76A95',
   receipt: {
    ...
   }
-}
+},
 {
   type: 'TRANSACTION',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   functionName: 'initialize(address)',
   status: 'PENDING',
   transaction: {
    ...
   }
-}
+},
 {
   type: 'TRANSACTION',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   functionName: 'initialize(address)',
   status: 'COMPLETE',
   receipt: {
@@ -207,83 +208,83 @@ await lspFactory.LSP3UniversalProfile.deploy(
 }
 {
   type: 'PROXY_DEPLOYMENT',
-  contractName: 'KeyManager',
+  contractName: 'LSP6KeyManager',
   status: 'PENDING',
   transaction: {
     ...
   }
-}
+},
 {
   type: 'PROXY_DEPLOYMENT',
-  contractName: 'KeyManager',
+  contractName: 'LSP6KeyManager',
   status: 'COMPLETE',
   contractAddress: '0x04952ED68B5386Ff0a9891A10E2B1F204f98e209',
   receipt: {
     ...
   }
-}
+},
 {
   type: 'TRANSACTION',
-  contractName: 'KeyManager',
+  contractName: 'LSP6KeyManager',
   functionName: 'initialize(address)',
   status: 'PENDING',
   transaction: {
     ...
   }
-}
+},
 {
   type: 'TRANSACTION',
-  contractName: 'KeyManager',
+  contractName: 'LSP6KeyManager',
   functionName: 'initialize(address)',
   status: 'COMPLETE',
   receipt: {
     ...
   }
-}
+},
 {
   type: 'TRANSACTION',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   functionName: 'setData(bytes32[],bytes[])',
   status: 'PENDING',
   transaction: {
    ...
   }
-}
+},
 {
   type: 'TRANSACTION',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   functionName: 'setData(bytes32[],bytes[])',
   status: 'COMPLETE',
   receipt: {
    ...
   }
-}
+},
 {
   type: 'TRANSACTION',
   status: 'PENDING',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   functionName: 'transferOwnership(address)',
   transaction: {
     ...
   }
-}
+},
 {
   type: 'TRANSACTION',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   functionName: 'transferOwnership(address)',
   status: 'COMPLETE',
   receipt: {
     ...
   }
-}
+},
 {
-  ERC725Account: {
+  LSP0ERC725Account: {
     address: '0x805761959e7B94090fedD51776C63AB474a76A95',
     receipt: {
      ...
     },
   },
-  KeyManager: {
+  LSP6KeyManager: {
     address: '0x04952ED68B5386Ff0a9891A10E2B1F204f98e209',
     receipt: {
       ...
@@ -415,7 +416,7 @@ await LSP3UniversalProfile.uploadProfileData(
   },
   {
     ipfsGateway: 'https://ipfs.infura.io',
-  },
+  }
 );
 
 /**
@@ -449,7 +450,7 @@ await LSP3UniversalProfile.uploadProfileData(
       port: 5001,
       protocol: 'https',
     },
-  },
+  }
 );
 
 /**

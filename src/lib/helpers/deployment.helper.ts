@@ -176,8 +176,9 @@ export function getDeployedByteCode(
   return provider.getCode(contractAddress);
 }
 
-export function deploymentWithContractsOnCompletion$(deployment$: Observable<DeploymentEvent>) {
-  const contractAccumulator = {};
+export function deploymentWithContractsOnCompletion$<T>(deployment$: Observable<DeploymentEvent>) {
+  const contractAccumulator = {} as T;
+
   return deployment$.pipe(
     tap((deploymentEvent) => {
       if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {

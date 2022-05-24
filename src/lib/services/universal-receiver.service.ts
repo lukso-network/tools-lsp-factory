@@ -36,10 +36,10 @@ export function universalReceiverDelegateDeployment$(
 
   return forkJoin([defaultURDBytecode$, baseContractAddresses$]).pipe(
     switchMap(([defaultURDBytecode, baseContractAddresses]) => {
-      if (baseContractAddresses.UniversalReceiverDelegate || byteCode) {
+      if (baseContractAddresses.LSP1UniversalReceiverDelegate || byteCode) {
         return universalReceiverDelegateDeploymentWithBaseContractAddress$(
           signer,
-          baseContractAddresses.UniversalReceiverDelegate,
+          baseContractAddresses.LSP1UniversalReceiverDelegate,
           byteCode
         );
       }
