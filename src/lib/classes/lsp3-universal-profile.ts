@@ -50,7 +50,7 @@ type UniversalProfileObservableOrPromise<
  * @property {NonceManager} signer
  * @memberof LSPFactory
  */
-export class LSP3UniversalProfile {
+export class UniversalProfile {
   options: LSPFactoryOptions;
   signer: NonceManager;
   constructor(options: LSPFactoryOptions) {
@@ -262,6 +262,6 @@ export class LSP3UniversalProfile {
    */
   async uploadProfileData(profileData: ProfileDataBeforeUpload, uploadOptions?: UploadOptions) {
     const uploadOptionsToUse = uploadOptions || this.options.uploadOptions || defaultUploadOptions;
-    return LSP3UniversalProfile.uploadProfileData(profileData, uploadOptionsToUse);
+    return UniversalProfile.uploadProfileData(profileData, uploadOptionsToUse);
   }
 }

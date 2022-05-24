@@ -1,6 +1,6 @@
 import { ethers, providers, Signer } from 'ethers';
 
-import { LSP3UniversalProfile } from './classes/lsp3-universal-profile';
+import { UniversalProfile } from './classes/lsp3-universal-profile';
 import { LSP4DigitalAssetMetadata } from './classes/lsp4-digital-asset-metadata';
 import { LSP7DigitalAsset } from './classes/lsp7-digital-asset';
 import { LSP8IdentifiableDigitalAsset } from './classes/lsp8-identifiable-digital-asset';
@@ -13,7 +13,7 @@ import { SignerOptions } from './interfaces/lsp-factory-options';
  */
 export class LSPFactory {
   options: LSPFactoryOptions;
-  LSP3UniversalProfile: LSP3UniversalProfile;
+  UniversalProfile: UniversalProfile;
   LSP4DigitalAssetMetadata: LSP4DigitalAssetMetadata;
   LSP7DigitalAsset: LSP7DigitalAsset;
   LSP8IdentifiableDigitalAsset: LSP8IdentifiableDigitalAsset;
@@ -69,7 +69,7 @@ export class LSPFactory {
       uploadOptions: ipfsGateway ? { ipfsGateway } : undefined,
     };
 
-    this.LSP3UniversalProfile = new LSP3UniversalProfile(this.options);
+    this.UniversalProfile = new UniversalProfile(this.options);
     this.LSP4DigitalAssetMetadata = new LSP4DigitalAssetMetadata(this.options);
     this.LSP7DigitalAsset = new LSP7DigitalAsset(this.options);
     this.LSP8IdentifiableDigitalAsset = new LSP8IdentifiableDigitalAsset(this.options);

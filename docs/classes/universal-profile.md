@@ -1,14 +1,14 @@
 ---
 sidebar_position: 1
-title: LSP3UniversalProfile
+title: UniversalProfile
 ---
 
-# LSP3UniversalProfile
+# UniversalProfile
 
 ## deploy
 
 ```javascript
-lspFactory.LSP3UniversalProfile.deploy(profileProperties [, options]);
+lspFactory.UniversalProfile.deploy(profileProperties [, options]);
 ```
 
 Deploys and **configures** a [Universal Profile](../../../standards/universal-profile/introduction) to the blockchain. It will deploy the following contracts:
@@ -69,7 +69,7 @@ See the [configuration specification](../deployment/universal-profile#configurat
 ### Example
 
 ```javascript title="Deploying a Universal Profile"
-await lspFactory.LSP3UniversalProfile.deploy({
+await lspFactory.UniversalProfile.deploy({
   controllingAccounts: ['0xb74a88C43BCf691bd7A851f6603cb1868f6fc147'],
   lsp3Profile: {
     name: 'My Universal Profile',
@@ -151,7 +151,7 @@ await lspFactory.LSP3UniversalProfile.deploy({
 #### Reactive Universal Profile Deployment Example
 
 ```javascript title="Deploying a reactive Universal Profile"
-await lspFactory.LSP3UniversalProfile.deploy(
+await lspFactory.UniversalProfile.deploy(
   {
     controllingAccounts: ['0x9Fba07e245B415cC9580BD6c890a9fd7D22e20db'],
   },
@@ -300,7 +300,7 @@ Deployment Complete
 ## uploadProfileData
 
 ```javascript
-lspFactory.LSP3UniversalProfile.uploadProfileData(profileData [, options]);
+lspFactory.UniversalProfile.uploadProfileData(profileData [, options]);
 ```
 
 Processes and uploads the [LSP3Profile Metadata](../../../standards/universal-profile/lsp3-universal-profile-metadata) to IPFS. The IPFS gateway can be set inside the `options` object.
@@ -346,7 +346,7 @@ Object containing configuration details of how the metadata should be uploaded.
 ### Examples
 
 ```javascript title="Uploading profile data"
-await LSP3UniversalProfile.uploadProfileData({
+await UniversalProfile.uploadProfileData({
   name: 'My Universal Profile',
   description: 'My cool Universal Profile',
   tags: ['Fashion', 'Design'],
@@ -389,7 +389,7 @@ await LSP3UniversalProfile.uploadProfileData({
 ```
 
 ```javascript title="Uploading profile data using a custom IPFS gateway"
-await LSP3UniversalProfile.uploadProfileData(
+await UniversalProfile.uploadProfileData(
   {
     name: 'My Universal Profile',
     description: 'My cool Universal Profile',
@@ -437,7 +437,7 @@ await LSP3UniversalProfile.uploadProfileData(
 ```
 
 ```javascript title="Uploading profile data using a custom IPFS options"
-await LSP3UniversalProfile.uploadProfileData(
+await UniversalProfile.uploadProfileData(
   {
     name: 'My Universal Profile',
     description: 'My cool Universal Profile',
