@@ -35,7 +35,7 @@ export async function testUPDeployment(
   lspFactory: LSPFactory,
   controllerAddresses: string[]
 ) {
-  const deployedContracts = await lspFactory.LSP3UniversalProfile.deploy(
+  const deployedContracts = await lspFactory.UniversalProfile.deploy(
     {
       controllerAddresses,
     },

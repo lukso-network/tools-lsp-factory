@@ -93,7 +93,7 @@ export function universalReceiverDelegateDeploymentWithBaseContractAddress$(
  * @param {Signer} signer
  * @param {string} baseContractAddress
  * @return {*}  Promise<DeploymentEventStandardContract | DeploymentEventProxyContract>
- * @memberof LSP3UniversalProfile
+ * @memberof UniversalProfile
  */
 export async function deployUniversalReceiverDelegate(
   signer: Signer,

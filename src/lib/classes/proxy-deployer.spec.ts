@@ -2,7 +2,7 @@ import { ethers, SignerWithAddress } from 'hardhat';
 
 import { ProxyDeployer } from './proxy-deployer';
 
-describe('LSP3UniversalProfile', () => {
+describe('UniversalProfile', () => {
   let baseContracts;
   let proxyDeployer;
   let signer: SignerWithAddress;
@@ -16,12 +16,12 @@ describe('LSP3UniversalProfile', () => {
     baseContracts = await proxyDeployer.deployUniversalProfileBaseContracts();
   });
 
-  it('should deploy the LSP3Account proxy and setData', async () => {
+  it('should deploy the ERC725Account proxy and setData', async () => {
     // LSPAccount
-    const lsp3AccountProxy = await proxyDeployer.deployProxyContract(
+    const erc725AccountProxy = await proxyDeployer.deployProxyContract(
       baseContracts.universalProfile
     );
-    await lsp3AccountProxy.initialize(await signer.getAddress());
+    await erc725AccountProxy.initialize(await signer.getAddress());
 
     // UniversalReceiverDelegate
     const universalReceiverDelegateProxy = await proxyDeployer.deployProxyContract(
@@ -29,14 +29,14 @@ describe('LSP3UniversalProfile', () => {
     );
     await universalReceiverDelegateProxy.initialize();
 
-    await lsp3AccountProxy.setData(
+    await erc725AccountProxy.setData(
       ['0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'],
       ['0xbeefbeef'],
       {
         from: await signer.getAddress(),
       }
     );
-    const data = await lsp3AccountProxy.getData([
+    const data = await erc725AccountProxy.getData([
       '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
     ]);
 

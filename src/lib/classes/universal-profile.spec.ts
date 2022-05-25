@@ -11,6 +11,7 @@ import {
   UniversalProfile__factory,
 } from '../../../build/main/src';
 import { LSPFactory } from '../../../build/main/src/lib/lsp-factory';
+import { lsp3ProfileJson } from '../../../test/lsp3-profile.mock';
 import {
   testProxyBytecodeContainsAddress,
   testSetData,
@@ -23,14 +24,13 @@ import {
   PREFIX_PERMISSIONS,
 } from '../helpers/config.helper';
 import { getDeployedByteCode } from '../helpers/deployment.helper';
+import { ContractNames, DeployedContracts, DeploymentEvent } from '../interfaces';
 
-import { lsp3ProfileJson } from './../../../test/lsp3-profile.mock';
-import { ContractNames, DeployedContracts, DeploymentEvent } from './../interfaces';
 import { ProxyDeployer } from './proxy-deployer';
 
 jest.setTimeout(60000);
 jest.useRealTimers();
-describe('LSP3UniversalProfile', () => {
+describe('UniversalProfile', () => {
   let signers: SignerWithAddress[];
   let provider: providers.JsonRpcProvider;
   let lspFactory: LSPFactory;
@@ -58,7 +58,7 @@ describe('LSP3UniversalProfile', () => {
         it('should deploy and set LSP3Profile data', async () => {
           signer = signers[0];
 
-          const { LSP0ERC725Account } = await lspFactory.LSP3UniversalProfile.deploy({
+          const { LSP0ERC725Account } = await lspFactory.UniversalProfile.deploy({
             controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
             lsp3Profile: lsp3ProfileMetadata,
           });
@@ -90,7 +90,7 @@ describe('LSP3UniversalProfile', () => {
       beforeAll(async () => {
         signer = signers[0];
 
-        const { LSP0ERC725Account, LSP6KeyManager } = await lspFactory.LSP3UniversalProfile.deploy(
+        const { LSP0ERC725Account, LSP6KeyManager } = await lspFactory.UniversalProfile.deploy(
           {
             controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
             lsp3Profile: lsp3ProfileJson.LSP3Profile,
@@ -124,7 +124,7 @@ describe('LSP3UniversalProfile', () => {
     beforeAll(async () => {
       uniqueController = signers[0];
 
-      const { LSP0ERC725Account } = await lspFactory.LSP3UniversalProfile.deploy({
+      const { LSP0ERC725Account } = await lspFactory.UniversalProfile.deploy({
         controllerAddresses: [uniqueController.address],
       });
 
@@ -164,7 +164,7 @@ describe('LSP3UniversalProfile', () => {
       firstControllerAddress = signers[0].address;
       secondControllerAddress = signers[1].address;
 
-      const { LSP0ERC725Account, LSP6KeyManager } = await lspFactory.LSP3UniversalProfile.deploy({
+      const { LSP0ERC725Account, LSP6KeyManager } = await lspFactory.UniversalProfile.deploy({
         controllerAddresses: [firstControllerAddress, secondControllerAddress],
       });
 
@@ -226,7 +226,7 @@ describe('LSP3UniversalProfile', () => {
     it('should have correct controller address', (done) => {
       lspFactory = new LSPFactory(provider, signers[0]);
 
-      const deployments$ = lspFactory.LSP3UniversalProfile.deploy(
+      const deployments$ = lspFactory.UniversalProfile.deploy(
         {
           controllerAddresses: [signers[0].address],
           lsp3Profile: lsp3ProfileJson.LSP3Profile,

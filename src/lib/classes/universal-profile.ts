@@ -27,15 +27,14 @@ import {
   universalProfileBaseContractsDeployment$,
 } from '../services/base-contract.service';
 import { keyManagerDeployment$ } from '../services/key-manager.service';
-
 import {
   accountDeployment$,
   convertUniversalProfileConfigurationObject,
   isSignerUniversalProfile$,
   lsp3ProfileUpload$,
   setDataAndTransferOwnershipTransactions$,
-} from './../services/lsp3-account.service';
-import { universalReceiverDelegateDeployment$ } from './../services/universal-receiver.service';
+} from '../services/lsp3-account.service';
+import { universalReceiverDelegateDeployment$ } from '../services/universal-receiver.service';
 
 type UniversalProfileObservableOrPromise<
   T extends ContractDeploymentOptionsReactive | ContractDeploymentOptionsNonReactive
@@ -50,7 +49,7 @@ type UniversalProfileObservableOrPromise<
  * @property {NonceManager} signer
  * @memberof LSPFactory
  */
-export class LSP3UniversalProfile {
+export class UniversalProfile {
   options: LSPFactoryOptions;
   signer: NonceManager;
   constructor(options: LSPFactoryOptions) {
@@ -66,11 +65,11 @@ export class LSP3UniversalProfile {
    * @param {ProfileDeploymentOptions} profileData
    * @param {ContractDeploymentOptions} contractDeploymentOptions
    * @return {*}  Promise<DeployedContracts> | Observable<LSP3AccountDeploymentEvent | DeploymentEventTransaction>
-   * @memberof LSP3UniversalProfile
+   * @memberof UniversalProfile
    *
    * @example
    * ```javascript
-   *lspFactory.LSP3UniversalProfile.deploy({
+   *lspFactory.UniversalProfile.deploy({
    *    controllingAccounts: ['0xb74a88C43BCf691bd7A851f6603cb1868f6fc147'],
    *    lsp3Profile: myUniversalProfileData
    *  });
@@ -198,7 +197,7 @@ export class LSP3UniversalProfile {
   }
 
   /**
-   * Pre-deploys the latest Version of the LSP3UniversalProfile smart-contracts.
+   * Pre-deploys the latest Version of the UniversalProfile smart-contracts.
    *
    * @param {'string'} [version] Instead of deploying the latest Version you can also deploy a specific
    *  version of the smart-contracts. A list of all available version is available here.
@@ -215,7 +214,7 @@ export class LSP3UniversalProfile {
    *
    * @param {ProfileDataBeforeUpload} profileData
    * @return {*}  {(Promise<AddResult | string>)} Returns processed LSP3 Data and upload url
-   * @memberof LSP3UniversalProfile
+   * @memberof UniversalProfile
    */
   static async uploadProfileData(
     profileData: ProfileDataBeforeUpload,
@@ -258,10 +257,10 @@ export class LSP3UniversalProfile {
    *
    * @param {ProfileDataBeforeUpload} profileData
    * @return {*}  {(Promise<AddResult | string>)} Returns processed LSP3 Data and upload url
-   * @memberof LSP3UniversalProfile
+   * @memberof UniversalProfile
    */
   async uploadProfileData(profileData: ProfileDataBeforeUpload, uploadOptions?: UploadOptions) {
     const uploadOptionsToUse = uploadOptions || this.options.uploadOptions || defaultUploadOptions;
-    return LSP3UniversalProfile.uploadProfileData(profileData, uploadOptionsToUse);
+    return UniversalProfile.uploadProfileData(profileData, uploadOptionsToUse);
   }
 }
