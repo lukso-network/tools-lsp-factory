@@ -313,7 +313,7 @@ await lspFactory.UniversalProfile.deploy({...}, {
 
 The `UniversalReceiverDelegate` is a logic contract that writes to the Universal Profile when it receives some asset. This operation is not specific to any particular Universal Profile, so developers can use the same `UniversalReceiverDelegate` contract for multiple different Universal Profile deployments.
 
-By default, no Universal Receiver Delegate contract will be deployed. Instead LSPFactory will use the latest available version of the `UniversalReceiverDelegate` version stored in the [version file](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json). This address is used directly on the Universal Profile and is given the `SETDATA` LSP6 permission.
+By default, no Universal Receiver Delegate contract will be deployed. Instead LSPFactory will use the latest available version of the `UniversalReceiverDelegate` version stored in the [version file](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json). This address is used directly on the Universal Profile and is given the [`SETDATA` LSP6 permission](https://docs.lukso.tech/standards/universal-profile/lsp6-key-manager#permissions).
 
 Reusing the `UniversalReceiverDelegate` address means that no `UniversalReceiverDelegate` contract needs to be deployed when deploying a Universal Profile which further reduces the gas cost of Universal Profile deployment.
 
