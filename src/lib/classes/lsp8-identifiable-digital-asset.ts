@@ -10,11 +10,11 @@ import {
   LSPFactoryOptions,
 } from '../interfaces';
 import {
-  ContractDeploymentOptionsNonReactive,
-  ContractDeploymentOptionsReactive,
   ContractNames,
   DeployedLSP8IdentifiableDigitalAsset,
   DigitalAssetDeploymentOptions,
+  LSP8ContractDeploymentOptionsNonReactive,
+  LSP8ContractDeploymentOptionsReactive,
 } from '../interfaces/digital-asset-deployment';
 import {
   lsp8BaseContractDeployment$,
@@ -30,8 +30,8 @@ import {
 import { isSignerUniversalProfile$ } from '../services/lsp3-account.service';
 
 type LSP8ObservableOrPromise<
-  T extends ContractDeploymentOptionsReactive | ContractDeploymentOptionsNonReactive
-> = T extends ContractDeploymentOptionsReactive
+  T extends LSP8ContractDeploymentOptionsReactive | LSP8ContractDeploymentOptionsNonReactive
+> = T extends LSP8ContractDeploymentOptionsReactive
   ? Observable<DeploymentEventContract | DeploymentEventTransaction>
   : Promise<DeployedLSP8IdentifiableDigitalAsset>;
 
@@ -71,8 +71,8 @@ export class LSP8IdentifiableDigitalAsset {
    */
   deploy<
     T extends
-      | ContractDeploymentOptionsReactive
-      | ContractDeploymentOptionsNonReactive = ContractDeploymentOptionsNonReactive
+      | LSP8ContractDeploymentOptionsReactive
+      | LSP8ContractDeploymentOptionsNonReactive = LSP8ContractDeploymentOptionsNonReactive
   >(
     digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: T

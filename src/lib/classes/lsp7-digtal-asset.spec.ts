@@ -62,7 +62,9 @@ describe('LSP7DigitalAsset', () => {
         symbol: 'TKN',
       },
       {
-        version: baseContract.address,
+        LSP7DigitalAsset: {
+          version: baseContract.address,
+        },
       }
     );
 
@@ -89,7 +91,9 @@ describe('LSP7DigitalAsset', () => {
         symbol: 'TKN',
       },
       {
-        deployProxy: false,
+        LSP7DigitalAsset: {
+          deployProxy: false,
+        },
       }
     );
 
@@ -160,7 +164,9 @@ describe('LSP7DigitalAsset', () => {
         symbol: 'TKN',
       },
       {
-        version: passedBytecode,
+        LSP7DigitalAsset: {
+          version: passedBytecode,
+        },
       }
     );
 

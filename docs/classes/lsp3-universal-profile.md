@@ -45,14 +45,14 @@ Object containing profile properties set during Universal Profile deployment.
 
 Object which specifies how the [UniversalProfile](../../../standards/universal-profile/lsp0-erc725account.md), [KeyManager](../../../standards/universal-profile/lsp6-key-manager.md) and [UniversalReceiverDelegate](../../../standards/universal-profile/lsp1-universal-receiver-delegate.md) smart contracts will be deployed.
 
-| Name                                                                               | Type             | Description                                                                                                                                                                                     |
-| :--------------------------------------------------------------------------------- | :--------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ERC725Account` (optional)                                                         | Object           | Generic contract configuration object. Specify [`version`](../deployment/universal-profile#contract-versions) and [`deployProxy`](../deployment/universal-profile#proxy-deployment) parameters. |
-| `KeyManager` (optional)                                                            | Object           | Generic contract configuration object. Specify [`version`](../deployment/universal-profile#contract-versions) and [`deployProxy`](../deployment/universal-profile#proxy-deployment) parameters. |
-| `UniversalReceiverDelegate` (optional)                                             | Object           | Generic contract configuration object. Specify [`version`](../deployment/universal-profile#contract-versions) and [`deployProxy`](../deployment/universal-profile#proxy-deployment) parameters. |
-| [`version`](../deployment/universal-profile#contract-versions) (optional)          | String           | Sets the global contract version. All contracts will be deployed with this version if set.                                                                                                      |
-| [`deployReactive`](../deployment/universal-profile#reactive-deployment) (optional) | Boolean          | Specify whether a Promise or Observable should be returned.                                                                                                                                     |
-| [`ipfsGateway`](../deployment/universal-profile#ipfs-upload-options) (optional)    | String \| Object | IPFS gateway url or an object containing IPFS gateway options.                                                                                                                                  |
+| Name                                                                               | Type             | Description                                                                                                                                                       |
+| :--------------------------------------------------------------------------------- | :--------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`ERC725Account`](../deployment/options.md) (optional)                             | Object           | Generic contract configuration object. Takes [`version`](../deployment/options.md#version) and [`deployProxy`](../deployment/options.md#deploy-proxy) parameters. |
+| [`LSP6Keymanager`](../deployment/options.md) (optional)                            | Object           | Generic contract configuration object. Takes [`version`](../deployment/options.md#version) and [`deployProxy`](../deployment/options.md#deploy-proxy) parameters. |
+| [`LSP1UniversalReceiverDelegate`](../deployment/options.md) (optional)             | Object           | Generic contract configuration object. Takes [`version`](../deployment/options.md#version) and [`deployProxy`](../deployment/options.md#deploy-proxy) parameters. |
+| [`version`](../deployment/universal-profile#contract-versions) (optional)          | String           | Sets the global contract version. All contracts will be deployed with this version if set.                                                                        |
+| [`deployReactive`](../deployment/universal-profile#reactive-deployment) (optional) | Boolean          | Specify whether a Promise or Observable should be returned.                                                                                                       |
+| [`ipfsGateway`](../deployment/universal-profile#ipfs-upload-options) (optional)    | String \| Object | IPFS gateway url or an object containing IPFS gateway options.                                                                                                    |
 
 :::info Contract Deployment Details
 See the [configuration specification](../deployment/universal-profile#configuration) for more information about the `options` property.
@@ -156,7 +156,7 @@ await lspFactory.LSP3UniversalProfile.deploy(
   },
   {
     deployReactive: true,
-  }
+  },
 ).subscribe({
   next: (deploymentEvent) => {
     console.log(deploymentEvent);
@@ -415,7 +415,7 @@ await LSP3UniversalProfile.uploadProfileData(
   },
   {
     ipfsGateway: 'https://ipfs.infura.io',
-  }
+  },
 );
 
 /**
@@ -449,7 +449,7 @@ await LSP3UniversalProfile.uploadProfileData(
       port: 5001,
       protocol: 'https',
     },
-  }
+  },
 );
 
 /**

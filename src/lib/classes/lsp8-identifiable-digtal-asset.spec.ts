@@ -60,7 +60,9 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         symbol: 'TKN',
       },
       {
-        version: baseContract.address,
+        LSP8IdentifiableDigitalAsset: {
+          version: baseContract.address,
+        },
       }
     );
 
@@ -126,7 +128,9 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         symbol: 'TKN',
       },
       {
-        deployProxy: false,
+        LSP8IdentifiableDigitalAsset: {
+          deployProxy: false,
+        },
       }
     );
 
@@ -193,7 +197,9 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         symbol: 'TKN',
       },
       {
-        version: passedBytecode,
+        LSP8IdentifiableDigitalAsset: {
+          version: passedBytecode,
+        },
       }
     );
 

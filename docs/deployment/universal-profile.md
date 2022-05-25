@@ -282,59 +282,38 @@ await UniversalProfile.uploadMetaData(myLSP3MetaData);
 ## Deployment Configuration
 
 A Universal Profile is composed of three smart contracts. [LSP0 ERC725 Account](../../../standards/universal-profile/lsp0-erc725account), [LSP6 Key Manager](../../../standards/universal-profile/lsp6-key-manager), and [LSP1-UniversalReceiver](../../../standards/generic-standards/lsp1-universal-receiver.md).
-When deploying a Universal Profile, you can configure how developers should deploy these contracts inside the `contractDeploymentOptions` object. Builders can configure each contract separately. The available options are the same for all contracts.
+When deploying a Universal Profile, you can configure how these contracts should be deployed inside the `options` object.
 
-Under the `version` key developers can pass a [version number](./universal-profile#contract-versions), [custom bytecode](./universal-profile#deploying-custom-bytecode) or a [base contract address](./universal-profile#using-a-custom-address) to be used during deployment.
+Under the [`version`](./options.md#version) key, developers can pass a [version number](./options.md#version), [custom bytecode](./options.md#deploying-custom-bytecode) or a [base contract address](./options.md#custom-base-contract-address) to be used during deployment. By setting the [`deployProxy`](./options.md#deploy-proxy) parameter developers can specify whether the contract should be deployed using proxy deployment.
+
+:::info
+`deployProxy` defaults to true for `ERC725Account` and `KeyManager` and false for `UniversalReceiverDelegate`.
+Read more about configuring proxy deployment and contract versioning [here](../deployment/options.md)
+
+:::
 
 ```javascript
 await lspFactory.UniversalProfile.deploy({...}, {
   ERC725Account: {
     version: '0.4.1', // Version number
+    deployProxy: true
   },
   UniversalReceiverDelegate: {
-    version: '0x...' // Custom bytecode
+    version: '0x...', // Custom bytecode
+    deployProxy: false
   },
   KeyManager: {
-    version: '0x6c1F3Ed2F99054C88897e2f32187ef15c62dC560' // Base contract address
+    version: '0x6c1F3Ed2F99054C88897e2f32187ef15c62dC560', // Base contract address
+    deployProxy: true
   }
 })
 ```
-
-### Proxy Deployment
-
-Proxy deployment allows you to determine whether your contract should be deployed as a **minimal proxy contract** based on [EIP1167](https://eips.ethereum.org/EIPS/eip-1167) or an entire contract with a constructor.
-
-```javascript
-lspFactory.UniversalProfile.deploy({...}, {
-  ERC725Account: {
-    deployProxy: false,
-  },
-})
-```
-
-A proxy contract is a lightweight contract that inherits its logic by referencing the address of a contract already deployed on the blockchain. Inheriting allows cheaper deployment of Universal Profiles because only the proxy contract needs to be deployed.
-
-LSPFactory stores base contract addresses inside the [version file](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json).
-
-:::info
-The function will use the latest available base contract version if no version is specified in the version parameter.
-LSPFactory stores base contract addresses for different versions [internally](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json).
-:::
-
-:::info
-
-- The property `deployProxy` defaults to `true` for `ERC725Account` and `LSP6KeyManager`
-- The property `deployProxy` defaults to `false` for `UniversalReceiverDelegate`.
-
-:::
-
-When using proxy deployment, LSPFactory will check that there is some bytecode deployed at the base contract address before deploying. A new base contract will be deployed and referenced in the proxy contract if there is none. This process is helpful when using LSPFactory on a local development network like Hardhat, where there will be no pre-deployed base contracts.
 
 #### Universal Receiver Delegate Proxy Deployment
 
 The `UniversalReceiverDelegate` is a logic contract that writes to the Universal Profile when it receives some asset. This operation is not specific to any particular Universal Profile, so developers can use the same `UniversalReceiverDelegate` contract for multiple different Universal Profile deployments.
 
-By default, LSPFactory will use the latest available version of the `UniversalReceiverDelegate` version stored in the [version file](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json). This address is used directly on the Universal Profile and is given the `SETDATA` LSP6 permission.
+By default, no Universal Receiver Delegate contract will be deployed. Instead LSPFactory will use the latest available version of the `UniversalReceiverDelegate` version stored in the [version file](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json). This address is used directly on the Universal Profile and is given the [`SETDATA` LSP6 permission](https://docs.lukso.tech/standards/universal-profile/lsp6-key-manager#permissions).
 
 Reusing the `UniversalReceiverDelegate` address means that no `UniversalReceiverDelegate` contract needs to be deployed when deploying a Universal Profile which further reduces the gas cost of Universal Profile deployment.
 
@@ -349,22 +328,8 @@ lspFactory.UniversalProfile.deploy({...}, {
 })
 ```
 
-### Using a Custom Address
-
-When using proxy deployment you can specify the base contract address by passing the `version` parameter. This allows you to deploy a specific contract implementation by using a custom base contract you have deployed.
-
-Any base contract address that developers pass here must adhere to the relevant LSP contract standard it is being used for.
-
-```javascript title="Deploying a Universal Profile using a custom ERC725Account base contract implementation"
-lspFactory.UniversalProfile.deploy({...}, {
-    ERC725Account: {
-        version: '0x00b1d454Eb5d917253FD6cb4D5560dEC30b0960c',
-    },
-})
-```
-
 :::info
-The `UniversalReceiverDelegate` contract does not use proxy deployment by default. If an address is passed to the `UniversalReceiverDelegate` `version` parameter and `deployProxy` is not set to `true`, LSPFactory will set the provided address directly on the ERC725Account as the [LSP1UniversalReceiverDelegate key](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-0-ERC725Account.md#lsp1universalreceiverdelegate) and given the `SETDATA` LSP6 permission. You can read more in the [section above](./universal-profile#universal-receiver-delegate-proxy-deployment).
+The `UniversalReceiverDelegate` contract does not use proxy deployment by default. If an address is passed to the `LSP1UniversalReceiverDelegate` `version` parameter and `deployProxy` is not set to `true`, LSPFactory will set the provided address directly on the ERC725Account as the [LSP1UniversalReceiverDelegate key](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-0-ERC725Account.md#lsp1universalreceiverdelegate) and the [`SETDATA` LSP6 permission](https://docs.lukso.tech/standards/universal-profile/lsp6-key-manager#permissions).
 :::
 
 ```javascript title="Using a custom UniversalReceiverDelegate address"

@@ -318,69 +318,40 @@ LSPFactory will create five resized versions of any passed images, with max size
 
 ## Deployment Configuration
 
-Developers can select a unique deployment configuration for their Digital Asset contract using the `options` parameter. This allows easy deployment of a specific version or implementation of a Digital Asset smart contract.
+Developers can select a unique deployment configuration for their Digital Asset contract using the `options` parameter. This allows easy deployment of a specific version or implementation of a Digital Asset smart contract by passing the [`version`](./options.md#version) parameter.
+
+Under the [version](./options.md#version) parameter developers can pass a [version number](./options.md#version), [custom bytecode](./options.md#deploying-custom-bytecode) or a [base contract address](./options.md#custom-base-contract-address) to be used during deployment. By setting the [`deployProxy`](./options.md#deploy-proxy) parameter developers can specify whether the contract should be deployed using proxy deployment.
+
+:::info
+Read more about configuring proxy deployment and contract versioning [here](../deployment/options.md).
+
+:::
+
+```js title="Passing LSP7DigitalAsset contract options"
+await lspFactory.LSP7DigitalAsset.deploy({...}, {
+    LSP7DigitalAsset: {
+        version: '0x...', // Custom bytecode
+        deployProxy: false
+    },
+})
+```
+
+```js title="Passing LSP8IdentifiableDigitalAsset contract options"
+await lspFactory.LSP8IdentifiableDigitalAsset.deploy({...}, {
+    LSP8IdentifiableDigitalAsset: {
+        version: '0x87cd003F9Ac7d6eBcd811f7b427c7dBF6f6ba132', // Custom base contract address
+        deployProxy: true
+    },
+})
+```
 
 ### Proxy Deployment
 
-By passing the `deployProxy` parameter developers can determine whether their digital asset smart contract should be deployed as a **minimal proxy contract** based on [EIP1167](https://eips.ethereum.org/EIPS/eip-1167) or an entire contract with a constructor.
+By passing the [`deployProxy`](./options.md#deploy-proxy) parameter developers can determine whether their digital asset smart contract should be deployed as a **minimal proxy contract** based on [EIP1167](https://eips.ethereum.org/EIPS/eip-1167) or an entire contract with a constructor.
 
 :::info
 `deployProxy` defaults to `true` for both LSP7 and LSP8. If `deployProxy` is set to false, a full contract with a constructor will be deployed at the latest version.
 :::
-
-Read more about how proxy deployment is used in the LSPFactory [here](../getting-started.md#proxy-deployment).
-
-### Version
-
-Under the `version` parameter developers can pass a [version number](./digital-asset.md#contract-versions), [custom bytecode](./digital-asset.md#deploying-custom-bytecode) or a [base contract address](./digital-asset.md#custom-base-contract-address) to be used during deployment.
-
-```javascript title="Deploying an LSP7 Digital Asset at version 0.4.1"
-await lspFactory.LSP8IdentifiableDigitalAsset.deploy({...}, {
-  version: '0.4.1',
-  deployProxy: true
-});
-```
-
-#### Custom Base Contract Address
-
-When using proxy deployment you can specify the base contract address by passing an address to the `version` parameter. This allows you to specify the contract implementation by using a custom base contract you have deployed. LSPFactory will then deploy a proxy contract which inherits its logic from the specified base contract address.
-
-Any base contract address that developers pass here must adhere to the relevant LSP contract standard it is being used for.
-
-Read more about proxy deployment [here](../getting-started.md#proxy-deployment).
-
-```javascript title="Deploying an LSP7 Digital Asset with a specific base contract address"
-await lspFactory.LSP7DigitalAsset.deploy({...}, {
-  version: '0x00b1d454Eb5d917253FD6cb4D5560dEC30b0960c',
-  deployProxy: true
-});
-```
-
-#### Contract Versions
-
-LSPFactory stores the addresses of different base contract versions [internally](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json). By specifying a `version` number, developers can specify which base contract implementation should be used during deployment.
-
-```javascript
-await lspFactory.LSP8IdentifiableDigitalAsset.deploy({...}, {
-  version: '0.5.0',
-});
-```
-
-#### Deploying Custom Bytecode
-
-When deploying a Digital Asset, you can use your custom contract implementation by passing the compiled creation bytecode of a contract you have written as the `version` parameter.
-
-The passed bytecode can be the instantiation bytecode of a custom contract implementation you have written according to your use case. The implementation must meet the relevant LSP standard requirements.
-
-:::note
-Contracts deployed from custom bytecode will not use any proxy contract deployment.
-:::
-
-```javascript title="Deploying an LSP8 digital Asset from custom bytecode"
-await lspFactory.LSP8IdentifiableDigitalAsset.deploy({...}, {
-  version: '0x...', // Creation bytecode to be deployed
-});
-```
 
 ### IPFS Upload Options
 

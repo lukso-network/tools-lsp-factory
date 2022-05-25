@@ -649,12 +649,22 @@ export function digitalAssetAddress$(
 export function convertDigitalAssetConfigurationObject(
   contractDeploymentOptions?: ContractDeploymentOptions
 ): DigitalAssetConfiguration {
-  const { version, byteCode, libAddress } = convertContractDeploymentOptionsVersion(
-    contractDeploymentOptions?.version
-  );
+  let providedVersion: string;
+  let providedDeployProxy: boolean;
+
+  if ('LSP7DigitalAsset' in contractDeploymentOptions) {
+    providedVersion = contractDeploymentOptions?.LSP7DigitalAsset?.version;
+    providedDeployProxy = contractDeploymentOptions?.LSP7DigitalAsset?.deployProxy;
+  } else if ('LSP8IdentifiableDigitalAsset' in contractDeploymentOptions) {
+    providedVersion = contractDeploymentOptions?.LSP8IdentifiableDigitalAsset?.version;
+    providedDeployProxy = contractDeploymentOptions?.LSP8IdentifiableDigitalAsset?.deployProxy;
+  }
+
+  const { version, byteCode, libAddress } =
+    convertContractDeploymentOptionsVersion(providedVersion);
 
   return {
-    deployProxy: contractDeploymentOptions?.deployProxy,
+    deployProxy: providedDeployProxy,
     uploadOptions: contractDeploymentOptions?.ipfsGateway
       ? { ipfsGateway: contractDeploymentOptions?.ipfsGateway }
       : undefined,

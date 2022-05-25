@@ -148,22 +148,6 @@ const lspFactory = new LSPFactory(provider, {
 });
 ```
 
-## Proxy Deployment
-
-LSPFactory uses proxy deployment of smart contracts to maximise gas efficiency. This can be configured inside the `options` object when deploying [Universal Profiles](./deployment/universal-profile.md) or [Digital Assets](./deployment/digital-asset.md).
-
-When using proxy deployment contracts will be deployed as a **minimal proxy contract** based on [EIP1167](https://eips.ethereum.org/EIPS/eip-1167). This is a lightweight contract that inherits its logic by referencing the address of a contract already deployed on the blockchain. Inheriting allows cheaper deployment of Universal Profiles and Digital Assets because only the proxy contract needs to be deployed.
-
-Base contract addresses for different networks are stored internally in the [version file](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json) to allow a specific version of an LSP smart contract to be used. If no version is specified, the most recent base contract version will be referenced by the proxy contract.
-
-:::info
-A specific contract version can be used by passing the `version` parameter in the `options` object when deploying. If no version is specified the latest base contract address will be used.
-:::
-
-LSPFactory will check that there is some bytecode deployed at the base contract address before deploying. If none is found, a new base contract will be deployed and referenced in the proxy contract. This process is helpful when using LSPFactory on a local development network like Hardhat where there will be no pre-deployed base contracts.
-
-When using proxy deployment you can specify the base contract address by passing the `version` parameter inside the `options` object. This allows you to deploy a specific contract implementation by using a custom base contract you have deployed.
-
 ## Reactive deployment
 
 The LSPFactory uses [RxJS](https://rxjs.dev/) library to deploy contracts. This can be leveraged for certain front-end behaviors to give better feedback to users when they trigger a deployment from a user interface. For example, you may want to implement a loading bar to tell users how deployment is progressing or display details and addresses of the contracts as they are deployed.
