@@ -105,15 +105,15 @@ lspFactory.UniversalProfile.deploy({...}, {
 await lspFactory.UniversalProfile.deploy({...}, {
     ERC725Account: {
         version: '0.5.0',
-        deployProy: true
+        deployProxy: true
     },
     LSP6Keymanager: {
         version: '0x...', // Custom bytecode
-        deployProy: false
+        deployProxy: false
     },
     LSP1UniversalReceiverDelegate: {
         version: '0x87cd003F9Ac7d6eBcd811f7b427c7dBF6f6ba132', // Custom base contract address
-        deployProy: true
+        deployProxy: true
     },
 })
 ```
@@ -122,7 +122,7 @@ await lspFactory.UniversalProfile.deploy({...}, {
 await lspFactory.LSP7DigitalAsset.deploy({...}, {
     LSP7DigitalAsset: {
         version: '0x...', // Custom bytecode
-        deployProy: false
+        deployProxy: false
     },
 })
 ```
@@ -131,7 +131,7 @@ await lspFactory.LSP7DigitalAsset.deploy({...}, {
 await lspFactory.LSP8IdentifiableDigitalAsset.deploy({...}, {
     LSP8IdentifiableDigitalAsset: {
         version: '0x87cd003F9Ac7d6eBcd811f7b427c7dBF6f6ba132', // Custom base contract address
-        deployProy: true
+        deployProxy: true
     },
 })
 ```

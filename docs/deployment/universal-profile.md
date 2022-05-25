@@ -329,7 +329,7 @@ lspFactory.UniversalProfile.deploy({...}, {
 ```
 
 :::info
-The `UniversalReceiverDelegate` contract does not use proxy deployment by default. If an address is passed to the `LSP1UniversalReceiverDelegate` `version` parameter and `deployProxy` is not set to `true`, LSPFactory will set the provided address directly on the ERC725Account as the [LSP1UniversalReceiverDelegate key](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-0-ERC725Account.md#lsp1universalreceiverdelegate) and the `SETDATA` LSP6 permission.
+The `UniversalReceiverDelegate` contract does not use proxy deployment by default. If an address is passed to the `LSP1UniversalReceiverDelegate` `version` parameter and `deployProxy` is not set to `true`, LSPFactory will set the provided address directly on the ERC725Account as the [LSP1UniversalReceiverDelegate key](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-0-ERC725Account.md#lsp1universalreceiverdelegate) and the [`SETDATA` LSP6 permission](https://docs.lukso.tech/standards/universal-profile/lsp6-key-manager#permissions).
 :::
 
 ```javascript title="Using a custom UniversalReceiverDelegate address"
