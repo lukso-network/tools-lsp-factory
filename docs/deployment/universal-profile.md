@@ -284,7 +284,7 @@ await UniversalProfile.uploadMetaData(myLSP3MetaData);
 A Universal Profile is composed of three smart contracts. [LSP0 ERC725 Account](../../../standards/universal-profile/lsp0-erc725account), [LSP6 Key Manager](../../../standards/universal-profile/lsp6-key-manager), and [LSP1-UniversalReceiver](../../../standards/generic-standards/lsp1-universal-receiver.md).
 When deploying a Universal Profile, you can configure how these contracts should be deployed inside the `options` object.
 
-Under the [`version`](./options.md#version) key developers can pass a [version number](./options.md#version), [custom bytecode](./options.md#deploying-custom-bytecode) or a [base contract address](./options.md#custom-base-contract-address) to be used during deployment. By setting the [`deployProxy`](./options.md#deploy-proxy) parameter developers can specify whether the contract should be deployed using proxy deployment.
+Under the [`version`](./options.md#version) key, developers can pass a [version number](./options.md#version), [custom bytecode](./options.md#deploying-custom-bytecode) or a [base contract address](./options.md#custom-base-contract-address) to be used during deployment. By setting the [`deployProxy`](./options.md#deploy-proxy) parameter developers can specify whether the contract should be deployed using proxy deployment.
 
 :::info
 `deployProxy` defaults to true for `ERC725Account` and `KeyManager` and false for `UniversalReceiverDelegate`.
