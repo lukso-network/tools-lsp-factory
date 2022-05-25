@@ -4,11 +4,7 @@ import { BytesLike, Contract, ContractFactory, ethers, Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, from, Observable, of } from 'rxjs';
 import { defaultIfEmpty, mergeMap, shareReplay, switchMap } from 'rxjs/operators';
 
-import {
-  LSP3UniversalProfile,
-  UniversalProfile__factory,
-  UniversalProfileInit__factory,
-} from '../..';
+import { UniversalProfile, UniversalProfile__factory, UniversalProfileInit__factory } from '../..';
 import {
   ADDRESS_PERMISSIONS_ARRAY_KEY,
   DEFAULT_PERMISSIONS,
@@ -303,7 +299,7 @@ export async function getLsp3ProfileDataUrl(
       json: lsp3ProfileJson as LSP3ProfileJSON,
     };
   } else {
-    lsp3ProfileData = await LSP3UniversalProfile.uploadProfileData(lsp3Profile, uploadOptions);
+    lsp3ProfileData = await UniversalProfile.uploadProfileData(lsp3Profile, uploadOptions);
   }
 
   return lsp3ProfileData;

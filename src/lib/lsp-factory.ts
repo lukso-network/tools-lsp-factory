@@ -1,10 +1,10 @@
 import { ethers, providers, Signer } from 'ethers';
 
-import { UniversalProfile } from './classes/lsp3-universal-profile';
 import { LSP4DigitalAssetMetadata } from './classes/lsp4-digital-asset-metadata';
 import { LSP7DigitalAsset } from './classes/lsp7-digital-asset';
 import { LSP8IdentifiableDigitalAsset } from './classes/lsp8-identifiable-digital-asset';
 import { ProxyDeployer } from './classes/proxy-deployer';
+import { UniversalProfile } from './classes/universal-profile';
 import { EthersExternalProvider, LSPFactoryOptions } from './interfaces';
 import { SignerOptions } from './interfaces/lsp-factory-options';
 

@@ -11,6 +11,7 @@ import {
   UniversalProfile__factory,
 } from '../../../build/main/src';
 import { LSPFactory } from '../../../build/main/src/lib/lsp-factory';
+import { lsp3ProfileJson } from '../../../test/lsp3-profile.mock';
 import {
   testProxyBytecodeContainsAddress,
   testSetData,
@@ -23,14 +24,13 @@ import {
   PREFIX_PERMISSIONS,
 } from '../helpers/config.helper';
 import { getDeployedByteCode } from '../helpers/deployment.helper';
+import { ContractNames, DeployedContracts, DeploymentEvent } from '../interfaces';
 
-import { lsp3ProfileJson } from './../../../test/lsp3-profile.mock';
-import { ContractNames, DeployedContracts, DeploymentEvent } from './../interfaces';
 import { ProxyDeployer } from './proxy-deployer';
 
 jest.setTimeout(60000);
 jest.useRealTimers();
-describe('LSP3UniversalProfile', () => {
+describe('UniversalProfile', () => {
   let signers: SignerWithAddress[];
   let provider: providers.JsonRpcProvider;
   let lspFactory: LSPFactory;
