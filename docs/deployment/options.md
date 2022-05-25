@@ -42,7 +42,7 @@ await lspFactory.LSP7DigitalAsset.deploy({...}, {
 
 #### Contract Versions
 
-LSPFactory stores the addresses of different base contract versions [internally](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json). By specifying a `version` number, developers can specify which base contract version should be used during deployment.
+LSPFactory stores the addresses of different base contract versions [internally](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json). By specifying a `version` number, developers can specify which base contract version should be used during deployment. The version number reflects the package version of the [lsp-smart-contracts library](https://github.com/lukso-network/tools-lsp-factory/releases) used to deploy the base contract.
 
 ```javascript
 await lspFactory.LSP8IdentifiableDigitalAsset.deploy({...}, {

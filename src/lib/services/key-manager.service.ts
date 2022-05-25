@@ -37,7 +37,7 @@ export function keyManagerDeployment$(
         return keyManagerDeploymentForAccount$(
           signer,
           erc725AccountAddress,
-          baseContractAddress.KeyManager,
+          baseContractAddress.LSP6KeyManager,
           byteCode
         );
       }

@@ -207,7 +207,7 @@ Javascript's `File` object is only available when using javascript in the browse
 <script/>
 ```
 
-LSPFactory will create five resized versions of the passed image, with max sizes of `1800x1800`, `1024x1024`, `640x640`, `320x320`, `180x180`. These resized images will be set inside the `LSP3Metadata` and attached to the `ERC725Account`.
+LSPFactory will create five resized versions of the passed image, with max sizes of `1800x1800`, `1024x1024`, `640x640`, `320x320`, `180x180`. These resized images will be set inside the `LSP3Metadata` and attached to the `ERC725Account` contract.
 
 <!-- #### Using Image Buffers
 
@@ -294,15 +294,15 @@ Read more about configuring proxy deployment and contract versioning [here](../d
 
 ```javascript
 await lspFactory.UniversalProfile.deploy({...}, {
-  ERC725Account: {
+  LSP0ERC725Account: {
     version: '0.4.1', // Version number
     deployProxy: true
   },
-  UniversalReceiverDelegate: {
+  LSP1UniversalReceiverDelegate: {
     version: '0x...', // Custom bytecode
     deployProxy: false
   },
-  KeyManager: {
+  LSP6KeyManager: {
     version: '0x6c1F3Ed2F99054C88897e2f32187ef15c62dC560', // Base contract address
     deployProxy: true
   }
@@ -321,7 +321,7 @@ To specify that your `UniversalReceiverDelegate` contract should use proxy deplo
 
 ```javascript
 lspFactory.UniversalProfile.deploy({...}, {
-    UniversalReceiverDelegate: {
+    LSP1UniversalReceiverDelegate: {
         deployProxy: true,
         version: '0x00b1d454Eb5d917253FD6cb4D5560dEC30b0960c',
     },
@@ -334,7 +334,7 @@ The `UniversalReceiverDelegate` contract does not use proxy deployment by defaul
 
 ```javascript title="Using a custom UniversalReceiverDelegate address"
 lspFactory.UniversalProfile.deploy({...}, {
-    UniversalReceiverDelegate: {
+    LSP1UniversalReceiverDelegate: {
         version: '0x00b1d454Eb5d917253FD6cb4D5560dEC30b0960c',
         deployProxy: false
     },
@@ -423,15 +423,24 @@ const observable = await lspFactory.UniversalProfile.deploy({...}, {
   deployReactive: true
 });
 
-observable.subscribe();
-```
+observable.subscribe({
+  next: (deploymentEvent) => {
+    console.log(deploymentEvent);
+  },
+  error: (error) => {
+    console.error(error);
+  },
+  complete: () => {
+    console.log('Universal Profile deployment completed');
+  },
+});```
 
 The following events will be emitted:
 
 ```typescript
   {
   type: 'PROXY_DEPLOYMENT',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   status: 'PENDING',
   transaction: {
     ...
@@ -439,7 +448,7 @@ The following events will be emitted:
 }
 {
   type: 'PROXY_DEPLOYMENT',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   status: 'COMPLETE',
   contractAddress: '0xa7b2ab323cD2504689637A0b503262A337ab87d6',
   receipt: {
@@ -448,7 +457,7 @@ The following events will be emitted:
 }
 {
   type: 'TRANSACTION',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   functionName: 'initialize(address)',
   status: 'PENDING',
   transaction: {
@@ -457,7 +466,7 @@ The following events will be emitted:
 }
 {
   type: 'TRANSACTION',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   functionName: 'initialize(address)',
   status: 'COMPLETE',
   receipt: {
@@ -466,7 +475,7 @@ The following events will be emitted:
 }
 {
   type: 'PROXY_DEPLOYMENT',
-  contractName: 'KeyManager',
+  contractName: 'LSP6KeyManager',
   status: 'PENDING',
   transaction: {
     ...
@@ -474,7 +483,7 @@ The following events will be emitted:
 }
 {
   type: 'PROXY_DEPLOYMENT',
-  contractName: 'KeyManager',
+  contractName: 'LSP6KeyManager',
   status: 'COMPLETE',
   contractAddress: '0x8fE3f0fd1bc2aCDA6cf3712Cd9C7858B8195DC8E',
   receipt: {
@@ -483,7 +492,7 @@ The following events will be emitted:
 }
 {
   type: 'TRANSACTION',
-  contractName: 'KeyManager',
+  contractName: 'LSP6KeyManager',
   functionName: 'initialize(address)',
   status: 'PENDING',
   transaction: {
@@ -492,7 +501,7 @@ The following events will be emitted:
 }
 {
   type: 'TRANSACTION',
-  contractName: 'KeyManager',
+  contractName: 'LSP6KeyManager',
   functionName: 'initialize(address)',
   status: 'COMPLETE',
   receipt: {
@@ -501,7 +510,7 @@ The following events will be emitted:
 }
 {
   type: 'TRANSACTION',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   functionName: 'setData(bytes32[],bytes[])',
   status: 'PENDING',
   transaction: {
@@ -510,7 +519,7 @@ The following events will be emitted:
 }
 {
   type: 'TRANSACTION',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   functionName: 'setData(bytes32[],bytes[])',
   status: 'COMPLETE',
   receipt: {
@@ -520,7 +529,7 @@ The following events will be emitted:
 {
   type: 'TRANSACTION',
   status: 'PENDING',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   functionName: 'transferOwnership(address)',
   transaction: {
     ...
@@ -528,7 +537,7 @@ The following events will be emitted:
 }
 {
   type: 'TRANSACTION',
-  contractName: 'ERC725Account',
+  contractName: 'LSP0ERC725Account',
   functionName: 'transferOwnership(address)',
   status: 'COMPLETE',
   receipt: {
@@ -536,17 +545,18 @@ The following events will be emitted:
   }
 }
 {
-  ERC725Account: {
+  LSP0ERC725Account: {
     address: '0xa7b2ab323cD2504689637A0b503262A337ab87d6',
     receipt: {
       ...
     }
   },
-  KeyManager: {
+  LSP6KeyManager: {
     address: '0x8fE3f0fd1bc2aCDA6cf3712Cd9C7858B8195DC8E',
     receipt: {
       ...
     }
   }
 }
+Digital Asset deployment completed
 ```

@@ -133,7 +133,7 @@ export class LSP8IdentifiableDigitalAsset {
       signerIsUniversalProfile$
     );
 
-    const deployment$ = deploymentWithContractsOnCompletion$(
+    const deployment$ = deploymentWithContractsOnCompletion$<DeployedLSP8IdentifiableDigitalAsset>(
       concat([baseContractDeployment$, digitalAsset$, setLSP4AndTransferOwnership$]).pipe(
         concatAll()
       )

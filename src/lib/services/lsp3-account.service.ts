@@ -57,7 +57,7 @@ export function accountDeployment$(
     switchMap((baseContractAddresses) => {
       return accountDeploymentWithBaseContractAddress$(
         signer,
-        baseContractAddresses.ERC725Account,
+        baseContractAddresses.LSP0ERC725Account,
         bytecode
       );
     }),
@@ -531,24 +531,27 @@ export function isSignerUniversalProfile$(signer: Signer) {
 export function convertUniversalProfileConfigurationObject(
   contractDeploymentOptions: ContractDeploymentOptions
 ): UniversalProfileDeploymentConfiguration {
+  const erc725AccountConfig =
+    contractDeploymentOptions?.LSP0ERC725Account || contractDeploymentOptions?.ERC725Account;
+
   const {
     version: erc725AccountVersion,
     byteCode: erc725AccountBytecode,
     libAddress: erc725AccountLibAddress,
-  } = convertContractDeploymentOptionsVersion(contractDeploymentOptions?.ERC725Account?.version);
+  } = convertContractDeploymentOptionsVersion(erc725AccountConfig?.version);
 
   const {
     version: keyManagerVersion,
     byteCode: keyManagerBytecode,
     libAddress: keyManagerLibAddress,
-  } = convertContractDeploymentOptionsVersion(contractDeploymentOptions?.KeyManager?.version);
+  } = convertContractDeploymentOptionsVersion(contractDeploymentOptions?.LSP6KeyManager?.version);
 
   const {
     version: universalReceiverDelegateVersion,
     byteCode: universalReceiverDelegateBytecode,
     libAddress: universalReceiverDelegateLibAddress,
   } = convertContractDeploymentOptionsVersion(
-    contractDeploymentOptions?.UniversalReceiverDelegate?.version
+    contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.version
   );
 
   return {
@@ -556,23 +559,23 @@ export function convertUniversalProfileConfigurationObject(
     uploadOptions: contractDeploymentOptions?.ipfsGateway
       ? { ipfsGateway: contractDeploymentOptions?.ipfsGateway }
       : undefined,
-    ERC725Account: {
+    LSP0ERC725Account: {
       version: erc725AccountVersion,
       byteCode: erc725AccountBytecode,
       libAddress: erc725AccountLibAddress,
-      deployProxy: contractDeploymentOptions?.ERC725Account?.deployProxy,
+      deployProxy: erc725AccountConfig?.deployProxy,
     },
-    KeyManager: {
+    LSP6KeyManager: {
       version: keyManagerVersion,
       byteCode: keyManagerBytecode,
       libAddress: keyManagerLibAddress,
-      deployProxy: contractDeploymentOptions?.KeyManager?.deployProxy,
+      deployProxy: contractDeploymentOptions?.LSP6KeyManager?.deployProxy,
     },
-    UniversalReceiverDelegate: {
+    LSP1UniversalReceiverDelegate: {
       version: universalReceiverDelegateVersion,
       byteCode: universalReceiverDelegateBytecode,
       libAddress: universalReceiverDelegateLibAddress,
-      deployProxy: contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy,
+      deployProxy: contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.deployProxy,
     },
     deployReactive: contractDeploymentOptions?.deployReactive,
   };

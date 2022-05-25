@@ -4,9 +4,9 @@ import { LSP3ProfileDataForEncoding, ProfileDataBeforeUpload } from './lsp3-prof
 import { IPFSGateway, UploadOptions } from './profile-upload-options';
 
 export enum ContractNames {
-  ERC725_Account = 'ERC725Account',
-  KEY_MANAGER = 'KeyManager',
-  UNIVERSAL_RECEIVER = 'UniversalReceiverDelegate',
+  ERC725_Account = 'LSP0ERC725Account',
+  KEY_MANAGER = 'LSP6KeyManager',
+  UNIVERSAL_RECEIVER = 'LSP1UniversalReceiverDelegate',
 }
 
 export interface ControllerOptions {
@@ -19,20 +19,16 @@ export interface ControllerOptions {
  */
 export interface ProfileDeploymentOptions {
   controllerAddresses: (string | ControllerOptions)[];
-  baseContractAddresses?: {
-    erc725Account?: string;
-    universalReceiverDelegate?: string;
-    keyManager?: string;
-  };
   lsp3Profile?: ProfileDataBeforeUpload | LSP3ProfileDataForEncoding | string;
 }
+
 export interface DeployedContracts {
-  ERC725Account?: DeployedContract;
-  ERC725AccountBaseContract?: DeployedContract;
-  KeyManager: DeployedContract;
-  KeyManagerBaseContract: DeployedContract;
-  UniversalReceiverDelegate: DeployedContract;
-  UniversalReceiverDelegateBaseContract: DeployedContract;
+  LSP0ERC725Account?: DeployedContract;
+  LSP0ERC725AccountBaseContract?: DeployedContract;
+  LSP6KeyManager: DeployedContract;
+  LSP6KeyManagerBaseContract: DeployedContract;
+  LSP1UniversalReceiverDelegate: DeployedContract;
+  LSP1UniversalReceiverDelegateBaseContract: DeployedContract;
 }
 
 export interface BaseContractAddresses {
@@ -44,9 +40,10 @@ export interface BaseContractAddresses {
 interface ContractDeploymentOptionsBase {
   version?: string;
   ipfsGateway?: IPFSGateway;
+  LSP0ERC725Account?: ContractOptions;
   ERC725Account?: ContractOptions;
-  KeyManager?: ContractOptions;
-  UniversalReceiverDelegate?: ContractOptions;
+  LSP6KeyManager?: ContractOptions;
+  LSP1UniversalReceiverDelegate?: ContractOptions;
 }
 
 export interface ContractDeploymentOptionsReactive extends ContractDeploymentOptionsBase {
@@ -71,8 +68,8 @@ interface ContractConfiguration {
 export interface UniversalProfileDeploymentConfiguration {
   version?: string;
   uploadOptions?: UploadOptions;
-  ERC725Account?: ContractConfiguration;
-  KeyManager?: ContractConfiguration;
-  UniversalReceiverDelegate?: ContractConfiguration;
+  LSP0ERC725Account?: ContractConfiguration;
+  LSP6KeyManager?: ContractConfiguration;
+  LSP1UniversalReceiverDelegate?: ContractConfiguration;
   deployReactive: boolean;
 }

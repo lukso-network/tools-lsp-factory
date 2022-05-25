@@ -161,26 +161,26 @@ export function shouldDeployUniversalProfileBaseContracts$(
     shouldDeployBaseContract$(
       provider,
       contractVersions[chainId]?.contracts?.ERC725Account?.baseContract,
-      contractDeploymentOptions?.ERC725Account?.deployProxy,
+      contractDeploymentOptions?.LSP0ERC725Account?.deployProxy,
       defaultUPBaseContractAddress,
-      contractDeploymentOptions?.ERC725Account?.libAddress,
-      contractDeploymentOptions?.ERC725Account?.byteCode
+      contractDeploymentOptions?.LSP0ERC725Account?.libAddress,
+      contractDeploymentOptions?.LSP0ERC725Account?.byteCode
     ),
     shouldDeployBaseContract$(
       provider,
       contractVersions[chainId]?.contracts?.UniversalReceiverDelegate?.baseContract,
-      contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy,
+      contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.deployProxy,
       defaultUniversalReceiverBaseContractAddress,
-      contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress,
-      contractDeploymentOptions?.UniversalReceiverDelegate?.byteCode
+      contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.libAddress,
+      contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.byteCode
     ),
     shouldDeployBaseContract$(
       provider,
       contractVersions[chainId]?.contracts?.KeyManager?.baseContract,
-      contractDeploymentOptions?.KeyManager?.deployProxy,
+      contractDeploymentOptions?.LSP6KeyManager?.deployProxy,
       defaultKeyManagerBaseContractAddress,
-      contractDeploymentOptions?.KeyManager?.libAddress,
-      contractDeploymentOptions?.KeyManager?.byteCode
+      contractDeploymentOptions?.LSP6KeyManager?.libAddress,
+      contractDeploymentOptions?.LSP6KeyManager?.byteCode
     ),
   ]).pipe(shareReplay());
 }
@@ -192,16 +192,16 @@ export function universalProfileBaseContractAddresses$(
   contractDeploymentOptions?: UniversalProfileDeploymentConfiguration,
   deployUniversalReceiverProxy?: boolean
 ) {
-  const providedUPBaseContractAddress = contractDeploymentOptions?.ERC725Account?.libAddress;
+  const providedUPBaseContractAddress = contractDeploymentOptions?.LSP0ERC725Account?.libAddress;
   const providedUniversalReceiverContractAddress =
-    contractDeploymentOptions?.UniversalReceiverDelegate?.libAddress;
-  const providedKeyManagerContractAddress = contractDeploymentOptions?.KeyManager?.libAddress;
+    contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.libAddress;
+  const providedKeyManagerContractAddress = contractDeploymentOptions?.LSP6KeyManager?.libAddress;
 
   const baseContractAddresses: BaseContractAddresses = {
     [UniversalProfileContractNames.ERC725_Account]:
       providedUPBaseContractAddress ??
-      (contractDeploymentOptions?.ERC725Account?.deployProxy !== false &&
-        !contractDeploymentOptions?.ERC725Account?.byteCode)
+      (contractDeploymentOptions?.LSP0ERC725Account?.deployProxy !== false &&
+        !contractDeploymentOptions?.LSP0ERC725Account?.byteCode)
         ? defaultUPBaseContractAddress
         : null,
     [UniversalProfileContractNames.UNIVERSAL_RECEIVER]:
@@ -210,8 +210,8 @@ export function universalProfileBaseContractAddresses$(
         : null,
     [UniversalProfileContractNames.KEY_MANAGER]:
       providedKeyManagerContractAddress ??
-      (contractDeploymentOptions?.KeyManager?.deployProxy !== false &&
-        !contractDeploymentOptions?.KeyManager?.byteCode)
+      (contractDeploymentOptions?.LSP6KeyManager?.deployProxy !== false &&
+        !contractDeploymentOptions?.LSP6KeyManager?.byteCode)
         ? defaultKeyManagerBaseContractAddress
         : null,
   };

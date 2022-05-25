@@ -398,7 +398,17 @@ const observable = lspFactory.LSP7DigitalAsset.deploy({...}, {
   deployReactive: true
 });
 
-observable.subscribe();
+observable.subscribe({
+  next: (deploymentEvent) => {
+    console.log(deploymentEvent);
+  },
+  error: (error) => {
+    console.error(error);
+  },
+  complete: () => {
+    console.log('Digital Asset deployment completed');
+  },
+});
 ```
 
 The following events will be emitted:
@@ -485,6 +495,7 @@ The following events will be emitted:
     },
   }
 }
+Digital Asset deployment completed
 ```
 
 #### LSP8 Deployment Events
