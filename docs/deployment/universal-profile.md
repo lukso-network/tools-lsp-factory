@@ -38,10 +38,7 @@ The property `controllerAddresses` can be filled with addresses of externally ow
 
 ```javascript
 await lspFactory.UniversalProfile.deploy({
-  controllerAddresses: [
-    '0x7Ab53a0C861fb955050A8DA109eEeA5E61fd8Aa4',
-    '0x56fE4E7dc2bc0b6397E4609B07b4293482E3F72B',
-  ],
+  controllerAddresses: ['0x7Ab53a0C861fb955050A8DA109eEeA5E61fd8Aa4', '0x56fE4E7dc2bc0b6397E4609B07b4293482E3F72B'],
 });
 ```
 
