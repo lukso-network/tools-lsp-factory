@@ -431,7 +431,7 @@ observable.subscribe({
     console.error(error);
   },
   complete: () => {
-    console.log('Digital Asset deployment completed');
+    console.log('Universal Profile deployment completed');
   },
 });```
 
