@@ -573,6 +573,5 @@ export function convertUniversalProfileConfigurationObject(
       libAddress: universalReceiverDelegateLibAddress,
       deployProxy: contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.deployProxy,
     },
-    deployReactive: contractDeploymentOptions?.deployReactive,
   };
 }

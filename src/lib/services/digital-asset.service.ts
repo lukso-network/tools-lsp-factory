@@ -47,9 +47,9 @@ import {
   DeploymentType,
 } from '../interfaces';
 import {
-  ContractDeploymentOptions,
   ContractNames,
   DigitalAssetConfiguration,
+  DigitalAssetContractDeploymentOptions,
   DigitalAssetDeploymentOptions,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
@@ -647,7 +647,7 @@ export function digitalAssetAddress$(
 }
 
 export function convertDigitalAssetConfigurationObject(
-  contractDeploymentOptions?: ContractDeploymentOptions
+  contractDeploymentOptions?: DigitalAssetContractDeploymentOptions
 ): DigitalAssetConfiguration {
   let providedVersion: string;
   let providedDeployProxy: boolean;
@@ -668,7 +668,6 @@ export function convertDigitalAssetConfigurationObject(
     uploadOptions: contractDeploymentOptions?.ipfsGateway
       ? { ipfsGateway: contractDeploymentOptions?.ipfsGateway }
       : undefined,
-    deployReactive: contractDeploymentOptions?.deployReactive,
     version,
     byteCode,
     libAddress,

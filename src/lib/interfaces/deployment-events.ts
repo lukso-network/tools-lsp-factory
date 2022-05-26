@@ -55,6 +55,12 @@ export type DeploymentEvent =
   | DeploymentEventTransaction
   | DeploymentEventBaseContract;
 
+export interface DeploymentEventCallbacks<T> {
+  next?: (value: DeploymentEvent) => void;
+  error?: (error: unknown) => void;
+  complete?: (contracts: T) => void;
+}
+
 /**
  * @internal
  */

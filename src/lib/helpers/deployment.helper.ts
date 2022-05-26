@@ -1,6 +1,6 @@
 import { Contract, ContractFactory, ContractInterface, providers, Signer } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
-import { Observable } from 'rxjs';
+import { lastValueFrom, Observable } from 'rxjs';
 import { catchError, endWith, shareReplay, switchMap, takeLast, tap } from 'rxjs/operators';
 
 import {
@@ -176,29 +176,32 @@ export function getDeployedByteCode(
   return provider.getCode(contractAddress);
 }
 
-export function deploymentWithContractsOnCompletion$<T>(deployment$: Observable<DeploymentEvent>) {
+export function waitForContractDeployment<T>(deployment$: Observable<DeploymentEvent>): Promise<T> {
   const contractAccumulator = {} as T;
 
-  return deployment$.pipe(
-    tap((deploymentEvent) => {
-      if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
-        return;
-      }
+  return lastValueFrom(
+    deployment$.pipe(
+      tap((deploymentEvent) => {
+        if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
+          return;
+        }
 
-      if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
-        contractAccumulator[`${deploymentEvent.contractName}BaseContract`] = {
-          address: deploymentEvent.receipt.contractAddress,
-          receipt: deploymentEvent.receipt,
-        };
-      } else {
-        contractAccumulator[deploymentEvent.contractName] = {
-          address: deploymentEvent.receipt.contractAddress,
-          receipt: deploymentEvent.receipt,
-        };
-      }
-    }),
-    endWith(contractAccumulator)
-  );
+        if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
+          contractAccumulator[`${deploymentEvent.contractName}BaseContract`] = {
+            address: deploymentEvent.receipt.contractAddress,
+            receipt: deploymentEvent.receipt,
+          };
+        } else {
+          contractAccumulator[deploymentEvent.contractName] = {
+            address: deploymentEvent.receipt.contractAddress,
+            receipt: deploymentEvent.receipt,
+          };
+        }
+      }),
+      endWith(contractAccumulator),
+      shareReplay()
+    )
+  ) as Promise<T>;
 }
 
 export function isAddress(testAddress: string) {

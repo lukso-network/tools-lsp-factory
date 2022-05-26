@@ -1,7 +1,7 @@
 import { LSP4MetadataBeforeUpload, LSP4MetadataForEncoding } from './lsp4-digital-asset';
 import { IPFSGateway, UploadOptions } from './profile-upload-options';
 
-import { ContractOptions, DeployedContract } from '.';
+import { ContractOptions, DeployedContract, DeploymentEventCallbacks } from '.';
 
 export enum ContractNames {
   LSP7_DIGITAL_ASSET = 'LSP7DigitalAsset',
@@ -32,40 +32,17 @@ interface ContractDeploymentOptionsBase {
   ipfsGateway?: IPFSGateway;
 }
 
-interface LSP7ContractDeploymentOptionsBase extends ContractDeploymentOptionsBase {
+export interface LSP7ContractDeploymentOptions extends ContractDeploymentOptionsBase {
   LSP7DigitalAsset?: ContractOptions;
+  events?: DeploymentEventCallbacks<DeployedLSP7DigitalAsset>;
 }
 
-export interface LSP7ContractDeploymentOptionsReactive extends LSP7ContractDeploymentOptionsBase {
-  deployReactive: true;
-}
-
-export interface LSP7ContractDeploymentOptionsNonReactive
-  extends LSP7ContractDeploymentOptionsBase {
-  deployReactive?: false;
-}
-
-export type LSP7ContractDeploymentOptions =
-  | LSP7ContractDeploymentOptionsReactive
-  | LSP7ContractDeploymentOptionsNonReactive;
-
-interface LSP8ContractDeploymentOptionsBase extends ContractDeploymentOptionsBase {
+export interface LSP8ContractDeploymentOptions extends ContractDeploymentOptionsBase {
   LSP8IdentifiableDigitalAsset?: ContractOptions;
-}
-export interface LSP8ContractDeploymentOptionsReactive extends LSP8ContractDeploymentOptionsBase {
-  deployReactive: true;
+  events?: DeploymentEventCallbacks<DeployedLSP8IdentifiableDigitalAsset>;
 }
 
-export interface LSP8ContractDeploymentOptionsNonReactive
-  extends LSP8ContractDeploymentOptionsBase {
-  deployReactive?: false;
-}
-
-export type LSP8ContractDeploymentOptions =
-  | LSP8ContractDeploymentOptionsReactive
-  | LSP8ContractDeploymentOptionsNonReactive;
-
-export type ContractDeploymentOptions =
+export type DigitalAssetContractDeploymentOptions =
   | LSP7ContractDeploymentOptions
   | LSP8ContractDeploymentOptions;
 
@@ -75,5 +52,4 @@ export interface DigitalAssetConfiguration {
   libAddress?: string;
   deployProxy?: boolean;
   uploadOptions?: UploadOptions;
-  deployReactive: boolean;
 }

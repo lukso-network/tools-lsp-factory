@@ -1,24 +1,21 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, lastValueFrom, merge, Observable } from 'rxjs';
-import { concatAll } from 'rxjs/operators';
+import { concat, merge } from 'rxjs';
+import { concatAll, shareReplay } from 'rxjs/operators';
 
 import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { defaultUploadOptions } from '../helpers/config.helper';
-import { deploymentWithContractsOnCompletion$ } from '../helpers/deployment.helper';
+import { waitForContractDeployment } from '../helpers/deployment.helper';
 import { ipfsUpload, prepareMetadataImage } from '../helpers/uploader.helper';
 import {
-  DeploymentEventContract,
-  DeploymentEventTransaction,
   LSPFactoryOptions,
   ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
 } from '../interfaces';
 import { ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import {
-  ContractDeploymentOptionsNonReactive,
-  ContractDeploymentOptionsReactive,
-  DeployedContracts,
+  ContractDeploymentOptions,
+  DeployedUniversalProfileContracts,
 } from '../interfaces/profile-deployment';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 import {
@@ -35,12 +32,6 @@ import {
   setDataAndTransferOwnershipTransactions$,
 } from '../services/lsp3-account.service';
 import { universalReceiverDelegateDeployment$ } from '../services/universal-receiver.service';
-
-type UniversalProfileObservableOrPromise<
-  T extends ContractDeploymentOptionsReactive | ContractDeploymentOptionsNonReactive
-> = T extends ContractDeploymentOptionsReactive
-  ? Observable<DeploymentEventContract | DeploymentEventTransaction>
-  : Promise<DeployedContracts>;
 
 /**
  * Class responsible for deploying UniversalProfiles and uploading LSP3 metadata to IPFS
@@ -60,11 +51,11 @@ export class UniversalProfile {
   /**
    * Deploys a UniversalProfile and uploads LSP3 Profile data to IPFS
    *
-   *  Returns a Promise with deployed contract details or an RxJS Observable of transaction details if `deployReactive` flag is set to true
+   * Returns a Promise with deployed contract details.
    *
    * @param {ProfileDeploymentOptions} profileData
    * @param {ContractDeploymentOptions} contractDeploymentOptions
-   * @return {*}  Promise<DeployedContracts> | Observable<LSP3AccountDeploymentEvent | DeploymentEventTransaction>
+   * @return {*}  Promise<DeployedContracts>
    * @memberof UniversalProfile
    *
    * @example
@@ -76,14 +67,10 @@ export class UniversalProfile {
    *};
    * ```
    */
-  deploy<
-    T extends
-      | ContractDeploymentOptionsReactive
-      | ContractDeploymentOptionsNonReactive = ContractDeploymentOptionsNonReactive
-  >(
+  async deploy(
     profileDeploymentOptions: ProfileDeploymentOptions,
-    contractDeploymentOptions?: T
-  ): UniversalProfileObservableOrPromise<T> {
+    contractDeploymentOptions?: ContractDeploymentOptions
+  ): Promise<DeployedUniversalProfileContracts> {
     const deploymentConfiguration =
       convertUniversalProfileConfigurationObject(contractDeploymentOptions);
 
@@ -169,7 +156,7 @@ export class UniversalProfile {
       deploymentConfiguration?.LSP1UniversalReceiverDelegate?.byteCode
     );
 
-    // 4 set permissions, profile and universal receiver + transfer ownership to KeyManager
+    // 4 > set permissions, lsp3metadata and universal receiver + transfer ownership to KeyManager
     const setDataAndTransferOwnership$ = setDataAndTransferOwnershipTransactions$(
       this.signer,
       account$,
@@ -181,19 +168,31 @@ export class UniversalProfile {
       defaultUniversalReceiverAddress
     );
 
-    const deployment$ = deploymentWithContractsOnCompletion$(
-      concat([
-        baseContractDeployment$,
-        account$,
-        merge(universalReceiver$, keyManager$),
-        setDataAndTransferOwnership$,
-      ]).pipe(concatAll())
-    );
+    const deployment$ = concat([
+      baseContractDeployment$,
+      account$,
+      merge(universalReceiver$, keyManager$),
+      setDataAndTransferOwnership$,
+    ]).pipe(concatAll(), shareReplay());
 
-    if (deploymentConfiguration?.deployReactive)
-      return deployment$ as UniversalProfileObservableOrPromise<T>;
+    if (contractDeploymentOptions?.events?.next || contractDeploymentOptions?.events?.error) {
+      deployment$.subscribe({
+        next: contractDeploymentOptions.events.next,
+        error: contractDeploymentOptions.events.error,
+      });
+    }
 
-    return lastValueFrom(deployment$) as UniversalProfileObservableOrPromise<T>;
+    const contractsPromise =
+      waitForContractDeployment<DeployedUniversalProfileContracts>(deployment$);
+
+    if (!contractDeploymentOptions?.events?.complete) {
+      return contractsPromise;
+    }
+
+    const contracts = await contractsPromise;
+
+    contractDeploymentOptions?.events?.complete(contracts);
+    return contracts;
   }
 
   /**
