@@ -411,31 +411,39 @@ If the `ipfsGateway` parameter is provided, it will override the `ipfsGateway` o
 
 ### Reactive Deployment
 
-LSPFactory uses [RxJS](https://rxjs.dev/) to deploy smart contracts. This can be leveraged for reactive deployment of Universal Profiles. [Read more here](../getting-started.md#reactive-deployment).
+LSPFactory emits events for each step of the deployment process. These events can be hooked into by passing the `onDeployEvents` object inside of the `options` object.
 
-When `deployReactive` is set to `true`, an [RxJS Observable](https://rxjs.dev/guide/observable) will be returned which will emit events as the deployment progresses.
+The `onDeployEvents` object takes three callback handler parameters:
+
+- `next` will be called once for every deployment event that is fired.
+- `complete` will be called once after deployment is finished with the completed contract deployment details.
+- `error` will be called once if an error is thrown during deployment.
+
+This enables LSPFactory to be used for certain reactive behaviors. For example, to give better feedback to users during deployment from a user interface such as a loading bar, or display live updates with the details and addresses of contracts as they are deployed.
+
+:::info
+The `complete` callback will be called with the same contracts object which is returned when the `deploy` function is resolved.
+
+:::
 
 ```typescript title="Reactive deployment of a Universal Profile"
-const observable = await lspFactory.UniversalProfile.deploy({...}, {
-  deployReactive: true
+const contracts = await lspFactory.UniversalProfile.deploy({...}, {
+  onDeployEvents: {
+    next: (deploymentEvent) => {
+      console.log(deploymentEvent);
+    },
+    error: (error) => {
+      console.error(error);
+    },
+    complete: (contracts) => {
+      console.log('Universal Profile deployment completed');
+      console.log(contracts);
+    },
+  }
 });
 
-observable.subscribe({
-  next: (deploymentEvent) => {
-    console.log(deploymentEvent);
-  },
-  error: (error) => {
-    console.error(error);
-  },
-  complete: () => {
-    console.log('Universal Profile deployment completed');
-  },
-});```
-
-The following events will be emitted:
-
-```typescript
-  {
+/**
+{
   type: 'PROXY_DEPLOYMENT',
   contractName: 'LSP0ERC725Account',
   status: 'PENDING',
@@ -541,6 +549,7 @@ The following events will be emitted:
     ...
   }
 }
+Universal Profile deployment completed
 {
   LSP0ERC725Account: {
     address: '0xa7b2ab323cD2504689637A0b503262A337ab87d6',
@@ -555,5 +564,6 @@ The following events will be emitted:
     }
   }
 }
-Digital Asset deployment completed
+*/
+
 ```
