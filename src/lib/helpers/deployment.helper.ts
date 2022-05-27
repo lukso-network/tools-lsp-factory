@@ -6,6 +6,7 @@ import { catchError, endWith, shareReplay, switchMap, takeLast, tap } from 'rxjs
 import {
   DeploymentEvent,
   DeploymentEventBaseContract,
+  DeploymentEventCallbacks,
   DeploymentEventProxyContract,
   DeploymentEventStandardContract,
   DeploymentStatus,
@@ -99,38 +100,28 @@ export async function deployContract(
   deployContractFunction,
   name: string
 ): Promise<DeploymentEventStandardContract> {
-  try {
-    const contract: Contract = await deployContractFunction();
+  const contract: Contract = await deployContractFunction();
 
-    return {
-      type: DeploymentType.DEPLOYMENT,
-      status: DeploymentStatus.PENDING,
-      contractName: name,
-      transaction: contract.deployTransaction,
-    };
-  } catch (error) {
-    console.error(`Error when deploying ${name}`, error);
-    throw error;
-  }
+  return {
+    type: DeploymentType.DEPLOYMENT,
+    status: DeploymentStatus.PENDING,
+    contractName: name,
+    transaction: contract.deployTransaction,
+  };
 }
 
 export async function deployBaseContract(
   deployContractFunction,
   name: string
 ): Promise<DeploymentEventBaseContract> {
-  try {
-    const contract: Contract = await deployContractFunction();
+  const contract: Contract = await deployContractFunction();
 
-    return {
-      type: DeploymentType.BASE_CONTRACT,
-      status: DeploymentStatus.PENDING,
-      contractName: name,
-      transaction: contract.deployTransaction,
-    };
-  } catch (error) {
-    console.error(`Error when deploying ${name}`, error);
-    throw error;
-  }
+  return {
+    type: DeploymentType.BASE_CONTRACT,
+    status: DeploymentStatus.PENDING,
+    contractName: name,
+    transaction: contract.deployTransaction,
+  };
 }
 
 export async function deployProxyContract(
@@ -139,21 +130,16 @@ export async function deployProxyContract(
   name: string,
   signer: Signer
 ): Promise<DeploymentEventProxyContract> {
-  try {
-    const contract: Contract = await deployContractFunction();
-    const factory = new ContractFactory(abi, getProxyByteCode(contract.address), signer);
-    const deployedProxy = await factory.deploy();
-    const transaction = deployedProxy.deployTransaction;
-    return {
-      type: DeploymentType.PROXY,
-      contractName: name,
-      status: DeploymentStatus.PENDING,
-      transaction,
-    };
-  } catch (error) {
-    console.error(`Error when deploying ${name}`, error);
-    throw error;
-  }
+  const contract: Contract = await deployContractFunction();
+  const factory = new ContractFactory(abi, getProxyByteCode(contract.address), signer);
+  const deployedProxy = await factory.deploy();
+  const transaction = deployedProxy.deployTransaction;
+  return {
+    type: DeploymentType.PROXY,
+    contractName: name,
+    status: DeploymentStatus.PENDING,
+    transaction,
+  };
 }
 
 /**
@@ -227,4 +213,28 @@ export function convertContractDeploymentOptionsVersion(providedVersion?: string
   }
 
   return { version, byteCode, libAddress };
+}
+
+export async function resolveContractDeployment<T>(
+  contractsPromise: Promise<T>,
+  onDeployEvents: DeploymentEventCallbacks<T>
+) {
+  let contracts: T;
+
+  if (onDeployEvents?.error) {
+    try {
+      contracts = await contractsPromise;
+    } catch (error) {
+      // Skip. Error is handled by subscribe block.
+    }
+  } else {
+    // No error callback passed. Let calling code handle errors.
+    contracts = await contractsPromise;
+  }
+
+  if (onDeployEvents?.complete) {
+    onDeployEvents?.complete(contracts);
+  }
+
+  return contracts;
 }

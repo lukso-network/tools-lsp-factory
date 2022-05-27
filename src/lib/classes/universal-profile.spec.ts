@@ -235,7 +235,7 @@ describe('UniversalProfile', () => {
           lsp3Profile: lsp3ProfileJson.LSP3Profile,
         },
         {
-          events: {
+          onDeployEvents: {
             next: (deploymentEvent: DeploymentEvent) => {
               if (
                 deploymentEvent.receipt?.contractAddress &&

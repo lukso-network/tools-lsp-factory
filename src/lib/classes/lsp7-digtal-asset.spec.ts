@@ -122,7 +122,7 @@ describe('LSP7DigitalAsset', () => {
         symbol: 'TKN',
       },
       {
-        events: {
+        onDeployEvents: {
           next: (deploymentEvent: DeploymentEvent) => {
             if (
               deploymentEvent.receipt?.contractAddress &&

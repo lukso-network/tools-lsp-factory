@@ -5,7 +5,7 @@ import { concatAll, shareReplay } from 'rxjs/operators';
 import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { defaultUploadOptions } from '../helpers/config.helper';
-import { waitForContractDeployment } from '../helpers/deployment.helper';
+import { resolveContractDeployment, waitForContractDeployment } from '../helpers/deployment.helper';
 import { ipfsUpload, prepareMetadataImage } from '../helpers/uploader.helper';
 import {
   LSPFactoryOptions,
@@ -30,7 +30,7 @@ import {
   isSignerUniversalProfile$,
   lsp3ProfileUpload$,
   setDataAndTransferOwnershipTransactions$,
-} from '../services/lsp3-account.service';
+} from '../services/universal-profile.service';
 import { universalReceiverDelegateDeployment$ } from '../services/universal-receiver.service';
 
 /**
@@ -175,24 +175,20 @@ export class UniversalProfile {
       setDataAndTransferOwnership$,
     ]).pipe(concatAll(), shareReplay());
 
-    if (contractDeploymentOptions?.events?.next || contractDeploymentOptions?.events?.error) {
+    if (
+      contractDeploymentOptions?.onDeployEvents?.next ||
+      contractDeploymentOptions?.onDeployEvents?.error
+    ) {
       deployment$.subscribe({
-        next: contractDeploymentOptions.events.next,
-        error: contractDeploymentOptions.events.error,
+        next: contractDeploymentOptions?.onDeployEvents?.next,
+        error: contractDeploymentOptions?.onDeployEvents?.error || (() => null),
       });
     }
 
     const contractsPromise =
       waitForContractDeployment<DeployedUniversalProfileContracts>(deployment$);
 
-    if (!contractDeploymentOptions?.events?.complete) {
-      return contractsPromise;
-    }
-
-    const contracts = await contractsPromise;
-
-    contractDeploymentOptions?.events?.complete(contracts);
-    return contracts;
+    return resolveContractDeployment(contractsPromise, contractDeploymentOptions?.onDeployEvents);
   }
 
   /**

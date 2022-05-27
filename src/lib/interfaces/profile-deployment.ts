@@ -46,7 +46,7 @@ export interface ContractDeploymentOptions {
   ERC725Account?: ContractOptions;
   LSP6KeyManager?: ContractOptions;
   LSP1UniversalReceiverDelegate?: ContractOptions;
-  events?: DeploymentEventCallbacks<DeployedUniversalProfileContracts>;
+  onDeployEvents?: DeploymentEventCallbacks<DeployedUniversalProfileContracts>;
 }
 
 interface ContractConfiguration {

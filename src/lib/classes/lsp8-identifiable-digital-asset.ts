@@ -3,7 +3,7 @@ import { concat, concatAll, EMPTY, shareReplay, switchMap } from 'rxjs';
 
 import versions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
-import { waitForContractDeployment } from '../helpers/deployment.helper';
+import { resolveContractDeployment, waitForContractDeployment } from '../helpers/deployment.helper';
 import { LSPFactoryOptions } from '../interfaces';
 import {
   ContractNames,
@@ -22,7 +22,7 @@ import {
   lsp8IdentifiableDigitalAssetDeployment$,
   setMetadataAndTransferOwnership$,
 } from '../services/digital-asset.service';
-import { isSignerUniversalProfile$ } from '../services/lsp3-account.service';
+import { isSignerUniversalProfile$ } from '../services/universal-profile.service';
 
 /**
  * Class responsible for deploying LSP8 Identifiable Digital Assets
@@ -124,22 +124,19 @@ export class LSP8IdentifiableDigitalAsset {
       setLSP4AndTransferOwnership$,
     ]).pipe(concatAll());
 
-    if (contractDeploymentOptions?.events?.next || contractDeploymentOptions?.events?.error) {
+    if (
+      contractDeploymentOptions?.onDeployEvents?.next ||
+      contractDeploymentOptions?.onDeployEvents?.error
+    ) {
       deployment$.subscribe({
-        next: contractDeploymentOptions?.events?.next,
-        error: contractDeploymentOptions?.events?.error,
+        next: contractDeploymentOptions?.onDeployEvents?.next,
+        error: contractDeploymentOptions?.onDeployEvents?.error,
       });
     }
 
     const contractPromise =
       waitForContractDeployment<DeployedLSP8IdentifiableDigitalAsset>(deployment$);
 
-    if (!contractDeploymentOptions?.events?.complete) {
-      return contractPromise;
-    }
-
-    const contracts = await contractPromise;
-    contractDeploymentOptions.events.complete(contracts);
-    return contracts;
+    return resolveContractDeployment(contractPromise, contractDeploymentOptions?.onDeployEvents);
   }
 }

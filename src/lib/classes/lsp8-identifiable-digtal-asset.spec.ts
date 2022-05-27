@@ -91,7 +91,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       },
       {
         LSP8IdentifiableDigitalAsset: { version: baseContract.address },
-        events: {
+        onDeployEvents: {
           next: (deploymentEvent: DeploymentEvent) => {
             if (
               deploymentEvent.receipt?.contractAddress &&
@@ -160,7 +160,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       },
       {
         LSP8IdentifiableDigitalAsset: { version: baseContract.address },
-        events: {
+        onDeployEvents: {
           next,
           complete,
         },

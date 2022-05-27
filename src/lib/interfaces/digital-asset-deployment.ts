@@ -34,12 +34,12 @@ interface ContractDeploymentOptionsBase {
 
 export interface LSP7ContractDeploymentOptions extends ContractDeploymentOptionsBase {
   LSP7DigitalAsset?: ContractOptions;
-  events?: DeploymentEventCallbacks<DeployedLSP7DigitalAsset>;
+  onDeployEvents?: DeploymentEventCallbacks<DeployedLSP7DigitalAsset>;
 }
 
 export interface LSP8ContractDeploymentOptions extends ContractDeploymentOptionsBase {
   LSP8IdentifiableDigitalAsset?: ContractOptions;
-  events?: DeploymentEventCallbacks<DeployedLSP8IdentifiableDigitalAsset>;
+  onDeployEvents?: DeploymentEventCallbacks<DeployedLSP8IdentifiableDigitalAsset>;
 }
 
 export type DigitalAssetContractDeploymentOptions =
