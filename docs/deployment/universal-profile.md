@@ -170,6 +170,44 @@ await lspFactory.UniversalProfile.deploy({
 };
 ```
 
+### Setting an Avatar in LSP3MetaData
+
+An avatar can be set by passing the `avatar` property to the `lsp3Profile` object.
+
+An avatar can be passed as an array where each element is a different file format of the same avatar. Each file format can be passed as a `File` object, or asset metadata object according to the [LSP2 ERC725Y JSON Schema standard](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#Array).
+
+If an avatar file is passed as a `File` object, the file will uploaded to IPFS, converted to the correct asset metadata format and added to the [LSP3 Profile Metadata](https://docs.lukso.tech/standards/universal-profile/lsp3-universal-profile-metadata) Json.
+
+Avatar files passed as a metadata objects will be set directly on the [LSP3 Profile Metadata](https://docs.lukso.tech/standards/universal-profile/lsp3-universal-profile-metadata) Json.
+
+```javascript title='Setting LSP3 metadata to be uploaded with an avatar with two formats'
+<input type="file" id="avatar">
+
+<script>
+  const myLocalAvatar = document.getElementById('avatar').files[0];
+
+  const myUniversalProfileData = {
+    name: 'My Universal Profile',
+    description: 'My cool Universal Profile',
+    asset: [
+        myLocalAvatar,
+        {
+          hashFunction: 'keccak256(bytes)',
+          hash: '0x5f3dbd89cde4dde36241c501203b67a93b89908063f5516535136bc25f712e11',
+          url: 'ipfs://QmWkAki4mLq2c9hsbKs4HFCaZdpUX1jLKKBb5y8YMATkak',
+          fileType: 'image/obj',
+        },
+      ]
+  };
+
+  await lspFactory.UniversalProfile.deploy({
+    controllingAccounts: ['0x...'],
+    lsp3Profile: myUniversalProfileData
+  });
+
+<script/>
+```
+
 #### Using the Javascript File object
 
 Javascript offers a `File` object for easy handling of files inside a browser. Developers can pass these to `profileImage` and `backgroundImage` fields to allow easy drag and drop of images from a user interface.

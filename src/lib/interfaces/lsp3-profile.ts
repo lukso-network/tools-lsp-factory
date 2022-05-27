@@ -34,6 +34,7 @@ export interface ProfileDataBeforeUpload {
   description: string;
   links?: LinkMetdata[];
   tags?: string[];
+  avatar?: (File | AssetMetadata)[];
 }
 
 export interface ProfileDataForEncoding {

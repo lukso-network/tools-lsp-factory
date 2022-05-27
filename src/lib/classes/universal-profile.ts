@@ -6,7 +6,7 @@ import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { defaultUploadOptions } from '../helpers/config.helper';
 import { resolveContractDeployment, waitForContractDeployment } from '../helpers/deployment.helper';
-import { ipfsUpload, prepareMetadataImage } from '../helpers/uploader.helper';
+import { ipfsUpload, prepareMetadataAsset, prepareMetadataImage } from '../helpers/uploader.helper';
 import {
   LSPFactoryOptions,
   ProfileDataBeforeUpload,
@@ -216,9 +216,15 @@ export class UniversalProfile {
     uploadOptions?: UploadOptions
   ): Promise<ProfileDataForEncoding> {
     uploadOptions = uploadOptions || defaultUploadOptions;
-    const [profileImage, backgroundImage] = await Promise.all([
+
+    const [profileImage, backgroundImage, avatar] = await Promise.all([
       prepareMetadataImage(uploadOptions, profileData.profileImage),
       prepareMetadataImage(uploadOptions, profileData.backgroundImage),
+      profileData.avatar
+        ? Promise.all(
+            profileData.avatar?.map((avatar) => prepareMetadataAsset(avatar, uploadOptions))
+          )
+        : undefined,
     ]);
 
     const profile = {
@@ -226,6 +232,7 @@ export class UniversalProfile {
         ...profileData,
         profileImage,
         backgroundImage,
+        avatar,
       },
     };
 
