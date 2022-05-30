@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/lukso-network/tools-lsp-factory/compare/v2.1.0...v2.3.0) (2022-05-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove reactiveDeployment (#120)
+* rename LSP3UniversalProfile -> UniversalProfile (#119)
+* use full universal profile contract names (#118)
+* Adds contract object to digital asset options object
+
+### Features
+
+* add avatar to LSP3 upload ([#121](https://github.com/lukso-network/tools-lsp-factory/issues/121)) ([e278d5a](https://github.com/lukso-network/tools-lsp-factory/commit/e278d5a69bf667cbb5bced47976250a644384b78))
+
+### improvement
+
+* Adds contract object to digital asset options object ([bf01091](https://github.com/lukso-network/tools-lsp-factory/commit/bf01091b7110cf7ee6492aaf13f5bc51f90c3d43))
+* remove reactiveDeployment ([#120](https://github.com/lukso-network/tools-lsp-factory/issues/120)) ([8ea2eb3](https://github.com/lukso-network/tools-lsp-factory/commit/8ea2eb36ead007c0282034f971868e0c90339d3b))
+* rename LSP3UniversalProfile -> UniversalProfile ([#119](https://github.com/lukso-network/tools-lsp-factory/issues/119)) ([feac758](https://github.com/lukso-network/tools-lsp-factory/commit/feac7581f8f6197ec6e3cd742db29fd89d3f2d6a))
+* use full universal profile contract names ([#118](https://github.com/lukso-network/tools-lsp-factory/issues/118)) ([12cef50](https://github.com/lukso-network/tools-lsp-factory/commit/12cef504bebc5c5e1fccdb1200205bfa04d95ee0))
+
 ## [2.2.0](https://github.com/lukso-network/tools-lsp-factory/compare/v2.1.0...v2.2.0) (2022-05-20)
 
 
