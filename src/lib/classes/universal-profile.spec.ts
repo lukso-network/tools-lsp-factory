@@ -24,7 +24,7 @@ import {
   PREFIX_PERMISSIONS,
 } from '../helpers/config.helper';
 import { getDeployedByteCode } from '../helpers/deployment.helper';
-import { ContractNames, DeployedContracts, DeploymentEvent } from '../interfaces';
+import { ContractNames, DeployedUniversalProfileContracts, DeploymentEvent } from '../interfaces';
 
 import { ProxyDeployer } from './proxy-deployer';
 
@@ -222,52 +222,50 @@ describe('UniversalProfile', () => {
     });
   });
 
-  describe('Reactive deployment', () => {
+  describe('Async deployment', () => {
     it('should have correct controller address', (done) => {
       lspFactory = new LSPFactory(provider, signers[0]);
 
-      const deployments$ = lspFactory.UniversalProfile.deploy(
+      let erc725Address: string;
+      let keyManagerAddress: string;
+
+      lspFactory.UniversalProfile.deploy(
         {
           controllerAddresses: [signers[0].address],
           lsp3Profile: lsp3ProfileJson.LSP3Profile,
         },
         {
-          deployReactive: true,
+          onDeployEvents: {
+            next: (deploymentEvent: DeploymentEvent) => {
+              if (
+                deploymentEvent.receipt?.contractAddress &&
+                deploymentEvent.contractName === ContractNames.ERC725_Account
+              ) {
+                erc725Address = deploymentEvent.receipt.contractAddress;
+              }
+
+              if (
+                deploymentEvent.receipt?.contractAddress &&
+                deploymentEvent.contractName === ContractNames.KEY_MANAGER
+              ) {
+                keyManagerAddress = deploymentEvent.receipt.contractAddress;
+              }
+            },
+            error: (error) => {
+              // Fail to exit subsciber
+              expect(1).toEqual(error);
+            },
+            complete: async () => {
+              const universalProfile = UniversalProfile__factory.connect(erc725Address, signers[0]);
+
+              const ownerAddress = await universalProfile.owner();
+              expect(ownerAddress).toEqual(keyManagerAddress);
+
+              done();
+            },
+          },
         }
       );
-
-      let erc725Address: string;
-      let keyManagerAddress: string;
-
-      deployments$.subscribe({
-        next: (deploymentEvent: DeploymentEvent) => {
-          if (
-            deploymentEvent.receipt?.contractAddress &&
-            deploymentEvent.contractName === ContractNames.ERC725_Account
-          ) {
-            erc725Address = deploymentEvent.receipt.contractAddress;
-          }
-
-          if (
-            deploymentEvent.receipt?.contractAddress &&
-            deploymentEvent.contractName === ContractNames.KEY_MANAGER
-          ) {
-            keyManagerAddress = deploymentEvent.receipt.contractAddress;
-          }
-        },
-        error: (error) => {
-          // Fail to exit subsciber
-          expect(1).toEqual(error);
-        },
-        complete: async () => {
-          const universalProfile = UniversalProfile__factory.connect(erc725Address, signers[0]);
-
-          const ownerAddress = await universalProfile.owner();
-          expect(ownerAddress).toEqual(keyManagerAddress);
-
-          done();
-        },
-      });
     });
   });
 
@@ -288,7 +286,7 @@ describe('UniversalProfile', () => {
     });
 
     describe('Deployment with only ERC725 baseContract set to true', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
       it('Should deploy only ERC725 Base contract', async () => {
         deployedContracts = await testUPDeployment(
           {
@@ -311,7 +309,7 @@ describe('UniversalProfile', () => {
     });
 
     describe('Deployment with only KeyManager baseContract set to true', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
       it('Should deploy only KeyManager Base contract', async () => {
         deployedContracts = await testUPDeployment(
           {
@@ -334,7 +332,7 @@ describe('UniversalProfile', () => {
     });
 
     describe('Deployment with only URD baseContract set to true', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
       it('Should deploy only URD Base contract', async () => {
         deployedContracts = await testUPDeployment(
           {
@@ -375,7 +373,7 @@ describe('UniversalProfile', () => {
 
   describe('Deploying UP with specified bytecode', () => {
     describe('Deploy ERC725Accout from custom bytecode', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
       it('should not deploy UP base contract', async () => {
         deployedContracts = await testUPDeployment(
           {
@@ -406,7 +404,7 @@ describe('UniversalProfile', () => {
       });
     });
     describe('Deploy KeyManager from custom bytecode', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
       it('should not deploy KeyManager base contract', async () => {
         lspFactory = new LSPFactory(provider, signers[1]);
 
@@ -437,7 +435,7 @@ describe('UniversalProfile', () => {
       });
     });
     describe('Deploy Universal Receiver Delegate from custom bytecode', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
       it('should not deploy KeyManager base contract', async () => {
         deployedContracts = await testUPDeployment(
           {
@@ -478,7 +476,7 @@ describe('UniversalProfile', () => {
     });
 
     describe('Deploying with only UP base contract specified', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
 
       it('should not deploy UP base contract', async () => {
         deployedContracts = await testUPDeployment(
@@ -507,7 +505,7 @@ describe('UniversalProfile', () => {
     });
 
     describe('Deploying with only KeyManager base contract specified', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
 
       it('should not deploy KeyManager base contract', async () => {
         deployedContracts = await testUPDeployment(
@@ -536,7 +534,7 @@ describe('UniversalProfile', () => {
     });
 
     describe('Deploying with only UniversalReceiverDelegate contract specified', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
       it('should not deploy URD contracts', async () => {
         deployedContracts = await testUPDeployment(
           {

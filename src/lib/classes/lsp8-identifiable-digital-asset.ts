@@ -1,20 +1,15 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, concatAll, EMPTY, lastValueFrom, Observable, shareReplay, switchMap } from 'rxjs';
+import { concat, concatAll, EMPTY, shareReplay, switchMap } from 'rxjs';
 
 import versions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
-import { deploymentWithContractsOnCompletion$ } from '../helpers/deployment.helper';
-import {
-  DeploymentEventContract,
-  DeploymentEventTransaction,
-  LSPFactoryOptions,
-} from '../interfaces';
+import { resolveContractDeployment, waitForContractDeployment } from '../helpers/deployment.helper';
+import { LSPFactoryOptions } from '../interfaces';
 import {
   ContractNames,
   DeployedLSP8IdentifiableDigitalAsset,
   DigitalAssetDeploymentOptions,
-  LSP8ContractDeploymentOptionsNonReactive,
-  LSP8ContractDeploymentOptionsReactive,
+  LSP8ContractDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
 import {
   lsp8BaseContractDeployment$,
@@ -27,13 +22,7 @@ import {
   lsp8IdentifiableDigitalAssetDeployment$,
   setMetadataAndTransferOwnership$,
 } from '../services/digital-asset.service';
-import { isSignerUniversalProfile$ } from '../services/lsp3-account.service';
-
-type LSP8ObservableOrPromise<
-  T extends LSP8ContractDeploymentOptionsReactive | LSP8ContractDeploymentOptionsNonReactive
-> = T extends LSP8ContractDeploymentOptionsReactive
-  ? Observable<DeploymentEventContract | DeploymentEventTransaction>
-  : Promise<DeployedLSP8IdentifiableDigitalAsset>;
+import { isSignerUniversalProfile$ } from '../services/universal-profile.service';
 
 /**
  * Class responsible for deploying LSP8 Identifiable Digital Assets
@@ -53,10 +42,10 @@ export class LSP8IdentifiableDigitalAsset {
   /**
    * Deploys a mintable LSP8 Identifiable Digital Asset
    *
-   * Returns a Promise with deployed contract details or an RxJS Observable of transaction details if `deployReactive` flag is set to true
+   * Returns a Promise with deployed contract details.
    *
    * @param {DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
-   * @param {ContractDeploymentOptions} contractDeploymentOptions
+   * @param {LSP8ContractDeploymentOptions} contractDeploymentOptions
    * @return {*}  Promise<DeployedContracts> | Observable<DigitalAssetDeploymentEvent>
    * @memberof LSP8IdentifiableDigitalAsset
    *
@@ -69,14 +58,10 @@ export class LSP8IdentifiableDigitalAsset {
    *})
    *```
    */
-  deploy<
-    T extends
-      | LSP8ContractDeploymentOptionsReactive
-      | LSP8ContractDeploymentOptionsNonReactive = LSP8ContractDeploymentOptionsNonReactive
-  >(
+  async deploy(
     digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
-    contractDeploymentOptions?: T
-  ): LSP8ObservableOrPromise<T> {
+    contractDeploymentOptions?: LSP8ContractDeploymentOptions
+  ): Promise<DeployedLSP8IdentifiableDigitalAsset> {
     const digitalAssetConfiguration = contractDeploymentOptions
       ? convertDigitalAssetConfigurationObject(contractDeploymentOptions)
       : null;
@@ -133,14 +118,25 @@ export class LSP8IdentifiableDigitalAsset {
       signerIsUniversalProfile$
     );
 
-    const deployment$ = deploymentWithContractsOnCompletion$<DeployedLSP8IdentifiableDigitalAsset>(
-      concat([baseContractDeployment$, digitalAsset$, setLSP4AndTransferOwnership$]).pipe(
-        concatAll()
-      )
-    );
+    const deployment$ = concat([
+      baseContractDeployment$,
+      digitalAsset$,
+      setLSP4AndTransferOwnership$,
+    ]).pipe(concatAll());
 
-    if (digitalAssetConfiguration?.deployReactive) return deployment$ as LSP8ObservableOrPromise<T>;
+    if (
+      contractDeploymentOptions?.onDeployEvents?.next ||
+      contractDeploymentOptions?.onDeployEvents?.error
+    ) {
+      deployment$.subscribe({
+        next: contractDeploymentOptions?.onDeployEvents?.next,
+        error: contractDeploymentOptions?.onDeployEvents?.error || (() => null),
+      });
+    }
 
-    return lastValueFrom(deployment$) as LSP8ObservableOrPromise<T>;
+    const contractPromise =
+      waitForContractDeployment<DeployedLSP8IdentifiableDigitalAsset>(deployment$);
+
+    return resolveContractDeployment(contractPromise, contractDeploymentOptions?.onDeployEvents);
   }
 }

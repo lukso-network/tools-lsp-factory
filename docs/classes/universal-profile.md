@@ -52,19 +52,18 @@ Object which specifies how the [UniversalProfile](../../../standards/universal-p
 | [`LSP6Keymanager`](../deployment/options.md) (optional)                            | Object           | Generic contract configuration object. Takes [`version`](../deployment/options.md#version) and [`deployProxy`](../deployment/options.md#deploy-proxy) parameters.                                             |
 | [`LSP1UniversalReceiverDelegate`](../deployment/options.md) (optional)             | Object           | Generic contract configuration object. Takes [`version`](../deployment/options.md#version) and [`deployProxy`](../deployment/options.md#deploy-proxy) parameters.                                             |
 | [`version`](../deployment/universal-profile#contract-versions) (optional)          | String           | Sets the global contract version. All contracts will be deployed with this version if set.                                                                                                                    |
-| [`deployReactive`](../deployment/universal-profile#reactive-deployment) (optional) | Boolean          | Specify whether a Promise or Observable should be returned.                                                                                                                                                   |
+| [`onDeployEvents`](../deployment/universal-profile#reactive-deployment) (optional) | Object           | Pass `next`, `complete` and `error` callback handlers to be executed as deployment events are fired. See [`Reactive Deployment`](../deployment/universal-profile#reactive-deployment)                         |
 | [`ipfsGateway`](../deployment/universal-profile#ipfs-upload-options) (optional)    | String \| Object | IPFS gateway url or an object containing IPFS gateway options.                                                                                                                                                |
 
 :::info Contract Deployment Details
-See the [configuration specification](../deployment/universal-profile#configuration) for more information about the `options` property.
+See the [configuration specification](../deployment/universal-profile#deployment-configuration) for more information about the `options` property.
 :::
 
 ### Returns
 
-| Type                                              | Description                                                                                                                              |
-| :------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------- |
-| `Promise`                                         | Resolves to an object containing deployed contract details. Default return value.                                                        |
-| [`Observable`](https://rxjs.dev/guide/observable) | An [RxJS Observable] object which emits events as contracts are deployed. Retutned if `deployProxy` is set to `true` in `options` object |
+| Type      | Description                                                 |
+| :-------- | :---------------------------------------------------------- |
+| `Promise` | Resolves to an object containing deployed contract details. |
 
 ### Example
 
@@ -150,25 +149,26 @@ await lspFactory.UniversalProfile.deploy({
 
 #### Reactive Universal Profile Deployment Example
 
-```javascript title="Deploying a reactive Universal Profile"
+```javascript title="Reactive Universal Profile Deployment"
 await lspFactory.UniversalProfile.deploy(
   {
     controllingAccounts: ['0x9Fba07e245B415cC9580BD6c890a9fd7D22e20db'],
   },
   {
-    deployReactive: true,
-  }
-).subscribe({
-  next: (deploymentEvent) => {
-    console.log(deploymentEvent);
+    onDeployEvents: {
+      next: (deploymentEvent) => {
+        console.log(deploymentEvent);
+      },
+      error: (error) => {
+        console.error(error);
+      },
+      complete: (contracts) => {
+        console.log('Deployment Complete');
+        console.log(contracts);
+      },
+    },
   },
-  error: (error) => {
-    console.error(error);
-  },
-  complete: () => {
-    console.log('Deployment Complete');
-  },
-});
+);
 
 /**
 {
@@ -277,6 +277,7 @@ await lspFactory.UniversalProfile.deploy(
     ...
   }
 },
+Deployment Complete
 {
   LSP0ERC725Account: {
     address: '0x805761959e7B94090fedD51776C63AB474a76A95',
@@ -291,7 +292,6 @@ await lspFactory.UniversalProfile.deploy(
     },
   }
 }
-Deployment Complete
 */
 ```
 
@@ -416,7 +416,7 @@ await UniversalProfile.uploadProfileData(
   },
   {
     ipfsGateway: 'https://ipfs.infura.io',
-  }
+  },
 );
 
 /**
@@ -450,7 +450,7 @@ await UniversalProfile.uploadProfileData(
       port: 5001,
       protocol: 'https',
     },
-  }
+  },
 );
 
 /**

@@ -16,7 +16,7 @@ import {
   DeploymentEventProxyContract,
 } from '../interfaces';
 
-import { LSP3AccountDeploymentEvent } from './lsp3-account.service';
+import { LSP3AccountDeploymentEvent } from './universal-profile.service';
 
 export type KeyManagerDeploymentEvent = DeploymentEventContract;
 

@@ -9,7 +9,7 @@ import {
   PREFIX_PERMISSIONS,
 } from '../helpers/config.helper';
 
-import { prepareSetDataParameters } from './lsp3-account.service';
+import { prepareSetDataParameters } from './universal-profile.service';
 
 jest.setTimeout(60000);
 jest.useRealTimers();

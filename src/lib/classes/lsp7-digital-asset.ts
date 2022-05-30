@@ -1,19 +1,14 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, concatAll, EMPTY, lastValueFrom, Observable, shareReplay, switchMap } from 'rxjs';
+import { concat, concatAll, EMPTY, shareReplay, switchMap } from 'rxjs';
 
 import versions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
-import { deploymentWithContractsOnCompletion$ } from '../helpers/deployment.helper';
-import {
-  DeploymentEventContract,
-  DeploymentEventTransaction,
-  LSPFactoryOptions,
-} from '../interfaces';
+import { resolveContractDeployment, waitForContractDeployment } from '../helpers/deployment.helper';
+import { LSPFactoryOptions } from '../interfaces';
 import {
   ContractNames,
   DeployedLSP7DigitalAsset,
-  LSP7ContractDeploymentOptionsNonReactive,
-  LSP7ContractDeploymentOptionsReactive,
+  LSP7ContractDeploymentOptions,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
 import {
@@ -27,13 +22,7 @@ import {
   lsp7DigitalAssetDeployment$,
   setMetadataAndTransferOwnership$,
 } from '../services/digital-asset.service';
-import { isSignerUniversalProfile$ } from '../services/lsp3-account.service';
-
-type LSP7ObservableOrPromise<
-  T extends LSP7ContractDeploymentOptionsReactive | LSP7ContractDeploymentOptionsNonReactive
-> = T extends LSP7ContractDeploymentOptionsReactive
-  ? Observable<DeploymentEventContract | DeploymentEventTransaction>
-  : Promise<DeployedLSP7DigitalAsset>;
+import { isSignerUniversalProfile$ } from '../services/universal-profile.service';
 
 /**
  * Class responsible for deploying LSP7 Digital Assets
@@ -53,11 +42,11 @@ export class LSP7DigitalAsset {
   /**
    * Deploys a mintable LSP7 Digital Asset
    *
-   * Returns a Promise with deployed contract details or an RxJS Observable of transaction details if `deployReactive` flag is set to true
+   * Returns a Promise with deployed contract details
    *
    * @param {LSP7DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
    * @param {ContractDeploymentOptions} contractDeploymentOptions
-   * @return {*}  Promise<DeployedContracts> | Observable<DigitalAssetDeploymentEvent>
+   * @return {*}  Promise<Deployed<LSP7DigitalAsset>
    * @memberof LSP7DigitalAsset
    *
    * @example
@@ -70,14 +59,10 @@ export class LSP7DigitalAsset {
    *})
    *```
    */
-  deploy<
-    T extends
-      | LSP7ContractDeploymentOptionsReactive
-      | LSP7ContractDeploymentOptionsNonReactive = LSP7ContractDeploymentOptionsNonReactive
-  >(
+  async deploy(
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
-    contractDeploymentOptions: T = undefined
-  ): LSP7ObservableOrPromise<T> {
+    contractDeploymentOptions?: LSP7ContractDeploymentOptions
+  ): Promise<DeployedLSP7DigitalAsset> {
     const digitalAssetConfiguration = contractDeploymentOptions
       ? convertDigitalAssetConfigurationObject(contractDeploymentOptions)
       : null;
@@ -134,14 +119,24 @@ export class LSP7DigitalAsset {
       signerIsUniversalProfile$
     );
 
-    const deployment$ = deploymentWithContractsOnCompletion$<DeployedLSP7DigitalAsset>(
-      concat([baseContractDeployment$, digitalAsset$, setLSP4AndTransferOwnership$]).pipe(
-        concatAll()
-      )
-    );
+    const deployment$ = concat([
+      baseContractDeployment$,
+      digitalAsset$,
+      setLSP4AndTransferOwnership$,
+    ]).pipe(concatAll(), shareReplay());
 
-    if (digitalAssetConfiguration?.deployReactive) return deployment$ as LSP7ObservableOrPromise<T>;
+    if (
+      contractDeploymentOptions?.onDeployEvents?.next ||
+      contractDeploymentOptions?.onDeployEvents?.error
+    ) {
+      deployment$.subscribe({
+        next: contractDeploymentOptions?.onDeployEvents?.next,
+        error: contractDeploymentOptions?.onDeployEvents?.error || (() => null),
+      });
+    }
 
-    return lastValueFrom(deployment$) as LSP7ObservableOrPromise<T>;
+    const contractsPromise = waitForContractDeployment<DeployedLSP7DigitalAsset>(deployment$);
+
+    return resolveContractDeployment(contractsPromise, contractDeploymentOptions?.onDeployEvents);
   }
 }

@@ -118,25 +118,20 @@ export async function deployProxyContract(
   deployContractFunction,
   signer: Signer
 ): Promise<DeploymentEventProxyContract> {
-  try {
-    const contract: Contract = await deployContractFunction();
-    const factory = new ContractFactory(
-      UniversalProfile__factory.abi,
-      getProxyByteCode(contract.address),
-      signer
-    );
-    const deployedProxy = await factory.deploy(signer.getAddress());
-    const transaction = deployedProxy.deployTransaction;
-    return {
-      type: DeploymentType.PROXY,
-      contractName: ContractNames.ERC725_Account,
-      status: DeploymentStatus.PENDING,
-      transaction,
-    };
-  } catch (error) {
-    console.error(`Error when deploying ${ContractNames.ERC725_Account}`, error);
-    throw error;
-  }
+  const contract: Contract = await deployContractFunction();
+  const factory = new ContractFactory(
+    UniversalProfile__factory.abi,
+    getProxyByteCode(contract.address),
+    signer
+  );
+  const deployedProxy = await factory.deploy(signer.getAddress());
+  const transaction = deployedProxy.deployTransaction;
+  return {
+    type: DeploymentType.PROXY,
+    contractName: ContractNames.ERC725_Account,
+    status: DeploymentStatus.PENDING,
+    transaction,
+  };
 }
 
 function initializeProxy(
@@ -573,6 +568,5 @@ export function convertUniversalProfileConfigurationObject(
       libAddress: universalReceiverDelegateLibAddress,
       deployProxy: contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.deployProxy,
     },
-    deployReactive: contractDeploymentOptions?.deployReactive,
   };
 }

@@ -32,11 +32,11 @@ Specify properties to be set on the LSP7 Digital Asset during deployment.
 
 Object which specifies how the LSP7 Digital Asset will be deployed
 
-| Name                                                                           | Type             | Description                                                                                                                                                  |
-| :----------------------------------------------------------------------------- | :--------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`LSP7DigitalAsset`](../deployment/options.md) (optional)                      | String           | Generic contract configuration object. Takes [`version`](../deployment/options.md#version) and [`deployProxy`](../deployment/options.md#version) parameters. |
-| [`deployReactive`](../deployment/digital-asset#reactive-deployment) (optional) | Boolean          | Whether to return an [RxJS Observable] of deployment events. Defaults to `false`.                                                                            |
-| [`ipfsGateway`](../deployment/digital-asset#ipfs-upload-options) (optional)    | String \| Object | An IPFS gateway URL or an object containing IPFS configuration options.                                                                                      |
+| Name                                                                           | Type             | Description                                                                                                                                                                           |
+| :----------------------------------------------------------------------------- | :--------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`LSP7DigitalAsset`](../deployment/options.md) (optional)                      | String           | Generic contract configuration object. Takes [`version`](../deployment/options.md#version) and [`deployProxy`](../deployment/options.md#version) parameters.                          |
+| [`onDeployEvents`](../deployment/digital-asset#reactive-deployment) (optional) | Object           | Pass `next`, `complete` and `error` callback handlers to be executed as deployment events are fired. See [`Reactive Deployment`](../deployment/digital-asset.md#reactive-deployment). |
+| [`ipfsGateway`](../deployment/digital-asset#ipfs-upload-options) (optional)    | String \| Object | An IPFS gateway URL or an object containing IPFS configuration options.                                                                                                               |
 
 :::info
 You can read more about the `options` object specification on [its official page](../deployment/digital-asset.md#deployment-configuration)
@@ -89,7 +89,7 @@ await lspFactory.LSP7DigitalAsset.deploy({
 */
 ```
 
-#### Deployment of Reactive LSP7 Digital Asset Example
+#### Reactive LSP7 Digital Asset deployment Example
 
 ```javascript title="Deploying a Reactive LSP7 Digital Asset"
 await lspFactory.LSP7DigitalAsset.deploy(
@@ -100,19 +100,21 @@ await lspFactory.LSP7DigitalAsset.deploy(
     isNFT: true,
   },
   {
-    deployReactive: true,
+    onDeployEvents: {
+      next: (deploymentEvent) => {
+        console.log(deploymentEvent);
+      },
+      error: (error) => {
+        console.error(error);
+      },
+      complete: (digitalAsset) => {
+        console.log('Deployment Complete');
+        console.log(digitalAsset);
+      },
+    },
   },
-).subscribe({
-  next: (deploymentEvent) => {
-    console.log(deploymentEvent);
-  },
-  error: (error) => {
-    console.error(error);
-  },
-  complete: () => {
-    console.log('Deployment Complete');
-  },
-});
+);
+
 /**
 {
   type: 'PROXY_DEPLOYMENT',
@@ -185,6 +187,7 @@ await lspFactory.LSP7DigitalAsset.deploy(
     ...
   }
 }
+Deployment Complete
 {
   LSP7DigitalAsset: {
     address: '0x97053C386eaa49d6eAD7477220ca04EFcD857dde',
@@ -193,7 +196,6 @@ await lspFactory.LSP7DigitalAsset.deploy(
     },
   }
 }
-Deployment Complete
 */
 ```
 
