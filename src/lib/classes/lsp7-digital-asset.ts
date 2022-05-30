@@ -131,7 +131,7 @@ export class LSP7DigitalAsset {
     ) {
       deployment$.subscribe({
         next: contractDeploymentOptions?.onDeployEvents?.next,
-        error: contractDeploymentOptions?.onDeployEvents?.error,
+        error: contractDeploymentOptions?.onDeployEvents?.error || (() => null),
       });
     }
 

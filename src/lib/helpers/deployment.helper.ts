@@ -232,7 +232,7 @@ export async function resolveContractDeployment<T>(
     contracts = await contractsPromise;
   }
 
-  if (onDeployEvents?.complete) {
+  if (contracts && onDeployEvents?.complete) {
     onDeployEvents?.complete(contracts);
   }
 

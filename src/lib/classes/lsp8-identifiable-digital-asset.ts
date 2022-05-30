@@ -130,7 +130,7 @@ export class LSP8IdentifiableDigitalAsset {
     ) {
       deployment$.subscribe({
         next: contractDeploymentOptions?.onDeployEvents?.next,
-        error: contractDeploymentOptions?.onDeployEvents?.error,
+        error: contractDeploymentOptions?.onDeployEvents?.error || (() => null),
       });
     }
 
