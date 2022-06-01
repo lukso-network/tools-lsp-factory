@@ -111,9 +111,9 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy(
       error: (error) => {
         console.error(error);
       },
-      complete: (digitalAsset) => {
+      complete: (contracts) => {
         console.log('Deployment Complete');
-        console.log(digitalAsset);
+        console.log(contracts.LSP8IdentifiableDigitalAsset);
       },
     },
   },
@@ -193,12 +193,10 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy(
 }
 Deployment Complete
 {
-  LSP8IdentifiableDigitalAsset: {
-    address: '0x2cA038832c15E61b83d47414Eb53818a45e0E142',
-    receipt: {
-      ...
-    },
-  }
+  address: '0x2cA038832c15E61b83d47414Eb53818a45e0E142',
+  receipt: {
+    ...
+  },
 }
 */
 ```
