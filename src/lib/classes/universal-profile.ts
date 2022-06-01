@@ -12,7 +12,7 @@ import {
   ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
 } from '../interfaces';
-import { ProfileDataForEncoding } from '../interfaces/lsp3-profile';
+import { LSP3ProfileBeforeUpload, ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import {
   ContractDeploymentOptions,
   DeployedUniversalProfileContracts,
@@ -74,9 +74,16 @@ export class UniversalProfile {
     const deploymentConfiguration =
       convertUniversalProfileConfigurationObject(contractDeploymentOptions);
 
+    const lsp3Profile =
+      typeof profileDeploymentOptions?.lsp3Profile !== 'string' &&
+      typeof profileDeploymentOptions?.lsp3Profile !== 'undefined' &&
+      'LSP3Profile' in profileDeploymentOptions?.lsp3Profile
+        ? profileDeploymentOptions?.lsp3Profile?.LSP3Profile
+        : profileDeploymentOptions?.lsp3Profile;
+
     // -1 > Run IPFS upload process in parallel with contract deployment
     const lsp3Profile$ = lsp3ProfileUpload$(
-      profileDeploymentOptions.lsp3Profile,
+      lsp3Profile,
       deploymentConfiguration?.uploadOptions ?? this.options.uploadOptions
     );
 
@@ -212,10 +219,12 @@ export class UniversalProfile {
    * @memberof UniversalProfile
    */
   static async uploadProfileData(
-    profileData: ProfileDataBeforeUpload,
+    profileData: ProfileDataBeforeUpload | LSP3ProfileBeforeUpload,
     uploadOptions?: UploadOptions
   ): Promise<ProfileDataForEncoding> {
     uploadOptions = uploadOptions || defaultUploadOptions;
+
+    profileData = 'LSP3Profile' in profileData ? profileData.LSP3Profile : profileData;
 
     const [profileImage, backgroundImage, avatar] = await Promise.all([
       prepareMetadataImage(uploadOptions, profileData.profileImage),

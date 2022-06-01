@@ -1,4 +1,8 @@
-import { LSP4MetadataBeforeUpload, LSP4MetadataForEncoding } from './lsp4-digital-asset';
+import {
+  LSP4MetadataBeforeUpload,
+  LSP4MetadataContentBeforeUpload,
+  LSP4MetadataForEncoding,
+} from './lsp4-digital-asset';
 import { IPFSGateway, UploadOptions } from './profile-upload-options';
 
 import { ContractOptions, DeployedContract, DeploymentEventCallbacks } from '.';
@@ -12,7 +16,11 @@ export interface DigitalAssetDeploymentOptions {
   controllerAddress: string;
   name: string;
   symbol: string;
-  digitalAssetMetadata?: LSP4MetadataBeforeUpload | LSP4MetadataForEncoding | string;
+  digitalAssetMetadata?:
+    | LSP4MetadataBeforeUpload
+    | LSP4MetadataContentBeforeUpload
+    | LSP4MetadataForEncoding
+    | string;
   creators?: string[];
 }
 

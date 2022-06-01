@@ -37,7 +37,11 @@ import {
   ProfileDataBeforeUpload,
   UniversalProfileDeploymentConfiguration,
 } from '../interfaces';
-import { LSP3ProfileDataForEncoding, ProfileDataForEncoding } from '../interfaces/lsp3-profile';
+import {
+  LSP3ProfileBeforeUpload,
+  LSP3ProfileDataForEncoding,
+  ProfileDataForEncoding,
+} from '../interfaces/lsp3-profile';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 
 import { UniversalReveiverDeploymentEvent } from './universal-receiver.service';
@@ -318,10 +322,21 @@ async function getEncodedLSP3ProfileData(
 }
 
 export function lsp3ProfileUpload$(
-  lsp3Profile: ProfileDataBeforeUpload | LSP3ProfileDataForEncoding | string,
+  passedProfileData:
+    | ProfileDataBeforeUpload
+    | LSP3ProfileBeforeUpload
+    | LSP3ProfileDataForEncoding
+    | string,
   uploadOptions?: UploadOptions
 ) {
   let lsp3Profile$: Observable<string>;
+
+  const lsp3Profile =
+    typeof passedProfileData !== 'string' &&
+    typeof passedProfileData !== 'undefined' &&
+    'LSP3Profile' in passedProfileData
+      ? passedProfileData?.LSP3Profile
+      : passedProfileData;
 
   if (typeof lsp3Profile !== 'string' || !isMetadataEncoded(lsp3Profile)) {
     lsp3Profile$ = lsp3Profile

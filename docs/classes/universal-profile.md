@@ -167,7 +167,7 @@ await lspFactory.UniversalProfile.deploy(
         console.log(contracts);
       },
     },
-  },
+  }
 );
 
 /**
@@ -329,6 +329,12 @@ Object containing the [LSP3 Metadata](../../../standards/universal-profile/lsp3-
 | `links`           | Array         | An Array of Objects containing `title` and `url` parameters.                               |
 | `tags`            | Object        | An object containing the profile data to upload.                                           |
 
+OR
+
+| Name          | Type   | Description                                                                                                    |
+| :------------ | :----- | :------------------------------------------------------------------------------------------------------------- |
+| `LSP3Profile` | Object | Object containing `name`, `description`, `profileImage`, `backgroundImage`, `links`, `tags` as described above |
+
 #### 2. `options` - Object (optional)
 
 Object containing configuration details of how the metadata should be uploaded.
@@ -388,6 +394,33 @@ await UniversalProfile.uploadProfileData({
 */
 ```
 
+```javascript title="Uploading profile data"
+await UniversalProfile.uploadProfileData({
+  LSP3Profile: {
+    name: 'My Universal Profile',
+    description: 'My cool Universal Profile',
+    tags: ['Fashion', 'Design'],
+    links: [{ title: 'My Website', url: 'www.my-website.com' }],
+  },
+});
+
+/**
+{
+  profile: {
+    LSP3Profile: {
+      name: 'My Universal Profile',
+      description: 'My cool Universal Profile',
+      tags: [Array],
+      links: [Array],
+      profileImage: [Array],
+      backgroundImage: [Array]
+    }
+  },
+  url: 'ipfs://QmS7NCnoXub7ju13HZuDzJpWqWq15Nev4CC18821qBNbkx'
+}
+*/
+```
+
 ```javascript title="Uploading profile data using a custom IPFS gateway"
 await UniversalProfile.uploadProfileData(
   {
@@ -416,7 +449,7 @@ await UniversalProfile.uploadProfileData(
   },
   {
     ipfsGateway: 'https://ipfs.infura.io',
-  },
+  }
 );
 
 /**
@@ -450,7 +483,7 @@ await UniversalProfile.uploadProfileData(
       port: 5001,
       protocol: 'https',
     },
-  },
+  }
 );
 
 /**

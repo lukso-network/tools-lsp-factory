@@ -50,6 +50,7 @@ describe('UniversalProfile', () => {
 
     const allowedLSP3Formats = [
       lsp3ProfileJson.LSP3Profile,
+      lsp3ProfileJson,
       { json: lsp3ProfileJson, url: 'ipfs://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D' },
     ];
 

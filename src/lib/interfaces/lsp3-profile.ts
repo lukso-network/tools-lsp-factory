@@ -37,6 +37,10 @@ export interface ProfileDataBeforeUpload {
   avatar?: (File | AssetMetadata)[];
 }
 
+export interface LSP3ProfileBeforeUpload {
+  LSP3Profile: ProfileDataBeforeUpload;
+}
+
 export interface ProfileDataForEncoding {
   json: LSP3ProfileJSON;
   url: string;

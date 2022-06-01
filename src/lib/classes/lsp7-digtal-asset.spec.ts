@@ -201,6 +201,7 @@ describe('LSP7DigitalAsset', () => {
 
     const allowedLSP4Formats = [
       lsp4DigitalAsset.LSP4Metadata,
+      lsp4DigitalAsset,
       { json: lsp4DigitalAsset, url: 'ipfs://QmRrqBTQL3h2Vc9PEL3d18VnRknzstEGVCxhVW6jPaZzSF' },
     ];
 

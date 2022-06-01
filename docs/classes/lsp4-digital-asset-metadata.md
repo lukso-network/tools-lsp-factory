@@ -28,6 +28,12 @@ If `options` are not specified in the function call, and the function is used on
 | `images` (optional) | Array         | An Array of images where each image element is a JavaScript File object or an Array of image metadata Objects for different sizes of the same image. |
 | `assets` (optional) | Array         | An Array of assets where each asset is a JavaScript File object or an asset metadata Object.                                                         |
 
+OR
+
+| Name           | Type   | Description                                                                             |
+| :------------- | :----- | :-------------------------------------------------------------------------------------- |
+| `LSP4Metadata` | Object | Object containing `description`, `links`, `icon`, `images`, `assets` as described above |
+
 #### 2. `options` - Object (optional)
 
 | Name                                                                        | Type             | Description                                                                                                 |
@@ -72,6 +78,38 @@ await LSP4DigitalAssetMetadata.uploadMetadata(
 */
 ```
 
+```javascript title="Uploading LSP4Metadata"
+const image = new File();
+const icon = new File();
+const asset = new File();
+
+await LSP4DigitalAssetMetadata.uploadMetadata(
+    {
+      LSP4Metadata: {
+        description: "Digital Asset",
+        assets: [asset],
+        images: [image],
+        icon: icon,
+        links: [{ title: "Cool", url: "cool.com" }],
+      }
+    };
+);
+/**
+{
+  lsp4Metadata: {
+    LSP4Metadata: {
+      description: 'Digital Asset',
+      assets: [Array],
+      images: [Array],
+      icon: [Array],
+      links: [Array]
+    }
+  },
+  url: 'ipfs://QmXJxJePjm6A9TSC4m32GN6h3PknVY2C4HqNaBEF6EeuGB'
+}
+*/
+```
+
 #### Upload Custom LSP4 Metadata Example
 
 ```javascript title="Uploading LSP4Metadata using custom upload options"
@@ -89,7 +127,7 @@ await LSP4DigitalAssetMetadata.uploadMetadata(
       port: 5001,
       protocol: 'https',
     },
-  },
+  }
 );
 /**
 {
