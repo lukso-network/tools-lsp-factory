@@ -107,9 +107,9 @@ await lspFactory.LSP7DigitalAsset.deploy(
       error: (error) => {
         console.error(error);
       },
-      complete: (digitalAsset) => {
+      complete: (contracts) => {
         console.log('Deployment Complete');
-        console.log(digitalAsset);
+        console.log(contracts.LSP7DigitalAsset);
       },
     },
   },
@@ -189,12 +189,10 @@ await lspFactory.LSP7DigitalAsset.deploy(
 }
 Deployment Complete
 {
-  LSP7DigitalAsset: {
-    address: '0x97053C386eaa49d6eAD7477220ca04EFcD857dde',
-    receipt: {
-      ...
-    },
-  }
+  address: '0x97053C386eaa49d6eAD7477220ca04EFcD857dde',
+  receipt: {
+    ...
+  },
 }
 */
 ```

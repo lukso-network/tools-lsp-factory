@@ -404,7 +404,7 @@ The `complete` callback will be called with the same contracts object which is r
 #### LSP7 Deployment Events
 
 ```javascript title="Reactive deployment of an LSP7 Digital Asset"
-const digitalAsset = lspFactory.LSP7DigitalAsset.deploy({...}, {
+const contracts = lspFactory.LSP7DigitalAsset.deploy({...}, {
   onDeployEvents: {
     next: (deploymentEvent) => {
       console.log(deploymentEvent);
@@ -412,9 +412,9 @@ const digitalAsset = lspFactory.LSP7DigitalAsset.deploy({...}, {
     error: (error) => {
       console.error(error);
     },
-    complete: (digitalAsset) => {
+    complete: (contracts) => {
       console.log('Digital Asset deployment completed');
-      console.log(digitalAsset);
+      console.log(contracts.LSP7DigitalAsset);
     },
   }
 });
@@ -493,12 +493,10 @@ const digitalAsset = lspFactory.LSP7DigitalAsset.deploy({...}, {
 }
 Digital Asset deployment completed
 {
-  LSP7DigitalAsset: {
-    address: '0x97053C386eaa49d6eAD7477220ca04EFcD857dde',
-    receipt: {
-      ...
-    },
-  }
+  address: '0x97053C386eaa49d6eAD7477220ca04EFcD857dde',
+  receipt: {
+    ...
+  },
 }
 */
 ```
@@ -506,7 +504,7 @@ Digital Asset deployment completed
 #### LSP8 Deployment Events
 
 ```typescript title="Reactive deployment of an LSP8 Identifiable Digital Asset"
-const digitalAsset = lspFactory.LSP8IdentifiableDigitalAsset.deploy({...}, {
+const contracts = lspFactory.LSP8IdentifiableDigitalAsset.deploy({...}, {
   onDeployEvents: {
     next: (deploymentEvent) => {
       console.log(deploymentEvent);
@@ -514,9 +512,9 @@ const digitalAsset = lspFactory.LSP8IdentifiableDigitalAsset.deploy({...}, {
     error: (error) => {
       console.error(error);
     },
-    complete: (digitalAsset) => {
+    complete: (contracts) => {
       console.log('Digital Asset deployment completed');
-      console.log(digitalAsset);
+      console.log(contracts.LSP8IdentifiableDigitalAsset);
     },
   }
 });
@@ -595,12 +593,10 @@ const digitalAsset = lspFactory.LSP8IdentifiableDigitalAsset.deploy({...}, {
 }
 Digital Asset deployment completed
 {
-  LSP8IdentifiableDigitalAsset: {
-    address: '0x2cA038832c15E61b83d47414Eb53818a45e0E142',
-    receipt: {
-      ...
-    },
-  }
+  address: '0x2cA038832c15E61b83d47414Eb53818a45e0E142',
+  receipt: {
+    ...
+  },
 }
 */
 
