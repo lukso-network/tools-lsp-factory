@@ -25,7 +25,7 @@ import {
 } from '../../';
 import { LSP4DigitalAssetMetadata } from '../classes/lsp4-digital-asset-metadata';
 import {
-  ERC725_ACCOUNT_INTERRFACE,
+  ERC725_ACCOUNT_INTERFACE,
   GAS_BUFFER,
   GAS_PRICE,
   LSP4_KEYS,
@@ -61,6 +61,8 @@ import {
   LSP4MetadataUrlForEncoding,
 } from '../interfaces/lsp4-digital-asset';
 import { UploadOptions } from '../interfaces/profile-upload-options';
+
+import { addressIsUniversalProfile } from './universal-profile.service';
 
 export type DigitalAssetDeploymentEvent = DeploymentEventContract | DeploymentEventProxyContract;
 
@@ -441,7 +443,8 @@ export function setMetadataAndTransferOwnership$(
           lsp4Metadata$,
           contractName,
           digitalAssetDeploymentOptions,
-          isSignerUniversalProfile$
+          isSignerUniversalProfile$,
+          signer
         )
       : EMPTY.pipe(defaultIfEmpty({ keysToSet: null, valuesToSet: null }), shareReplay());
 
@@ -517,11 +520,15 @@ export async function sendSetDataAndTransferOwnershipTransactions(
   const transactionsArray = [];
 
   if (keysToSet && valuesToSet) {
-    const setDataEstimate = await digitalAsset.estimateGas.setData(keysToSet, valuesToSet, {
-      gasPrice: GAS_PRICE,
-    });
+    const setDataEstimate = await digitalAsset.estimateGas['setData(bytes32[],bytes[])'](
+      keysToSet,
+      valuesToSet,
+      {
+        gasPrice: GAS_PRICE,
+      }
+    );
 
-    setDataTransaction = digitalAsset.setData(keysToSet, valuesToSet, {
+    setDataTransaction = digitalAsset['setData(bytes32[],bytes[])'](keysToSet, valuesToSet, {
       gasLimit: setDataEstimate.add(GAS_BUFFER),
       gasPrice: GAS_PRICE,
     });
@@ -567,7 +574,8 @@ export function prepareLSP4SetDataTransaction$(
   lsp4Metadata$: Observable<string | null>,
   contractName: string,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
-  isSignerUniversalProfile$: Observable<boolean>
+  isSignerUniversalProfile$: Observable<boolean>,
+  signer: Signer
 ) {
   return forkJoin([digitalAsset$, lsp4Metadata$, isSignerUniversalProfile$]).pipe(
     switchMap(([{ receipt: digitalAssetReceipt }, lsp4Metadata, isSignerUniversalProfile]) => {
@@ -579,7 +587,8 @@ export function prepareLSP4SetDataTransaction$(
         digitalAssetAddress,
         lsp4Metadata,
         digitalAssetDeploymentOptions,
-        contractName
+        contractName,
+        signer
       );
     }),
     shareReplay()
@@ -590,7 +599,8 @@ async function prepareSetDataTransaction(
   digitalAssetAddress: string,
   lsp4Metadata: string,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
-  contractName: string
+  contractName: string,
+  signer: Signer
 ) {
   const creators = digitalAssetDeploymentOptions?.creators ?? [];
 
@@ -600,21 +610,22 @@ async function prepareSetDataTransaction(
   const creatorsMapKeys: string[] = [];
   const creatorsMapValues: string[] = [];
 
-  creators.forEach((creatorAddress, index) => {
+  for (let i = 0; i < creators.length; i++) {
     creatorArrayIndexKeys.push(
       LSP4_KEYS.LSP4_CREATORS_ARRAY.slice(0, 34) +
-        ethers.utils.hexZeroPad(ethers.utils.hexlify([index]), 16).substring(2)
+        ethers.utils.hexZeroPad(ethers.utils.hexlify([i]), 16).substring(2)
     );
 
-    creatorArrayIndexValues.push(creatorAddress);
+    creatorArrayIndexValues.push(creators[i]);
 
-    creatorsMapKeys.push(LSP4_KEYS.LSP4_CREATORS_MAP_PREFIX + creatorAddress.slice(2));
+    const isUniversalProfile = await addressIsUniversalProfile(creators[i], signer);
+    const creatorInterface = isUniversalProfile ? ERC725_ACCOUNT_INTERFACE : '0xffffffff';
 
+    creatorsMapKeys.push(LSP4_KEYS.LSP4_CREATORS_MAP_PREFIX + creators[i].slice(2));
     creatorsMapValues.push(
-      ethers.utils.hexZeroPad(ethers.utils.hexlify([index]), 8) + ERC725_ACCOUNT_INTERRFACE.slice(2)
+      creatorInterface.slice(0, 10) + ethers.utils.hexZeroPad(ethers.utils.hexlify([i]), 8).slice(2)
     );
-  });
-
+  }
   const keysToSet: string[] = [];
   const valuesToSet: string[] = [];
 

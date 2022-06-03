@@ -4,10 +4,16 @@ import { BytesLike, Contract, ContractFactory, ethers, Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, from, Observable, of } from 'rxjs';
 import { defaultIfEmpty, mergeMap, shareReplay, switchMap } from 'rxjs/operators';
 
-import { UniversalProfile, UniversalProfile__factory, UniversalProfileInit__factory } from '../..';
+import {
+  LSP6KeyManager__factory,
+  UniversalProfile,
+  UniversalProfile__factory,
+  UniversalProfileInit__factory,
+} from '../..';
 import {
   ADDRESS_PERMISSIONS_ARRAY_KEY,
   DEFAULT_PERMISSIONS,
+  ERC725_ACCOUNT_INTERFACE,
   GAS_BUFFER,
   GAS_PRICE,
   LSP3_UP_KEYS,
@@ -164,6 +170,7 @@ export function setDataAndTransferOwnershipTransactions$(
   defaultUniversalReceiverDelegateAddress?: string
 ): Observable<DeploymentEventTransaction> {
   const setDataParameters$ = prepareSetDataTransaction$(
+    signer,
     account$,
     universalReceiver$,
     controllerAddresses,
@@ -178,34 +185,19 @@ export function setDataAndTransferOwnershipTransactions$(
     isSignerUniversalProfile$
   );
 
-  const pendingTransactionArray$ = forkJoin([
-    setDataParameters$,
-    transferOwnershipParameters$,
-  ]).pipe(
+  const transactions$ = forkJoin([setDataParameters$, transferOwnershipParameters$]).pipe(
     switchMap(([{ erc725AccountAddress, keysToSet, valuesToSet }, { keyManagerAddress }]) => {
       return sendSetDataAndTransferOwnershipTransactions(
         signer,
         erc725AccountAddress,
         keysToSet,
         valuesToSet,
-        keyManagerAddress
+        keyManagerAddress,
+        controllerAddresses
       );
     }),
-    shareReplay()
-  );
-
-  const transactions$ = pendingTransactionArray$.pipe(
     switchMap((transactions) => {
       return from(transactions);
-    }),
-    mergeMap(async (transaction) => {
-      return {
-        type: transaction.type,
-        contractName: transaction.contractName,
-        functionName: transaction.functionName,
-        status: transaction.status,
-        transaction: await transaction.pendingTransaction,
-      } as DeploymentEventTransaction;
     }),
     shareReplay()
   );
@@ -227,6 +219,7 @@ export function setDataAndTransferOwnershipTransactions$(
 }
 
 export function prepareSetDataTransaction$(
+  signer: Signer,
   account$: Observable<LSP3AccountDeploymentEvent>,
   universalReceiver$: Observable<UniversalReveiverDeploymentEvent>,
   controllerAddresses: (string | ControllerOptions)[],
@@ -265,6 +258,7 @@ export function prepareSetDataTransaction$(
             defaultUniversalReceiverDelegateAddress;
 
         return prepareSetDataParameters(
+          signer,
           lsp3AccountAddress,
           universalReceiverDelegateAddress,
           controllerAddresses,
@@ -356,56 +350,57 @@ export function lsp3ProfileUpload$(
  * @param {Signer} signer
  * @param {string} erc725AccountAddress
  * @param {string} universalReceiverDelegateAddress
- * @param {(string | ControllerOptions)[]} controllerAddresses
+ * @param {(string | ControllerOptions)[]} controllers
  * @param {LSP3ProfileDataForEncoding | string} encodedLSP3Profile
  *
  * @return {*}  Observable<LSP3AccountDeploymentEvent | DeploymentEventTransaction>
  */
 export async function prepareSetDataParameters(
+  signer: Signer,
   erc725AccountAddress: string,
   universalReceiverDelegateAddress: string,
-  controllerAddresses: (string | ControllerOptions)[],
+  controllers: (string | ControllerOptions)[],
   encodedLSP3Profile?: string
 ) {
-  const signersAddresses: string[] = [];
-  const signersPermissions: string[] = [];
+  const controllerAddresses: string[] = [];
+  const controllerPermissions: string[] = [];
 
-  controllerAddresses.map((controller, index) => {
+  controllers.map((controller, index) => {
     if (typeof controller === 'string') {
-      signersAddresses[index] = controller;
-      signersPermissions[index] = ERC725.encodePermissions(DEFAULT_PERMISSIONS);
+      controllerAddresses[index] = controller;
+      controllerPermissions[index] = ERC725.encodePermissions(DEFAULT_PERMISSIONS);
     } else {
-      signersAddresses[index] = controller.address;
-      signersPermissions[index] = controller.permissions;
+      controllerAddresses[index] = controller.address;
+      controllerPermissions[index] = controller.permissions;
     }
   });
 
   // see: https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md#addresspermissionspermissionsaddress
-  const addressPermissionsKeys = signersAddresses.map(
+  const addressPermissionsKeys = controllerAddresses.map(
     (address) => PREFIX_PERMISSIONS + address.substring(2)
   );
 
   // see: https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md#addresspermissions
-  const addressPermissionsArrayElements = signersAddresses.map((_, index) => {
+  const addressPermissionsArrayElements = controllerAddresses.map((_, index) => {
     const hexIndex = ethers.utils.hexlify([index]);
 
-    const leftSide = ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34);
-    const rightSide = ethers.utils.hexZeroPad(hexIndex, 16);
-
-    return leftSide + rightSide.substring(2);
+    return (
+      ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
+      ethers.utils.hexZeroPad(hexIndex, 16).substring(2)
+    );
   });
 
-  const hexIndex = ethers.utils.hexlify([signersAddresses.length]);
+  const hexIndex = ethers.utils.hexlify([controllerAddresses.length]);
 
   const universalReceiverPermissionIndex =
     ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) + ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
   const keysToSet = [
     LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
-    ...addressPermissionsKeys, // AddressPermissions:Permissions:<controllerAddress> = controllerPermission,
     PREFIX_PERMISSIONS + universalReceiverDelegateAddress.substring(2),
     ADDRESS_PERMISSIONS_ARRAY_KEY,
     ...addressPermissionsArrayElements, // AddressPermission[index] = controllerAddress
+    ...addressPermissionsKeys, // AddressPermissions:Permissions:<address> = controllerPermission,
     universalReceiverPermissionIndex,
   ];
 
@@ -415,12 +410,23 @@ export async function prepareSetDataParameters(
 
   const valuesToSet = [
     universalReceiverDelegateAddress,
-    ...signersPermissions,
     SET_DATA_PERMISSION,
-    ethers.utils.defaultAbiCoder.encode(['uint256'], [signersPermissions.length]),
-    ...signersAddresses,
+    ethers.utils.defaultAbiCoder.encode(['uint256'], [controllerPermissions.length + 1]),
+    ...controllerAddresses,
+    ...controllerPermissions,
     universalReceiverDelegateAddress,
   ];
+
+  // Set CHANGEOWNER + CHANGEPERMISSIONS for deploy key. Revoked after transfer ownerhip step is complete
+  const signerAddress = await signer.getAddress();
+
+  if (!controllerAddresses.includes(signerAddress)) {
+    keysToSet.push(PREFIX_PERMISSIONS + signerAddress.substring(2));
+    valuesToSet.push(ERC725.encodePermissions({ CHANGEOWNER: true, CHANGEPERMISSIONS: true }));
+  } else {
+    valuesToSet[keysToSet.indexOf(PREFIX_PERMISSIONS + signerAddress.substring(2))] =
+      ERC725.encodePermissions({ CHANGEOWNER: true, CHANGEPERMISSIONS: true });
+  }
 
   if (encodedLSP3Profile) {
     keysToSet.push(LSP3_UP_KEYS.LSP3_PROFILE);
@@ -439,12 +445,13 @@ export async function sendSetDataAndTransferOwnershipTransactions(
   erc725AccountAddress: string,
   keysToSet: string[],
   valuesToSet: string[],
-  keyManagerAddress: string
-) {
+  keyManagerAddress: string,
+  controllers: (string | ControllerOptions)[]
+): Promise<DeploymentEventTransaction[]> {
   const erc725Account = new UniversalProfile__factory(signer).attach(erc725AccountAddress);
   const signerAddress = await signer.getAddress();
 
-  const setDataEstimate = await erc725Account.estimateGas.setData(
+  const setDataEstimate = await erc725Account.estimateGas['setData(bytes32[],bytes[])'](
     keysToSet,
     valuesToSet as BytesLike[],
     {
@@ -460,16 +467,72 @@ export async function sendSetDataAndTransferOwnershipTransactions(
     }
   );
 
-  const setDataTransaction = erc725Account.setData(keysToSet, valuesToSet as BytesLike[], {
-    gasLimit: setDataEstimate.add(GAS_BUFFER),
-    gasPrice: GAS_PRICE,
-  });
+  const setDataTransaction = await erc725Account['setData(bytes32[],bytes[])'](
+    keysToSet,
+    valuesToSet as BytesLike[],
+    {
+      gasLimit: setDataEstimate.add(GAS_BUFFER),
+      gasPrice: GAS_PRICE,
+    }
+  );
 
-  const transferOwnershipTransaction = erc725Account.transferOwnership(keyManagerAddress, {
+  const transferOwnershipTransaction = await erc725Account.transferOwnership(keyManagerAddress, {
     from: signerAddress,
     gasLimit: transferOwnershipEstimate.add(GAS_BUFFER),
     gasPrice: GAS_PRICE,
   });
+
+  const claimOwnershipPayload = erc725Account.interface.getSighash('claimOwnership');
+  const keyManager = new LSP6KeyManager__factory(signer).attach(keyManagerAddress);
+
+  const claimOwnershipEstimate = await keyManager.estimateGas.execute(claimOwnershipPayload, {
+    from: signerAddress,
+    gasPrice: GAS_PRICE,
+  });
+
+  const claimOwnershipTransaction = await keyManager.execute(claimOwnershipPayload, {
+    gasLimit: claimOwnershipEstimate.add(GAS_BUFFER),
+    gasPrice: GAS_PRICE,
+  });
+
+  const controllerAddress = controllers.map((controller) => {
+    return typeof controller === 'string' ? controller : controller.address;
+  });
+
+  let signerPermission: string;
+
+  if (controllerAddress.includes(signerAddress)) {
+    const controller = controllers[controllerAddress.indexOf(signerAddress)];
+    signerPermission =
+      typeof controller === 'string'
+        ? ERC725.encodePermissions(DEFAULT_PERMISSIONS)
+        : controller.permissions ?? ERC725.encodePermissions(DEFAULT_PERMISSIONS);
+  } else {
+    signerPermission = ERC725.encodePermissions({});
+  }
+
+  // There is a bug in typechain which means encodeFunctionData does not work properly with overloaded functions so we need to cast to any here
+  const revokeSignerPermissionsPayload = (erc725Account.interface as any).encodeFunctionData(
+    'setData(bytes32,bytes)',
+    [PREFIX_PERMISSIONS + signerAddress.substring(2), signerPermission]
+  );
+
+  const revokeSignerPermissionsEstimate = await keyManager.estimateGas.execute(
+    revokeSignerPermissionsPayload,
+    {
+      from: signerAddress,
+      gasPrice: GAS_PRICE,
+    }
+  );
+
+  const revokeSignerPermissionsTransaction = await keyManager.execute(
+    revokeSignerPermissionsPayload,
+    {
+      from: signerAddress,
+      gasPrice: GAS_PRICE,
+      gasLimit: revokeSignerPermissionsEstimate.add(GAS_BUFFER),
+    }
+  );
 
   return [
     {
@@ -477,14 +540,28 @@ export async function sendSetDataAndTransferOwnershipTransactions(
       contractName: ContractNames.ERC725_Account,
       status: DeploymentStatus.PENDING,
       functionName: 'setData(bytes32[],bytes[])',
-      pendingTransaction: setDataTransaction,
+      transaction: setDataTransaction,
     },
     {
       type: DeploymentType.TRANSACTION,
       contractName: ContractNames.ERC725_Account,
       status: DeploymentStatus.PENDING,
       functionName: 'transferOwnership(address)',
-      pendingTransaction: transferOwnershipTransaction,
+      transaction: transferOwnershipTransaction,
+    },
+    {
+      type: DeploymentType.TRANSACTION,
+      contractName: ContractNames.ERC725_Account,
+      status: DeploymentStatus.PENDING,
+      functionName: 'claimOwnership()',
+      transaction: claimOwnershipTransaction,
+    },
+    {
+      type: DeploymentType.TRANSACTION,
+      contractName: ContractNames.ERC725_Account,
+      status: DeploymentStatus.PENDING,
+      functionName: 'setData(bytes32,bytes)',
+      transaction: revokeSignerPermissionsTransaction,
     },
   ];
 }
@@ -522,16 +599,25 @@ export function prepareTransferOwnershipTransaction$(
 
 export function isSignerUniversalProfile$(signer: Signer) {
   return defer(async () => {
-    try {
-      const signerAddress = await signer.getAddress();
-      const universalProfile = UniversalProfile__factory.connect(signerAddress, signer);
-
-      const owner = await universalProfile.owner();
-      return !!owner;
-    } catch (error) {
-      return false;
-    }
+    const signerAddress = await signer.getAddress();
+    return await addressIsUniversalProfile(signerAddress, signer);
   }).pipe(shareReplay());
+}
+
+export async function addressIsUniversalProfile(address: string, signer: Signer) {
+  try {
+    const universalProfile = UniversalProfile__factory.connect(address, signer);
+
+    let isUniversalProfile = await universalProfile.supportsInterface(ERC725_ACCOUNT_INTERFACE);
+
+    if (!isUniversalProfile) {
+      isUniversalProfile = await universalProfile.supportsInterface('0x63cb749b');
+    }
+
+    return isUniversalProfile;
+  } catch (error) {
+    return false;
+  }
 }
 
 export function convertUniversalProfileConfigurationObject(

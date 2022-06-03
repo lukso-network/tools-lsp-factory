@@ -35,6 +35,7 @@ describe('LSP3Account Service', () => {
 
     it('should set one controller address', async () => {
       const { keysToSet, valuesToSet, erc725AccountAddress } = await prepareSetDataParameters(
+        signers[0],
         universalProfile.address,
         universalReceiverDelegate.address,
         [signers[0].address]
@@ -44,20 +45,24 @@ describe('LSP3Account Service', () => {
 
       // AddressPermissions[] array length should be 1
       const totalPermissionsSet = valuesToSet[keysToSet.indexOf(ADDRESS_PERMISSIONS_ARRAY_KEY)];
-      const expectedLength = abiCoder.encode(['uint256'], [1]);
+      const expectedLength = abiCoder.encode(['uint256'], [2]);
       expect(totalPermissionsSet).toEqual(expectedLength);
 
       // controller address should have default permissions set
       const controllerPermissionsKey = PREFIX_PERMISSIONS + signers[0].address.substring(2);
       const controllerPermissionsValue = valuesToSet[keysToSet.indexOf(controllerPermissionsKey)];
-      const expectedPermissions = ERC725.encodePermissions(DEFAULT_PERMISSIONS);
+      const expectedPermissions = ERC725.encodePermissions({
+        CHANGEOWNER: true,
+        CHANGEPERMISSIONS: true,
+      });
       expect(controllerPermissionsValue).toEqual(expectedPermissions);
 
       // controller address in the array at index 0 -> AddressPermissions[0]
       const hexIndex = ethers.utils.hexlify([0]);
-      const leftSideKey = ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34);
-      const rightSideKey = ethers.utils.hexZeroPad(hexIndex, 16);
-      const addressPermissionArrayIndexKey = leftSideKey + rightSideKey.substring(2);
+
+      const addressPermissionArrayIndexKey =
+        ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
+        ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
       const result = valuesToSet[keysToSet.indexOf(addressPermissionArrayIndexKey)];
       const checkedsumResult = ethers.utils.getAddress(result);
@@ -68,6 +73,7 @@ describe('LSP3Account Service', () => {
       const controllerAddresses = [signers[0].address, signers[0].address];
 
       const { keysToSet, valuesToSet } = await prepareSetDataParameters(
+        signers[0],
         universalProfile.address,
         universalReceiverDelegate.address,
         controllerAddresses
@@ -75,7 +81,7 @@ describe('LSP3Account Service', () => {
 
       // AddressPermissions[] array length should be 2
       const totalPermissionsSet = valuesToSet[keysToSet.indexOf(ADDRESS_PERMISSIONS_ARRAY_KEY)];
-      const expectedLength = abiCoder.encode(['uint256'], [controllerAddresses.length]);
+      const expectedLength = abiCoder.encode(['uint256'], [controllerAddresses.length + 1]);
       expect(totalPermissionsSet).toEqual(expectedLength);
 
       for (let index = 0; index < controllerAddresses.length; index++) {
@@ -85,7 +91,10 @@ describe('LSP3Account Service', () => {
         const controllerPermissionsKey = PREFIX_PERMISSIONS + controllerAddress.substring(2);
         const controllerPermissionsValue = valuesToSet[keysToSet.indexOf(controllerPermissionsKey)];
 
-        const expectedPermissions = ERC725.encodePermissions(DEFAULT_PERMISSIONS);
+        const expectedPermissions = ERC725.encodePermissions({
+          CHANGEOWNER: true,
+          CHANGEPERMISSIONS: true,
+        });
         expect(controllerPermissionsValue).toEqual(expectedPermissions);
 
         // controller address in the array at AddressPermissions[index]
@@ -103,14 +112,15 @@ describe('LSP3Account Service', () => {
       const controllerAddresses = signers.slice(0, 10).map((signer) => signer.address);
 
       const { keysToSet, valuesToSet } = await prepareSetDataParameters(
+        signers[0],
         universalProfile.address,
         universalReceiverDelegate.address,
         controllerAddresses
       );
 
-      // AddressPermissions[] array length should be 10
+      // AddressPermissions[] array length should be 11 (including Universal Receiver Delegate address)
       const totalPermissionsSet = valuesToSet[keysToSet.indexOf(ADDRESS_PERMISSIONS_ARRAY_KEY)];
-      const expectedLength = abiCoder.encode(['uint256'], [controllerAddresses.length]);
+      const expectedLength = abiCoder.encode(['uint256'], [controllerAddresses.length + 1]);
       expect(totalPermissionsSet).toEqual(expectedLength);
 
       for (let index = 0; index < controllerAddresses.length; index++) {
@@ -120,7 +130,14 @@ describe('LSP3Account Service', () => {
         const controllerPermissionsKey = PREFIX_PERMISSIONS + controllerAddress.substring(2);
         const controllerPermissionsValue = valuesToSet[keysToSet.indexOf(controllerPermissionsKey)];
 
-        const expectedPermissions = ERC725.encodePermissions(DEFAULT_PERMISSIONS);
+        const expectedPermissions =
+          controllerAddress === (await signers[0].getAddress())
+            ? ERC725.encodePermissions({
+                CHANGEOWNER: true,
+                CHANGEPERMISSIONS: true,
+              })
+            : ERC725.encodePermissions(DEFAULT_PERMISSIONS);
+
         expect(controllerPermissionsValue).toEqual(expectedPermissions);
 
         // controller address in the array at AddressPermissions[index]

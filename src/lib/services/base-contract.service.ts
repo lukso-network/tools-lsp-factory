@@ -6,7 +6,7 @@ import { defaultIfEmpty, last, shareReplay, switchMap, tap } from 'rxjs/operator
 import {
   BaseContractAddresses,
   DeploymentEventContract,
-  LSP1UniversalReceiverDelegateUPInit__factory,
+  LSP1UniversalReceiverDelegateUP__factory,
   LSP6KeyManagerInit__factory,
   LSP7MintableInit__factory,
   LSP8MintableInit__factory,
@@ -41,7 +41,7 @@ export function universalProfileBaseContractsDeployment$(
   const universalReceiverBaseContractDeploymentReceipt$ = deployBaseContract$(
     UniversalProfileContractNames.UNIVERSAL_RECEIVER,
     () => {
-      return new LSP1UniversalReceiverDelegateUPInit__factory(signer).deploy({
+      return new LSP1UniversalReceiverDelegateUP__factory(signer).deploy({
         gasPrice: GAS_PRICE,
       });
     }
