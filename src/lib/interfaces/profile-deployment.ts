@@ -1,6 +1,10 @@
 import { ContractOptions, DeployedContract } from '../..';
 
-import { LSP3ProfileDataForEncoding, ProfileDataBeforeUpload } from './lsp3-profile';
+import {
+  LSP3ProfileBeforeUpload,
+  LSP3ProfileDataForEncoding,
+  ProfileDataBeforeUpload,
+} from './lsp3-profile';
 import { IPFSGateway, UploadOptions } from './profile-upload-options';
 
 import { DeploymentEventCallbacks } from '.';
@@ -21,7 +25,11 @@ export interface ControllerOptions {
  */
 export interface ProfileDeploymentOptions {
   controllerAddresses: (string | ControllerOptions)[];
-  lsp3Profile?: ProfileDataBeforeUpload | LSP3ProfileDataForEncoding | string;
+  lsp3Profile?:
+    | ProfileDataBeforeUpload
+    | LSP3ProfileBeforeUpload
+    | LSP3ProfileDataForEncoding
+    | string;
 }
 
 export interface DeployedUniversalProfileContracts {

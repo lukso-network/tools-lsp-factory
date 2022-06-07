@@ -80,6 +80,27 @@ await lspFactory.UniversalProfile.deploy({
 };
 ```
 
+LSP3 Metadata can also be passed with the `LSP3Profile` key:
+
+```javascript title='Uploading an LSP3 metadata automatically'
+await lspFactory.UniversalProfile.deploy({
+    controllerAddresses: ['0x...'],
+    lsp3Profile: {
+      LSP3Profile: {
+        name: 'My-Cool-Profile',
+        description: 'My cool Universal Profile',
+        tags: ['public-profile'],
+        links: [{
+          title: 'My Website',
+          url: 'www.my-website.com'
+        }],
+        ...
+      }
+    }
+  });
+};
+```
+
 The following two examples will download the JSON file before hashing it and generating the proper [JSONURL](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#JSONURL) value.
 
 ```javascript title='Providing a previously uploaded LSP3 metadata IPFS URL'

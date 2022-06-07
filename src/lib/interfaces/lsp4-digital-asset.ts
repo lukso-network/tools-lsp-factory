@@ -12,12 +12,16 @@ export interface LSP4DigitalAsset {
   icon: ImageMetadata[];
 }
 
-export interface LSP4MetadataBeforeUpload {
+export interface LSP4MetadataContentBeforeUpload {
   description: string;
   links?: LinkMetdata[];
   icon?: File | ImageBuffer | ImageMetadata[];
   images?: (File | ImageBuffer | ImageMetadata[])[];
   assets?: (File | AssetBuffer | AssetMetadata)[];
+}
+
+export interface LSP4MetadataBeforeUpload {
+  LSP4Metadata: LSP4MetadataContentBeforeUpload;
 }
 
 export interface LSP4MetadataUrlForEncoding {

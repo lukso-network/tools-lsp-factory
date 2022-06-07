@@ -117,7 +117,7 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
     symbol: 'DEMO',
     creators: ['0x7Ab53a0C861fb955050A8DA109eEeA5E61fd8Aa4', '0x6c1F3Ed2F99054C88897e2f32187ef15c62dC560'],
     digitalAssetMetadata: {
-      'description': 'My NFT 2.0'
+      description: 'My NFT 2.0'
       ...
     }
 });
@@ -155,6 +155,23 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
       url: "https://docs.lukso.tech"
     }],
   },
+  ...
+});
+```
+
+LSP4 Metadata can also be passed with the `LSP4Metadata` key:
+
+```javascript title="Passing LSP4Metadata key"
+await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
+  digitalAssetMetadata: {
+    LSP4Metadata: {
+      description: "My Digital Asset",
+      links: [{
+        title: "LUKSO Docs",
+        url: "https://docs.lukso.tech"
+      }],
+    },
+  }
   ...
 });
 ```

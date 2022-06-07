@@ -74,7 +74,7 @@ await lspFactory.UniversalProfile.deploy({
     name: 'My Universal Profile',
     description: 'My cool Universal Profile',
     tags: ['Fashion', 'Design'],
-    links: [{ title: 'My Website', url: 'www.my-website.com' }],
+    links: [{ title: 'My Website', url: 'https://www.my-website.com' }],
   },
 });
 
@@ -167,7 +167,7 @@ await lspFactory.UniversalProfile.deploy(
         console.log(contracts);
       },
     },
-  },
+  }
 );
 
 /**
@@ -320,14 +320,21 @@ Object containing the [LSP3 Metadata](../../../standards/universal-profile/lsp3-
 
 :::
 
-| Name              | Type          | Description                                                                                |
-| :---------------- | :------------ | :----------------------------------------------------------------------------------------- |
-| `name`            | String        | The name of the Universal Profile                                                          |
-| `description`     | String        | The description of the Universal Profile                                                   |
-| `profileImage`    | File \| Array | Javascript File object or an array of image metadata for different sizes of the same image |
-| `backgroundImage` | File \| Array | Javascript File object or an Array of image metadata for different sizes of the same image |
-| `links`           | Array         | An Array of Objects containing `title` and `url` parameters.                               |
-| `tags`            | Object        | An object containing the profile data to upload.                                           |
+| Name              | Type          | Description                                                                                                            |
+| :---------------- | :------------ | :--------------------------------------------------------------------------------------------------------------------- |
+| `name`            | String        | The name of the Universal Profile                                                                                      |
+| `description`     | String        | The description of the Universal Profile                                                                               |
+| `profileImage`    | File \| Array | Javascript File object or an array of image metadata for different sizes of the same image                             |
+| `backgroundImage` | File \| Array | Javascript File object or an Array of image metadata for different sizes of the same image                             |
+| `links`           | Array         | An Array of Objects containing `title` and `url` parameters.                                                           |
+| `tags`            | Object        | An object containing the profile data to upload.                                                                       |
+| `avatar`          | Array         | Array of different file formats of the same avatar asset passed as Javascript File object or an asset metadata object. |
+
+OR
+
+| Name          | Type   | Description                                                                                                              |
+| :------------ | :----- | :----------------------------------------------------------------------------------------------------------------------- |
+| `LSP3Profile` | Object | Object containing `name`, `description`, `profileImage`, `backgroundImage`, `links`, `tags`, `avatar` as described above |
 
 #### 2. `options` - Object (optional)
 
@@ -346,41 +353,137 @@ Object containing configuration details of how the metadata should be uploaded.
 ### Examples
 
 ```javascript title="Uploading profile data"
+
+const myLocalImage = new File();
+const myLocalAvatar = new File();
+
+<script>
+  await UniversalProfile.uploadProfileData({
+    name: 'My Universal Profile',
+    description: 'My cool Universal Profile',
+    tags: ['Fashion', 'Design'],
+    links: [{ title: 'My Website', url: 'https://www.my-website.com' }],
+    profileImage: myLocalImage,
+    backgroundImage: myLocalImage,
+    avatar: [myLocalAvatar],
+  });
+<script/>
+
+/**
+{
+  json: {
+    LSP3Profile: {
+      name: 'My Universal Profile',
+      description: 'My cool Universal Profile',
+      tags: ['Fashion', 'Design'],
+      links: [{ title: 'My Website', url: 'https://www.my-website.com' }],
+      profileImage: [
+        {
+          "width": 1800,
+          "height": 1800,
+          "hashFunction": "keccak256(bytes)",
+          "hash": "0x5c6125b5a553337b5ad55610c47114bf58d33c7a21aef14b0ed4c214203c9ca7",
+          "url": "ipfs://QmPCQwamReJshNiqSSzf4zMVffNiDx44ykTf1zY95vG6rv"
+        },
+        {
+          "width": 1024,
+          "height": 1024,
+          "hashFunction": "keccak256(bytes)",
+          "hash": "0xc4d1d37a8545012be38a8f33f9a53daceab955a17310bcfffe00f34811506938",
+          "url": "ipfs://Qme8tedX78TaxVwtvacJyS7bcSwe69F4aNnknUzL3gYdFY"
+        },
+        {
+          "width": 640,
+          "height": 640,
+          "hashFunction": "keccak256(bytes)",
+          "hash": "0xa63ebb82e8c428c9a02f1c0a040199748844dccf62e75fcd85454bce4acd4afd",
+          "url": "ipfs://QmdQRdeeGGmWCPs1iCtxiNzHMZemFpvcsdvweCdnufHdqr"
+        },
+        {
+          "width": 320,
+          "height": 320,
+          "hashFunction": "keccak256(bytes)",
+          "hash": "0x2ab638bb61f4cb686c3ca5ca09285e4507ad2328c0b5f6e10378425ed7c75cd9",
+          "url": "ipfs://QmfYYafv6ucuKSm3EbcJxho9Cr2g5Pa3yhv7TaANbP8jbg"
+        },
+        {
+          "width": 180,
+          "height": 180,
+          "hashFunction": "keccak256(bytes)",
+          "hash": "0xefb0b36b3bba2338c18b2b55a0cbc52f04eda03e9b58ca8d04a92fc9b1387853",
+          "url": "ipfs://QmU5XJfL1V5tBLfm7xYMGYEi7VLiwDCfsCc8KswRgXNQSr"
+        }
+      ],
+      backgroundImage: [
+        {
+          "width": 1800,
+          "height": 1800,
+          "hashFunction": "keccak256(bytes)",
+          "hash": "0x5c6125b5a553337b5ad55610c47114bf58d33c7a21aef14b0ed4c214203c9ca7",
+          "url": "ipfs://QmPCQwamReJshNiqSSzf4zMVffNiDx44ykTf1zY95vG6rv"
+        },
+        {
+          "width": 1024,
+          "height": 1024,
+          "hashFunction": "keccak256(bytes)",
+          "hash": "0xc4d1d37a8545012be38a8f33f9a53daceab955a17310bcfffe00f34811506938",
+          "url": "ipfs://Qme8tedX78TaxVwtvacJyS7bcSwe69F4aNnknUzL3gYdFY"
+        },
+        {
+          "width": 640,
+          "height": 640,
+          "hashFunction": "keccak256(bytes)",
+          "hash": "0xa63ebb82e8c428c9a02f1c0a040199748844dccf62e75fcd85454bce4acd4afd",
+          "url": "ipfs://QmdQRdeeGGmWCPs1iCtxiNzHMZemFpvcsdvweCdnufHdqr"
+        },
+        {
+          "width": 320,
+          "height": 320,
+          "hashFunction": "keccak256(bytes)",
+          "hash": "0x2ab638bb61f4cb686c3ca5ca09285e4507ad2328c0b5f6e10378425ed7c75cd9",
+          "url": "ipfs://QmfYYafv6ucuKSm3EbcJxho9Cr2g5Pa3yhv7TaANbP8jbg"
+        },
+        {
+          "width": 180,
+          "height": 180,
+          "hashFunction": "keccak256(bytes)",
+          "hash": "0xefb0b36b3bba2338c18b2b55a0cbc52f04eda03e9b58ca8d04a92fc9b1387853",
+          "url": "ipfs://QmU5XJfL1V5tBLfm7xYMGYEi7VLiwDCfsCc8KswRgXNQSr"
+        }
+      ],
+      avatar: [
+        {
+          "hashFunction": "keccak256(bytes)",
+          "hash": "0x5f3dbd89cde4dde36241c501203b67a93b89908063f5516535136bc25f712e11",
+          "url": "ipfs://QmWkAki4mLq2cshpbKs4HFCaZdpUX1jLKKfb5y8YMATkwk",
+          "fileType": "image/jpeg"
+        }
+      ]
+    }
+  },
+  url: 'ipfs://QmS7NCnoXub7ju13HZuDzJpWqWq15Nev4CC18821qBNbkx'
+}
+*/
+```
+
+```javascript title="Uploading profile data"
 await UniversalProfile.uploadProfileData({
-  name: 'My Universal Profile',
-  description: 'My cool Universal Profile',
-  tags: ['Fashion', 'Design'],
-  links: [{ title: 'My Website', url: 'www.my-website.com' }],
-  profileImage: [
-    {
-      width: 500,
-      height: 500,
-      hashFunction: 'keccak256(bytes)',
-      hash: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
-      url: 'ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp',
-    },
-  ],
-  backgroundImage: [
-    {
-      width: 500,
-      height: 500,
-      hashFunction: 'keccak256(bytes)',
-      hash: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
-      url: 'ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp',
-    },
-  ],
+  LSP3Profile: {
+    name: 'My Universal Profile',
+    description: 'My cool Universal Profile',
+    tags: ['Fashion', 'Design'],
+    links: [{ title: 'My Website', url: 'https://www.my-website.com' }],
+  },
 });
 
 /**
 {
-  profile: {
+  json: {
     LSP3Profile: {
       name: 'My Universal Profile',
       description: 'My cool Universal Profile',
-      tags: [Array],
-      links: [Array],
-      profileImage: [Array],
-      backgroundImage: [Array]
+      tags: ['Fashion', 'Design'],
+      links: [{ title: 'My Website', url: 'https://www.my-website.com' }],
     }
   },
   url: 'ipfs://QmS7NCnoXub7ju13HZuDzJpWqWq15Nev4CC18821qBNbkx'
@@ -394,41 +497,21 @@ await UniversalProfile.uploadProfileData(
     name: 'My Universal Profile',
     description: 'My cool Universal Profile',
     tags: ['Fashion', 'Design'],
-    links: [{ title: 'My Website', url: 'www.my-website.com' }],
-    profileImage: [
-      {
-        width: 500,
-        height: 500,
-        hashFunction: 'keccak256(bytes)',
-        hash: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
-        url: 'ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp',
-      },
-    ],
-    backgroundImage: [
-      {
-        width: 500,
-        height: 500,
-        hashFunction: 'keccak256(bytes)',
-        hash: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
-        url: 'ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp',
-      },
-    ],
+    links: [{ title: 'My Website', url: 'https://www.my-website.com' }],
   },
   {
     ipfsGateway: 'https://ipfs.infura.io',
-  },
+  }
 );
 
 /**
 {
-  profile: {
+  json: {
     LSP3Profile: {
       name: 'My Universal Profile',
       description: 'My cool Universal Profile',
-      tags: [Array],
-      links: [Array],
-      profileImage: [Array],
-      backgroundImage: [Array]
+      tags: ['Fashion', 'Design'],
+      links: [{ title: 'My Website', url: 'https://www.my-website.com' }],
     }
   },
   url: 'ipfs://QmS7NCnoXub7ju13HZuDzJpWqWq15Nev4CC18821qBNbkx'
@@ -442,7 +525,7 @@ await UniversalProfile.uploadProfileData(
     name: 'My Universal Profile',
     description: 'My cool Universal Profile',
     tags: ['Fashion', 'Design'],
-    links: [{ title: 'My Website', url: 'www.my-website.com' }],
+    links: [{ title: 'My Website', url: 'https://www.my-website.com' }],
   },
   {
     ipfsGateway: {
@@ -450,19 +533,17 @@ await UniversalProfile.uploadProfileData(
       port: 5001,
       protocol: 'https',
     },
-  },
+  }
 );
 
 /**
 {
-  profile: {
+  json: {
     LSP3Profile: {
       name: 'My Universal Profile',
       description: 'My cool Universal Profile',
-      tags: [Array],
-      links: [Array],
-      profileImage: [Array],
-      backgroundImage: [Array]
+      tags: ['Fashion', 'Design'],
+      links: [{ title: 'My Website', url: 'https://www.my-website.com' }],,
     }
   },
   url: 'ipfs://QmS7NCnoXub7ju13HZuDzJpWqWq15Nev4CC18821qBNbkx'

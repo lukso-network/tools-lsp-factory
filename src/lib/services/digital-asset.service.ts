@@ -56,6 +56,7 @@ import {
 import {
   LSP4DigitalAssetJSON,
   LSP4MetadataBeforeUpload,
+  LSP4MetadataContentBeforeUpload,
   LSP4MetadataForEncoding,
   LSP4MetadataUrlForEncoding,
 } from '../interfaces/lsp4-digital-asset';
@@ -348,10 +349,21 @@ function initializeLSP8Proxy(
 }
 
 export function lsp4MetadataUpload$(
-  lsp4Metadata: LSP4MetadataBeforeUpload | LSP4MetadataForEncoding | string,
+  passedDigitalAssetMetadata:
+    | LSP4MetadataBeforeUpload
+    | LSP4MetadataContentBeforeUpload
+    | LSP4MetadataForEncoding
+    | string,
   uploadOptions?: UploadOptions
 ) {
   let lsp4Metadata$: Observable<string>;
+
+  const lsp4Metadata =
+    typeof passedDigitalAssetMetadata !== 'string' &&
+    typeof passedDigitalAssetMetadata !== 'undefined' &&
+    'LSP4Metadata' in passedDigitalAssetMetadata
+      ? passedDigitalAssetMetadata.LSP4Metadata
+      : passedDigitalAssetMetadata;
 
   if (typeof lsp4Metadata !== 'string' || !isMetadataEncoded(lsp4Metadata)) {
     lsp4Metadata$ = lsp4Metadata
@@ -365,7 +377,7 @@ export function lsp4MetadataUpload$(
 }
 
 export async function getLSP4MetadataUrl(
-  lsp4Metadata: LSP4MetadataBeforeUpload | string,
+  lsp4Metadata: LSP4MetadataContentBeforeUpload | string,
   uploadOptions: UploadOptions
 ): Promise<LSP4MetadataUrlForEncoding> {
   let lsp4MetadataForEncoding: LSP4MetadataUrlForEncoding;
@@ -396,7 +408,7 @@ export async function getLSP4MetadataUrl(
 }
 
 export async function getEncodedLSP4Metadata(
-  lsp4Metadata: LSP4MetadataBeforeUpload | LSP4MetadataForEncoding | string,
+  lsp4Metadata: LSP4MetadataContentBeforeUpload | LSP4MetadataForEncoding | string,
   uploadOptions: UploadOptions
 ): Promise<string> {
   let lsp4MetadataForEncoding: LSP4MetadataForEncoding;
