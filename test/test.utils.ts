@@ -7,7 +7,7 @@ import { UniversalProfile__factory } from '../types/ethers-v5/factories/Universa
 import { LSP6KeyManager__factory } from '../types/ethers-v5/factories/LSP6KeyManager__factory';
 import { LSP1UniversalReceiverDelegateUP__factory } from '../types/ethers-v5/factories/LSP1UniversalReceiverDelegateUP__factory';
 import { ContractDeploymentOptions, LSPFactory } from '../build/main/src';
-import { DeployedContracts } from '../src/lib/interfaces';
+import { ContractNames, DeployedContracts } from '../src/lib/interfaces';
 import { getDeployedByteCode, getProxyByteCode } from '../src/lib/helpers/deployment.helper';
 import { providers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
@@ -35,7 +35,7 @@ export async function testUPDeployment(
   lspFactory: LSPFactory,
   controllerAddresses: string[]
 ) {
-  const deployedContracts = await lspFactory.LSP3UniversalProfile.deploy(
+  const deployedContracts = await lspFactory.UniversalProfile.deploy(
     {
       controllerAddresses,
     },
@@ -44,7 +44,7 @@ export async function testUPDeployment(
 
   expect(Object.keys(deployedContracts).length).toEqual(expectedContractNumber);
 
-  const contractNames = ['ERC725Account', 'KeyManager'];
+  const contractNames = [ContractNames.ERC725_Account, ContractNames.KEY_MANAGER];
 
   for (const contractName of contractNames) {
     if (
@@ -58,12 +58,12 @@ export async function testUPDeployment(
   }
 
   if (
-    contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy &&
-    !isAddress(contractDeploymentOptions?.UniversalReceiverDelegate.version)
+    contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.deployProxy &&
+    !isAddress(contractDeploymentOptions?.LSP1UniversalReceiverDelegate.version)
   ) {
-    expect(deployedContracts[`UniversalReceiverDelegateBaseContract`]).toBeDefined();
+    expect(deployedContracts[`LSP1UniversalReceiverDelegateBaseContract`]).toBeDefined();
   } else {
-    expect(deployedContracts[`UniversalReceiverDelegateBaseContract`]).toBeUndefined();
+    expect(deployedContracts[`LSP1UniversalReceiverDelegateBaseContract`]).toBeUndefined();
   }
 
   return deployedContracts as DeployedContracts;
@@ -86,12 +86,15 @@ export async function testSetData(upAddress: string, keyManagerAddress: string, 
 
   const keyManager = LSP6KeyManager__factory.connect(keyManagerAddress, signer);
 
-  const abi = await universalProfile.populateTransaction.setData([key], [value]);
+  const abi = await universalProfile.populateTransaction['setData(bytes32[],bytes[])'](
+    [key],
+    [value]
+  );
 
   const result = await keyManager.connect(signer).execute(abi.data);
   expect(result).toBeTruthy();
 
-  const data = await universalProfile.getData([key]);
+  const data = await universalProfile['getData(bytes32[])']([key]);
   expect(data).toEqual([value]);
 }
 

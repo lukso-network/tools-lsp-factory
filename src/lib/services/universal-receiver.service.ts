@@ -6,14 +6,12 @@ import {
   DeploymentEventContract,
   DeploymentEventProxyContract,
   LSP1UniversalReceiverDelegateUP__factory,
-  LSP1UniversalReceiverDelegateUPInit__factory,
 } from '../..';
 import { NULL_ADDRESS } from '../helpers/config.helper';
 import {
   deployContract,
   deployProxyContract,
   getDeployedByteCode,
-  initialize,
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { BaseContractAddresses, ContractNames } from '../interfaces';
@@ -36,10 +34,10 @@ export function universalReceiverDelegateDeployment$(
 
   return forkJoin([defaultURDBytecode$, baseContractAddresses$]).pipe(
     switchMap(([defaultURDBytecode, baseContractAddresses]) => {
-      if (baseContractAddresses.UniversalReceiverDelegate || byteCode) {
+      if (baseContractAddresses.LSP1UniversalReceiverDelegate || byteCode) {
         return universalReceiverDelegateDeploymentWithBaseContractAddress$(
           signer,
-          baseContractAddresses.UniversalReceiverDelegate,
+          baseContractAddresses.LSP1UniversalReceiverDelegate,
           byteCode
         );
       }
@@ -67,22 +65,7 @@ export function universalReceiverDelegateDeploymentWithBaseContractAddress$(
     universalReceiverDelegateDeployment$
   );
 
-  const universalReceiverDelegateInitialize$ = baseContractAddress
-    ? initializeProxy(
-        signer,
-        universalReceiverDelegateStoreReceipt$ as Observable<DeploymentEventProxyContract>
-      )
-    : EMPTY;
-
-  const universalReceiverDelegateInitializeReceipt$ =
-    waitForReceipt<UniversalReveiverDeploymentEvent>(universalReceiverDelegateInitialize$);
-
-  return concat(
-    universalReceiverDelegateDeployment$,
-    universalReceiverDelegateStoreReceipt$,
-    universalReceiverDelegateInitialize$,
-    universalReceiverDelegateInitializeReceipt$
-  );
+  return concat(universalReceiverDelegateDeployment$, universalReceiverDelegateStoreReceipt$);
 }
 
 /**
@@ -93,7 +76,7 @@ export function universalReceiverDelegateDeploymentWithBaseContractAddress$(
  * @param {Signer} signer
  * @param {string} baseContractAddress
  * @return {*}  Promise<DeploymentEventStandardContract | DeploymentEventProxyContract>
- * @memberof LSP3UniversalProfile
+ * @memberof UniversalProfile
  */
 export async function deployUniversalReceiverDelegate(
   signer: Signer,
@@ -102,7 +85,7 @@ export async function deployUniversalReceiverDelegate(
 ) {
   const deploymentFunction = async () => {
     if (baseContractAddress) {
-      return new LSP1UniversalReceiverDelegateUPInit__factory(signer).attach(baseContractAddress);
+      return new LSP1UniversalReceiverDelegateUP__factory(signer).attach(baseContractAddress);
     }
 
     if (bytecode) {
@@ -120,24 +103,10 @@ export async function deployUniversalReceiverDelegate(
 
   return baseContractAddress
     ? deployProxyContract(
-        LSP1UniversalReceiverDelegateUPInit__factory.abi,
+        LSP1UniversalReceiverDelegateUP__factory.abi,
         deploymentFunction,
         ContractNames.UNIVERSAL_RECEIVER,
         signer
       )
     : deployContract(deploymentFunction, ContractNames.UNIVERSAL_RECEIVER);
-}
-
-function initializeProxy(
-  signer: Signer,
-  universalReceiverDelegateReceipt$: Observable<DeploymentEventProxyContract>
-) {
-  return initialize(
-    universalReceiverDelegateReceipt$,
-    new LSP1UniversalReceiverDelegateUPInit__factory(signer),
-    async () => {
-      return [];
-    },
-    'initialize()'
-  );
 }

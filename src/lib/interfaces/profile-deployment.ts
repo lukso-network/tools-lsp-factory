@@ -1,12 +1,18 @@
-import { DeployedContract } from '../..';
+import { ContractOptions, DeployedContract } from '../..';
 
-import { LSP3ProfileDataForEncoding, ProfileDataBeforeUpload } from './lsp3-profile';
+import {
+  LSP3ProfileBeforeUpload,
+  LSP3ProfileDataForEncoding,
+  ProfileDataBeforeUpload,
+} from './lsp3-profile';
 import { IPFSGateway, UploadOptions } from './profile-upload-options';
 
+import { DeploymentEventCallbacks } from '.';
+
 export enum ContractNames {
-  ERC725_Account = 'ERC725Account',
-  KEY_MANAGER = 'KeyManager',
-  UNIVERSAL_RECEIVER = 'UniversalReceiverDelegate',
+  ERC725_Account = 'LSP0ERC725Account',
+  KEY_MANAGER = 'LSP6KeyManager',
+  UNIVERSAL_RECEIVER = 'LSP1UniversalReceiverDelegate',
 }
 
 export interface ControllerOptions {
@@ -19,20 +25,20 @@ export interface ControllerOptions {
  */
 export interface ProfileDeploymentOptions {
   controllerAddresses: (string | ControllerOptions)[];
-  baseContractAddresses?: {
-    erc725Account?: string;
-    universalReceiverDelegate?: string;
-    keyManager?: string;
-  };
-  lsp3Profile?: ProfileDataBeforeUpload | LSP3ProfileDataForEncoding | string;
+  lsp3Profile?:
+    | ProfileDataBeforeUpload
+    | LSP3ProfileBeforeUpload
+    | LSP3ProfileDataForEncoding
+    | string;
 }
-export interface DeployedContracts {
-  ERC725Account?: DeployedContract;
-  ERC725AccountBaseContract?: DeployedContract;
-  KeyManager: DeployedContract;
-  KeyManagerBaseContract: DeployedContract;
-  UniversalReceiverDelegate: DeployedContract;
-  UniversalReceiverDelegateBaseContract: DeployedContract;
+
+export interface DeployedUniversalProfileContracts {
+  LSP0ERC725Account?: DeployedContract;
+  LSP0ERC725AccountBaseContract?: DeployedContract;
+  LSP6KeyManager: DeployedContract;
+  LSP6KeyManagerBaseContract: DeployedContract;
+  LSP1UniversalReceiverDelegate: DeployedContract;
+  LSP1UniversalReceiverDelegateBaseContract: DeployedContract;
 }
 
 export interface BaseContractAddresses {
@@ -41,30 +47,15 @@ export interface BaseContractAddresses {
   [ContractNames.UNIVERSAL_RECEIVER]?: string;
 }
 
-interface ContractOptions {
-  version?: string;
-  deployProxy?: boolean;
-}
-
-interface ContractDeploymentOptionsBase {
+export interface ContractDeploymentOptions {
   version?: string;
   ipfsGateway?: IPFSGateway;
+  LSP0ERC725Account?: ContractOptions;
   ERC725Account?: ContractOptions;
-  KeyManager?: ContractOptions;
-  UniversalReceiverDelegate?: ContractOptions;
+  LSP6KeyManager?: ContractOptions;
+  LSP1UniversalReceiverDelegate?: ContractOptions;
+  onDeployEvents?: DeploymentEventCallbacks<DeployedUniversalProfileContracts>;
 }
-
-export interface ContractDeploymentOptionsReactive extends ContractDeploymentOptionsBase {
-  deployReactive: true;
-}
-
-export interface ContractDeploymentOptionsNonReactive extends ContractDeploymentOptionsBase {
-  deployReactive?: false;
-}
-
-export type ContractDeploymentOptions =
-  | ContractDeploymentOptionsReactive
-  | ContractDeploymentOptionsNonReactive;
 
 interface ContractConfiguration {
   version?: string;
@@ -76,8 +67,7 @@ interface ContractConfiguration {
 export interface UniversalProfileDeploymentConfiguration {
   version?: string;
   uploadOptions?: UploadOptions;
-  ERC725Account?: ContractConfiguration;
-  KeyManager?: ContractConfiguration;
-  UniversalReceiverDelegate?: ContractConfiguration;
-  deployReactive: boolean;
+  LSP0ERC725Account?: ContractConfiguration;
+  LSP6KeyManager?: ContractConfiguration;
+  LSP1UniversalReceiverDelegate?: ContractConfiguration;
 }

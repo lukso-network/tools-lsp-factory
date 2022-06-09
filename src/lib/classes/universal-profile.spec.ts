@@ -11,11 +11,13 @@ import {
   UniversalProfile__factory,
 } from '../../../build/main/src';
 import { LSPFactory } from '../../../build/main/src/lib/lsp-factory';
+import { lsp3ProfileJson } from '../../../test/lsp3-profile.mock';
 import {
   testProxyBytecodeContainsAddress,
   testSetData,
   testUPDeployment,
 } from '../../../test/test.utils';
+import { UniversalProfile } from '../../../types/ethers-v5';
 import {
   ADDRESS_PERMISSIONS_ARRAY_KEY,
   DEFAULT_PERMISSIONS,
@@ -23,14 +25,13 @@ import {
   PREFIX_PERMISSIONS,
 } from '../helpers/config.helper';
 import { getDeployedByteCode } from '../helpers/deployment.helper';
+import { ContractNames, DeployedUniversalProfileContracts, DeploymentEvent } from '../interfaces';
 
-import { lsp3ProfileJson } from './../../../test/lsp3-profile.mock';
-import { DeployedContracts, DeploymentEvent } from './../interfaces';
 import { ProxyDeployer } from './proxy-deployer';
 
 jest.setTimeout(60000);
 jest.useRealTimers();
-describe('LSP3UniversalProfile', () => {
+describe('UniversalProfile', () => {
   let signers: SignerWithAddress[];
   let provider: providers.JsonRpcProvider;
   let lspFactory: LSPFactory;
@@ -44,12 +45,13 @@ describe('LSP3UniversalProfile', () => {
 
   describe('Deploying with LSP3Profile Metadata', () => {
     let signer: SignerWithAddress;
-    let universalProfile;
+    let universalProfile: UniversalProfile;
     const expectedLSP3Value =
       '0x6f357c6a5af8bb903787236579aff8a6518c022fe655646fded5e1ea23ca7aedddb221a4697066733a2f2f516d624b76435645655069444b78756f7579747939624d73574241785a444772326a68786434704c474c78393544';
 
     const allowedLSP3Formats = [
       lsp3ProfileJson.LSP3Profile,
+      lsp3ProfileJson,
       { json: lsp3ProfileJson, url: 'ipfs://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D' },
     ];
 
@@ -58,19 +60,19 @@ describe('LSP3UniversalProfile', () => {
         it('should deploy and set LSP3Profile data', async () => {
           signer = signers[0];
 
-          const { ERC725Account } = await lspFactory.LSP3UniversalProfile.deploy({
+          const { LSP0ERC725Account } = await lspFactory.UniversalProfile.deploy({
             controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
             lsp3Profile: lsp3ProfileMetadata,
           });
 
-          universalProfile = UniversalProfile__factory.connect(ERC725Account.address, signer);
+          universalProfile = UniversalProfile__factory.connect(LSP0ERC725Account.address, signer);
 
-          const data = await universalProfile.getData([
+          const lsp3Data = await universalProfile['getData(bytes32[])']([
             '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
           ]);
 
-          expect(data[0].startsWith('0x6f357c6a')).toBe(true);
-          expect(data[0]).toEqual(expectedLSP3Value);
+          expect(lsp3Data[0].startsWith('0x6f357c6a')).toBe(true);
+          expect(lsp3Data[0]).toEqual(expectedLSP3Value);
         });
       });
     });
@@ -84,13 +86,13 @@ describe('LSP3UniversalProfile', () => {
 
     allowedIPFSGatewayFormats.forEach((allowedGatewayFormat) => {
       let signer;
-      let universalProfile;
+      let universalProfile: UniversalProfile;
       let keyManager;
 
       beforeAll(async () => {
         signer = signers[0];
 
-        const { ERC725Account, KeyManager } = await lspFactory.LSP3UniversalProfile.deploy(
+        const { LSP0ERC725Account, LSP6KeyManager } = await lspFactory.UniversalProfile.deploy(
           {
             controllerAddresses: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
             lsp3Profile: lsp3ProfileJson.LSP3Profile,
@@ -100,15 +102,15 @@ describe('LSP3UniversalProfile', () => {
           }
         );
 
-        universalProfile = UniversalProfile__factory.connect(ERC725Account.address, signer);
-        keyManager = KeyManager;
+        universalProfile = UniversalProfile__factory.connect(LSP0ERC725Account.address, signer);
+        keyManager = LSP6KeyManager;
       });
 
       it('should deploy and set LSP3Profile data', async () => {
         const ownerAddress = await universalProfile.owner();
         expect(ownerAddress).toEqual(keyManager.address);
 
-        const data = await universalProfile.getData([
+        const data = await universalProfile['getData(bytes32[])']([
           '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
         ]);
 
@@ -119,20 +121,23 @@ describe('LSP3UniversalProfile', () => {
 
   describe('Deploying a UP with one controller address', () => {
     let uniqueController: SignerWithAddress;
-    let universalProfile;
+    let universalProfile: UniversalProfile;
 
     beforeAll(async () => {
       uniqueController = signers[0];
 
-      const { ERC725Account } = await lspFactory.LSP3UniversalProfile.deploy({
+      const { LSP0ERC725Account } = await lspFactory.UniversalProfile.deploy({
         controllerAddresses: [uniqueController.address],
       });
 
-      universalProfile = UniversalProfile__factory.connect(ERC725Account.address, uniqueController);
+      universalProfile = UniversalProfile__factory.connect(
+        LSP0ERC725Account.address,
+        uniqueController
+      );
     });
 
     it('controller address should have DEFAULT_PERMISSIONS set', async () => {
-      const [signerPermissions] = await universalProfile.getData([
+      const [signerPermissions] = await universalProfile['getData(bytes32[])']([
         PREFIX_PERMISSIONS + uniqueController.address.substring(2),
       ]);
 
@@ -145,39 +150,106 @@ describe('LSP3UniversalProfile', () => {
         ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
         ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
-      const [result] = await universalProfile.getData([key]);
+      const [result] = await universalProfile['getData(bytes32[])']([key]);
       const checkedsumResult = ethers.utils.getAddress(result);
       expect(checkedsumResult).toEqual(uniqueController.address);
     });
   });
 
+  describe('Deploying for a different controller address', () => {
+    let controller: SignerWithAddress;
+    let universalProfile: UniversalProfile;
+
+    beforeAll(async () => {
+      controller = signers[5];
+
+      const { LSP0ERC725Account } = await lspFactory.UniversalProfile.deploy({
+        controllerAddresses: [controller.address],
+      });
+
+      universalProfile = UniversalProfile__factory.connect(LSP0ERC725Account.address, controller);
+    });
+
+    it('controller address should have DEFAULT_PERMISSIONS set', async () => {
+      const [signerPermissions] = await universalProfile['getData(bytes32[])']([
+        PREFIX_PERMISSIONS + controller.address.substring(2),
+      ]);
+
+      expect(signerPermissions).toEqual(ERC725.encodePermissions(DEFAULT_PERMISSIONS));
+    });
+
+    it('signer address should have no permissions set', async () => {
+      const [signerPermissions] = await universalProfile['getData(bytes32[])']([
+        PREFIX_PERMISSIONS + signers[0].address.substring(2),
+      ]);
+
+      expect(signerPermissions).toEqual(ERC725.encodePermissions({}));
+    });
+  });
+
+  describe('Deploying with custom permissions', () => {
+    let controller: SignerWithAddress;
+    let controllerAddress: string;
+    let universalProfile: UniversalProfile;
+    const customPermissions = ERC725.encodePermissions({ SETDATA: true, TRANSFERVALUE: true });
+
+    beforeAll(async () => {
+      controller = signers[0];
+      controllerAddress = signers[0].address;
+
+      const { LSP0ERC725Account } = await lspFactory.UniversalProfile.deploy({
+        controllerAddresses: [{ address: controllerAddress, permissions: customPermissions }],
+      });
+
+      universalProfile = UniversalProfile__factory.connect(LSP0ERC725Account.address, controller);
+    });
+
+    it('controller address should have custom permissions set', async () => {
+      const [signerPermissions] = await universalProfile['getData(bytes32[])']([
+        PREFIX_PERMISSIONS + controller.address.substring(2),
+      ]);
+
+      expect(signerPermissions).toEqual(customPermissions);
+    });
+  });
+
   describe('Deploying UP with 2 x controller addresses', () => {
-    let universalProfile;
+    let universalProfile: UniversalProfile;
     let keyManager;
     let firstControllerAddress: string;
     let secondControllerAddress: string;
+    const customPermissions = ERC725.encodePermissions({
+      DELEGATECALL: true,
+      CALL: true,
+      SETDATA: true,
+    });
 
     beforeAll(async () => {
       firstControllerAddress = signers[0].address;
       secondControllerAddress = signers[1].address;
 
-      const { ERC725Account, KeyManager } = await lspFactory.LSP3UniversalProfile.deploy({
-        controllerAddresses: [firstControllerAddress, secondControllerAddress],
+      const { LSP0ERC725Account, LSP6KeyManager } = await lspFactory.UniversalProfile.deploy({
+        controllerAddresses: [
+          firstControllerAddress,
+          { address: secondControllerAddress, permissions: customPermissions },
+        ],
       });
 
       universalProfile = new ethers.Contract(
-        ERC725Account.address,
+        LSP0ERC725Account.address,
         UniversalProfileContract.abi,
         provider
       );
 
-      keyManager = new ethers.Contract(KeyManager.address, KeyManagerContract.abi, provider);
+      keyManager = new ethers.Contract(LSP6KeyManager.address, KeyManagerContract.abi, provider);
     });
 
     it('1st address should have DEFAULT_PERMISSIONS set', async () => {
       const [signerPermissions] = await universalProfile
         .connect(signers[0])
-        .callStatic.getData([PREFIX_PERMISSIONS + firstControllerAddress.substring(2)]);
+        .callStatic['getData(bytes32[])']([
+          PREFIX_PERMISSIONS + firstControllerAddress.substring(2),
+        ]);
 
       expect(signerPermissions).toEqual(ERC725.encodePermissions(DEFAULT_PERMISSIONS));
     });
@@ -188,7 +260,9 @@ describe('LSP3UniversalProfile', () => {
         ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
         ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
-      const [result] = await universalProfile.connect(signers[0]).callStatic.getData([key]);
+      const [result] = await universalProfile
+        .connect(signers[0])
+        .callStatic['getData(bytes32[])']([key]);
       const checkedsumResult = ethers.utils.getAddress(result);
       expect(checkedsumResult).toEqual(firstControllerAddress);
     });
@@ -196,9 +270,11 @@ describe('LSP3UniversalProfile', () => {
     it('2nd address should have DEFAULT_PERMISSIONS set', async () => {
       const [signerPermissions] = await universalProfile
         .connect(signers[1])
-        .callStatic.getData([PREFIX_PERMISSIONS + secondControllerAddress.substring(2)]);
+        .callStatic['getData(bytes32[])']([
+          PREFIX_PERMISSIONS + secondControllerAddress.substring(2),
+        ]);
 
-      expect(signerPermissions).toEqual(ERC725.encodePermissions(DEFAULT_PERMISSIONS));
+      expect(signerPermissions).toEqual(customPermissions);
     });
 
     it('2nd address should be registered in AddressPermissions[1] array', async () => {
@@ -207,7 +283,9 @@ describe('LSP3UniversalProfile', () => {
         ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
         ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
-      const [result] = await universalProfile.connect(signers[0]).callStatic.getData([key]);
+      const [result] = await universalProfile
+        .connect(signers[0])
+        .callStatic['getData(bytes32[])']([key]);
       const checkedsumResult = ethers.utils.getAddress(result);
       expect(checkedsumResult).toEqual(secondControllerAddress);
     });
@@ -219,52 +297,50 @@ describe('LSP3UniversalProfile', () => {
     });
   });
 
-  describe('Reactive deployment', () => {
+  describe('Async deployment', () => {
     it('should have correct controller address', (done) => {
       lspFactory = new LSPFactory(provider, signers[0]);
 
-      const deployments$ = lspFactory.LSP3UniversalProfile.deploy(
+      let erc725Address: string;
+      let keyManagerAddress: string;
+
+      lspFactory.UniversalProfile.deploy(
         {
           controllerAddresses: [signers[0].address],
           lsp3Profile: lsp3ProfileJson.LSP3Profile,
         },
         {
-          deployReactive: true,
+          onDeployEvents: {
+            next: (deploymentEvent: DeploymentEvent) => {
+              if (
+                deploymentEvent.receipt?.contractAddress &&
+                deploymentEvent.contractName === ContractNames.ERC725_Account
+              ) {
+                erc725Address = deploymentEvent.receipt.contractAddress;
+              }
+
+              if (
+                deploymentEvent.receipt?.contractAddress &&
+                deploymentEvent.contractName === ContractNames.KEY_MANAGER
+              ) {
+                keyManagerAddress = deploymentEvent.receipt.contractAddress;
+              }
+            },
+            error: (error) => {
+              // Fail to exit subsciber
+              expect(1).toEqual(error);
+            },
+            complete: async () => {
+              const universalProfile = UniversalProfile__factory.connect(erc725Address, signers[0]);
+
+              const ownerAddress = await universalProfile.owner();
+              expect(ownerAddress).toEqual(keyManagerAddress);
+
+              done();
+            },
+          },
         }
       );
-
-      let erc725Address: string;
-      let keyManagerAddress: string;
-
-      deployments$.subscribe({
-        next: (deploymentEvent: DeploymentEvent) => {
-          if (
-            deploymentEvent.receipt?.contractAddress &&
-            deploymentEvent.contractName === 'ERC725Account'
-          ) {
-            erc725Address = deploymentEvent.receipt.contractAddress;
-          }
-
-          if (
-            deploymentEvent.receipt?.contractAddress &&
-            deploymentEvent.contractName === 'KeyManager'
-          ) {
-            keyManagerAddress = deploymentEvent.receipt.contractAddress;
-          }
-        },
-        error: (error) => {
-          // Fail to exit subsciber
-          expect(1).toEqual(error);
-        },
-        complete: async () => {
-          const universalProfile = UniversalProfile__factory.connect(erc725Address, signers[0]);
-
-          const ownerAddress = await universalProfile.owner();
-          expect(ownerAddress).toEqual(keyManagerAddress);
-
-          done();
-        },
-      });
     });
   });
 
@@ -273,9 +349,9 @@ describe('LSP3UniversalProfile', () => {
       it('Should not deploy base contracts', async () => {
         await testUPDeployment(
           {
-            ERC725Account: { deployProxy: false },
-            KeyManager: { deployProxy: false },
-            UniversalReceiverDelegate: { deployProxy: false },
+            LSP0ERC725Account: { deployProxy: false },
+            LSP6KeyManager: { deployProxy: false },
+            LSP1UniversalReceiverDelegate: { deployProxy: false },
           },
           3,
           lspFactory,
@@ -285,13 +361,13 @@ describe('LSP3UniversalProfile', () => {
     });
 
     describe('Deployment with only ERC725 baseContract set to true', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
       it('Should deploy only ERC725 Base contract', async () => {
         deployedContracts = await testUPDeployment(
           {
-            ERC725Account: { deployProxy: true },
-            KeyManager: { deployProxy: false },
-            UniversalReceiverDelegate: { deployProxy: false },
+            LSP0ERC725Account: { deployProxy: true },
+            LSP6KeyManager: { deployProxy: false },
+            LSP1UniversalReceiverDelegate: { deployProxy: false },
           },
           4,
           lspFactory,
@@ -300,21 +376,21 @@ describe('LSP3UniversalProfile', () => {
       });
       it('UP contract bytecode should contain base contract address', async () => {
         await testProxyBytecodeContainsAddress(
-          deployedContracts.ERC725Account.address,
-          deployedContracts.ERC725AccountBaseContract.address,
+          deployedContracts.LSP0ERC725Account.address,
+          deployedContracts.LSP0ERC725AccountBaseContract.address,
           provider
         );
       });
     });
 
     describe('Deployment with only KeyManager baseContract set to true', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
       it('Should deploy only KeyManager Base contract', async () => {
         deployedContracts = await testUPDeployment(
           {
-            ERC725Account: { deployProxy: false },
-            KeyManager: { deployProxy: true },
-            UniversalReceiverDelegate: { deployProxy: false },
+            LSP0ERC725Account: { deployProxy: false },
+            LSP6KeyManager: { deployProxy: true },
+            LSP1UniversalReceiverDelegate: { deployProxy: false },
           },
           4,
           lspFactory,
@@ -323,21 +399,21 @@ describe('LSP3UniversalProfile', () => {
       });
       it('KeyManager contract bytecode should contain base contract address', async () => {
         await testProxyBytecodeContainsAddress(
-          deployedContracts.KeyManager.address,
-          deployedContracts.KeyManagerBaseContract.address,
+          deployedContracts.LSP6KeyManager.address,
+          deployedContracts.LSP6KeyManagerBaseContract.address,
           provider
         );
       });
     });
 
     describe('Deployment with only URD baseContract set to true', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
       it('Should deploy only URD Base contract', async () => {
         deployedContracts = await testUPDeployment(
           {
-            ERC725Account: { deployProxy: false },
-            KeyManager: { deployProxy: false },
-            UniversalReceiverDelegate: { deployProxy: true },
+            LSP0ERC725Account: { deployProxy: false },
+            LSP6KeyManager: { deployProxy: false },
+            LSP1UniversalReceiverDelegate: { deployProxy: true },
           },
           4,
           lspFactory,
@@ -347,8 +423,8 @@ describe('LSP3UniversalProfile', () => {
 
       it('KeyManager contract bytecode should contain base contract address', async () => {
         await testProxyBytecodeContainsAddress(
-          deployedContracts.UniversalReceiverDelegate.address,
-          deployedContracts.UniversalReceiverDelegateBaseContract.address,
+          deployedContracts.LSP1UniversalReceiverDelegate.address,
+          deployedContracts.LSP1UniversalReceiverDelegateBaseContract.address,
           provider
         );
       });
@@ -358,9 +434,9 @@ describe('LSP3UniversalProfile', () => {
       it('Should deploy with all baseContracts', async () => {
         await testUPDeployment(
           {
-            ERC725Account: { deployProxy: true },
-            KeyManager: { deployProxy: true },
-            UniversalReceiverDelegate: { deployProxy: true },
+            LSP0ERC725Account: { deployProxy: true },
+            LSP6KeyManager: { deployProxy: true },
+            LSP1UniversalReceiverDelegate: { deployProxy: true },
           },
           6,
           lspFactory,
@@ -372,11 +448,11 @@ describe('LSP3UniversalProfile', () => {
 
   describe('Deploying UP with specified bytecode', () => {
     describe('Deploy ERC725Accout from custom bytecode', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
       it('should not deploy UP base contract', async () => {
         deployedContracts = await testUPDeployment(
           {
-            ERC725Account: {
+            LSP0ERC725Account: {
               version: UniversalProfile__factory.bytecode,
             },
           },
@@ -387,14 +463,14 @@ describe('LSP3UniversalProfile', () => {
       });
       it('should be able to setData', async () => {
         await testSetData(
-          deployedContracts.ERC725Account.address,
-          deployedContracts.KeyManager.address,
+          deployedContracts.LSP0ERC725Account.address,
+          deployedContracts.LSP6KeyManager.address,
           signers[0]
         );
       });
       it('should have deployed bytecode', async () => {
         const bytecode = await getDeployedByteCode(
-          deployedContracts.ERC725Account.address,
+          deployedContracts.LSP0ERC725Account.address,
           provider
         );
 
@@ -403,13 +479,13 @@ describe('LSP3UniversalProfile', () => {
       });
     });
     describe('Deploy KeyManager from custom bytecode', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
       it('should not deploy KeyManager base contract', async () => {
         lspFactory = new LSPFactory(provider, signers[1]);
 
         deployedContracts = await testUPDeployment(
           {
-            KeyManager: { version: LSP6KeyManager__factory.bytecode },
+            LSP6KeyManager: { version: LSP6KeyManager__factory.bytecode },
           },
           4,
           lspFactory,
@@ -418,24 +494,27 @@ describe('LSP3UniversalProfile', () => {
       });
       it('should be able to setData', async () => {
         await testSetData(
-          deployedContracts.ERC725Account.address,
-          deployedContracts.KeyManager.address,
+          deployedContracts.LSP0ERC725Account.address,
+          deployedContracts.LSP6KeyManager.address,
           signers[0]
         );
       });
       it('should have deployed bytecode', async () => {
-        const bytecode = await getDeployedByteCode(deployedContracts.KeyManager.address, provider);
+        const bytecode = await getDeployedByteCode(
+          deployedContracts.LSP6KeyManager.address,
+          provider
+        );
 
         expect(bytecode).not.toEqual('0x');
         expect(bytecode.length).toBeGreaterThan(100);
       });
     });
     describe('Deploy Universal Receiver Delegate from custom bytecode', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
       it('should not deploy KeyManager base contract', async () => {
         deployedContracts = await testUPDeployment(
           {
-            UniversalReceiverDelegate: {
+            LSP1UniversalReceiverDelegate: {
               version: LSP1UniversalReceiverDelegateUP__factory.bytecode,
             },
           },
@@ -446,14 +525,14 @@ describe('LSP3UniversalProfile', () => {
       });
       it('should be able to setData', async () => {
         await testSetData(
-          deployedContracts.ERC725Account.address,
-          deployedContracts.KeyManager.address,
+          deployedContracts.LSP0ERC725Account.address,
+          deployedContracts.LSP6KeyManager.address,
           signers[0]
         );
       });
       it('should have deployed bytecode', async () => {
         const bytecode = await getDeployedByteCode(
-          deployedContracts.UniversalReceiverDelegate.address,
+          deployedContracts.LSP1UniversalReceiverDelegate.address,
           provider
         );
 
@@ -472,12 +551,12 @@ describe('LSP3UniversalProfile', () => {
     });
 
     describe('Deploying with only UP base contract specified', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
 
       it('should not deploy UP base contract', async () => {
         deployedContracts = await testUPDeployment(
           {
-            ERC725Account: { version: baseContracts.universalProfile.address },
+            LSP0ERC725Account: { version: baseContracts.universalProfile.address },
           },
           4,
           lspFactory,
@@ -486,14 +565,14 @@ describe('LSP3UniversalProfile', () => {
       });
       it('should be able to setData', async () => {
         await testSetData(
-          deployedContracts.ERC725Account.address,
-          deployedContracts.KeyManager.address,
+          deployedContracts.LSP0ERC725Account.address,
+          deployedContracts.LSP6KeyManager.address,
           signers[0]
         );
       });
       it('UP contract bytecode should contain base contract address', async () => {
         await testProxyBytecodeContainsAddress(
-          deployedContracts.ERC725Account.address,
+          deployedContracts.LSP0ERC725Account.address,
           baseContracts.universalProfile.address,
           provider
         );
@@ -501,12 +580,12 @@ describe('LSP3UniversalProfile', () => {
     });
 
     describe('Deploying with only KeyManager base contract specified', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
 
       it('should not deploy KeyManager base contract', async () => {
         deployedContracts = await testUPDeployment(
           {
-            KeyManager: { version: baseContracts.keyManager.address },
+            LSP6KeyManager: { version: baseContracts.keyManager.address },
           },
           4,
           lspFactory,
@@ -515,14 +594,14 @@ describe('LSP3UniversalProfile', () => {
       });
       it('should be able to setData', async () => {
         await testSetData(
-          deployedContracts.ERC725Account.address,
-          deployedContracts.KeyManager.address,
+          deployedContracts.LSP0ERC725Account.address,
+          deployedContracts.LSP6KeyManager.address,
           signers[0]
         );
       });
       it('KeyManager contract bytecode should contain base contract address', async () => {
         await testProxyBytecodeContainsAddress(
-          deployedContracts.KeyManager.address,
+          deployedContracts.LSP6KeyManager.address,
           baseContracts.keyManager.address,
           provider
         );
@@ -530,11 +609,11 @@ describe('LSP3UniversalProfile', () => {
     });
 
     describe('Deploying with only UniversalReceiverDelegate contract specified', () => {
-      let deployedContracts: DeployedContracts;
+      let deployedContracts: DeployedUniversalProfileContracts;
       it('should not deploy URD contracts', async () => {
         deployedContracts = await testUPDeployment(
           {
-            UniversalReceiverDelegate: {
+            LSP1UniversalReceiverDelegate: {
               version: baseContracts.universalReceiverDelegate.address,
             },
           },
@@ -545,18 +624,20 @@ describe('LSP3UniversalProfile', () => {
       });
       it('should be able to setData', async () => {
         await testSetData(
-          deployedContracts.ERC725Account.address,
-          deployedContracts.KeyManager.address,
+          deployedContracts.LSP0ERC725Account.address,
+          deployedContracts.LSP6KeyManager.address,
           signers[0]
         );
       });
       it('should set provided LSP1 key on the UP', async () => {
         const universalProfile = UniversalProfile__factory.connect(
-          deployedContracts.ERC725Account.address,
+          deployedContracts.LSP0ERC725Account.address,
           signers[0]
         );
 
-        const data = await universalProfile.getData([LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY]);
+        const data = await universalProfile['getData(bytes32[])']([
+          LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
+        ]);
 
         const checkedsumResult = ethers.utils.getAddress(data[0]);
 
@@ -566,7 +647,7 @@ describe('LSP3UniversalProfile', () => {
       it('should use provided address as base contract if deployProxy set to true', async () => {
         deployedContracts = await testUPDeployment(
           {
-            UniversalReceiverDelegate: {
+            LSP1UniversalReceiverDelegate: {
               version: baseContracts.universalReceiverDelegate.address,
               deployProxy: true,
             },
@@ -578,19 +659,21 @@ describe('LSP3UniversalProfile', () => {
       });
       it('should set deployed URD contract on the UP', async () => {
         const universalProfile = UniversalProfile__factory.connect(
-          deployedContracts.ERC725Account.address,
+          deployedContracts.LSP0ERC725Account.address,
           signers[0]
         );
 
-        const data = await universalProfile.getData([LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY]);
+        const univeralReceiverDelegate = await universalProfile['getData(bytes32[])']([
+          LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
+        ]);
 
-        const checkedsumResult = ethers.utils.getAddress(data[0]);
+        const checkedsumResult = ethers.utils.getAddress(univeralReceiverDelegate[0]);
 
-        expect(checkedsumResult).toEqual(deployedContracts.UniversalReceiverDelegate.address);
+        expect(checkedsumResult).toEqual(deployedContracts.LSP1UniversalReceiverDelegate.address);
       });
       it('URD contract bytecode should contain base contract address', async () => {
         await testProxyBytecodeContainsAddress(
-          deployedContracts.UniversalReceiverDelegate.address,
+          deployedContracts.LSP1UniversalReceiverDelegate.address,
           baseContracts.universalReceiverDelegate.address,
           provider
         );

@@ -1,24 +1,21 @@
 import { NonceManager } from '@ethersproject/experimental';
-import { concat, lastValueFrom, merge, Observable } from 'rxjs';
-import { concatAll } from 'rxjs/operators';
+import { concat, merge } from 'rxjs';
+import { concatAll, shareReplay } from 'rxjs/operators';
 
 import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { defaultUploadOptions } from '../helpers/config.helper';
-import { deploymentWithContractsOnCompletion$ } from '../helpers/deployment.helper';
-import { ipfsUpload, prepareMetadataImage } from '../helpers/uploader.helper';
+import { resolveContractDeployment, waitForContractDeployment } from '../helpers/deployment.helper';
+import { ipfsUpload, prepareMetadataAsset, prepareMetadataImage } from '../helpers/uploader.helper';
 import {
-  DeploymentEventContract,
-  DeploymentEventTransaction,
   LSPFactoryOptions,
   ProfileDataBeforeUpload,
   ProfileDeploymentOptions,
 } from '../interfaces';
-import { ProfileDataForEncoding } from '../interfaces/lsp3-profile';
+import { LSP3ProfileBeforeUpload, ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import {
-  ContractDeploymentOptionsNonReactive,
-  ContractDeploymentOptionsReactive,
-  DeployedContracts,
+  ContractDeploymentOptions,
+  DeployedUniversalProfileContracts,
 } from '../interfaces/profile-deployment';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 import {
@@ -27,21 +24,14 @@ import {
   universalProfileBaseContractsDeployment$,
 } from '../services/base-contract.service';
 import { keyManagerDeployment$ } from '../services/key-manager.service';
-
 import {
   accountDeployment$,
   convertUniversalProfileConfigurationObject,
   isSignerUniversalProfile$,
   lsp3ProfileUpload$,
   setDataAndTransferOwnershipTransactions$,
-} from './../services/lsp3-account.service';
-import { universalReceiverDelegateDeployment$ } from './../services/universal-receiver.service';
-
-type UniversalProfileObservableOrPromise<
-  T extends ContractDeploymentOptionsReactive | ContractDeploymentOptionsNonReactive
-> = T extends ContractDeploymentOptionsReactive
-  ? Observable<DeploymentEventContract | DeploymentEventTransaction>
-  : Promise<DeployedContracts>;
+} from '../services/universal-profile.service';
+import { universalReceiverDelegateDeployment$ } from '../services/universal-receiver.service';
 
 /**
  * Class responsible for deploying UniversalProfiles and uploading LSP3 metadata to IPFS
@@ -50,7 +40,7 @@ type UniversalProfileObservableOrPromise<
  * @property {NonceManager} signer
  * @memberof LSPFactory
  */
-export class LSP3UniversalProfile {
+export class UniversalProfile {
   options: LSPFactoryOptions;
   signer: NonceManager;
   constructor(options: LSPFactoryOptions) {
@@ -61,36 +51,39 @@ export class LSP3UniversalProfile {
   /**
    * Deploys a UniversalProfile and uploads LSP3 Profile data to IPFS
    *
-   *  Returns a Promise with deployed contract details or an RxJS Observable of transaction details if `deployReactive` flag is set to true
+   * Returns a Promise with deployed contract details.
    *
    * @param {ProfileDeploymentOptions} profileData
    * @param {ContractDeploymentOptions} contractDeploymentOptions
-   * @return {*}  Promise<DeployedContracts> | Observable<LSP3AccountDeploymentEvent | DeploymentEventTransaction>
-   * @memberof LSP3UniversalProfile
+   * @return {*}  Promise<DeployedContracts>
+   * @memberof UniversalProfile
    *
    * @example
    * ```javascript
-   *lspFactory.LSP3UniversalProfile.deploy({
+   *lspFactory.UniversalProfile.deploy({
    *    controllingAccounts: ['0xb74a88C43BCf691bd7A851f6603cb1868f6fc147'],
    *    lsp3Profile: myUniversalProfileData
    *  });
    *};
    * ```
    */
-  deploy<
-    T extends
-      | ContractDeploymentOptionsReactive
-      | ContractDeploymentOptionsNonReactive = ContractDeploymentOptionsNonReactive
-  >(
+  async deploy(
     profileDeploymentOptions: ProfileDeploymentOptions,
-    contractDeploymentOptions?: T
-  ): UniversalProfileObservableOrPromise<T> {
+    contractDeploymentOptions?: ContractDeploymentOptions
+  ): Promise<DeployedUniversalProfileContracts> {
     const deploymentConfiguration =
       convertUniversalProfileConfigurationObject(contractDeploymentOptions);
 
+    const lsp3Profile =
+      typeof profileDeploymentOptions?.lsp3Profile !== 'string' &&
+      typeof profileDeploymentOptions?.lsp3Profile !== 'undefined' &&
+      'LSP3Profile' in profileDeploymentOptions?.lsp3Profile
+        ? profileDeploymentOptions?.lsp3Profile?.LSP3Profile
+        : profileDeploymentOptions?.lsp3Profile;
+
     // -1 > Run IPFS upload process in parallel with contract deployment
     const lsp3Profile$ = lsp3ProfileUpload$(
-      profileDeploymentOptions.lsp3Profile,
+      lsp3Profile,
       deploymentConfiguration?.uploadOptions ?? this.options.uploadOptions
     );
 
@@ -98,19 +91,19 @@ export class LSP3UniversalProfile {
 
     // 0 > Check for existing base contracts and deploy
     const defaultUPBaseContractAddress =
-      deploymentConfiguration?.ERC725Account?.libAddress ??
+      deploymentConfiguration?.LSP0ERC725Account?.libAddress ??
       contractVersions[this.options.chainId]?.contracts?.ERC725Account?.versions[
-        deploymentConfiguration?.ERC725Account?.version ?? defaultContractVersion
+        deploymentConfiguration?.LSP0ERC725Account?.version ?? defaultContractVersion
       ];
     const defaultUniversalReceiverAddress =
-      deploymentConfiguration?.UniversalReceiverDelegate?.libAddress ??
+      deploymentConfiguration?.LSP1UniversalReceiverDelegate?.libAddress ??
       contractVersions[this.options.chainId]?.contracts?.UniversalReceiverDelegate?.versions[
-        deploymentConfiguration?.UniversalReceiverDelegate?.version ?? defaultContractVersion
+        deploymentConfiguration?.LSP1UniversalReceiverDelegate?.version ?? defaultContractVersion
       ];
     const defaultKeyManagerBaseContractAddress =
-      deploymentConfiguration?.KeyManager?.libAddress ??
+      deploymentConfiguration?.LSP6KeyManager?.libAddress ??
       contractVersions[this.options.chainId]?.contracts?.KeyManager?.versions[
-        deploymentConfiguration?.KeyManager?.version ?? defaultContractVersion
+        deploymentConfiguration?.LSP6KeyManager?.version ?? defaultContractVersion
       ];
 
     const baseContractsToDeploy$ = shouldDeployUniversalProfileBaseContracts$(
@@ -128,9 +121,9 @@ export class LSP3UniversalProfile {
     );
 
     const deployUniversalReceiverProxy =
-      typeof deploymentConfiguration?.UniversalReceiverDelegate?.deployProxy === 'undefined'
+      typeof deploymentConfiguration?.LSP1UniversalReceiverDelegate?.deployProxy === 'undefined'
         ? contractVersions[this.options.chainId]?.contracts?.UniversalReceiverDelegate?.baseContract
-        : deploymentConfiguration?.UniversalReceiverDelegate?.deployProxy;
+        : deploymentConfiguration?.LSP1UniversalReceiverDelegate?.deployProxy;
 
     const baseContractAddresses$ = universalProfileBaseContractAddresses$(
       baseContractDeployment$,
@@ -144,7 +137,7 @@ export class LSP3UniversalProfile {
     const account$ = accountDeployment$(
       this.signer,
       baseContractAddresses$,
-      deploymentConfiguration?.ERC725Account?.byteCode
+      deploymentConfiguration?.LSP0ERC725Account?.byteCode
     );
 
     const signerIsUniversalProfile$ = isSignerUniversalProfile$(this.signer);
@@ -155,7 +148,7 @@ export class LSP3UniversalProfile {
       account$,
       baseContractAddresses$,
       signerIsUniversalProfile$,
-      deploymentConfiguration?.KeyManager?.byteCode
+      deploymentConfiguration?.LSP6KeyManager?.byteCode
     );
 
     // 3 > deploys UniversalReceiverDelegate
@@ -163,14 +156,14 @@ export class LSP3UniversalProfile {
       this.signer,
       this.options.provider,
       baseContractAddresses$,
-      deploymentConfiguration?.UniversalReceiverDelegate?.libAddress,
+      deploymentConfiguration?.LSP1UniversalReceiverDelegate?.libAddress,
       contractVersions[this.options.chainId]?.contracts?.UniversalReceiverDelegate?.versions[
-        deploymentConfiguration?.UniversalReceiverDelegate?.version ?? defaultContractVersion
+        deploymentConfiguration?.LSP1UniversalReceiverDelegate?.version ?? defaultContractVersion
       ],
-      deploymentConfiguration?.UniversalReceiverDelegate?.byteCode
+      deploymentConfiguration?.LSP1UniversalReceiverDelegate?.byteCode
     );
 
-    // 4 set permissions, profile and universal receiver + transfer ownership to KeyManager
+    // 4 > set permissions, lsp3metadata and universal receiver + transfer ownership to KeyManager
     const setDataAndTransferOwnership$ = setDataAndTransferOwnershipTransactions$(
       this.signer,
       account$,
@@ -182,23 +175,31 @@ export class LSP3UniversalProfile {
       defaultUniversalReceiverAddress
     );
 
-    const deployment$ = deploymentWithContractsOnCompletion$(
-      concat([
-        baseContractDeployment$,
-        account$,
-        merge(universalReceiver$, keyManager$),
-        setDataAndTransferOwnership$,
-      ]).pipe(concatAll())
-    );
+    const deployment$ = concat([
+      baseContractDeployment$,
+      account$,
+      merge(universalReceiver$, keyManager$),
+      setDataAndTransferOwnership$,
+    ]).pipe(concatAll(), shareReplay());
 
-    if (deploymentConfiguration?.deployReactive)
-      return deployment$ as UniversalProfileObservableOrPromise<T>;
+    if (
+      contractDeploymentOptions?.onDeployEvents?.next ||
+      contractDeploymentOptions?.onDeployEvents?.error
+    ) {
+      deployment$.subscribe({
+        next: contractDeploymentOptions?.onDeployEvents?.next,
+        error: contractDeploymentOptions?.onDeployEvents?.error || (() => null),
+      });
+    }
 
-    return lastValueFrom(deployment$) as UniversalProfileObservableOrPromise<T>;
+    const contractsPromise =
+      waitForContractDeployment<DeployedUniversalProfileContracts>(deployment$);
+
+    return resolveContractDeployment(contractsPromise, contractDeploymentOptions?.onDeployEvents);
   }
 
   /**
-   * Pre-deploys the latest Version of the LSP3UniversalProfile smart-contracts.
+   * Pre-deploys the latest Version of the UniversalProfile smart-contracts.
    *
    * @param {'string'} [version] Instead of deploying the latest Version you can also deploy a specific
    *  version of the smart-contracts. A list of all available version is available here.
@@ -215,16 +216,24 @@ export class LSP3UniversalProfile {
    *
    * @param {ProfileDataBeforeUpload} profileData
    * @return {*}  {(Promise<AddResult | string>)} Returns processed LSP3 Data and upload url
-   * @memberof LSP3UniversalProfile
+   * @memberof UniversalProfile
    */
   static async uploadProfileData(
-    profileData: ProfileDataBeforeUpload,
+    profileData: ProfileDataBeforeUpload | LSP3ProfileBeforeUpload,
     uploadOptions?: UploadOptions
   ): Promise<ProfileDataForEncoding> {
     uploadOptions = uploadOptions || defaultUploadOptions;
-    const [profileImage, backgroundImage] = await Promise.all([
+
+    profileData = 'LSP3Profile' in profileData ? profileData.LSP3Profile : profileData;
+
+    const [profileImage, backgroundImage, avatar] = await Promise.all([
       prepareMetadataImage(uploadOptions, profileData.profileImage),
       prepareMetadataImage(uploadOptions, profileData.backgroundImage),
+      profileData.avatar
+        ? Promise.all(
+            profileData.avatar?.map((avatar) => prepareMetadataAsset(avatar, uploadOptions))
+          )
+        : undefined,
     ]);
 
     const profile = {
@@ -232,6 +241,7 @@ export class LSP3UniversalProfile {
         ...profileData,
         profileImage,
         backgroundImage,
+        avatar,
       },
     };
 
@@ -258,10 +268,10 @@ export class LSP3UniversalProfile {
    *
    * @param {ProfileDataBeforeUpload} profileData
    * @return {*}  {(Promise<AddResult | string>)} Returns processed LSP3 Data and upload url
-   * @memberof LSP3UniversalProfile
+   * @memberof UniversalProfile
    */
   async uploadProfileData(profileData: ProfileDataBeforeUpload, uploadOptions?: UploadOptions) {
     const uploadOptionsToUse = uploadOptions || this.options.uploadOptions || defaultUploadOptions;
-    return LSP3UniversalProfile.uploadProfileData(profileData, uploadOptionsToUse);
+    return UniversalProfile.uploadProfileData(profileData, uploadOptionsToUse);
   }
 }

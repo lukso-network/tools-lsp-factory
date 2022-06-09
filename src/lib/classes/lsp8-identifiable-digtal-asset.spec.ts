@@ -1,6 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
 import { ethers } from 'hardhat';
+import { Subject } from 'rxjs';
 
 import {
   DeploymentEvent,
@@ -8,8 +9,8 @@ import {
   LSP8Mintable__factory,
   LSPFactory,
 } from '../../../build/main/src/index';
+import { testDeployWithSpecifiedCreators } from '../../../test/digital-asset.utils';
 import { lsp4DigitalAsset } from '../../../test/lsp4-digital-asset.mock';
-import { ERC725_ACCOUNT_INTERRFACE, LSP4_KEYS } from '../helpers/config.helper';
 
 import { ProxyDeployer } from './proxy-deployer';
 
@@ -60,7 +61,9 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         symbol: 'TKN',
       },
       {
-        version: baseContract.address,
+        LSP8IdentifiableDigitalAsset: {
+          version: baseContract.address,
+        },
       }
     );
 
@@ -76,24 +79,58 @@ describe('LSP8IdentifiableDigitalAsset', () => {
     expect(ownerAddress).toEqual(signer.address);
   });
 
-  it('should deploy reactive', (done) => {
+  it('should deploy async', (done) => {
     const myLSPFactory = new LSPFactory(provider, signer);
+    let lsp8Address: string;
 
-    const lsp8IdentifiableDigitalAsset$ = myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
+    myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
       {
         controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
       },
       {
-        libAddress: baseContract.address,
-        deployReactive: true,
+        LSP8IdentifiableDigitalAsset: { version: baseContract.address },
+        onDeployEvents: {
+          next: (deploymentEvent: DeploymentEvent) => {
+            if (
+              deploymentEvent.receipt?.contractAddress &&
+              deploymentEvent.contractName === 'LSP8IdentifiableDigitalAsset'
+            ) {
+              lsp8Address = deploymentEvent.receipt.contractAddress;
+            }
+          },
+          error: (error) => {
+            // Fail to exit subsciber
+            expect(1).toEqual(error);
+          },
+          complete: async () => {
+            const lsp8IdentifiableDigitalAsset = LSP8Mintable__factory.connect(lsp8Address, signer);
+
+            const ownerAddress = await lsp8IdentifiableDigitalAsset.owner();
+            expect(ownerAddress).toEqual(signer.address);
+            done();
+          },
+        },
       }
     );
-
+  });
+  it('Should be compatible with RxJS', (done) => {
+    const myLSPFactory = new LSPFactory(provider, signer);
     let lsp8Address: string;
 
-    lsp8IdentifiableDigitalAsset$.subscribe({
+    const subject = new Subject<DeploymentEvent>();
+    const lsp7DigitalAsset$ = subject.asObservable();
+
+    const next = (deploymentEvent: DeploymentEvent) => {
+      subject.next(deploymentEvent);
+    };
+
+    const complete = () => {
+      subject.complete();
+    };
+
+    lsp7DigitalAsset$.subscribe({
       next: (deploymentEvent: DeploymentEvent) => {
         if (
           deploymentEvent.receipt?.contractAddress &&
@@ -102,10 +139,6 @@ describe('LSP8IdentifiableDigitalAsset', () => {
           lsp8Address = deploymentEvent.receipt.contractAddress;
         }
       },
-      error: (error) => {
-        // Fail to exit subsciber
-        expect(1).toEqual(error);
-      },
       complete: async () => {
         const lsp8IdentifiableDigitalAsset = LSP8Mintable__factory.connect(lsp8Address, signer);
 
@@ -113,7 +146,26 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         expect(ownerAddress).toEqual(signer.address);
         done();
       },
+      error: (error) => {
+        // Fail to exit subsciber
+        expect(1).toEqual(error);
+      },
     });
+
+    myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
+      {
+        controllerAddress: signer.address,
+        name: 'TOKEN',
+        symbol: 'TKN',
+      },
+      {
+        LSP8IdentifiableDigitalAsset: { version: baseContract.address },
+        onDeployEvents: {
+          next,
+          complete,
+        },
+      }
+    );
   });
 
   it('should deploy LSP8 Identifiable Digital without a base contract', async () => {
@@ -126,7 +178,9 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         symbol: 'TKN',
       },
       {
-        deployProxy: false,
+        LSP8IdentifiableDigitalAsset: {
+          deployProxy: false,
+        },
       }
     );
 
@@ -142,45 +196,6 @@ describe('LSP8IdentifiableDigitalAsset', () => {
     expect(ownerAddress).toEqual('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
   });
 
-  it('should deploy reactive', (done) => {
-    const myLSPFactory = new LSPFactory(provider, signer);
-
-    const lsp8IdentifiableDigitalAsset$ = myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
-      {
-        controllerAddress: signer.address,
-        name: 'TOKEN',
-        symbol: 'TKN',
-      },
-      {
-        libAddress: baseContract.address,
-        deployReactive: true,
-      }
-    );
-
-    let lsp8Address: string;
-
-    lsp8IdentifiableDigitalAsset$.subscribe({
-      next: (deploymentEvent: DeploymentEvent) => {
-        if (
-          deploymentEvent.receipt?.contractAddress &&
-          deploymentEvent.contractName === 'LSP8IdentifiableDigitalAsset'
-        ) {
-          lsp8Address = deploymentEvent.receipt.contractAddress;
-        }
-      },
-      error: () => {
-        done();
-      },
-      complete: async () => {
-        const lsp8DigitalAsset = LSP8Mintable__factory.connect(lsp8Address, signer);
-
-        const ownerAddress = await lsp8DigitalAsset.owner();
-        expect(ownerAddress).toEqual(signer.address);
-        done();
-      },
-    });
-  });
-
   it('should deploy lsp8 with custom bytecode', async () => {
     const lspFactory = new LSPFactory(provider, signer);
 
@@ -193,7 +208,9 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         symbol: 'TKN',
       },
       {
-        version: passedBytecode,
+        LSP8IdentifiableDigitalAsset: {
+          version: passedBytecode,
+        },
       }
     );
 
@@ -237,6 +254,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
 
     const allowedLSP4Formats = [
       lsp4DigitalAsset.LSP4Metadata,
+      lsp4DigitalAsset,
       { json: lsp4DigitalAsset, url: 'ipfs://QmRrqBTQL3h2Vc9PEL3d18VnRknzstEGVCxhVW6jPaZzSF' },
     ];
 
@@ -262,7 +280,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         const ownerAddress = await digitalAsset.owner();
         expect(ownerAddress).toEqual(controllerAddress);
 
-        const data = await digitalAsset.getData([
+        const data = await digitalAsset['getData(bytes32[])']([
           '0x9afb95cacc9f95858ec44aa8c3b685511002e30ae54415823f406128b85b238e',
         ]);
 
@@ -270,7 +288,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         expect(data[0]).toEqual(expectedLSP4Value);
       });
       it('should have correct name and symbol set', async () => {
-        const [retrievedName, retrievedSymbol] = await digitalAsset.getData([
+        const [retrievedName, retrievedSymbol] = await digitalAsset['getData(bytes32[])']([
           '0xdeba1e292f8ba88238e10ab3c7f88bd4be4fac56cad5194b6ecceaf653468af1',
           '0x2f0a68ab07768e01943a599e73362a0e17a63a72e94dd2e384d2c1d4db932756',
         ]);
@@ -279,6 +297,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         expect(ethers.utils.toUtf8String(retrievedSymbol)).toEqual(symbol);
       });
     });
+
     describe('deploy lsp8 with specified creators', () => {
       let digitalAsset: LSP8Mintable;
       const controllerAddress = '0xaDa25A4424b08F5337DacD619D4bCb21536a9B95';
@@ -289,8 +308,19 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         '0x591c236982b089Ad4B60758C075fA50Ec53CD674',
       ];
 
+      let lspFactory: LSPFactory;
+
+      beforeAll(async () => {
+        lspFactory = new LSPFactory(provider, signer);
+        const contracts = await lspFactory.UniversalProfile.deploy({
+          controllerAddresses: [controllerAddress],
+        });
+
+        const universalProfileAddress = contracts.LSP0ERC725Account.address;
+        creators.push(universalProfileAddress);
+      });
+
       it('should deploy with specified creators', async () => {
-        const lspFactory = new LSPFactory(provider, signer);
         const lsp8DigitalAsset = await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
           controllerAddress,
           name,
@@ -298,42 +328,17 @@ describe('LSP8IdentifiableDigitalAsset', () => {
           creators,
         });
 
-        expect(lsp8DigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
-        expect(Object.keys(lsp8DigitalAsset).length).toEqual(2);
-
         digitalAsset = LSP8Mintable__factory.connect(
           lsp8DigitalAsset.LSP8IdentifiableDigitalAsset.address,
           signer
         );
+
+        expect(lsp8DigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
+        expect(Object.keys(lsp8DigitalAsset).length).toEqual(2);
       });
+
       it('should have LSP4Creators[] set correctly', async () => {
-        const [creatorArrayLength] = await digitalAsset.getData([LSP4_KEYS.LSP4_CREATORS_ARRAY]);
-        expect(creatorArrayLength).toEqual(
-          '0x0000000000000000000000000000000000000000000000000000000000000002'
-        );
-
-        const [creator1, creator2] = await digitalAsset.getData([
-          LSP4_KEYS.LSP4_CREATORS_ARRAY.slice(0, 34) +
-            ethers.utils.hexZeroPad(ethers.utils.hexlify([0]), 16).substring(2),
-          LSP4_KEYS.LSP4_CREATORS_ARRAY.slice(0, 34) +
-            ethers.utils.hexZeroPad(ethers.utils.hexlify([1]), 16).substring(2),
-        ]);
-
-        expect(ethers.utils.getAddress(creator1)).toEqual(creators[0]);
-        expect(ethers.utils.getAddress(creator2)).toEqual(creators[1]);
-      });
-      it('should have LSP4CreatorsMap set correctly', async () => {
-        const creatorMap = await digitalAsset.getData([
-          LSP4_KEYS.LSP4_CREATORS_MAP_PREFIX + creators[0].slice(2),
-          LSP4_KEYS.LSP4_CREATORS_MAP_PREFIX + creators[1].slice(2),
-        ]);
-
-        expect(creatorMap[0]).toEqual(
-          ethers.utils.hexZeroPad(ethers.utils.hexlify([0]), 8) + ERC725_ACCOUNT_INTERRFACE.slice(2)
-        );
-        expect(creatorMap[1]).toEqual(
-          ethers.utils.hexZeroPad(ethers.utils.hexlify([1]), 8) + ERC725_ACCOUNT_INTERRFACE.slice(2)
-        );
+        await testDeployWithSpecifiedCreators(digitalAsset, creators);
       });
     });
   });

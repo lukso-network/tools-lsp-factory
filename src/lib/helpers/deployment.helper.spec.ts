@@ -12,7 +12,7 @@ describe('waitForReceipt', () => {
   describe('with type PROXY', () => {
     it('should return a new deployment event with the receipt', (done) => {
       const expectedDeploymentEvent =
-        defaultDeploymentEvents[DeploymentType.PROXY].ERC725Account.deployment;
+        defaultDeploymentEvents[DeploymentType.PROXY].LSP0ERC725Account.deployment;
       const deploymentEvent$ = of(expectedDeploymentEvent);
       const receipt$ = waitForReceipt(deploymentEvent$);
 
@@ -30,7 +30,7 @@ describe('waitForReceipt', () => {
 
     it('should return a new deployment event with the receipt, functionName', (done) => {
       const expectedDeploymentEvent =
-        defaultDeploymentEvents[DeploymentType.PROXY].ERC725Account.initialize;
+        defaultDeploymentEvents[DeploymentType.PROXY].LSP0ERC725Account.initialize;
       const expectedDeploymentEvent$ = of(expectedDeploymentEvent);
       const receipt$ = waitForReceipt(expectedDeploymentEvent$);
 
@@ -49,7 +49,7 @@ describe('waitForReceipt', () => {
 
     it('should throw an error incase transaction.wait() fails/errors', (done) => {
       const expectedDeploymentEvent$ = of(
-        defaultDeploymentEvents[DeploymentType.PROXY].ERC725Account.error
+        defaultDeploymentEvents[DeploymentType.PROXY].LSP0ERC725Account.error
       );
       const receipt$ = waitForReceipt(expectedDeploymentEvent$);
 

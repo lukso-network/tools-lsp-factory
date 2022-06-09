@@ -1,7 +1,11 @@
-import { LSP4MetadataBeforeUpload, LSP4MetadataForEncoding } from './lsp4-digital-asset';
+import {
+  LSP4MetadataBeforeUpload,
+  LSP4MetadataContentBeforeUpload,
+  LSP4MetadataForEncoding,
+} from './lsp4-digital-asset';
 import { IPFSGateway, UploadOptions } from './profile-upload-options';
 
-import { DeployedContract } from '.';
+import { ContractOptions, DeployedContract, DeploymentEventCallbacks } from '.';
 
 export enum ContractNames {
   LSP7_DIGITAL_ASSET = 'LSP7DigitalAsset',
@@ -12,7 +16,11 @@ export interface DigitalAssetDeploymentOptions {
   controllerAddress: string;
   name: string;
   symbol: string;
-  digitalAssetMetadata?: LSP4MetadataBeforeUpload | LSP4MetadataForEncoding | string;
+  digitalAssetMetadata?:
+    | LSP4MetadataBeforeUpload
+    | LSP4MetadataContentBeforeUpload
+    | LSP4MetadataForEncoding
+    | string;
   creators?: string[];
 }
 
@@ -29,21 +37,22 @@ export interface DeployedLSP7DigitalAsset {
 }
 
 interface ContractDeploymentOptionsBase {
-  version?: string;
-  deployProxy?: boolean;
   ipfsGateway?: IPFSGateway;
 }
-export interface ContractDeploymentOptionsReactive extends ContractDeploymentOptionsBase {
-  deployReactive: true;
+
+export interface LSP7ContractDeploymentOptions extends ContractDeploymentOptionsBase {
+  LSP7DigitalAsset?: ContractOptions;
+  onDeployEvents?: DeploymentEventCallbacks<DeployedLSP7DigitalAsset>;
 }
 
-export interface ContractDeploymentOptionsNonReactive extends ContractDeploymentOptionsBase {
-  deployReactive?: false;
+export interface LSP8ContractDeploymentOptions extends ContractDeploymentOptionsBase {
+  LSP8IdentifiableDigitalAsset?: ContractOptions;
+  onDeployEvents?: DeploymentEventCallbacks<DeployedLSP8IdentifiableDigitalAsset>;
 }
 
-export type ContractDeploymentOptions =
-  | ContractDeploymentOptionsReactive
-  | ContractDeploymentOptionsNonReactive;
+export type DigitalAssetContractDeploymentOptions =
+  | LSP7ContractDeploymentOptions
+  | LSP8ContractDeploymentOptions;
 
 export interface DigitalAssetConfiguration {
   version?: string;
@@ -51,5 +60,4 @@ export interface DigitalAssetConfiguration {
   libAddress?: string;
   deployProxy?: boolean;
   uploadOptions?: UploadOptions;
-  deployReactive: boolean;
 }

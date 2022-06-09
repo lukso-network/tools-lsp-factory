@@ -1,13 +1,23 @@
-import { Contract, ContractFactory, ContractInterface, providers, Signer } from 'ethers';
+import { Contract, ContractFactory, ContractInterface, ethers, providers, Signer } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
-import { Observable } from 'rxjs';
-import { catchError, endWith, shareReplay, switchMap, takeLast, tap } from 'rxjs/operators';
+import { concat, from, lastValueFrom, Observable } from 'rxjs';
+import {
+  catchError,
+  endWith,
+  mergeMap,
+  shareReplay,
+  switchMap,
+  takeLast,
+  tap,
+} from 'rxjs/operators';
 
 import {
   DeploymentEvent,
   DeploymentEventBaseContract,
+  DeploymentEventCallbacks,
   DeploymentEventProxyContract,
   DeploymentEventStandardContract,
+  DeploymentEventTransaction,
   DeploymentStatus,
   DeploymentType,
 } from '../interfaces/deployment-events';
@@ -99,38 +109,28 @@ export async function deployContract(
   deployContractFunction,
   name: string
 ): Promise<DeploymentEventStandardContract> {
-  try {
-    const contract: Contract = await deployContractFunction();
+  const contract: Contract = await deployContractFunction();
 
-    return {
-      type: DeploymentType.DEPLOYMENT,
-      status: DeploymentStatus.PENDING,
-      contractName: name,
-      transaction: contract.deployTransaction,
-    };
-  } catch (error) {
-    console.error(`Error when deploying ${name}`, error);
-    throw error;
-  }
+  return {
+    type: DeploymentType.DEPLOYMENT,
+    status: DeploymentStatus.PENDING,
+    contractName: name,
+    transaction: contract.deployTransaction,
+  };
 }
 
 export async function deployBaseContract(
   deployContractFunction,
   name: string
 ): Promise<DeploymentEventBaseContract> {
-  try {
-    const contract: Contract = await deployContractFunction();
+  const contract: Contract = await deployContractFunction();
 
-    return {
-      type: DeploymentType.BASE_CONTRACT,
-      status: DeploymentStatus.PENDING,
-      contractName: name,
-      transaction: contract.deployTransaction,
-    };
-  } catch (error) {
-    console.error(`Error when deploying ${name}`, error);
-    throw error;
-  }
+  return {
+    type: DeploymentType.BASE_CONTRACT,
+    status: DeploymentStatus.PENDING,
+    contractName: name,
+    transaction: contract.deployTransaction,
+  };
 }
 
 export async function deployProxyContract(
@@ -139,21 +139,16 @@ export async function deployProxyContract(
   name: string,
   signer: Signer
 ): Promise<DeploymentEventProxyContract> {
-  try {
-    const contract: Contract = await deployContractFunction();
-    const factory = new ContractFactory(abi, getProxyByteCode(contract.address), signer);
-    const deployedProxy = await factory.deploy();
-    const transaction = deployedProxy.deployTransaction;
-    return {
-      type: DeploymentType.PROXY,
-      contractName: name,
-      status: DeploymentStatus.PENDING,
-      transaction,
-    };
-  } catch (error) {
-    console.error(`Error when deploying ${name}`, error);
-    throw error;
-  }
+  const contract: Contract = await deployContractFunction();
+  const factory = new ContractFactory(abi, getProxyByteCode(contract.address), signer);
+  const deployedProxy = await factory.deploy();
+  const transaction = deployedProxy.deployTransaction;
+  return {
+    type: DeploymentType.PROXY,
+    contractName: name,
+    status: DeploymentStatus.PENDING,
+    transaction,
+  };
 }
 
 /**
@@ -176,28 +171,32 @@ export function getDeployedByteCode(
   return provider.getCode(contractAddress);
 }
 
-export function deploymentWithContractsOnCompletion$(deployment$: Observable<DeploymentEvent>) {
-  const contractAccumulator = {};
-  return deployment$.pipe(
-    tap((deploymentEvent) => {
-      if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
-        return;
-      }
+export function waitForContractDeployment<T>(deployment$: Observable<DeploymentEvent>): Promise<T> {
+  const contractAccumulator = {} as T;
 
-      if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
-        contractAccumulator[`${deploymentEvent.contractName}BaseContract`] = {
-          address: deploymentEvent.receipt.contractAddress,
-          receipt: deploymentEvent.receipt,
-        };
-      } else {
-        contractAccumulator[deploymentEvent.contractName] = {
-          address: deploymentEvent.receipt.contractAddress,
-          receipt: deploymentEvent.receipt,
-        };
-      }
-    }),
-    endWith(contractAccumulator)
-  );
+  return lastValueFrom(
+    deployment$.pipe(
+      tap((deploymentEvent) => {
+        if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
+          return;
+        }
+
+        if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
+          contractAccumulator[`${deploymentEvent.contractName}BaseContract`] = {
+            address: deploymentEvent.receipt.contractAddress,
+            receipt: deploymentEvent.receipt,
+          };
+        } else {
+          contractAccumulator[deploymentEvent.contractName] = {
+            address: deploymentEvent.receipt.contractAddress,
+            receipt: deploymentEvent.receipt,
+          };
+        }
+      }),
+      endWith(contractAccumulator),
+      shareReplay()
+    )
+  ) as Promise<T>;
 }
 
 export function isAddress(testAddress: string) {
@@ -223,4 +222,71 @@ export function convertContractDeploymentOptionsVersion(providedVersion?: string
   }
 
   return { version, byteCode, libAddress };
+}
+
+export async function resolveContractDeployment<T>(
+  contractsPromise: Promise<T>,
+  onDeployEvents: DeploymentEventCallbacks<T>
+) {
+  let contracts: T;
+
+  if (onDeployEvents?.error) {
+    try {
+      contracts = await contractsPromise;
+    } catch (error) {
+      // Skip. Error is handled by subscribe block.
+    }
+  } else {
+    // No error callback passed. Let calling code handle errors.
+    contracts = await contractsPromise;
+  }
+
+  if (contracts && onDeployEvents?.complete) {
+    onDeployEvents?.complete(contracts);
+  }
+
+  return contracts;
+}
+
+export function waitForBatchedPendingTransactions(
+  pendingBatchedTransactionArray$: Observable<
+    {
+      type: DeploymentType;
+      contractName: string;
+      status: DeploymentStatus;
+      functionName: string;
+      pendingTransaction: Promise<ethers.ContractTransaction>;
+    }[]
+  >
+): Observable<DeploymentEventTransaction> {
+  const transactions$ = pendingBatchedTransactionArray$.pipe(
+    switchMap((transactions) => {
+      return from(transactions);
+    }),
+    mergeMap(async (transaction) => {
+      return {
+        type: transaction.type,
+        contractName: transaction.contractName,
+        functionName: transaction.functionName,
+        status: transaction.status,
+        transaction: await transaction.pendingTransaction,
+      } as DeploymentEventTransaction;
+    }),
+    shareReplay()
+  );
+
+  const receipts$ = transactions$.pipe(
+    mergeMap(async (deploymentEvent) => {
+      return {
+        type: deploymentEvent.type,
+        contractName: deploymentEvent.contractName,
+        functionName: deploymentEvent.functionName,
+        status: DeploymentStatus.COMPLETE,
+        receipt: await deploymentEvent.transaction.wait(),
+      } as DeploymentEventTransaction;
+    }),
+    shareReplay()
+  );
+
+  return concat(transactions$, receipts$);
 }

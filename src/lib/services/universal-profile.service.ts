@@ -2,16 +2,18 @@ import { ERC725 } from '@erc725/erc725.js';
 import axios from 'axios';
 import { BytesLike, Contract, ContractFactory, ethers, Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, from, Observable, of } from 'rxjs';
-import { defaultIfEmpty, mergeMap, shareReplay, switchMap } from 'rxjs/operators';
+import { defaultIfEmpty, shareReplay, switchMap, takeLast } from 'rxjs/operators';
 
 import {
-  LSP3UniversalProfile,
+  LSP6KeyManager__factory,
+  UniversalProfile,
   UniversalProfile__factory,
   UniversalProfileInit__factory,
 } from '../..';
 import {
   ADDRESS_PERMISSIONS_ARRAY_KEY,
   DEFAULT_PERMISSIONS,
+  ERC725_ACCOUNT_INTERFACE,
   GAS_BUFFER,
   GAS_PRICE,
   LSP3_UP_KEYS,
@@ -22,6 +24,7 @@ import {
   deployContract,
   getProxyByteCode,
   initialize,
+  waitForBatchedPendingTransactions,
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
@@ -41,7 +44,11 @@ import {
   ProfileDataBeforeUpload,
   UniversalProfileDeploymentConfiguration,
 } from '../interfaces';
-import { LSP3ProfileDataForEncoding, ProfileDataForEncoding } from '../interfaces/lsp3-profile';
+import {
+  LSP3ProfileBeforeUpload,
+  LSP3ProfileDataForEncoding,
+  ProfileDataForEncoding,
+} from '../interfaces/lsp3-profile';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 
 import { UniversalReveiverDeploymentEvent } from './universal-receiver.service';
@@ -57,7 +64,7 @@ export function accountDeployment$(
     switchMap((baseContractAddresses) => {
       return accountDeploymentWithBaseContractAddress$(
         signer,
-        baseContractAddresses.ERC725Account,
+        baseContractAddresses.LSP0ERC725Account,
         bytecode
       );
     }),
@@ -122,25 +129,20 @@ export async function deployProxyContract(
   deployContractFunction,
   signer: Signer
 ): Promise<DeploymentEventProxyContract> {
-  try {
-    const contract: Contract = await deployContractFunction();
-    const factory = new ContractFactory(
-      UniversalProfile__factory.abi,
-      getProxyByteCode(contract.address),
-      signer
-    );
-    const deployedProxy = await factory.deploy(signer.getAddress());
-    const transaction = deployedProxy.deployTransaction;
-    return {
-      type: DeploymentType.PROXY,
-      contractName: ContractNames.ERC725_Account,
-      status: DeploymentStatus.PENDING,
-      transaction,
-    };
-  } catch (error) {
-    console.error(`Error when deploying ${ContractNames.ERC725_Account}`, error);
-    throw error;
-  }
+  const contract: Contract = await deployContractFunction();
+  const factory = new ContractFactory(
+    UniversalProfile__factory.abi,
+    getProxyByteCode(contract.address),
+    signer
+  );
+  const deployedProxy = await factory.deploy(signer.getAddress());
+  const transaction = deployedProxy.deployTransaction;
+  return {
+    type: DeploymentType.PROXY,
+    contractName: ContractNames.ERC725_Account,
+    status: DeploymentStatus.PENDING,
+    transaction,
+  };
 }
 
 function initializeProxy(
@@ -169,6 +171,7 @@ export function setDataAndTransferOwnershipTransactions$(
   defaultUniversalReceiverDelegateAddress?: string
 ): Observable<DeploymentEventTransaction> {
   const setDataParameters$ = prepareSetDataTransaction$(
+    signer,
     account$,
     universalReceiver$,
     controllerAddresses,
@@ -183,7 +186,7 @@ export function setDataAndTransferOwnershipTransactions$(
     isSignerUniversalProfile$
   );
 
-  const pendingTransactionArray$ = forkJoin([
+  const pendingSetDataAndTransferOwnershipArray$ = forkJoin([
     setDataParameters$,
     transferOwnershipParameters$,
   ]).pipe(
@@ -199,39 +202,57 @@ export function setDataAndTransferOwnershipTransactions$(
     shareReplay()
   );
 
-  const transactions$ = pendingTransactionArray$.pipe(
-    switchMap((transactions) => {
-      return from(transactions);
-    }),
-    mergeMap(async (transaction) => {
-      return {
-        type: transaction.type,
-        contractName: transaction.contractName,
-        functionName: transaction.functionName,
-        status: transaction.status,
-        transaction: await transaction.pendingTransaction,
-      } as DeploymentEventTransaction;
+  const setDataAndTransferOwnership$ = waitForBatchedPendingTransactions(
+    pendingSetDataAndTransferOwnershipArray$
+  );
+
+  const claimOwnership$ = transferOwnershipParameters$.pipe(
+    switchMap(({ keyManagerAddress, erc725AccountAddress }) => {
+      return setDataAndTransferOwnership$.pipe(
+        takeLast(1),
+        switchMap(async () => {
+          return claimOwnership(signer, erc725AccountAddress, keyManagerAddress);
+        })
+      );
     }),
     shareReplay()
   );
 
-  const receipts$ = transactions$.pipe(
-    mergeMap(async (deploymentEvent) => {
-      return {
-        type: deploymentEvent.type,
-        contractName: deploymentEvent.contractName,
-        functionName: deploymentEvent.functionName,
-        status: DeploymentStatus.COMPLETE,
-        receipt: await deploymentEvent.transaction.wait(),
-      } as DeploymentEventTransaction;
+  const claimOwnershipReceipt$ = waitForReceipt<DeploymentEventTransaction>(claimOwnership$);
+
+  const revokeSignerPermissions$ = forkJoin([
+    setDataParameters$,
+    transferOwnershipParameters$,
+  ]).pipe(
+    switchMap(([{ erc725AccountAddress }, { keyManagerAddress }]) => {
+      return claimOwnershipReceipt$.pipe(
+        switchMap(() => {
+          return revokeSignerPermissions(
+            signer,
+            keyManagerAddress,
+            erc725AccountAddress,
+            controllerAddresses
+          );
+        })
+      );
     }),
     shareReplay()
   );
 
-  return concat(transactions$, receipts$);
+  const revokeSignerPermissionsReceipt$ =
+    waitForReceipt<DeploymentEventTransaction>(revokeSignerPermissions$);
+
+  return concat(
+    setDataAndTransferOwnership$,
+    claimOwnership$,
+    claimOwnershipReceipt$,
+    revokeSignerPermissions$,
+    revokeSignerPermissionsReceipt$
+  );
 }
 
 export function prepareSetDataTransaction$(
+  signer: Signer,
   account$: Observable<LSP3AccountDeploymentEvent>,
   universalReceiver$: Observable<UniversalReveiverDeploymentEvent>,
   controllerAddresses: (string | ControllerOptions)[],
@@ -270,6 +291,7 @@ export function prepareSetDataTransaction$(
             defaultUniversalReceiverDelegateAddress;
 
         return prepareSetDataParameters(
+          signer,
           lsp3AccountAddress,
           universalReceiverDelegateAddress,
           controllerAddresses,
@@ -303,7 +325,7 @@ export async function getLsp3ProfileDataUrl(
       json: lsp3ProfileJson as LSP3ProfileJSON,
     };
   } else {
-    lsp3ProfileData = await LSP3UniversalProfile.uploadProfileData(lsp3Profile, uploadOptions);
+    lsp3ProfileData = await UniversalProfile.uploadProfileData(lsp3Profile, uploadOptions);
   }
 
   return lsp3ProfileData;
@@ -327,10 +349,21 @@ async function getEncodedLSP3ProfileData(
 }
 
 export function lsp3ProfileUpload$(
-  lsp3Profile: ProfileDataBeforeUpload | LSP3ProfileDataForEncoding | string,
+  passedProfileData:
+    | ProfileDataBeforeUpload
+    | LSP3ProfileBeforeUpload
+    | LSP3ProfileDataForEncoding
+    | string,
   uploadOptions?: UploadOptions
 ) {
   let lsp3Profile$: Observable<string>;
+
+  const lsp3Profile =
+    typeof passedProfileData !== 'string' &&
+    typeof passedProfileData !== 'undefined' &&
+    'LSP3Profile' in passedProfileData
+      ? passedProfileData?.LSP3Profile
+      : passedProfileData;
 
   if (typeof lsp3Profile !== 'string' || !isMetadataEncoded(lsp3Profile)) {
     lsp3Profile$ = lsp3Profile
@@ -350,56 +383,57 @@ export function lsp3ProfileUpload$(
  * @param {Signer} signer
  * @param {string} erc725AccountAddress
  * @param {string} universalReceiverDelegateAddress
- * @param {(string | ControllerOptions)[]} controllerAddresses
+ * @param {(string | ControllerOptions)[]} controllers
  * @param {LSP3ProfileDataForEncoding | string} encodedLSP3Profile
  *
  * @return {*}  Observable<LSP3AccountDeploymentEvent | DeploymentEventTransaction>
  */
 export async function prepareSetDataParameters(
+  signer: Signer,
   erc725AccountAddress: string,
   universalReceiverDelegateAddress: string,
-  controllerAddresses: (string | ControllerOptions)[],
+  controllers: (string | ControllerOptions)[],
   encodedLSP3Profile?: string
 ) {
-  const signersAddresses: string[] = [];
-  const signersPermissions: string[] = [];
+  const controllerAddresses: string[] = [];
+  const controllerPermissions: string[] = [];
 
-  controllerAddresses.map((controller, index) => {
+  controllers.map((controller, index) => {
     if (typeof controller === 'string') {
-      signersAddresses[index] = controller;
-      signersPermissions[index] = ERC725.encodePermissions(DEFAULT_PERMISSIONS);
+      controllerAddresses[index] = controller;
+      controllerPermissions[index] = ERC725.encodePermissions(DEFAULT_PERMISSIONS);
     } else {
-      signersAddresses[index] = controller.address;
-      signersPermissions[index] = controller.permissions;
+      controllerAddresses[index] = controller.address;
+      controllerPermissions[index] = controller.permissions;
     }
   });
 
   // see: https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md#addresspermissionspermissionsaddress
-  const addressPermissionsKeys = signersAddresses.map(
+  const addressPermissionsKeys = controllerAddresses.map(
     (address) => PREFIX_PERMISSIONS + address.substring(2)
   );
 
   // see: https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md#addresspermissions
-  const addressPermissionsArrayElements = signersAddresses.map((_, index) => {
+  const addressPermissionsArrayElements = controllerAddresses.map((_, index) => {
     const hexIndex = ethers.utils.hexlify([index]);
 
-    const leftSide = ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34);
-    const rightSide = ethers.utils.hexZeroPad(hexIndex, 16);
-
-    return leftSide + rightSide.substring(2);
+    return (
+      ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
+      ethers.utils.hexZeroPad(hexIndex, 16).substring(2)
+    );
   });
 
-  const hexIndex = ethers.utils.hexlify([signersAddresses.length]);
+  const hexIndex = ethers.utils.hexlify([controllerAddresses.length]);
 
   const universalReceiverPermissionIndex =
     ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) + ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
   const keysToSet = [
     LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
-    ...addressPermissionsKeys, // AddressPermissions:Permissions:<controllerAddress> = controllerPermission,
     PREFIX_PERMISSIONS + universalReceiverDelegateAddress.substring(2),
     ADDRESS_PERMISSIONS_ARRAY_KEY,
     ...addressPermissionsArrayElements, // AddressPermission[index] = controllerAddress
+    ...addressPermissionsKeys, // AddressPermissions:Permissions:<address> = controllerPermission,
     universalReceiverPermissionIndex,
   ];
 
@@ -409,12 +443,23 @@ export async function prepareSetDataParameters(
 
   const valuesToSet = [
     universalReceiverDelegateAddress,
-    ...signersPermissions,
     SET_DATA_PERMISSION,
-    ethers.utils.defaultAbiCoder.encode(['uint256'], [signersPermissions.length]),
-    ...signersAddresses,
+    ethers.utils.defaultAbiCoder.encode(['uint256'], [controllerPermissions.length + 1]),
+    ...controllerAddresses,
+    ...controllerPermissions,
     universalReceiverDelegateAddress,
   ];
+
+  // Set CHANGEOWNER + CHANGEPERMISSIONS for deploy key. Revoked after transfer ownerhip step is complete
+  const signerAddress = await signer.getAddress();
+
+  if (!controllerAddresses.includes(signerAddress)) {
+    keysToSet.push(PREFIX_PERMISSIONS + signerAddress.substring(2));
+    valuesToSet.push(ERC725.encodePermissions({ CHANGEOWNER: true, CHANGEPERMISSIONS: true }));
+  } else {
+    valuesToSet[keysToSet.indexOf(PREFIX_PERMISSIONS + signerAddress.substring(2))] =
+      ERC725.encodePermissions({ CHANGEOWNER: true, CHANGEPERMISSIONS: true });
+  }
 
   if (encodedLSP3Profile) {
     keysToSet.push(LSP3_UP_KEYS.LSP3_PROFILE);
@@ -438,7 +483,7 @@ export async function sendSetDataAndTransferOwnershipTransactions(
   const erc725Account = new UniversalProfile__factory(signer).attach(erc725AccountAddress);
   const signerAddress = await signer.getAddress();
 
-  const setDataEstimate = await erc725Account.estimateGas.setData(
+  const setDataEstimate = await erc725Account.estimateGas['setData(bytes32[],bytes[])'](
     keysToSet,
     valuesToSet as BytesLike[],
     {
@@ -454,10 +499,16 @@ export async function sendSetDataAndTransferOwnershipTransactions(
     }
   );
 
-  const setDataTransaction = erc725Account.setData(keysToSet, valuesToSet as BytesLike[], {
-    gasLimit: setDataEstimate.add(GAS_BUFFER),
-    gasPrice: GAS_PRICE,
-  });
+  // Send batched transactions together
+  const setDataTransaction = erc725Account['setData(bytes32[],bytes[])'](
+    keysToSet,
+    valuesToSet as BytesLike[],
+    {
+      gasLimit: setDataEstimate.add(GAS_BUFFER),
+      gasPrice: GAS_PRICE,
+      from: signerAddress,
+    }
+  );
 
   const transferOwnershipTransaction = erc725Account.transferOwnership(keyManagerAddress, {
     from: signerAddress,
@@ -483,6 +534,95 @@ export async function sendSetDataAndTransferOwnershipTransactions(
   ];
 }
 
+export async function claimOwnership(
+  signer: Signer,
+  erc725AccountAddress: string,
+  keyManagerAddress: string
+): Promise<DeploymentEventTransaction> {
+  const erc725Account = new UniversalProfile__factory(signer).attach(erc725AccountAddress);
+  const signerAddress = await signer.getAddress();
+
+  const claimOwnershipPayload = erc725Account.interface.getSighash('claimOwnership');
+  const keyManager = new LSP6KeyManager__factory(signer).attach(keyManagerAddress);
+
+  const claimOwnershipEstimate = await keyManager.estimateGas.execute(claimOwnershipPayload, {
+    from: signerAddress,
+    gasPrice: GAS_PRICE,
+  });
+
+  const claimOwnershipTransaction = await keyManager.execute(claimOwnershipPayload, {
+    from: signerAddress,
+    gasPrice: GAS_PRICE,
+    gasLimit: claimOwnershipEstimate.add(GAS_BUFFER),
+  });
+
+  return {
+    type: DeploymentType.TRANSACTION,
+    contractName: ContractNames.ERC725_Account,
+    status: DeploymentStatus.PENDING,
+    functionName: 'claimOwnership()',
+    transaction: claimOwnershipTransaction,
+  };
+}
+
+export async function revokeSignerPermissions(
+  signer: Signer,
+  keyManagerAddress: string,
+  erc725AccountAddress: string,
+  controllers: (string | ControllerOptions)[]
+): Promise<DeploymentEventTransaction> {
+  const erc725Account = new UniversalProfile__factory(signer).attach(erc725AccountAddress);
+  const keyManager = new LSP6KeyManager__factory(signer).attach(keyManagerAddress);
+  const signerAddress = await signer.getAddress();
+
+  const controllerAddress = controllers.map((controller) => {
+    return typeof controller === 'string' ? controller : controller.address;
+  });
+
+  let signerPermission: string;
+
+  if (controllerAddress.includes(signerAddress)) {
+    const controller = controllers[controllerAddress.indexOf(signerAddress)];
+    signerPermission =
+      typeof controller === 'string'
+        ? ERC725.encodePermissions(DEFAULT_PERMISSIONS)
+        : controller.permissions ?? ERC725.encodePermissions(DEFAULT_PERMISSIONS);
+  } else {
+    signerPermission = ERC725.encodePermissions({});
+  }
+
+  // There is a bug in typechain which means encodeFunctionData does not work properly with overloaded functions so we need to cast to any here
+  const revokeSignerPermissionsPayload = (erc725Account.interface as any).encodeFunctionData(
+    'setData(bytes32,bytes)',
+    [PREFIX_PERMISSIONS + signerAddress.substring(2), signerPermission]
+  );
+
+  const revokeSignerPermissionsEstimate = await keyManager.estimateGas.execute(
+    revokeSignerPermissionsPayload,
+    {
+      from: signerAddress,
+      gasPrice: GAS_PRICE,
+    }
+  );
+
+  const revokeSignerPermissionsTransaction = await keyManager.execute(
+    revokeSignerPermissionsPayload,
+    {
+      from: signerAddress,
+      gasPrice: GAS_PRICE,
+      gasLimit: revokeSignerPermissionsEstimate.add(GAS_BUFFER),
+    }
+  );
+
+  return {
+    type: DeploymentType.TRANSACTION,
+    contractName: ContractNames.ERC725_Account,
+    status: DeploymentStatus.PENDING,
+    functionName: 'setData(bytes32,bytes)',
+    transaction: revokeSignerPermissionsTransaction,
+  };
+}
+
 export function prepareTransferOwnershipTransaction$(
   accountDeployment$: DeploymentEvent$,
   keyManagerDeployment$: DeploymentEvent$,
@@ -495,17 +635,16 @@ export function prepareTransferOwnershipTransaction$(
         { receipt: keyManagerReceipt },
         isSignerUniversalProfile,
       ]) => {
-        const lsp3Address = isSignerUniversalProfile
+        const erc725AccountAddress = isSignerUniversalProfile
           ? lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.logs[0].address
           : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
 
         const keyManagerAddress = isSignerUniversalProfile
-          ? keyManagerReceipt.contractAddress ||
-            '0x' + keyManagerReceipt.logs[0].topics[2].slice(26)
+          ? keyManagerReceipt.contractAddress || keyManagerReceipt.logs[0].address
           : keyManagerReceipt.contractAddress || keyManagerReceipt.to;
 
         return of({
-          lsp3Address,
+          erc725AccountAddress,
           keyManagerAddress,
         });
       }
@@ -516,39 +655,51 @@ export function prepareTransferOwnershipTransaction$(
 
 export function isSignerUniversalProfile$(signer: Signer) {
   return defer(async () => {
-    try {
-      const signerAddress = await signer.getAddress();
-      const universalProfile = UniversalProfile__factory.connect(signerAddress, signer);
-
-      const owner = await universalProfile.owner();
-      return !!owner;
-    } catch (error) {
-      return false;
-    }
+    const signerAddress = await signer.getAddress();
+    return await addressIsUniversalProfile(signerAddress, signer);
   }).pipe(shareReplay());
+}
+
+export async function addressIsUniversalProfile(address: string, signer: Signer) {
+  try {
+    const universalProfile = UniversalProfile__factory.connect(address, signer);
+
+    let isUniversalProfile = await universalProfile.supportsInterface(ERC725_ACCOUNT_INTERFACE);
+
+    if (!isUniversalProfile) {
+      isUniversalProfile = await universalProfile.supportsInterface('0x63cb749b');
+    }
+
+    return isUniversalProfile;
+  } catch (error) {
+    return false;
+  }
 }
 
 export function convertUniversalProfileConfigurationObject(
   contractDeploymentOptions: ContractDeploymentOptions
 ): UniversalProfileDeploymentConfiguration {
+  const erc725AccountConfig =
+    contractDeploymentOptions?.LSP0ERC725Account || contractDeploymentOptions?.ERC725Account;
+
   const {
     version: erc725AccountVersion,
     byteCode: erc725AccountBytecode,
     libAddress: erc725AccountLibAddress,
-  } = convertContractDeploymentOptionsVersion(contractDeploymentOptions?.ERC725Account?.version);
+  } = convertContractDeploymentOptionsVersion(erc725AccountConfig?.version);
 
   const {
     version: keyManagerVersion,
     byteCode: keyManagerBytecode,
     libAddress: keyManagerLibAddress,
-  } = convertContractDeploymentOptionsVersion(contractDeploymentOptions?.KeyManager?.version);
+  } = convertContractDeploymentOptionsVersion(contractDeploymentOptions?.LSP6KeyManager?.version);
 
   const {
     version: universalReceiverDelegateVersion,
     byteCode: universalReceiverDelegateBytecode,
     libAddress: universalReceiverDelegateLibAddress,
   } = convertContractDeploymentOptionsVersion(
-    contractDeploymentOptions?.UniversalReceiverDelegate?.version
+    contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.version
   );
 
   return {
@@ -556,24 +707,23 @@ export function convertUniversalProfileConfigurationObject(
     uploadOptions: contractDeploymentOptions?.ipfsGateway
       ? { ipfsGateway: contractDeploymentOptions?.ipfsGateway }
       : undefined,
-    ERC725Account: {
+    LSP0ERC725Account: {
       version: erc725AccountVersion,
       byteCode: erc725AccountBytecode,
       libAddress: erc725AccountLibAddress,
-      deployProxy: contractDeploymentOptions?.ERC725Account?.deployProxy,
+      deployProxy: erc725AccountConfig?.deployProxy,
     },
-    KeyManager: {
+    LSP6KeyManager: {
       version: keyManagerVersion,
       byteCode: keyManagerBytecode,
       libAddress: keyManagerLibAddress,
-      deployProxy: contractDeploymentOptions?.KeyManager?.deployProxy,
+      deployProxy: contractDeploymentOptions?.LSP6KeyManager?.deployProxy,
     },
-    UniversalReceiverDelegate: {
+    LSP1UniversalReceiverDelegate: {
       version: universalReceiverDelegateVersion,
       byteCode: universalReceiverDelegateBytecode,
       libAddress: universalReceiverDelegateLibAddress,
-      deployProxy: contractDeploymentOptions?.UniversalReceiverDelegate?.deployProxy,
+      deployProxy: contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.deployProxy,
     },
-    deployReactive: contractDeploymentOptions?.deployReactive,
   };
 }
