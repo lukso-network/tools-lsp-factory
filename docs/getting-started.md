@@ -107,7 +107,7 @@ Anonymous profiles can also be useful if you wish to create the LSP3 metadata la
 You can now continue using your UP address within the dApp:
 
 ```javascript
-const myUPAddress = myContracts.ERC725Account.address;
+const myUPAddress = myContracts.LSP0ERC725Account.address;
 ```
 
 ## Options

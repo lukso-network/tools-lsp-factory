@@ -258,13 +258,13 @@ An icon can also be passed for the Digital Asset. This should be multiple image 
 await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
   digitalAssetMetadata: {
     icon: [
-        {
-          width: 256,
-          height: 256,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0xfdafad027ecfe57eb4ad044b938805d1dec209d6e9f960fc320d7b9b11cced14',
-          url: 'ipfs://QmPLqMFDxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrajSGp',
-        }
+      {
+        width: 256,
+        height: 256,
+        hashFunction: 'keccak256(bytes)',
+        hash: '0xfdafad027ecfe57eb4ad044b938805d1dec209d6e9f960fc320d7b9b11cced14',
+        url: 'ipfs://QmPLqMFDxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrajSGp',
+      }
       ... // Multiple sizes of the icon image should be included
     ]
   },

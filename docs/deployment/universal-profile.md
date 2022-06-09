@@ -26,6 +26,13 @@ After, it will:
 
 These smart contracts linked with some [LSP3 Universal Profile Metadata](../../../standards/universal-profile/lsp3-universal-profile-metadata) form a Universal Profile. The metadata is the 'face' of your profile and contains information such as your name, description, and profile image.
 
+:::caution
+The deployment key passed to LSPFactory will be given `CHANGEOWNER` and `CHANGEPERMISSIONS` [LSP6 permissions](../../../standards/universal-profile/lsp6-key-manager#-types-of-permissions) in order to carry out the Universal Profile deployment.
+
+These permisisons are revoked as the final step of deployment. It is important this step is completed correctly to avoid security risks.
+
+:::
+
 ## Profile Properties
 
 Inside the `profileProperties` object, you can set profile configuration options such as the controller addresses and LSP3 metadata.
@@ -38,7 +45,10 @@ The property `controllerAddresses` can be filled with addresses of externally ow
 
 ```javascript
 await lspFactory.UniversalProfile.deploy({
-  controllerAddresses: ['0x7Ab53a0C861fb955050A8DA109eEeA5E61fd8Aa4', '0x56fE4E7dc2bc0b6397E4609B07b4293482E3F72B'],
+  controllerAddresses: [
+    '0x7Ab53a0C861fb955050A8DA109eEeA5E61fd8Aa4',
+    '0x56fE4E7dc2bc0b6397E4609B07b4293482E3F72B',
+  ],
 });
 ```
 
@@ -315,7 +325,8 @@ The `uploadMetaData()` function is available as a static or non-static method to
 ```javascript title="Calling uploadMetaData on an LSPFactory instance"
 await myLSPFactory.UniversalProfile.uploadMetaData(myLSP3MetaData);
 
-> {
+/**
+{
   hash: '0x1234...',
   hashFunction: 'keccak256(utf8)',
   url: 'https://ipfs.lukso.network/ipfs/QmPzUfdKhY6vfcLNDnitwKanpm5GqjYSmw9todNVmi4bqy',
@@ -327,6 +338,7 @@ await myLSPFactory.UniversalProfile.uploadMetaData(myLSP3MetaData);
     }
   }
 }
+*/
 ```
 
 ```javascript title="Calling uploadMetaData on the uninstantiated class"
@@ -412,7 +424,7 @@ await lspFactory.UniversalProfile.deploy({...}, {
 ```javascript title="Deploying a Universal Profile at version 0.5.0, with a KeyManager set to version to 0.4.0"
 await lspFactory.UniversalProfile.deploy({...}, {
     version: '0.5.0',
-    KeyManager: {
+    LSP6KeyManager: {
       version: '0.4.0'
     }
 });
@@ -428,7 +440,7 @@ The custom bytecode will be deployed and used as part of the Universal Profile. 
 
 ```javascript title="Deploying a Universal Profile with a custom KeyManager implementation"
 lspFactory.UniversalProfile.deploy({...}, {
-    KeyManager: {
+    LSP6KeyManager: {
       version: '0x...'
     }
 });
@@ -603,6 +615,42 @@ const contracts = await lspFactory.UniversalProfile.deploy({...}, {
   type: 'TRANSACTION',
   contractName: 'LSP0ERC725Account',
   functionName: 'transferOwnership(address)',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP0ERC725Account',
+  functionName: 'claimOwnership()',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP0ERC725Account',
+  functionName: 'claimOwnership()',
+  status: 'COMPLETE',
+  receipt: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP0ERC725Account',
+  functionName: 'setData(bytes32,bytes)',
+  status: 'PENDING',
+  transaction: {
+    ...
+  }
+}
+{
+  type: 'TRANSACTION',
+  contractName: 'LSP0ERC725Account',
+  functionName: 'setData(bytes32,bytes)',
   status: 'COMPLETE',
   receipt: {
     ...
