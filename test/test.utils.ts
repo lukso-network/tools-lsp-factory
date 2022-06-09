@@ -86,12 +86,15 @@ export async function testSetData(upAddress: string, keyManagerAddress: string, 
 
   const keyManager = LSP6KeyManager__factory.connect(keyManagerAddress, signer);
 
-  const abi = await universalProfile.populateTransaction.setData([key], [value]);
+  const abi = await universalProfile.populateTransaction['setData(bytes32[],bytes[])'](
+    [key],
+    [value]
+  );
 
   const result = await keyManager.connect(signer).execute(abi.data);
   expect(result).toBeTruthy();
 
-  const data = await universalProfile.getData([key]);
+  const data = await universalProfile['getData(bytes32[])']([key]);
   expect(data).toEqual([value]);
 }
 

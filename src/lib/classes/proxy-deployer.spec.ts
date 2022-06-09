@@ -4,7 +4,7 @@ import { ProxyDeployer } from './proxy-deployer';
 
 describe('UniversalProfile', () => {
   let baseContracts;
-  let proxyDeployer;
+  let proxyDeployer: ProxyDeployer;
   let signer: SignerWithAddress;
 
   beforeAll(async () => {
@@ -23,20 +23,14 @@ describe('UniversalProfile', () => {
     );
     await erc725AccountProxy.initialize(await signer.getAddress());
 
-    // UniversalReceiverDelegate
-    const universalReceiverDelegateProxy = await proxyDeployer.deployProxyContract(
-      baseContracts.universalReceiverDelegate
-    );
-    await universalReceiverDelegateProxy.initialize();
-
-    await erc725AccountProxy.setData(
+    await erc725AccountProxy['setData(bytes32[],bytes[])'](
       ['0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'],
       ['0xbeefbeef'],
       {
         from: await signer.getAddress(),
       }
     );
-    const data = await erc725AccountProxy.getData([
+    const data = await erc725AccountProxy['getData(bytes32[])']([
       '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
     ]);
 
