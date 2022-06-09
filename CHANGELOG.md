@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file. See [standa
 * rename LSP3UniversalProfile -> UniversalProfile (#119)
 * use full universal profile contract names (#118)
 * Adds contract object to digital asset options object
+* Update smart contracts to v0.6.0. 
 
 ### Features
 
