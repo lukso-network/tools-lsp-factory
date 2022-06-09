@@ -24,14 +24,12 @@
       },
       "LSP7Mintable": {
         "versions": {
-          "0.5.0": "0x99AA90a7C44e5Ce4C1960dc72Dda5C45De37EA4B",
           "0.6.0": "0x536C330cb3E6D0DD74Aa7541F1c490E50Ba81f38"
         },
         "baseContract": true
       },
       "LSP8Mintable": {
         "versions": {
-          "0.5.0": "0x9486f66B2CD54a04B75F8E3b1088C46B02F05F26",
           "0.6.0": "0x8796A3e938f41bD381888EB1213f7fd91aec48cD"
         },
         "baseContract": true
