@@ -206,8 +206,8 @@ export function setDataAndTransferOwnershipTransactions$(
     pendingSetDataAndTransferOwnershipArray$
   );
 
-  const claimOwnership$ = forkJoin([setDataParameters$, transferOwnershipParameters$]).pipe(
-    switchMap(([{ erc725AccountAddress }, { keyManagerAddress }]) => {
+  const claimOwnership$ = transferOwnershipParameters$.pipe(
+    switchMap(({ keyManagerAddress, erc725AccountAddress }) => {
       return setDataAndTransferOwnership$.pipe(
         takeLast(1),
         switchMap(async () => {
@@ -635,17 +635,16 @@ export function prepareTransferOwnershipTransaction$(
         { receipt: keyManagerReceipt },
         isSignerUniversalProfile,
       ]) => {
-        const lsp3Address = isSignerUniversalProfile
+        const erc725AccountAddress = isSignerUniversalProfile
           ? lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.logs[0].address
           : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
 
         const keyManagerAddress = isSignerUniversalProfile
-          ? keyManagerReceipt.contractAddress ||
-            '0x' + keyManagerReceipt.logs[0].topics[2].slice(26)
+          ? keyManagerReceipt.contractAddress || keyManagerReceipt.logs[0].address
           : keyManagerReceipt.contractAddress || keyManagerReceipt.to;
 
         return of({
-          lsp3Address,
+          erc725AccountAddress,
           keyManagerAddress,
         });
       }
