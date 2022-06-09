@@ -48,7 +48,7 @@ export const DEFAULT_PERMISSIONS = {
   SIGN: true,
 };
 
-export const DEFAULT_CONTRACT_VERSION = '0.5.0';
+export const DEFAULT_CONTRACT_VERSION = '0.6.0';
 
 export const GAS_PRICE = 10_000_000_000;
 export const GAS_BUFFER = 100_000;

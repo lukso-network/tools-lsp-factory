@@ -2,7 +2,7 @@ import { ERC725 } from '@erc725/erc725.js';
 import axios from 'axios';
 import { BytesLike, Contract, ContractFactory, ethers, Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, from, Observable, of } from 'rxjs';
-import { defaultIfEmpty, mergeMap, shareReplay, switchMap } from 'rxjs/operators';
+import { defaultIfEmpty, shareReplay, switchMap, takeLast } from 'rxjs/operators';
 
 import {
   LSP6KeyManager__factory,
@@ -24,6 +24,7 @@ import {
   deployContract,
   getProxyByteCode,
   initialize,
+  waitForBatchedPendingTransactions,
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
@@ -185,37 +186,69 @@ export function setDataAndTransferOwnershipTransactions$(
     isSignerUniversalProfile$
   );
 
-  const transactions$ = forkJoin([setDataParameters$, transferOwnershipParameters$]).pipe(
+  const pendingSetDataAndTransferOwnershipArray$ = forkJoin([
+    setDataParameters$,
+    transferOwnershipParameters$,
+  ]).pipe(
     switchMap(([{ erc725AccountAddress, keysToSet, valuesToSet }, { keyManagerAddress }]) => {
       return sendSetDataAndTransferOwnershipTransactions(
         signer,
         erc725AccountAddress,
         keysToSet,
         valuesToSet,
-        keyManagerAddress,
-        controllerAddresses
+        keyManagerAddress
       );
     }),
-    switchMap((transactions) => {
-      return from(transactions);
+    shareReplay()
+  );
+
+  const setDataAndTransferOwnership$ = waitForBatchedPendingTransactions(
+    pendingSetDataAndTransferOwnershipArray$
+  );
+
+  const claimOwnership$ = forkJoin([setDataParameters$, transferOwnershipParameters$]).pipe(
+    switchMap(([{ erc725AccountAddress }, { keyManagerAddress }]) => {
+      return setDataAndTransferOwnership$.pipe(
+        takeLast(1),
+        switchMap(async () => {
+          return claimOwnership(signer, erc725AccountAddress, keyManagerAddress);
+        })
+      );
     }),
     shareReplay()
   );
 
-  const receipts$ = transactions$.pipe(
-    mergeMap(async (deploymentEvent) => {
-      return {
-        type: deploymentEvent.type,
-        contractName: deploymentEvent.contractName,
-        functionName: deploymentEvent.functionName,
-        status: DeploymentStatus.COMPLETE,
-        receipt: await deploymentEvent.transaction.wait(),
-      } as DeploymentEventTransaction;
+  const claimOwnershipReceipt$ = waitForReceipt<DeploymentEventTransaction>(claimOwnership$);
+
+  const revokeSignerPermissions$ = forkJoin([
+    setDataParameters$,
+    transferOwnershipParameters$,
+  ]).pipe(
+    switchMap(([{ erc725AccountAddress }, { keyManagerAddress }]) => {
+      return claimOwnershipReceipt$.pipe(
+        switchMap(() => {
+          return revokeSignerPermissions(
+            signer,
+            keyManagerAddress,
+            erc725AccountAddress,
+            controllerAddresses
+          );
+        })
+      );
     }),
     shareReplay()
   );
 
-  return concat(transactions$, receipts$);
+  const revokeSignerPermissionsReceipt$ =
+    waitForReceipt<DeploymentEventTransaction>(revokeSignerPermissions$);
+
+  return concat(
+    setDataAndTransferOwnership$,
+    claimOwnership$,
+    claimOwnershipReceipt$,
+    revokeSignerPermissions$,
+    revokeSignerPermissionsReceipt$
+  );
 }
 
 export function prepareSetDataTransaction$(
@@ -445,9 +478,8 @@ export async function sendSetDataAndTransferOwnershipTransactions(
   erc725AccountAddress: string,
   keysToSet: string[],
   valuesToSet: string[],
-  keyManagerAddress: string,
-  controllers: (string | ControllerOptions)[]
-): Promise<DeploymentEventTransaction[]> {
+  keyManagerAddress: string
+) {
   const erc725Account = new UniversalProfile__factory(signer).attach(erc725AccountAddress);
   const signerAddress = await signer.getAddress();
 
@@ -467,20 +499,48 @@ export async function sendSetDataAndTransferOwnershipTransactions(
     }
   );
 
-  const setDataTransaction = await erc725Account['setData(bytes32[],bytes[])'](
+  // Send batched transactions together
+  const setDataTransaction = erc725Account['setData(bytes32[],bytes[])'](
     keysToSet,
     valuesToSet as BytesLike[],
     {
       gasLimit: setDataEstimate.add(GAS_BUFFER),
       gasPrice: GAS_PRICE,
+      from: signerAddress,
     }
   );
 
-  const transferOwnershipTransaction = await erc725Account.transferOwnership(keyManagerAddress, {
+  const transferOwnershipTransaction = erc725Account.transferOwnership(keyManagerAddress, {
     from: signerAddress,
     gasLimit: transferOwnershipEstimate.add(GAS_BUFFER),
     gasPrice: GAS_PRICE,
   });
+
+  return [
+    {
+      type: DeploymentType.TRANSACTION,
+      contractName: ContractNames.ERC725_Account,
+      status: DeploymentStatus.PENDING,
+      functionName: 'setData(bytes32[],bytes[])',
+      pendingTransaction: setDataTransaction,
+    },
+    {
+      type: DeploymentType.TRANSACTION,
+      contractName: ContractNames.ERC725_Account,
+      status: DeploymentStatus.PENDING,
+      functionName: 'transferOwnership(address)',
+      pendingTransaction: transferOwnershipTransaction,
+    },
+  ];
+}
+
+export async function claimOwnership(
+  signer: Signer,
+  erc725AccountAddress: string,
+  keyManagerAddress: string
+): Promise<DeploymentEventTransaction> {
+  const erc725Account = new UniversalProfile__factory(signer).attach(erc725AccountAddress);
+  const signerAddress = await signer.getAddress();
 
   const claimOwnershipPayload = erc725Account.interface.getSighash('claimOwnership');
   const keyManager = new LSP6KeyManager__factory(signer).attach(keyManagerAddress);
@@ -491,9 +551,29 @@ export async function sendSetDataAndTransferOwnershipTransactions(
   });
 
   const claimOwnershipTransaction = await keyManager.execute(claimOwnershipPayload, {
-    gasLimit: claimOwnershipEstimate.add(GAS_BUFFER),
+    from: signerAddress,
     gasPrice: GAS_PRICE,
+    gasLimit: claimOwnershipEstimate.add(GAS_BUFFER),
   });
+
+  return {
+    type: DeploymentType.TRANSACTION,
+    contractName: ContractNames.ERC725_Account,
+    status: DeploymentStatus.PENDING,
+    functionName: 'claimOwnership()',
+    transaction: claimOwnershipTransaction,
+  };
+}
+
+export async function revokeSignerPermissions(
+  signer: Signer,
+  keyManagerAddress: string,
+  erc725AccountAddress: string,
+  controllers: (string | ControllerOptions)[]
+): Promise<DeploymentEventTransaction> {
+  const erc725Account = new UniversalProfile__factory(signer).attach(erc725AccountAddress);
+  const keyManager = new LSP6KeyManager__factory(signer).attach(keyManagerAddress);
+  const signerAddress = await signer.getAddress();
 
   const controllerAddress = controllers.map((controller) => {
     return typeof controller === 'string' ? controller : controller.address;
@@ -534,36 +614,13 @@ export async function sendSetDataAndTransferOwnershipTransactions(
     }
   );
 
-  return [
-    {
-      type: DeploymentType.TRANSACTION,
-      contractName: ContractNames.ERC725_Account,
-      status: DeploymentStatus.PENDING,
-      functionName: 'setData(bytes32[],bytes[])',
-      transaction: setDataTransaction,
-    },
-    {
-      type: DeploymentType.TRANSACTION,
-      contractName: ContractNames.ERC725_Account,
-      status: DeploymentStatus.PENDING,
-      functionName: 'transferOwnership(address)',
-      transaction: transferOwnershipTransaction,
-    },
-    {
-      type: DeploymentType.TRANSACTION,
-      contractName: ContractNames.ERC725_Account,
-      status: DeploymentStatus.PENDING,
-      functionName: 'claimOwnership()',
-      transaction: claimOwnershipTransaction,
-    },
-    {
-      type: DeploymentType.TRANSACTION,
-      contractName: ContractNames.ERC725_Account,
-      status: DeploymentStatus.PENDING,
-      functionName: 'setData(bytes32,bytes)',
-      transaction: revokeSignerPermissionsTransaction,
-    },
-  ];
+  return {
+    type: DeploymentType.TRANSACTION,
+    contractName: ContractNames.ERC725_Account,
+    status: DeploymentStatus.PENDING,
+    functionName: 'setData(bytes32,bytes)',
+    transaction: revokeSignerPermissionsTransaction,
+  };
 }
 
 export function prepareTransferOwnershipTransaction$(

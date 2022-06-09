@@ -1,7 +1,15 @@
-import { Contract, ContractFactory, ContractInterface, providers, Signer } from 'ethers';
+import { Contract, ContractFactory, ContractInterface, ethers, providers, Signer } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
-import { lastValueFrom, Observable } from 'rxjs';
-import { catchError, endWith, shareReplay, switchMap, takeLast, tap } from 'rxjs/operators';
+import { concat, from, lastValueFrom, Observable } from 'rxjs';
+import {
+  catchError,
+  endWith,
+  mergeMap,
+  shareReplay,
+  switchMap,
+  takeLast,
+  tap,
+} from 'rxjs/operators';
 
 import {
   DeploymentEvent,
@@ -9,6 +17,7 @@ import {
   DeploymentEventCallbacks,
   DeploymentEventProxyContract,
   DeploymentEventStandardContract,
+  DeploymentEventTransaction,
   DeploymentStatus,
   DeploymentType,
 } from '../interfaces/deployment-events';
@@ -237,4 +246,47 @@ export async function resolveContractDeployment<T>(
   }
 
   return contracts;
+}
+
+export function waitForBatchedPendingTransactions(
+  pendingBatchedTransactionArray$: Observable<
+    {
+      type: DeploymentType;
+      contractName: string;
+      status: DeploymentStatus;
+      functionName: string;
+      pendingTransaction: Promise<ethers.ContractTransaction>;
+    }[]
+  >
+): Observable<DeploymentEventTransaction> {
+  const transactions$ = pendingBatchedTransactionArray$.pipe(
+    switchMap((transactions) => {
+      return from(transactions);
+    }),
+    mergeMap(async (transaction) => {
+      return {
+        type: transaction.type,
+        contractName: transaction.contractName,
+        functionName: transaction.functionName,
+        status: transaction.status,
+        transaction: await transaction.pendingTransaction,
+      } as DeploymentEventTransaction;
+    }),
+    shareReplay()
+  );
+
+  const receipts$ = transactions$.pipe(
+    mergeMap(async (deploymentEvent) => {
+      return {
+        type: deploymentEvent.type,
+        contractName: deploymentEvent.contractName,
+        functionName: deploymentEvent.functionName,
+        status: DeploymentStatus.COMPLETE,
+        receipt: await deploymentEvent.transaction.wait(),
+      } as DeploymentEventTransaction;
+    }),
+    shareReplay()
+  );
+
+  return concat(transactions$, receipts$);
 }
