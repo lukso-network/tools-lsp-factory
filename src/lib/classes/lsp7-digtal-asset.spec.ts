@@ -8,7 +8,7 @@ import {
   LSP7Mintable__factory,
   LSPFactory,
 } from '../../../build/main/src/index';
-import { ERC725_ACCOUNT_INTERFACE, LSP4_KEYS } from '../helpers/config.helper';
+import { testDeployWithSpecifiedCreators } from '../../../test/digital-asset.utils';
 
 import { lsp4DigitalAsset } from './../../../test/lsp4-digital-asset.mock';
 import { ProxyDeployer } from './proxy-deployer';
@@ -259,7 +259,7 @@ describe('LSP7DigitalAsset', () => {
     ];
     let lspFactory: LSPFactory;
 
-    it('set UP address in creator array', async () => {
+    beforeAll(async () => {
       lspFactory = new LSPFactory(provider, signer);
       const contracts = await lspFactory.UniversalProfile.deploy({
         controllerAddresses: [controllerAddress],
@@ -278,52 +278,17 @@ describe('LSP7DigitalAsset', () => {
         isNFT,
       });
 
-      expect(lsp7DigitalAsset.LSP7DigitalAsset.address).toBeDefined();
-      expect(Object.keys(lsp7DigitalAsset).length).toEqual(2);
-
       digitalAsset = LSP7Mintable__factory.connect(
         lsp7DigitalAsset.LSP7DigitalAsset.address,
         signer
       );
+
+      expect(lsp7DigitalAsset.LSP7DigitalAsset.address).toBeDefined();
+      expect(Object.keys(lsp7DigitalAsset).length).toEqual(2);
     });
 
     it('should have LSP4Creators[] set correctly', async () => {
-      const [creatorArrayLength] = await digitalAsset['getData(bytes32[])']([
-        LSP4_KEYS.LSP4_CREATORS_ARRAY,
-      ]);
-      expect(creatorArrayLength).toEqual(
-        '0x0000000000000000000000000000000000000000000000000000000000000003'
-      );
-
-      const [creator1, creator2, creator3] = await digitalAsset['getData(bytes32[])']([
-        LSP4_KEYS.LSP4_CREATORS_ARRAY.slice(0, 34) +
-          ethers.utils.hexZeroPad(ethers.utils.hexlify([0]), 16).substring(2),
-        LSP4_KEYS.LSP4_CREATORS_ARRAY.slice(0, 34) +
-          ethers.utils.hexZeroPad(ethers.utils.hexlify([1]), 16).substring(2),
-        LSP4_KEYS.LSP4_CREATORS_ARRAY.slice(0, 34) +
-          ethers.utils.hexZeroPad(ethers.utils.hexlify([2]), 16).substring(2),
-      ]);
-
-      expect(ethers.utils.getAddress(creator1)).toEqual(creators[0]);
-      expect(ethers.utils.getAddress(creator2)).toEqual(creators[1]);
-      expect(ethers.utils.getAddress(creator3)).toEqual(creators[2]);
-    });
-    it('should have LSP4CreatorsMap set correctly', async () => {
-      const creatorMap = await digitalAsset['getData(bytes32[])']([
-        LSP4_KEYS.LSP4_CREATORS_MAP_PREFIX + creators[0].slice(2),
-        LSP4_KEYS.LSP4_CREATORS_MAP_PREFIX + creators[1].slice(2),
-        LSP4_KEYS.LSP4_CREATORS_MAP_PREFIX + creators[2].slice(2),
-      ]);
-
-      expect(creatorMap[0]).toEqual(
-        '0xffffffff' + ethers.utils.hexZeroPad(ethers.utils.hexlify([0]), 8).slice(2)
-      );
-      expect(creatorMap[1]).toEqual(
-        '0xffffffff' + ethers.utils.hexZeroPad(ethers.utils.hexlify([1]), 8).slice(2)
-      );
-      expect(creatorMap[2]).toEqual(
-        ERC725_ACCOUNT_INTERFACE + ethers.utils.hexZeroPad(ethers.utils.hexlify([2]), 8).slice(2)
-      );
+      await testDeployWithSpecifiedCreators(digitalAsset, creators);
     });
   });
 });

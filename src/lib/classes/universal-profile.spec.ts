@@ -67,12 +67,12 @@ describe('UniversalProfile', () => {
 
           universalProfile = UniversalProfile__factory.connect(LSP0ERC725Account.address, signer);
 
-          const data = await universalProfile['getData(bytes32[])']([
+          const lsp3Data = await universalProfile['getData(bytes32[])']([
             '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
           ]);
 
-          expect(data[0].startsWith('0x6f357c6a')).toBe(true);
-          expect(data[0]).toEqual(expectedLSP3Value);
+          expect(lsp3Data[0].startsWith('0x6f357c6a')).toBe(true);
+          expect(lsp3Data[0]).toEqual(expectedLSP3Value);
         });
       });
     });
