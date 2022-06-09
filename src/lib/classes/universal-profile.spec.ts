@@ -663,11 +663,11 @@ describe('UniversalProfile', () => {
           signers[0]
         );
 
-        const data = await universalProfile['getData(bytes32[])']([
+        const univeralReceiverDelegate = await universalProfile['getData(bytes32[])']([
           LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
         ]);
 
-        const checkedsumResult = ethers.utils.getAddress(data[0]);
+        const checkedsumResult = ethers.utils.getAddress(univeralReceiverDelegate[0]);
 
         expect(checkedsumResult).toEqual(deployedContracts.LSP1UniversalReceiverDelegate.address);
       });
