@@ -35,39 +35,32 @@ const lspFactory = new LSPFactory(provider, {
 const myContracts = await lspFactory.UniversalProfile.deploy({
   controllerAddresses: ['0x...'], // Address which will controll the UP
   lsp3Profile: {
-    json: {
-      LSP3Profile: {
-        name: 'My Universal Profile',
-        description: 'My cool Universal Profile',
-        profileImage: [
-          {
-            width: 500,
-            height: 500,
-            hashFunction: 'keccak256(bytes)',
-            // bytes32 hex string of the image hash
-            hash: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
-            url: 'ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp',
-          },
-        ],
-        backgroundImage: [
-          {
-            width: 500,
-            height: 500,
-            hashFunction: 'keccak256(bytes)',
-            // bytes32 hex string of the image hash
-            hash: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
-            url: 'ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp',
-          },
-        ],
-        tags: ['Fashion', 'Design'],
-        links: [{ title: 'My Website', url: 'www.my-website.com' }],
+    name: 'My Universal Profile',
+    description: 'My cool Universal Profile',
+    profileImage: [
+      {
+        width: 500,
+        height: 500,
+        hashFunction: 'keccak256(bytes)',
+        hash: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
+        url: 'ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp',
       },
-    },
-    url: '',
+    ],
+    backgroundImage: [
+      {
+        width: 500,
+        height: 500,
+        hashFunction: 'keccak256(bytes)',
+        hash: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
+        url: 'ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp',
+      },
+    ],
+    tags: ['Fashion', 'Design'],
+    links: [{ title: 'My Website', url: 'www.my-website.com' }],
   },
 });
 
-const myUPAddress = myContracts.ERC725Account.address;
+const myUPAddress = myContracts.LSP0ERC725Account.address;
 ```
 
 ### Using Deployment events
