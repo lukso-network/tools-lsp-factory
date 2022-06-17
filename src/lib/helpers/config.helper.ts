@@ -1,3 +1,4 @@
+import { Permissions } from '@erc725/erc725.js/build/main/src/types/Method';
 import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
 import { Options } from 'ipfs-http-client';
@@ -35,7 +36,7 @@ export const ADDRESS_PERMISSIONS_ARRAY_KEY =
 export const PREFIX_PERMISSIONS = '0x4b80742de2bf82acb3630000';
 
 // exclude DELEGATECALL for safety
-export const DEFAULT_PERMISSIONS = {
+export const DEFAULT_PERMISSIONS: Permissions = {
   CHANGEOWNER: true,
   CHANGEPERMISSIONS: true,
   ADDPERMISSIONS: true,
@@ -46,6 +47,11 @@ export const DEFAULT_PERMISSIONS = {
   DEPLOY: true,
   TRANSFERVALUE: true,
   SIGN: true,
+  SUPER_CALL: true,
+  SUPER_DELEGATECALL: false,
+  SUPER_SETDATA: true,
+  SUPER_STATICCALL: true,
+  SUPER_TRANSFERVALUE: true,
 };
 
 export const DEFAULT_CONTRACT_VERSION = '0.6.0';

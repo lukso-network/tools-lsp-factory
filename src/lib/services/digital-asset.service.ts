@@ -420,11 +420,9 @@ export async function getEncodedLSP4Metadata(
     lsp4MetadataForEncoding = lsp4Metadata;
   }
 
-  const encodedLSP4Metadata = erc725EncodeData({
-    LSP4Metadata: lsp4MetadataForEncoding,
-  });
+  const encodedLSP4Metadata = erc725EncodeData(lsp4MetadataForEncoding, 'LSP4Metadata');
 
-  return encodedLSP4Metadata.LSP4Metadata.value;
+  return encodedLSP4Metadata.values[0];
 }
 
 export function setMetadataAndTransferOwnership$(
