@@ -35,5 +35,42 @@
         "baseContract": true
       }
     }
+  },
+  "2828": {
+    "name": "LUKSO L16",
+    "chainId": 2828,
+    "networkId": 2828,
+    "contracts": {
+        "ERC725Account": {
+            "versions": {
+              "0.6.1": "0xd4Ea48069862de4fD64131c7f551e866873B5e47"
+            },
+            "baseContract": true
+          },
+          "KeyManager": {
+            "versions": {
+              "0.6.1": "0x1C2245b03c37645814aDb91CD81b1580e29eeabF"
+            },
+            "baseContract": true
+          },
+          "UniversalReceiverDelegate": {
+            "versions": {
+              "0.6.1": "0xBe97521FCbbED2E6a6832B2E9A40fEec9215BEDF"
+            },
+            "baseContract": false
+          },
+          "LSP7Mintable": {
+            "versions": {
+              "0.6.1": "0x54077692857Ac4df45178fC074294782Af393a78"
+            },
+            "baseContract": true
+          },
+          "LSP8Mintable": {
+            "versions": {
+              "0.6.1": "0x00C31Fd44D6777c85024941787F56afd992bA51d"
+            },
+            "baseContract": true
+          }
+    }
   }
 }
