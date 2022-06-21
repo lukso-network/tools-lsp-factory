@@ -54,7 +54,7 @@ export const DEFAULT_PERMISSIONS: Permissions = {
   SUPER_TRANSFERVALUE: true,
 };
 
-export const DEFAULT_CONTRACT_VERSION = '0.6.0';
+export const DEFAULT_CONTRACT_VERSION = '0.6.1';
 
 export const GAS_PRICE = 10_000_000_000;
 export const GAS_BUFFER = 100_000;

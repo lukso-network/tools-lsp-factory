@@ -6,34 +6,76 @@
     "contracts": {
       "ERC725Account": {
         "versions": {
-          "0.6.0": "0xD943e023722f15A67EFC2114D16da74E011AbE14"
+          "0.6.0": "0xD943e023722f15A67EFC2114D16da74E011AbE14",
+          "0.6.1": "0x17c582ca6d96F0DA08227933c81791cbb0723d46"
         },
         "baseContract": true
       },
       "KeyManager": {
         "versions": {
-          "0.6.0": "0xad7DbD15269cc26D7673C864ED35444b09AbF0EF"
+          "0.6.0": "0xad7DbD15269cc26D7673C864ED35444b09AbF0EF",
+          "0.6.1": "0xE40cF7aEb6540dEA4783e45338343fCFD90f325d"
         },
         "baseContract": true
       },
       "UniversalReceiverDelegate": {
         "versions": {
-          "0.6.0": "0x3B38C101810AD6954a5A7c69300403Ecc0A51827"
+          "0.6.0": "0x3B38C101810AD6954a5A7c69300403Ecc0A51827",
+          "0.6.1": "0xe5089Aaa677501BeC72d5418d476850d83e5b750"
         },
         "baseContract": false
       },
       "LSP7Mintable": {
         "versions": {
-          "0.6.0": "0x536C330cb3E6D0DD74Aa7541F1c490E50Ba81f38"
+          "0.6.0": "0x536C330cb3E6D0DD74Aa7541F1c490E50Ba81f38",
+          "0.6.1": "0x1905F661102b008846aA905e2027965126ec3934"
         },
         "baseContract": true
       },
       "LSP8Mintable": {
         "versions": {
-          "0.6.0": "0x8796A3e938f41bD381888EB1213f7fd91aec48cD"
+          "0.6.0": "0x8796A3e938f41bD381888EB1213f7fd91aec48cD",
+          "0.6.1": "0xA54c78e2B168BD52E492A005E2f3F8Dda4D115D1"
         },
         "baseContract": true
       }
+    }
+  },
+  "2828": {
+    "name": "LUKSO L16",
+    "chainId": 2828,
+    "networkId": 2828,
+    "contracts": {
+        "ERC725Account": {
+            "versions": {
+              "0.6.1": "0xd4Ea48069862de4fD64131c7f551e866873B5e47"
+            },
+            "baseContract": true
+          },
+          "KeyManager": {
+            "versions": {
+              "0.6.1": "0x1C2245b03c37645814aDb91CD81b1580e29eeabF"
+            },
+            "baseContract": true
+          },
+          "UniversalReceiverDelegate": {
+            "versions": {
+              "0.6.1": "0xBe97521FCbbED2E6a6832B2E9A40fEec9215BEDF"
+            },
+            "baseContract": false
+          },
+          "LSP7Mintable": {
+            "versions": {
+              "0.6.1": "0x2EE73c19dd8e56f951dE95413b8cB77Cc2aD26D4"
+            },
+            "baseContract": true
+          },
+          "LSP8Mintable": {
+            "versions": {
+              "0.6.1": "0xf3a6e63898e0d58b141f748dd590109c0fcdff2f"
+            },
+            "baseContract": true
+          }
     }
   }
 }
