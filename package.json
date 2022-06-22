@@ -1,6 +1,6 @@
 {
   "name": "@lukso/lsp-factory.js",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Helper Library to allow simple deployments of UniversalProfiles and LSP7 and LSP8 Digital Assets.",
   "main": "build/main/src/index.js",
   "typings": "build/main/src/index.d.ts",
@@ -36,7 +36,7 @@
     "node": ">=10"
   },
   "dependencies": {
-    "@erc725/erc725.js": "^0.9.0",
+    "@erc725/erc725.js": "0.14.1",
     "@ethersproject/abi": "5.5.0",
     "@ethersproject/experimental": "5.5.0",
     "@lukso/lsp-smart-contracts": "0.6.0",

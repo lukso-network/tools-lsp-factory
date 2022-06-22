@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.1](https://github.com/lukso-network/tools-lsp-factory/compare/v2.3.0...v2.3.1) (2022-06-22)
+
+### Features
+
+* add base contract addresses on L16 ([89c1358](https://github.com/lukso-network/tools-lsp-factory/commit/89c13585224ae8e4767111e3806316ed133f44e1))
+
 ## [2.3.0](https://github.com/lukso-network/tools-lsp-factory/compare/v2.2.0...v2.3.0) (2022-05-30)
 
 

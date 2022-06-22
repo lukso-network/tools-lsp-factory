@@ -343,9 +343,9 @@ async function getEncodedLSP3ProfileData(
     lsp3ProfileDataForEncoding = lsp3Profile;
   }
 
-  const encodedDataResult = erc725EncodeData({ LSP3Profile: lsp3ProfileDataForEncoding });
+  const encodedDataResult = erc725EncodeData(lsp3ProfileDataForEncoding, 'LSP3Profile');
 
-  return encodedDataResult.LSP3Profile.value;
+  return encodedDataResult.values[0];
 }
 
 export function lsp3ProfileUpload$(

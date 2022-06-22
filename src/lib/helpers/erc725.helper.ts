@@ -30,8 +30,9 @@ export function getERC725(address?: string, provider?: providers.Web3Provider) {
 }
 
 export function erc725EncodeData(
-  data: { LSP4Metadata: LSP4MetadataForEncoding } | { LSP3Profile: LSP3ProfileDataForEncoding }
+  data: LSP4MetadataForEncoding | LSP3ProfileDataForEncoding,
+  keyName: string
 ) {
   const myERC725 = getERC725();
-  return myERC725.encodeData(data);
+  return myERC725.encodeData([{ keyName, value: data }]);
 }
