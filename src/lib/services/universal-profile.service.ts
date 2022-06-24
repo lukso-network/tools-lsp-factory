@@ -485,17 +485,13 @@ export async function sendSetDataAndTransferOwnershipTransactions(
 
   const setDataEstimate = await erc725Account.estimateGas['setData(bytes32[],bytes[])'](
     keysToSet,
-    valuesToSet as BytesLike[],
-    {
-      gasPrice: GAS_PRICE,
-    }
+    valuesToSet as BytesLike[]
   );
 
   const transferOwnershipEstimate = await erc725Account.estimateGas.transferOwnership(
     keyManagerAddress,
     {
       from: signerAddress,
-      gasPrice: GAS_PRICE,
     }
   );
 
@@ -547,7 +543,6 @@ export async function claimOwnership(
 
   const claimOwnershipEstimate = await keyManager.estimateGas.execute(claimOwnershipPayload, {
     from: signerAddress,
-    gasPrice: GAS_PRICE,
   });
 
   const claimOwnershipTransaction = await keyManager.execute(claimOwnershipPayload, {
@@ -601,7 +596,6 @@ export async function revokeSignerPermissions(
     revokeSignerPermissionsPayload,
     {
       from: signerAddress,
-      gasPrice: GAS_PRICE,
     }
   );
 
