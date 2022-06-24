@@ -76,9 +76,7 @@ export function initialize(
     switchMap(async (result) => {
       const contract = await factory.attach(result.receipt.contractAddress);
       const initializeParams = await initArguments(result);
-      const gasEstimate = await contract.estimateGas.initialize(...initializeParams, {
-        gasPrice: GAS_PRICE,
-      });
+      const gasEstimate = await contract.estimateGas.initialize(...initializeParams);
       const transaction = await contract.initialize(...initializeParams, {
         gasLimit: gasEstimate.add(GAS_BUFFER),
         gasPrice: GAS_PRICE,
