@@ -176,10 +176,7 @@ function initializeLSP7Proxy(
         name,
         symbol,
         controllerAddress,
-        isNFT,
-        {
-          gasPrice: GAS_PRICE,
-        }
+        isNFT
       );
 
       const transaction = await contract[`initialize(string,string,address,bool)`](
@@ -321,10 +318,7 @@ function initializeLSP8Proxy(
       const gasEstimate = await contract.estimateGas[`initialize(string,string,address)`](
         name,
         symbol,
-        controllerAddress,
-        {
-          gasPrice: GAS_PRICE,
-        }
+        controllerAddress
       );
 
       const transaction = await contract[`initialize(string,string,address)`](
@@ -520,10 +514,7 @@ export async function sendSetDataAndTransferOwnershipTransactions(
   if (keysToSet && valuesToSet) {
     const setDataEstimate = await digitalAsset.estimateGas['setData(bytes32[],bytes[])'](
       keysToSet,
-      valuesToSet,
-      {
-        gasPrice: GAS_PRICE,
-      }
+      valuesToSet
     );
 
     setDataTransaction = digitalAsset['setData(bytes32[],bytes[])'](keysToSet, valuesToSet, {
@@ -545,7 +536,6 @@ export async function sendSetDataAndTransferOwnershipTransactions(
       controllerAddress,
       {
         from: signerAddress,
-        gasPrice: GAS_PRICE,
       }
     );
 
