@@ -41,6 +41,7 @@ export class LSPFactory {
       provider = new ethers.providers.JsonRpcProvider(rpcUrlOrProvider);
     } else if ('chainId' in rpcUrlOrProvider) {
       provider = new ethers.providers.Web3Provider(rpcUrlOrProvider);
+      chainId = parseInt(rpcUrlOrProvider.chainId);
     } else if (typeof rpcUrlOrProvider !== 'string') {
       provider = rpcUrlOrProvider as providers.Web3Provider | providers.JsonRpcProvider;
     }
@@ -58,7 +59,10 @@ export class LSPFactory {
         signer = provider.getSigner();
       }
 
-      chainId = privateKeyOrSigner?.chainId;
+      if (privateKeyOrSigner?.chainId) {
+        chainId = privateKeyOrSigner?.chainId;
+      }
+
       ipfsGateway = privateKeyOrSigner?.ipfsGateway;
     }
 
