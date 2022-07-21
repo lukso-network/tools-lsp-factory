@@ -559,5 +559,4 @@ await UniversalProfile.uploadProfileData(
 ```
 
 [all permissions]: ../../../../../standards/universal-profile/lsp6-key-manager#-address-permissions
-[rxjs observable]: https://rxjs.dev/guide/observable
 [lsp3]: ../../../standards/universal-profile/lsp3-universal-profile-metadata
