@@ -46,7 +46,7 @@ Deploying a Universal Profile is as simple as running:
 
 ```javascript
 const myContracts = await lspFactory.UniversalProfile.deploy({
-  controllingAccounts: ['0x...'], // Account addresses which will control the UP
+  controllerAddresses: ['0x...'], // Account addresses which will control the UP
   lsp3Profile: myLSP3MetaData,
 });
 ```
