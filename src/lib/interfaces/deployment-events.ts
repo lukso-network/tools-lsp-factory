@@ -71,6 +71,7 @@ export type EthersExternalProvider = {
   isStatus?: boolean;
   host?: string;
   path?: string;
+  chainId?: string;
   sendAsync?: (
     request: { method: string; params?: Array<any> },
     callback: (error: any, response: any) => void
