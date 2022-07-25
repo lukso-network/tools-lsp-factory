@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.3](https://github.com/lukso-network/tools-lsp-factory/compare/v2.3.2...v2.3.3) (2022-07-25)
+
+
+### improvement
+
+* get chainId from provider ([d2db829](https://github.com/lukso-network/tools-lsp-factory/commit/d2db829a47ca429befc4cfd9505d45316cf16fd4))
+
+
 ### [2.3.2](https://github.com/lukso-network/tools-lsp-factory/compare/v2.3.1...v2.3.2) (2022-06-24)
 
 
