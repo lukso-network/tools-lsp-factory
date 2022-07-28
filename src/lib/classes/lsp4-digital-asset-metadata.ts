@@ -56,7 +56,10 @@ export class LSP4DigitalAssetMetadata {
     };
   }
 
-  async uploadMetadata(metaData: LSP4MetadataContentBeforeUpload, uploadOptions?: UploadOptions) {
+  async uploadMetadata(
+    metaData: LSP4MetadataContentBeforeUpload | LSP4MetadataBeforeUpload,
+    uploadOptions?: UploadOptions
+  ) {
     uploadOptions = uploadOptions || this.options.uploadOptions || defaultUploadOptions;
     return LSP4DigitalAssetMetadata.uploadMetadata(metaData, uploadOptions);
   }
