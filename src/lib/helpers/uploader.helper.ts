@@ -55,8 +55,8 @@ export async function imageUpload(
       }
 
       return {
-        width: height,
-        height: width,
+        width,
+        height,
         hashFunction: 'keccak256(bytes)',
         hash: keccak256(imgBuffer),
         url: 'ipfs://' + uploadResponse.cid.toString(),
