@@ -32,11 +32,11 @@ The [LSP7](./digital-asset.md#lsp7-nft-20) and [LSP8](./digital-asset.md#lsp8-nf
 
 The [LSP7] standard can be useful for NFT collections where you want all tokens to have the same [metadata](./digital-asset.md#adding-lsp4-metadata). For example a collection of digital clothing items.
 
-[LSP7] is based on the [ERC20] token standard and can be used as an NFT 2.0 contract by setting the `isNFT` constructor value to `true` when deploying. This will set the contract [decimals](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-7-DigitalAsset.md#decimals) value to 0 so that all tokens are indivisible.
+[LSP7] is based on the [ERC20] token standard and can be used as an NFT 2.0 contract by setting the `isNonDivisible` constructor value to `true` when deploying. This will set the contract [decimals](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-7-DigitalAsset.md#decimals) value to 0 so that all tokens are indivisible.
 
 ```javascript
 await lspFactory.LSP7DigitalAsset.deploy({
-    isNFT: true,
+    isNonDivisible: true,
     controllerAddress: '0x56fE4E7dc2bc0b6397E4609B07b4293482E3F72B',
     name: 'MYTOKEN'
     symbol: 'DEMO',
@@ -44,7 +44,7 @@ await lspFactory.LSP7DigitalAsset.deploy({
 ```
 
 :::info
-To deploy an [LSP7] NFT 2.0 smart contract, the `isNFT` parameter must be set to `true` when deploying. If `isNFT` is set to false the token decimals value will be set to 18 meaning they can be fractionalized.
+To deploy an [LSP7] NFT 2.0 smart contract, the `isNonDivisible` parameter must be set to `true` when deploying. If `isNonDivisible` is set to false the token decimals value will be set to 18 meaning they can be fractionalized.
 :::
 
 #### LSP8 NFT 2.0
@@ -71,24 +71,24 @@ await lspFactory.LSP7DigitalAsset.deploy(digitalAssetProperties [, options]);
 
 ```javascript
 await lspFactory.LSP7DigitalAsset.deploy({
-    isNFT: false,
+    isNonDivisible: false,
     controllerAddress: '0x56fE4E7dc2bc0b6397E4609B07b4293482E3F72B',
     name: 'MYTOKEN'
     symbol: 'DEMO',
 });
 ```
 
-When deploying, set the `isNFT` value to `false`. This will set the [decimals](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-7-DigitalAsset.md#decimals) value on the token contract to 18, allowing tokens to be fractionalized.
+When deploying, set the `isNonDivisible` value to `false`. This will set the [decimals](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-7-DigitalAsset.md#decimals) value on the token contract to 18, allowing tokens to be fractionalized.
 
 ## Digital Asset Properties
 
 Inside the `digitalAssetProperties` object, you can set digital assset configuration options such as the [controller address](./digital-asset.md#controller-address) and [LSP4 metadata](./digital-asset.md#adding-lsp4-metadata).
 
-[LSP7] and [LSP8] share the same constructor parameters, however LSP7 has an additional parameter `isNFT` used to set the decimals value on the contract to 0 or 18.
+[LSP7] and [LSP8] share the same constructor parameters, however LSP7 has an additional parameter `isNonDivisible` used to set the decimals value on the contract to 0 or 18.
 
 ```javascript
 await lspFactory.LSP7DigitalAsset.deploy({
-    isNFT: false,
+    isNonDivisible: false,
     controllerAddress: '0x56fE4E7dc2bc0b6397E4609B07b4293482E3F72B',
     name: 'MYTOKEN'
     symbol: 'DEMO',
@@ -104,7 +104,7 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
 ```
 
 :::info
-use the `isNFT` parameter on [LSP7] to deploy an [NFT 2.0](./digital-asset.md#deploying-an-nft-20) or [token contract](./digital-asset.md#deploying-a-fungible-token).
+use the `isNonDivisible` parameter on [LSP7] to deploy an [NFT 2.0](./digital-asset.md#deploying-an-nft-20) or [token contract](./digital-asset.md#deploying-a-fungible-token).
 :::
 
 ### Controller Address

@@ -30,7 +30,7 @@ Specify properties to be set on the LSP7 Digital Asset during deployment.
 | [`name`](../deployment/digital-asset#digital-asset-properties)                          | String           | The name of the token. Passed to the LSP7 smart contract as a constructor parameter                                                              |
 | [`symbol`](../deployment/digital-asset#digital-asset-properties)                        | String           | The symbol of the token. Passed to the LSP7 smart contract as a constructor parameter                                                            |
 | [`controllerAddress`](../deployment/digital-asset#controller-address)                   | String           | The owner of the contract. Passed to the LSP7 smart contract constructor parameter                                                               |
-| [`isNFT`](../deployment/digital-asset#lsp7-nft-20)                                      | Boolean          | Specify if the token should be fungible by setting the [LSP7 decimals] value to 18. Passed to the LSP7 smart contract as a constructor parameter |
+| [`isNonDivisible`](../deployment/digital-asset#lsp7-nft-20)                                      | Boolean          | Specify if the token should be fungible by setting the [LSP7 decimals] value to 18. Passed to the LSP7 smart contract as a constructor parameter |
 | [`digitalAssetMetadata`](../deployment/digital-asset#digital-asset-metadata) (optional) | Object \| String | The [LSP4] metadata to be attached to the smart contract.                                                                                        |
 | [`creators`](../deployment/digital-asset#adding-lsp4-metadata) (optional)               | Array            | The [LSP4] metadata to be attached to the smart contract.                                                                                        |
 
@@ -61,7 +61,7 @@ await lspFactory.LSP7DigitalAsset.deploy({
   name: 'My token',
   symbol: 'TKN',
   controllerAddress: '0xb74a88C43BCf691bd7A851f6603cb1868f6fc147',
-  isNFT: true,
+  isNonDivisible: true,
 });
 /**
 {
@@ -98,7 +98,7 @@ await lspFactory.LSP7DigitalAsset.deploy(
     name: 'My token',
     symbol: 'TKN',
     controllerAddress: '0xb74a88C43BCf691bd7A851f6603cb1868f6fc147',
-    isNFT: true,
+    isNonDivisible: true,
   },
   {
     onDeployEvents: {
