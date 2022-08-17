@@ -48,31 +48,31 @@
     "contracts": {
         "ERC725Account": {
             "versions": {
-              "0.6.1": "0xd4Ea48069862de4fD64131c7f551e866873B5e47"
+              "0.6.1": "0x4C3a6619EFD6177d5fE602F797a57AB2FF394A2A"
             },
             "baseContract": true
           },
           "KeyManager": {
             "versions": {
-              "0.6.1": "0x1C2245b03c37645814aDb91CD81b1580e29eeabF"
+              "0.6.1": "0xedD60B4786F569B646de6AF9a39C906Dfd5D9273"
             },
             "baseContract": true
           },
           "UniversalReceiverDelegate": {
             "versions": {
-              "0.6.1": "0xBe97521FCbbED2E6a6832B2E9A40fEec9215BEDF"
+              "0.6.1": "0x0E6C8D63bd3678EBd17Ca080Cd124c6e35DFce07"
             },
             "baseContract": false
           },
           "LSP7Mintable": {
             "versions": {
-              "0.6.1": "0x2EE73c19dd8e56f951dE95413b8cB77Cc2aD26D4"
+              "0.6.1": "0xaB750269818AACBbD57089a47EB0F829f0a2B07E"
             },
             "baseContract": true
           },
           "LSP8Mintable": {
             "versions": {
-              "0.6.1": "0xf3a6e63898e0d58b141f748dd590109c0fcdff2f"
+              "0.6.1": "0xD689FF3EE674bA4536ceAD72aA23f5D8be0dcd7e"
             },
             "baseContract": true
           }
