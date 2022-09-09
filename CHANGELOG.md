@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.4]([]https://github.com/lukso-network/tools-lsp-factory/compare/v2.3.3...v2.3.4) (2022-09-09)
+
+### Features
+* Give URD super setdata permission for UP ([3a291bf](https://github.com/lukso-network/tools-lsp-factory/commit/3a291bf06b29c3f2382f52b439d89b172b643a38))
+
+### Fixes 
+* add missing type for instance uploadMetadata ([3a291bf](https://github.com/lukso-network/tools-lsp-factory/commit/75ef1a6c994eabf4fa34fd3a101f8557fb2057c4))
+* swap height and width when uploading images ([a14e0fd](https://github.com/lukso-network/tools-lsp-factory/commit/a14e0fd9b9302f7495c583deaab37009d6bba5c1))
+
 ### [2.3.3](https://github.com/lukso-network/tools-lsp-factory/compare/v2.3.2...v2.3.3) (2022-07-25)
 
 
