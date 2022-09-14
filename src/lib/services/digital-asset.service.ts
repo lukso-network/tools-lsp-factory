@@ -16,10 +16,8 @@ import {
 } from 'rxjs';
 
 import {
-  LSP7DigitalAsset__factory,
   LSP7Mintable__factory,
   LSP7MintableInit__factory,
-  LSP8IdentifiableDigitalAsset__factory,
   LSP8Mintable__factory,
   LSP8MintableInit__factory,
 } from '../../';
@@ -130,7 +128,7 @@ async function deployLSP7DigitalAsset(
     }
 
     if (byteCode) {
-      return new ContractFactory(LSP7DigitalAsset__factory.abi, byteCode, signer).deploy(
+      return new ContractFactory(LSP7Mintable__factory.abi, byteCode, signer).deploy(
         digitalAssetDeploymentOptions.name,
         digitalAssetDeploymentOptions.symbol,
         controllerAddress,
@@ -271,11 +269,7 @@ async function deployLSP8IdentifiableDigitalAsset(
     }
 
     if (byteCode) {
-      return new ContractFactory(
-        LSP8IdentifiableDigitalAsset__factory.abi,
-        byteCode,
-        signer
-      ).deploy(
+      return new ContractFactory(LSP8Mintable__factory.abi, byteCode, signer).deploy(
         digitalAssetDeploymentOptions.name,
         digitalAssetDeploymentOptions.symbol,
         controllerAddress

@@ -33,7 +33,6 @@ export function universalProfileBaseContractsDeployment$(
       const universalProfileInit = await new UniversalProfileInit__factory(signer).deploy({
         gasPrice: GAS_PRICE,
       });
-      await universalProfileInit.initialize(NULL_ADDRESS);
       return universalProfileInit;
     }
   );
@@ -53,7 +52,6 @@ export function universalProfileBaseContractsDeployment$(
       const keyManagerInit = await new LSP6KeyManagerInit__factory(signer).deploy({
         gasPrice: GAS_PRICE,
       });
-      await keyManagerInit.initialize(NULL_ADDRESS);
       return keyManagerInit;
     }
   );
@@ -86,7 +84,6 @@ export function lsp7BaseContractDeployment$(signer: Signer) {
       gasPrice: GAS_PRICE,
     });
 
-    await lsp7Init['initialize(string,string,address,bool)']('', '', NULL_ADDRESS, false);
     return lsp7Init;
   });
 }
@@ -97,7 +94,6 @@ export function lsp8BaseContractDeployment$(signer: Signer) {
       gasPrice: GAS_PRICE,
     });
 
-    await lsp8Init['initialize(string,string,address)']('', '', NULL_ADDRESS);
     return lsp8Init;
   });
 }
