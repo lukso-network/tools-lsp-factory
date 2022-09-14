@@ -52,6 +52,7 @@ export const DEFAULT_PERMISSIONS: Permissions = {
   SUPER_SETDATA: true,
   SUPER_STATICCALL: true,
   SUPER_TRANSFERVALUE: true,
+  ENCRYPT: true,
 };
 
 export const DEFAULT_CONTRACT_VERSION = '0.7.0';

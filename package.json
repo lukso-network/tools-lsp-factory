@@ -36,7 +36,7 @@
     "node": ">=10"
   },
   "dependencies": {
-    "@erc725/erc725.js": "0.14.1",
+    "@erc725/erc725.js": "0.15.0",
     "@ethersproject/abi": "5.5.0",
     "@ethersproject/experimental": "5.5.0",
     "@lukso/lsp-smart-contracts": "0.7.0",
