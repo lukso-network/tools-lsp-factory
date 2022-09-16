@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/lukso-network/tools-lsp-factory/compare/v2.3.4...v2.4.0) (2022-09-15)
+
+### ⚠ BREAKING CHANGES
+
+* Upgrade lsp-smart-contracts to v0.7.0 (#163)
+
+### Features
+* Upgrade lsp-smart-contracts to v0.7.0 ([#163](https://github.com/lukso-network/tools-lsp-factory/issues/163)) ([761cd81](https://github.com/lukso-network/tools-lsp-factory/commit/761cd81089c55e4ab15d2a6c234ca39e40f3e46a))
+
 ### [2.3.4]([]https://github.com/lukso-network/tools-lsp-factory/compare/v2.3.3...v2.3.4) (2022-09-09)
 
 ### Features
