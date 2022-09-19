@@ -15,7 +15,7 @@ export const defaultUploadOptions: UploadOptions = {
   ipfsGateway: defaultIpfsGateway,
 };
 
-export const ERC725_ACCOUNT_INTERFACE = '0x9a3bfe88';
+export const ERC725_ACCOUNT_INTERFACE = '0xeb6be62e';
 
 export const LSP3_UP_KEYS = {
   UNIVERSAL_RECEIVER_DELEGATE_KEY: keccak256(toUtf8Bytes('LSP1UniversalReceiverDelegate')),
@@ -52,9 +52,10 @@ export const DEFAULT_PERMISSIONS: Permissions = {
   SUPER_SETDATA: true,
   SUPER_STATICCALL: true,
   SUPER_TRANSFERVALUE: true,
+  ENCRYPT: true,
 };
 
-export const DEFAULT_CONTRACT_VERSION = '0.6.1';
+export const DEFAULT_CONTRACT_VERSION = '0.7.0';
 
 export const GAS_PRICE = 10_000_000_000;
 export const GAS_BUFFER = 100_000;

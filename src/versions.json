@@ -6,36 +6,31 @@
     "contracts": {
       "ERC725Account": {
         "versions": {
-          "0.6.0": "0xD943e023722f15A67EFC2114D16da74E011AbE14",
-          "0.6.1": "0x17c582ca6d96F0DA08227933c81791cbb0723d46"
+          "0.7.0": "0x1B0a4C8E15b5E90C429049284758f46095cb6dE7"
         },
         "baseContract": true
       },
       "KeyManager": {
         "versions": {
-          "0.6.0": "0xad7DbD15269cc26D7673C864ED35444b09AbF0EF",
-          "0.6.1": "0xE40cF7aEb6540dEA4783e45338343fCFD90f325d"
+          "0.7.0": "0x46c2cb6c7517f08e9763a7A1dc7285c899cB72aE"
         },
         "baseContract": true
       },
       "UniversalReceiverDelegate": {
         "versions": {
-          "0.6.0": "0x3B38C101810AD6954a5A7c69300403Ecc0A51827",
-          "0.6.1": "0xe5089Aaa677501BeC72d5418d476850d83e5b750"
+          "0.7.0": "0x4369c827cd28ae80E406c1083466044Db9e588bF"
         },
         "baseContract": false
       },
       "LSP7Mintable": {
         "versions": {
-          "0.6.0": "0x536C330cb3E6D0DD74Aa7541F1c490E50Ba81f38",
-          "0.6.1": "0x1905F661102b008846aA905e2027965126ec3934"
+          "0.7.0": "0xE7A932bd4526bd2EF70759e8B4aa2849af127e1a"
         },
         "baseContract": true
       },
       "LSP8Mintable": {
         "versions": {
-          "0.6.0": "0x8796A3e938f41bD381888EB1213f7fd91aec48cD",
-          "0.6.1": "0xA54c78e2B168BD52E492A005E2f3F8Dda4D115D1"
+          "0.7.0": "0xff947C9Bb9Cbc1828BF861D69BB88814fC8Cf973"
         },
         "baseContract": true
       }
@@ -48,31 +43,31 @@
     "contracts": {
         "ERC725Account": {
             "versions": {
-              "0.6.1": "0xd4Ea48069862de4fD64131c7f551e866873B5e47"
+              "0.7.0": "0x5D9Fdbbc11CC93e74C4CDc92C3489Ad5120e60e5"
             },
             "baseContract": true
           },
           "KeyManager": {
             "versions": {
-              "0.6.1": "0x1C2245b03c37645814aDb91CD81b1580e29eeabF"
+              "0.7.0": "0x2C307b16fFCb393d6A0Cf422EfD78ad211b90A37"
             },
             "baseContract": true
           },
           "UniversalReceiverDelegate": {
             "versions": {
-              "0.6.1": "0xBe97521FCbbED2E6a6832B2E9A40fEec9215BEDF"
+              "0.7.0": "0xE6FFB031E64858546128046B8aA4B7281cA8F033"
             },
             "baseContract": false
           },
           "LSP7Mintable": {
             "versions": {
-              "0.6.1": "0x2EE73c19dd8e56f951dE95413b8cB77Cc2aD26D4"
+              "0.7.0": "0xe5aC59a841A996F93d97d52F067467c560a334a4"
             },
             "baseContract": true
           },
           "LSP8Mintable": {
             "versions": {
-              "0.6.1": "0xf3a6e63898e0d58b141f748dd590109c0fcdff2f"
+              "0.7.0": "0x08A6e191f1e08920D15C8645B54f4bbd82c374DC"
             },
             "baseContract": true
           }
