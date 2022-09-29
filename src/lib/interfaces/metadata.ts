@@ -6,7 +6,7 @@ export interface ImageMetadata {
   url: string;
 }
 
-export interface LinkMetdata {
+export interface LinkMetadata {
   title: string;
   url: string;
 }

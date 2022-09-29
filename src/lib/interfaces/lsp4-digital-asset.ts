@@ -1,4 +1,4 @@
-import { AssetBuffer, AssetMetadata, ImageBuffer, ImageMetadata, LinkMetdata } from './metadata';
+import { AssetBuffer, AssetMetadata, ImageBuffer, ImageMetadata, LinkMetadata } from './metadata';
 
 export interface LSP4DigitalAssetJSON {
   LSP4Metadata: LSP4DigitalAsset;
@@ -6,7 +6,7 @@ export interface LSP4DigitalAssetJSON {
 
 export interface LSP4DigitalAsset {
   description: string;
-  links: LinkMetdata[];
+  links: LinkMetadata[];
   images: ImageMetadata[][];
   assets: AssetMetadata[];
   icon: ImageMetadata[];
@@ -14,7 +14,7 @@ export interface LSP4DigitalAsset {
 
 export interface LSP4MetadataContentBeforeUpload {
   description: string;
-  links?: LinkMetdata[];
+  links?: LinkMetadata[];
   icon?: File | ImageBuffer | ImageMetadata[];
   images?: (File | ImageBuffer | ImageMetadata[])[];
   assets?: (File | AssetBuffer | AssetMetadata)[];
