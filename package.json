@@ -37,12 +37,12 @@
   },
   "dependencies": {
     "@erc725/erc725.js": "0.15.0",
-    "@ethersproject/abi": "5.7.0",
-    "@ethersproject/experimental": "5.7.0",
+    "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/experimental": "^5.7.0",
     "@lukso/lsp-smart-contracts": "0.7.0",
     "axios": "^0.23.0",
     "browser-image-compression": "^1.0.15",
-    "ethers": "5.7.0",
+    "ethers": "^5.7.0",
     "ipfs-http-client": "52.0.3",
     "ipfs-utils": "8.1.6",
     "rxjs": "^7.3.0"
