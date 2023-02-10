@@ -537,11 +537,14 @@ export async function claimOwnership(
   const claimOwnershipPayload = erc725Account.interface.getSighash('claimOwnership');
   const keyManager = new LSP6KeyManager__factory(signer).attach(keyManagerAddress);
 
-  const claimOwnershipEstimate = await keyManager.estimateGas.execute(claimOwnershipPayload, {
-    from: signerAddress,
-  });
+  const claimOwnershipEstimate = await keyManager.estimateGas['execute(bytes)'](
+    claimOwnershipPayload,
+    {
+      from: signerAddress,
+    }
+  );
 
-  const claimOwnershipTransaction = await keyManager.execute(claimOwnershipPayload, {
+  const claimOwnershipTransaction = await keyManager['execute(bytes)'](claimOwnershipPayload, {
     from: signerAddress,
     gasPrice: GAS_PRICE,
     gasLimit: claimOwnershipEstimate.add(GAS_BUFFER),
@@ -588,14 +591,14 @@ export async function revokeSignerPermissions(
     [PREFIX_PERMISSIONS + signerAddress.substring(2), signerPermission]
   );
 
-  const revokeSignerPermissionsEstimate = await keyManager.estimateGas.execute(
+  const revokeSignerPermissionsEstimate = await keyManager.estimateGas['execute(bytes)'](
     revokeSignerPermissionsPayload,
     {
       from: signerAddress,
     }
   );
 
-  const revokeSignerPermissionsTransaction = await keyManager.execute(
+  const revokeSignerPermissionsTransaction = await keyManager['execute(bytes)'](
     revokeSignerPermissionsPayload,
     {
       from: signerAddress,

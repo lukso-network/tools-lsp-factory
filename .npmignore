@@ -9,4 +9,3 @@ coverage
 hardhat.config.ts
 tsconfig.json
 tsconfig.module.json
-typedoc.json
