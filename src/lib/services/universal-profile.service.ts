@@ -206,26 +206,26 @@ export function setDataAndTransferOwnershipTransactions$(
     pendingSetDataAndTransferOwnershipArray$
   );
 
-  const claimOwnership$ = transferOwnershipParameters$.pipe(
+  const acceptOwnership$ = transferOwnershipParameters$.pipe(
     switchMap(({ keyManagerAddress, erc725AccountAddress }) => {
       return setDataAndTransferOwnership$.pipe(
         takeLast(1),
         switchMap(async () => {
-          return claimOwnership(signer, erc725AccountAddress, keyManagerAddress);
+          return acceptOwnership(signer, erc725AccountAddress, keyManagerAddress);
         })
       );
     }),
     shareReplay()
   );
 
-  const claimOwnershipReceipt$ = waitForReceipt<DeploymentEventTransaction>(claimOwnership$);
+  const acceptOwnershipReceipt$ = waitForReceipt<DeploymentEventTransaction>(acceptOwnership$);
 
   const revokeSignerPermissions$ = forkJoin([
     setDataParameters$,
     transferOwnershipParameters$,
   ]).pipe(
     switchMap(([{ erc725AccountAddress }, { keyManagerAddress }]) => {
-      return claimOwnershipReceipt$.pipe(
+      return acceptOwnershipReceipt$.pipe(
         switchMap(() => {
           return revokeSignerPermissions(
             signer,
@@ -244,8 +244,8 @@ export function setDataAndTransferOwnershipTransactions$(
 
   return concat(
     setDataAndTransferOwnership$,
-    claimOwnership$,
-    claimOwnershipReceipt$,
+    acceptOwnership$,
+    acceptOwnershipReceipt$,
     revokeSignerPermissions$,
     revokeSignerPermissionsReceipt$
   );
@@ -526,7 +526,7 @@ export async function sendSetDataAndTransferOwnershipTransactions(
   ];
 }
 
-export async function claimOwnership(
+export async function acceptOwnership(
   signer: Signer,
   erc725AccountAddress: string,
   keyManagerAddress: string
@@ -534,25 +534,28 @@ export async function claimOwnership(
   const erc725Account = new UniversalProfile__factory(signer).attach(erc725AccountAddress);
   const signerAddress = await signer.getAddress();
 
-  const claimOwnershipPayload = erc725Account.interface.getSighash('claimOwnership');
+  const acceptOwnershipPayload = erc725Account.interface.getSighash('acceptOwnership');
   const keyManager = new LSP6KeyManager__factory(signer).attach(keyManagerAddress);
 
-  const claimOwnershipEstimate = await keyManager.estimateGas.execute(claimOwnershipPayload, {
-    from: signerAddress,
-  });
+  const acceptOwnershipEstimate = await keyManager.estimateGas['execute(bytes)'](
+    acceptOwnershipPayload,
+    {
+      from: signerAddress,
+    }
+  );
 
-  const claimOwnershipTransaction = await keyManager.execute(claimOwnershipPayload, {
+  const acceptOwnershipTransaction = await keyManager['execute(bytes)'](acceptOwnershipPayload, {
     from: signerAddress,
     gasPrice: GAS_PRICE,
-    gasLimit: claimOwnershipEstimate.add(GAS_BUFFER),
+    gasLimit: acceptOwnershipEstimate.add(GAS_BUFFER),
   });
 
   return {
     type: DeploymentType.TRANSACTION,
     contractName: ContractNames.ERC725_Account,
     status: DeploymentStatus.PENDING,
-    functionName: 'claimOwnership()',
-    transaction: claimOwnershipTransaction,
+    functionName: 'acceptOwnership()',
+    transaction: acceptOwnershipTransaction,
   };
 }
 
@@ -588,14 +591,14 @@ export async function revokeSignerPermissions(
     [PREFIX_PERMISSIONS + signerAddress.substring(2), signerPermission]
   );
 
-  const revokeSignerPermissionsEstimate = await keyManager.estimateGas.execute(
+  const revokeSignerPermissionsEstimate = await keyManager.estimateGas['execute(bytes)'](
     revokeSignerPermissionsPayload,
     {
       from: signerAddress,
     }
   );
 
-  const revokeSignerPermissionsTransaction = await keyManager.execute(
+  const revokeSignerPermissionsTransaction = await keyManager['execute(bytes)'](
     revokeSignerPermissionsPayload,
     {
       from: signerAddress,

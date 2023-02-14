@@ -8,7 +8,7 @@ import { LSP6KeyManager__factory } from '../types/ethers-v5/factories/LSP6KeyMan
 import { LSP1UniversalReceiverDelegateUP__factory } from '../types/ethers-v5/factories/LSP1UniversalReceiverDelegateUP__factory';
 import { ContractDeploymentOptions, LSPFactory } from '../build/main/src';
 import { ContractNames, DeployedContracts } from '../src/lib/interfaces';
-import { getDeployedByteCode, getProxyByteCode } from '../src/lib/helpers/deployment.helper';
+import { getDeployedByteCode } from '../src/lib/helpers/deployment.helper';
 import { providers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
 
@@ -86,12 +86,10 @@ export async function testSetData(upAddress: string, keyManagerAddress: string, 
 
   const keyManager = LSP6KeyManager__factory.connect(keyManagerAddress, signer);
 
-  const abi = await universalProfile.populateTransaction['setData(bytes32[],bytes[])'](
-    [key],
-    [value]
-  );
+  const abi = await universalProfile.populateTransaction['setData(bytes32,bytes)'](key, value);
 
-  const result = await keyManager.connect(signer).execute(abi.data);
+  const result = await keyManager.connect(signer)['execute(bytes)'](abi.data as string);
+
   expect(result).toBeTruthy();
 
   const data = await universalProfile['getData(bytes32[])']([key]);
