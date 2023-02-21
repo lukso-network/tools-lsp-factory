@@ -5,33 +5,23 @@
     "networkId": 22,
     "contracts": {
       "ERC725Account": {
-        "versions": {
-          "0.7.0": "0x1B0a4C8E15b5E90C429049284758f46095cb6dE7"
-        },
+        "versions": {},
         "baseContract": true
       },
       "KeyManager": {
-        "versions": {
-          "0.7.0": "0x46c2cb6c7517f08e9763a7A1dc7285c899cB72aE"
-        },
+        "versions": {},
         "baseContract": true
       },
       "UniversalReceiverDelegate": {
-        "versions": {
-          "0.7.0": "0x4369c827cd28ae80E406c1083466044Db9e588bF"
-        },
+        "versions": {},
         "baseContract": false
       },
       "LSP7Mintable": {
-        "versions": {
-          "0.7.0": "0xE7A932bd4526bd2EF70759e8B4aa2849af127e1a"
-        },
+        "versions": {},
         "baseContract": true
       },
       "LSP8Mintable": {
-        "versions": {
-          "0.7.0": "0xff947C9Bb9Cbc1828BF861D69BB88814fC8Cf973"
-        },
+        "versions": {},
         "baseContract": true
       }
     }
@@ -41,36 +31,36 @@
     "chainId": 2828,
     "networkId": 2828,
     "contracts": {
-        "ERC725Account": {
-            "versions": {
-              "0.7.0": "0x5D9Fdbbc11CC93e74C4CDc92C3489Ad5120e60e5"
-            },
-            "baseContract": true
-          },
-          "KeyManager": {
-            "versions": {
-              "0.7.0": "0x2C307b16fFCb393d6A0Cf422EfD78ad211b90A37"
-            },
-            "baseContract": true
-          },
-          "UniversalReceiverDelegate": {
-            "versions": {
-              "0.7.0": "0xE6FFB031E64858546128046B8aA4B7281cA8F033"
-            },
-            "baseContract": false
-          },
-          "LSP7Mintable": {
-            "versions": {
-              "0.7.0": "0xe5aC59a841A996F93d97d52F067467c560a334a4"
-            },
-            "baseContract": true
-          },
-          "LSP8Mintable": {
-            "versions": {
-              "0.7.0": "0x08A6e191f1e08920D15C8645B54f4bbd82c374DC"
-            },
-            "baseContract": true
-          }
+      "ERC725Account": {
+        "versions": {
+          "0.8.0": "0x4b30900F119E11D2A8CAe18176c4f9840E586Cc4"
+        },
+        "baseContract": true
+      },
+      "KeyManager": {
+        "versions": {
+          "0.8.0": "0x03528d5035E79Cee3D40a06B4d3D638d12BDb030"
+        },
+        "baseContract": true
+      },
+      "UniversalReceiverDelegate": {
+        "versions": {
+          "0.8.0": "0x747Cf5aD7194aCfaCf366ac61ddD41B04Ba7a935"
+        },
+        "baseContract": false
+      },
+      "LSP7Mintable": {
+        "versions": {
+          "0.8.0": "0xCFEc56cfb5f8c765233A432FaA348f8bfFd37f23"
+        },
+        "baseContract": true
+      },
+      "LSP8Mintable": {
+        "versions": {
+          "0.8.0": "0x900d917f4ea52Ee693b1c64fA1010226f5c4ADaf"
+        },
+        "baseContract": true
+      }
     }
   }
 }

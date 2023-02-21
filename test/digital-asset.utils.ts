@@ -1,11 +1,6 @@
 import { ethers } from 'ethers';
 import { LSP7Mintable, LSP8Mintable } from '../build/main/src';
 import { ERC725_ACCOUNT_INTERFACE, LSP4_KEYS } from '../src/lib/helpers/config.helper';
-import {
-  DeployedLSP7DigitalAsset,
-  DeployedLSP8IdentifiableDigitalAsset,
-} from '../src/lib/interfaces/digital-asset-deployment';
-import { LSP7DigitalAsset } from '../types/ethers-v5';
 
 export async function testDeployWithSpecifiedCreators(
   digitalAsset: LSP7Mintable | LSP8Mintable,
