@@ -74,16 +74,9 @@ export class UniversalProfile {
     const deploymentConfiguration =
       convertUniversalProfileConfigurationObject(contractDeploymentOptions);
 
-    const lsp3Profile =
-      typeof profileDeploymentOptions?.lsp3Profile !== 'string' &&
-      typeof profileDeploymentOptions?.lsp3Profile !== 'undefined' &&
-      'LSP3Profile' in profileDeploymentOptions?.lsp3Profile
-        ? profileDeploymentOptions?.lsp3Profile?.LSP3Profile
-        : profileDeploymentOptions?.lsp3Profile;
-
     // -1 > Run IPFS upload process in parallel with contract deployment
     const lsp3Profile$ = lsp3ProfileUpload$(
-      lsp3Profile,
+      profileDeploymentOptions?.lsp3Profile,
       deploymentConfiguration?.uploadOptions ?? this.options.uploadOptions
     );
 

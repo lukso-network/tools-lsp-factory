@@ -65,6 +65,8 @@ describe('UniversalProfile', () => {
             lsp3Profile: lsp3ProfileMetadata,
           });
 
+          if (!LSP0ERC725Account) fail();
+
           universalProfile = UniversalProfile__factory.connect(LSP0ERC725Account.address, signer);
 
           const lsp3Data = await universalProfile['getData(bytes32[])']([
@@ -88,6 +90,8 @@ describe('UniversalProfile', () => {
       const { LSP0ERC725Account } = await lspFactory.UniversalProfile.deploy({
         controllerAddresses: [uniqueController.address],
       });
+
+      if (!LSP0ERC725Account) fail();
 
       universalProfile = UniversalProfile__factory.connect(
         LSP0ERC725Account.address,
@@ -126,6 +130,8 @@ describe('UniversalProfile', () => {
         controllerAddresses: [controller.address],
       });
 
+      if (!LSP0ERC725Account) fail();
+
       universalProfile = UniversalProfile__factory.connect(LSP0ERC725Account.address, controller);
     });
 
@@ -160,6 +166,8 @@ describe('UniversalProfile', () => {
         controllerAddresses: [{ address: controllerAddress, permissions: customPermissions }],
       });
 
+      if (!LSP0ERC725Account) fail();
+
       universalProfile = UniversalProfile__factory.connect(LSP0ERC725Account.address, controller);
     });
 
@@ -181,6 +189,7 @@ describe('UniversalProfile', () => {
       DELEGATECALL: true,
       CALL: true,
       SETDATA: true,
+      SUPER_SETDATA: true,
     });
 
     beforeAll(async () => {
@@ -193,6 +202,8 @@ describe('UniversalProfile', () => {
           { address: secondControllerAddress, permissions: customPermissions },
         ],
       });
+
+      if (!LSP0ERC725Account) fail();
 
       universalProfile = new ethers.Contract(
         LSP0ERC725Account.address,
@@ -248,6 +259,7 @@ describe('UniversalProfile', () => {
       const checkedsumResult = ethers.utils.getAddress(result);
       expect(checkedsumResult).toEqual(secondControllerAddress);
     });
+
     it('All controllers should be able to setData', async () => {
       const controllers = [signers[0], signers[1]];
       for (const controller of controllers) {
@@ -334,6 +346,9 @@ describe('UniversalProfile', () => {
         );
       });
       it('UP contract bytecode should contain base contract address', async () => {
+        if (!deployedContracts.LSP0ERC725Account) fail();
+        if (!deployedContracts.LSP0ERC725AccountBaseContract) fail();
+
         await testProxyBytecodeContainsAddress(
           deployedContracts.LSP0ERC725Account.address,
           deployedContracts.LSP0ERC725AccountBaseContract.address,
@@ -421,6 +436,8 @@ describe('UniversalProfile', () => {
         );
       });
       it('should be able to setData', async () => {
+        if (!deployedContracts.LSP0ERC725Account) fail();
+
         await testSetData(
           deployedContracts.LSP0ERC725Account.address,
           deployedContracts.LSP6KeyManager.address,
@@ -428,6 +445,8 @@ describe('UniversalProfile', () => {
         );
       });
       it('should have deployed bytecode', async () => {
+        if (!deployedContracts.LSP0ERC725Account) fail();
+
         const bytecode = await getDeployedByteCode(
           deployedContracts.LSP0ERC725Account.address,
           provider
@@ -452,6 +471,8 @@ describe('UniversalProfile', () => {
         );
       });
       it('should be able to setData', async () => {
+        if (!deployedContracts.LSP0ERC725Account) fail();
+
         await testSetData(
           deployedContracts.LSP0ERC725Account.address,
           deployedContracts.LSP6KeyManager.address,
@@ -483,6 +504,8 @@ describe('UniversalProfile', () => {
         );
       });
       it('should be able to setData', async () => {
+        if (!deployedContracts.LSP0ERC725Account) fail();
+
         await testSetData(
           deployedContracts.LSP0ERC725Account.address,
           deployedContracts.LSP6KeyManager.address,
@@ -523,6 +546,8 @@ describe('UniversalProfile', () => {
         );
       });
       it('should be able to setData', async () => {
+        if (!deployedContracts.LSP0ERC725Account) fail();
+
         await testSetData(
           deployedContracts.LSP0ERC725Account.address,
           deployedContracts.LSP6KeyManager.address,
@@ -530,6 +555,8 @@ describe('UniversalProfile', () => {
         );
       });
       it('UP contract bytecode should contain base contract address', async () => {
+        if (!deployedContracts.LSP0ERC725Account) fail();
+
         await testProxyBytecodeContainsAddress(
           deployedContracts.LSP0ERC725Account.address,
           baseContracts.universalProfile.address,
@@ -552,6 +579,8 @@ describe('UniversalProfile', () => {
         );
       });
       it('should be able to setData', async () => {
+        if (!deployedContracts.LSP0ERC725Account) fail();
+
         await testSetData(
           deployedContracts.LSP0ERC725Account.address,
           deployedContracts.LSP6KeyManager.address,
@@ -582,6 +611,8 @@ describe('UniversalProfile', () => {
         );
       });
       it('should be able to setData', async () => {
+        if (!deployedContracts.LSP0ERC725Account) fail();
+
         await testSetData(
           deployedContracts.LSP0ERC725Account.address,
           deployedContracts.LSP6KeyManager.address,
@@ -589,6 +620,8 @@ describe('UniversalProfile', () => {
         );
       });
       it('should set provided LSP1 key on the UP', async () => {
+        if (!deployedContracts.LSP0ERC725Account) fail();
+
         const universalProfile = UniversalProfile__factory.connect(
           deployedContracts.LSP0ERC725Account.address,
           signers[0]
@@ -617,6 +650,8 @@ describe('UniversalProfile', () => {
         );
       });
       it('should set deployed URD contract on the UP', async () => {
+        if (!deployedContracts.LSP0ERC725Account) fail();
+
         const universalProfile = UniversalProfile__factory.connect(
           deployedContracts.LSP0ERC725Account.address,
           signers[0]

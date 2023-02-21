@@ -18,6 +18,7 @@
     "eslint-comments/no-unused-disable": "error",
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": ["error"],
+    "@typescript-eslint/no-explicit-any": "off",
     "import/order": ["error", { "newlines-between": "always", "alphabetize": { "order": "asc" } }],
     "sort-imports": ["error", { "ignoreDeclarationSort": true, "ignoreCase": true }]
   }
