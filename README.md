@@ -70,19 +70,24 @@ The `onDeployEvents` option can be used to for real-time frontend updates.
 ```javascript
 const profileDeploymentEvents = [];
 
-const myUPAccount = await lspFactory.UniversalProfile.deploy({
-  onDeployEvents: {
-    next: (deploymentEvent: DeploymentEvent) => {
-      profileDeploymentEvents.push(deploymentEvent);
-    },
-    error: (error) => {
-      console.error(error);
-    },
-    complete: () => {
-      console.log(profileDeploymentEvents);
-    },
+const myContracts = await lspFactory.UniversalProfile.deploy(
+  {
+    controllerAddresses: ['0x...'], // Address which will controll the UP
   },
-});
+  {
+    onDeployEvents: {
+      next: (deploymentEvent: DeploymentEvent) => {
+        profileDeploymentEvents.push(deploymentEvent);
+      },
+      error: (error) => {
+        console.error(error);
+      },
+      complete: () => {
+        console.log(profileDeploymentEvents);
+      },
+    },
+  }
+);
 ```
 
 ## Contributing
