@@ -32,6 +32,7 @@ import {
   convertContractDeploymentOptionsVersion,
   deployContract,
   deployProxyContract,
+  getContractAddressFromReceipt,
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
@@ -70,6 +71,7 @@ export function lsp7DigitalAssetDeployment$(
   signer: Signer,
   digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
   baseContractAddress$: Observable<string>,
+  isSignerUniversalProfile$: Observable<boolean>,
   byteCode?: string
 ) {
   return baseContractAddress$.pipe(
@@ -77,6 +79,7 @@ export function lsp7DigitalAssetDeployment$(
       return lsp7DigitalAssetDeploymentWithBaseContractAddress$(
         signer,
         digitalAssetDeploymentOptions,
+        isSignerUniversalProfile$,
         baseContractAddress,
         byteCode
       );
@@ -88,6 +91,7 @@ export function lsp7DigitalAssetDeployment$(
 export function lsp7DigitalAssetDeploymentWithBaseContractAddress$(
   signer: Signer,
   digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
+  isSignerUniversalProfile$: Observable<boolean>,
   baseContractAddress?: string,
   byteCode?: string
 ) {
@@ -103,7 +107,8 @@ export function lsp7DigitalAssetDeploymentWithBaseContractAddress$(
     ? initializeLSP7Proxy(
         signer,
         lsp7DeploymentReceipt$ as Observable<DeploymentEventProxyContract>,
-        digitalAssetDeploymentOptions
+        digitalAssetDeploymentOptions,
+        isSignerUniversalProfile$
       )
     : EMPTY;
 
@@ -157,16 +162,22 @@ async function deployLSP7DigitalAsset(
 function initializeLSP7Proxy(
   signer: Signer,
   digitalAssetDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
-  digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions
+  digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
+  isSignerUniversalProfile$: Observable<boolean>
 ) {
   const { name, symbol, isNFT } = digitalAssetDeploymentOptions;
 
-  const initialize$ = digitalAssetDeploymentReceipt$.pipe(
-    takeLast(1),
-    switchMap(async (result) => {
-      const contract = await new LSP7MintableInit__factory(signer).attach(
-        result.receipt.contractAddress
+  const initialize$ = forkJoin([
+    digitalAssetDeploymentReceipt$.pipe(takeLast(1)),
+    isSignerUniversalProfile$,
+  ]).pipe(
+    switchMap(async ([result, isSignerUniversalProfile]) => {
+      const contractAddress = getContractAddressFromReceipt(
+        result.receipt,
+        isSignerUniversalProfile
       );
+
+      const contract = new LSP7MintableInit__factory(signer).attach(contractAddress);
 
       const controllerAddress = await signer.getAddress();
 
@@ -199,7 +210,7 @@ function initializeLSP7Proxy(
     shareReplay()
   );
 
-  return initialize$ as unknown as Observable<DeploymentEventProxyContract>;
+  return initialize$ as Observable<DeploymentEventProxyContract>;
 }
 
 // LSP8
@@ -207,6 +218,7 @@ function initializeLSP7Proxy(
 export function lsp8IdentifiableDigitalAssetDeployment$(
   signer: Signer,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
+  isSignerUniversalProfile$: Observable<boolean>,
   baseContractAddress$: Observable<string>,
   byteCode?: string
 ) {
@@ -215,6 +227,7 @@ export function lsp8IdentifiableDigitalAssetDeployment$(
       return lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
         signer,
         digitalAssetDeploymentOptions,
+        isSignerUniversalProfile$,
         baseContractAddress,
         byteCode
       );
@@ -226,6 +239,7 @@ export function lsp8IdentifiableDigitalAssetDeployment$(
 export function lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
   signer: Signer,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
+  isSignerUniversalProfile$: Observable<boolean>,
   baseContractAddress: string,
   byteCode?: string
 ) {
@@ -244,7 +258,8 @@ export function lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
     ? initializeLSP8Proxy(
         signer,
         lsp8DeploymentReceipt$ as Observable<DeploymentEventProxyContract>,
-        digitalAssetDeploymentOptions
+        digitalAssetDeploymentOptions,
+        isSignerUniversalProfile$
       )
     : EMPTY;
 
@@ -296,16 +311,19 @@ async function deployLSP8IdentifiableDigitalAsset(
 function initializeLSP8Proxy(
   signer: Signer,
   digitalAssetDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
-  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions
+  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
+  isSignerUniversalProfile$: Observable<boolean>
 ) {
   const { name, symbol } = digitalAssetDeploymentOptions;
 
-  const initialize$ = digitalAssetDeploymentReceipt$.pipe(
-    takeLast(1),
-    switchMap(async (result) => {
-      const contract = await new LSP8MintableInit__factory(signer).attach(
-        result.receipt.contractAddress
+  const initialize$ = forkJoin([digitalAssetDeploymentReceipt$, isSignerUniversalProfile$]).pipe(
+    switchMap(async ([result, isSignerUniversalProfile]) => {
+      const contractAddress = getContractAddressFromReceipt(
+        result.receipt,
+        isSignerUniversalProfile
       );
+
+      const contract = await new LSP8MintableInit__factory(signer).attach(contractAddress);
 
       const controllerAddress = await signer.getAddress();
 
@@ -561,9 +579,10 @@ export function prepareLSP4SetDataTransaction$(
 ) {
   return forkJoin([digitalAsset$, lsp4Metadata$, isSignerUniversalProfile$]).pipe(
     switchMap(([{ receipt: digitalAssetReceipt }, lsp4Metadata, isSignerUniversalProfile]) => {
-      const digitalAssetAddress = isSignerUniversalProfile
-        ? digitalAssetReceipt.contractAddress || digitalAssetReceipt.logs[0].address
-        : digitalAssetReceipt.contractAddress || digitalAssetReceipt.to;
+      const digitalAssetAddress = getContractAddressFromReceipt(
+        digitalAssetReceipt,
+        isSignerUniversalProfile
+      );
 
       return prepareSetDataTransaction(
         digitalAssetAddress,
@@ -640,10 +659,10 @@ export function digitalAssetAddress$(
 ) {
   return forkJoin([digitalAsset$, isSignerUniversalProfile$]).pipe(
     switchMap(([{ receipt: digitalAssetDeploymentReceipt }, isSignerUniversalProfile]) => {
-      const digitalAssetAddress = isSignerUniversalProfile
-        ? digitalAssetDeploymentReceipt.contractAddress ||
-          digitalAssetDeploymentReceipt.logs[0].address
-        : digitalAssetDeploymentReceipt.contractAddress || digitalAssetDeploymentReceipt.to;
+      const digitalAssetAddress = getContractAddressFromReceipt(
+        digitalAssetDeploymentReceipt,
+        isSignerUniversalProfile
+      );
 
       return of(digitalAssetAddress);
     }),

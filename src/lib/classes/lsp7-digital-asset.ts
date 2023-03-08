@@ -101,14 +101,15 @@ export class LSP7DigitalAsset {
       digitalAssetConfiguration?.byteCode
     );
 
+    const signerIsUniversalProfile$ = isSignerUniversalProfile$(this.signer);
+
     const digitalAsset$ = lsp7DigitalAssetDeployment$(
       this.signer,
       digitalAssetDeploymentOptions,
       baseContractAddress$,
+      signerIsUniversalProfile$,
       digitalAssetConfiguration?.byteCode
     );
-
-    const signerIsUniversalProfile$ = isSignerUniversalProfile$(this.signer);
 
     const setLSP4AndTransferOwnership$ = setMetadataAndTransferOwnership$(
       this.signer,

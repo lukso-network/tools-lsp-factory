@@ -22,6 +22,8 @@ import {
 import {
   convertContractDeploymentOptionsVersion,
   deployContract,
+  getContractAddressFromReceipt,
+  getContractAddressFromReceipt$,
   getProxyByteCode,
   initialize,
   waitForBatchedPendingTransactions,
@@ -58,6 +60,7 @@ export type LSP3AccountDeploymentEvent = DeploymentEventContract | DeploymentEve
 export function accountDeployment$(
   signer: Signer,
   baseContractAddresses$: Observable<BaseContractAddresses>,
+  isSignerUniversalProfile$: Observable<boolean>,
   bytecode?: string
 ) {
   return baseContractAddresses$.pipe(
@@ -65,6 +68,7 @@ export function accountDeployment$(
       return accountDeploymentWithBaseContractAddress$(
         signer,
         baseContractAddresses.LSP0ERC725Account,
+        isSignerUniversalProfile$,
         bytecode
       );
     }),
@@ -75,6 +79,7 @@ export function accountDeployment$(
 export function accountDeploymentWithBaseContractAddress$(
   signer: Signer,
   baseContractAddress: string,
+  isSignerUniversalProfile$: Observable<boolean>,
   bytecode?: string
 ): Observable<LSP3AccountDeploymentEvent> {
   const accountDeployment$ = defer(() =>
@@ -86,7 +91,11 @@ export function accountDeploymentWithBaseContractAddress$(
   ).pipe(shareReplay());
 
   const accountDeploymentInitialize$ = baseContractAddress
-    ? initializeProxy(signer, accountDeploymentReceipt$ as Observable<DeploymentEventProxyContract>)
+    ? initializeProxy(
+        signer,
+        accountDeploymentReceipt$ as Observable<DeploymentEventProxyContract>,
+        isSignerUniversalProfile$
+      )
     : EMPTY;
 
   const accountDeploymentInitializeReceipt$ = waitForReceipt<LSP3AccountDeploymentEvent>(
@@ -147,8 +156,14 @@ export async function deployProxyContract(
 
 function initializeProxy(
   signer: Signer,
-  accountDeploymentReceipt$: Observable<DeploymentEventProxyContract>
+  accountDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
+  isSignerUniversalProfile$: Observable<boolean>
 ) {
+  const contractAddress$ = getContractAddressFromReceipt$(
+    accountDeploymentReceipt$,
+    isSignerUniversalProfile$
+  );
+
   return initialize(
     accountDeploymentReceipt$,
     new UniversalProfileInit__factory(signer),
@@ -156,7 +171,8 @@ function initializeProxy(
       const signerAddress = await signer.getAddress();
       return [signerAddress];
     },
-    'initialize(address)'
+    'initialize(address)',
+    contractAddress$
   ).pipe(shareReplay());
 }
 
@@ -278,9 +294,10 @@ export function prepareSetDataTransaction$(
         lsp3ProfileData,
         isSignerUniversalProfile,
       ]) => {
-        const lsp3AccountAddress = isSignerUniversalProfile
-          ? lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.logs[0].address
-          : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
+        const lsp3AccountAddress = getContractAddressFromReceipt(
+          lsp3AccountReceipt,
+          isSignerUniversalProfile
+        );
 
         const universalReceiverDelegateAddress = isSignerUniversalProfile
           ? universalReceiverDelegateReceipt?.contractAddress ||
@@ -628,13 +645,15 @@ export function prepareTransferOwnershipTransaction$(
         { receipt: keyManagerReceipt },
         isSignerUniversalProfile,
       ]) => {
-        const erc725AccountAddress = isSignerUniversalProfile
-          ? lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.logs[0].address
-          : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
+        const erc725AccountAddress = getContractAddressFromReceipt(
+          lsp3AccountReceipt,
+          isSignerUniversalProfile
+        );
 
-        const keyManagerAddress = isSignerUniversalProfile
-          ? keyManagerReceipt.contractAddress || keyManagerReceipt.logs[0].address
-          : keyManagerReceipt.contractAddress || keyManagerReceipt.to;
+        const keyManagerAddress = getContractAddressFromReceipt(
+          keyManagerReceipt,
+          isSignerUniversalProfile
+        );
 
         return of({
           erc725AccountAddress,

@@ -6,6 +6,8 @@ import { LSP6KeyManager__factory, LSP6KeyManagerInit__factory } from '../..';
 import {
   deployContract,
   deployProxyContract,
+  getContractAddressFromReceipt,
+  getContractAddressFromReceipt$,
   initialize,
   waitForReceipt,
 } from '../helpers/deployment.helper';
@@ -30,14 +32,16 @@ export function keyManagerDeployment$(
   return forkJoin([accountDeployment$, baseContractAddress$, isSignerUniversalProfile$]).pipe(
     switchMap(
       ([{ receipt: lsp3AccountReceipt }, baseContractAddress, isSignerUniversalProfile]) => {
-        const erc725AccountAddress = isSignerUniversalProfile
-          ? lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.logs[0].address
-          : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
+        const erc725AccountAddress = getContractAddressFromReceipt(
+          lsp3AccountReceipt,
+          isSignerUniversalProfile
+        );
 
         return keyManagerDeploymentForAccount$(
           signer,
           erc725AccountAddress,
           baseContractAddress.LSP6KeyManager,
+          isSignerUniversalProfile$,
           byteCode
         );
       }
@@ -50,6 +54,7 @@ function keyManagerDeploymentForAccount$(
   signer: Signer,
   erc725AccountAddress: string,
   baseContractAddress: string,
+  isSignerUniversalProfile$: Observable<boolean>,
   byteCode?: string
 ): Observable<KeyManagerDeploymentEvent> {
   const keyManagerDeployment$ = from(
@@ -64,7 +69,8 @@ function keyManagerDeploymentForAccount$(
     ? initializeProxy(
         signer,
         keyManagerDeploymentReceipt$ as Observable<DeploymentEventProxyContract>,
-        erc725AccountAddress
+        erc725AccountAddress,
+        isSignerUniversalProfile$
       )
     : EMPTY;
 
@@ -122,14 +128,21 @@ export async function deployKeyManager(
 function initializeProxy(
   signer: Signer,
   keyManagerDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
-  accountAddress: string
+  accountAddress: string,
+  isSignerUniversalProfile$: Observable<boolean>
 ) {
+  const keyManagerAddress$ = getContractAddressFromReceipt$(
+    keyManagerDeploymentReceipt$,
+    isSignerUniversalProfile$
+  );
+
   return initialize(
     keyManagerDeploymentReceipt$,
     new LSP6KeyManagerInit__factory(signer),
     async () => {
       return [accountAddress];
     },
-    'initialize(address)'
+    'initialize(address)',
+    keyManagerAddress$
   );
 }

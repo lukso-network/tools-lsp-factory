@@ -126,14 +126,15 @@ export class UniversalProfile {
       deployUniversalReceiverProxy
     );
 
+    const signerIsUniversalProfile$ = isSignerUniversalProfile$(this.signer);
+
     // 1 > deploys ERC725Account
     const account$ = accountDeployment$(
       this.signer,
       baseContractAddresses$,
+      signerIsUniversalProfile$,
       deploymentConfiguration?.LSP0ERC725Account?.byteCode
     );
-
-    const signerIsUniversalProfile$ = isSignerUniversalProfile$(this.signer);
 
     // 2 > deploys KeyManager
     const keyManager$ = keyManagerDeployment$(

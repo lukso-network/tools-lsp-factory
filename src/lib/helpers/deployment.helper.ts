@@ -1,6 +1,6 @@
 import { Contract, ContractFactory, ContractInterface, ethers, providers, Signer } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
-import { concat, from, lastValueFrom, Observable } from 'rxjs';
+import { concat, forkJoin, from, lastValueFrom, Observable } from 'rxjs';
 import {
   catchError,
   endWith,
@@ -13,6 +13,7 @@ import {
 
 import {
   DeploymentEvent,
+  DeploymentEventBase,
   DeploymentEventBaseContract,
   DeploymentEventCallbacks,
   DeploymentEventProxyContract,
@@ -69,18 +70,22 @@ export function initialize(
   deploymentEvent$: Observable<DeploymentEvent>,
   factory: ContractFactory,
   initArguments: (result) => Promise<unknown[]>,
-  initializeFunctionSignature: string
+  initializeFunctionSignature: string,
+  contractAddress$?: Observable<string>
 ): Observable<DeploymentEventProxyContract> {
-  const initialize$ = deploymentEvent$.pipe(
-    takeLast(1),
-    switchMap(async (result) => {
-      const contract = await factory.attach(result.receipt.contractAddress);
+  contractAddress$ = contractAddress$ || from('');
+
+  const initialize$ = forkJoin([deploymentEvent$.pipe(takeLast(1)), contractAddress$]).pipe(
+    switchMap(async ([result, contractAddress]) => {
+      const contract = await factory.attach(contractAddress || result.receipt.contractAddress);
       const initializeParams = await initArguments(result);
+
       const gasEstimate = await contract.estimateGas.initialize(...initializeParams);
       const transaction = await contract.initialize(...initializeParams, {
         gasLimit: gasEstimate.add(GAS_BUFFER),
         gasPrice: GAS_PRICE,
       });
+
       return {
         type: DeploymentType.TRANSACTION,
         contractName: result.contractName,
@@ -92,7 +97,7 @@ export function initialize(
     shareReplay()
   );
 
-  return initialize$ as unknown as Observable<DeploymentEventProxyContract>;
+  return initialize$ as Observable<DeploymentEventProxyContract>;
 }
 
 /**
@@ -175,18 +180,27 @@ export function waitForContractDeployment<T>(deployment$: Observable<DeploymentE
   return lastValueFrom(
     deployment$.pipe(
       tap((deploymentEvent) => {
-        if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
+        let contractAddress: string;
+        try {
+          contractAddress =
+            deploymentEvent.receipt.contractAddress ||
+            ethers.utils.defaultAbiCoder
+              .decode(['address'], deploymentEvent.receipt.logs[1].topics[2])
+              .toString();
+        } catch {
           return;
         }
 
+        if (!contractAddress || contractAccumulator[deploymentEvent.contractName]) return;
+
         if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
           contractAccumulator[`${deploymentEvent.contractName}BaseContract`] = {
-            address: deploymentEvent.receipt.contractAddress,
+            address: contractAddress,
             receipt: deploymentEvent.receipt,
           };
         } else {
           contractAccumulator[deploymentEvent.contractName] = {
-            address: deploymentEvent.receipt.contractAddress,
+            address: contractAddress,
             receipt: deploymentEvent.receipt,
           };
         }
@@ -287,4 +301,26 @@ export function waitForBatchedPendingTransactions(
   );
 
   return concat(transactions$, receipts$);
+}
+
+export function getContractAddressFromReceipt(
+  receipt: ethers.providers.TransactionReceipt,
+  isSignerUniversalProfile: boolean
+) {
+  return isSignerUniversalProfile
+    ? receipt.contractAddress ||
+        ethers.utils.defaultAbiCoder.decode(['address'], receipt.logs[1].topics[2]).toString()
+    : receipt.contractAddress || receipt.to;
+}
+
+export function getContractAddressFromReceipt$(
+  accountDeploymentReceipt$: Observable<DeploymentEventBase>,
+  isSignerUniversalProfile$: Observable<boolean>
+) {
+  return forkJoin([accountDeploymentReceipt$.pipe(takeLast(1)), isSignerUniversalProfile$]).pipe(
+    switchMap(async ([result, isSignerUniversalProfile]) => {
+      return getContractAddressFromReceipt(result.receipt, isSignerUniversalProfile);
+    }),
+    shareReplay()
+  );
 }

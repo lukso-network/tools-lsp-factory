@@ -100,14 +100,15 @@ export class LSP8IdentifiableDigitalAsset {
       digitalAssetConfiguration?.byteCode
     );
 
+    const signerIsUniversalProfile$ = isSignerUniversalProfile$(this.signer);
+
     const digitalAsset$ = lsp8IdentifiableDigitalAssetDeployment$(
       this.signer,
       digitalAssetDeploymentOptions,
+      signerIsUniversalProfile$,
       baseContractAddress$,
       digitalAssetConfiguration?.byteCode
     );
-
-    const signerIsUniversalProfile$ = isSignerUniversalProfile$(this.signer);
 
     const setLSP4AndTransferOwnership$ = setMetadataAndTransferOwnership$(
       this.signer,
