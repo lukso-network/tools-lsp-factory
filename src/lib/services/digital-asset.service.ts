@@ -32,6 +32,7 @@ import {
   convertContractDeploymentOptionsVersion,
   deployContract,
   deployProxyContract,
+  getContractAddressFromDeploymentEvent,
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
@@ -165,7 +166,7 @@ function initializeLSP7Proxy(
     takeLast(1),
     switchMap(async (result) => {
       const contract = await new LSP7MintableInit__factory(signer).attach(
-        result.receipt.contractAddress
+        result.receipt.contractAddress || getContractAddressFromDeploymentEvent(result)
       );
 
       const controllerAddress = await signer.getAddress();
@@ -304,7 +305,7 @@ function initializeLSP8Proxy(
     takeLast(1),
     switchMap(async (result) => {
       const contract = await new LSP8MintableInit__factory(signer).attach(
-        result.receipt.contractAddress
+        result.receipt.contractAddress || getContractAddressFromDeploymentEvent(result)
       );
 
       const controllerAddress = await signer.getAddress();
@@ -560,9 +561,11 @@ export function prepareLSP4SetDataTransaction$(
   signer: Signer
 ) {
   return forkJoin([digitalAsset$, lsp4Metadata$, isSignerUniversalProfile$]).pipe(
-    switchMap(([{ receipt: digitalAssetReceipt }, lsp4Metadata, isSignerUniversalProfile]) => {
+    switchMap(([result, lsp4Metadata, isSignerUniversalProfile]) => {
+      const { receipt: digitalAssetReceipt } = result;
+
       const digitalAssetAddress = isSignerUniversalProfile
-        ? digitalAssetReceipt.contractAddress || digitalAssetReceipt.logs[0].address
+        ? digitalAssetReceipt.contractAddress || getContractAddressFromDeploymentEvent(result)
         : digitalAssetReceipt.contractAddress || digitalAssetReceipt.to;
 
       return prepareSetDataTransaction(
@@ -639,10 +642,12 @@ export function digitalAssetAddress$(
   isSignerUniversalProfile$: Observable<boolean>
 ) {
   return forkJoin([digitalAsset$, isSignerUniversalProfile$]).pipe(
-    switchMap(([{ receipt: digitalAssetDeploymentReceipt }, isSignerUniversalProfile]) => {
+    switchMap(([deploymentEvent, isSignerUniversalProfile]) => {
+      const { receipt: digitalAssetDeploymentReceipt } = deploymentEvent;
+
       const digitalAssetAddress = isSignerUniversalProfile
         ? digitalAssetDeploymentReceipt.contractAddress ||
-          digitalAssetDeploymentReceipt.logs[0].address
+          getContractAddressFromDeploymentEvent(deploymentEvent)
         : digitalAssetDeploymentReceipt.contractAddress || digitalAssetDeploymentReceipt.to;
 
       return of(digitalAssetAddress);

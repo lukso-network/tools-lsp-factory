@@ -6,6 +6,7 @@ import { LSP6KeyManager__factory, LSP6KeyManagerInit__factory } from '../..';
 import {
   deployContract,
   deployProxyContract,
+  getContractAddressFromDeploymentEvent,
   initialize,
   waitForReceipt,
 } from '../helpers/deployment.helper';
@@ -28,20 +29,20 @@ export function keyManagerDeployment$(
   byteCode?: string
 ): Observable<KeyManagerDeploymentEvent> {
   return forkJoin([accountDeployment$, baseContractAddress$, isSignerUniversalProfile$]).pipe(
-    switchMap(
-      ([{ receipt: lsp3AccountReceipt }, baseContractAddress, isSignerUniversalProfile]) => {
-        const erc725AccountAddress = isSignerUniversalProfile
-          ? lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.logs[0].address
-          : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
+    switchMap(([result, baseContractAddress, isSignerUniversalProfile]) => {
+      const { receipt: lsp3AccountReceipt } = result;
 
-        return keyManagerDeploymentForAccount$(
-          signer,
-          erc725AccountAddress,
-          baseContractAddress.LSP6KeyManager,
-          byteCode
-        );
-      }
-    ),
+      const erc725AccountAddress = isSignerUniversalProfile
+        ? lsp3AccountReceipt.contractAddress || getContractAddressFromDeploymentEvent(result)
+        : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
+
+      return keyManagerDeploymentForAccount$(
+        signer,
+        erc725AccountAddress,
+        baseContractAddress.LSP6KeyManager,
+        byteCode
+      );
+    }),
     shareReplay()
   );
 }
