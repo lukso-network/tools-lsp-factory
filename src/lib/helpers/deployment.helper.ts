@@ -22,7 +22,12 @@ import {
   DeploymentType,
 } from '../interfaces/deployment-events';
 
-import { GAS_BUFFER, GAS_PRICE } from './config.helper';
+import {
+  CONTRACT_CREATED_EVENT_SIGNATURE,
+  EXECUTED_EVENT_SIGNATURE,
+  GAS_BUFFER,
+  GAS_PRICE,
+} from './config.helper';
 
 /**
  *
@@ -74,7 +79,9 @@ export function initialize(
   const initialize$ = deploymentEvent$.pipe(
     takeLast(1),
     switchMap(async (result) => {
-      const contract = await factory.attach(result.receipt.contractAddress);
+      const contract = await factory.attach(
+        result.receipt.contractAddress || getContractAddressFromDeploymentEvent(result)
+      );
       const initializeParams = await initArguments(result);
       const gasEstimate = await contract.estimateGas.initialize(...initializeParams);
       const transaction = await contract.initialize(...initializeParams, {
@@ -175,9 +182,17 @@ export function waitForContractDeployment<T>(deployment$: Observable<DeploymentE
   return lastValueFrom(
     deployment$.pipe(
       tap((deploymentEvent) => {
-        if (!deploymentEvent.receipt || !deploymentEvent.receipt.contractAddress) {
+        let contractAddress: string;
+
+        try {
+          contractAddress =
+            deploymentEvent.receipt.contractAddress ||
+            getContractAddressFromDeploymentEvent(deploymentEvent);
+        } catch {
           return;
         }
+
+        if (!contractAddress || contractAccumulator[deploymentEvent.contractName]) return;
 
         if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
           contractAccumulator[`${deploymentEvent.contractName}BaseContract`] = {
@@ -186,7 +201,7 @@ export function waitForContractDeployment<T>(deployment$: Observable<DeploymentE
           };
         } else {
           contractAccumulator[deploymentEvent.contractName] = {
-            address: deploymentEvent.receipt.contractAddress,
+            address: contractAddress,
             receipt: deploymentEvent.receipt,
           };
         }
@@ -288,3 +303,48 @@ export function waitForBatchedPendingTransactions(
 
   return concat(transactions$, receipts$);
 }
+
+/**
+ *
+ * Finds the deployed contract address from a transaction receipt by extracting the address from the ContractCreated or Executed event, depending on whether the receipt is for a deployment or initialize transaction
+ *
+ * Used in cases where the new contract address is not returned in the contractAddress property of the receipt. Ie when signing transactions with a Universal Profile
+ *
+ * @param receipt
+ * @returns contract address
+ */
+export const getContractAddressFromDeploymentEvent = (deploymentEvent: DeploymentEvent) => {
+  const { logs } = deploymentEvent.receipt;
+
+  let eventSignatureToSearch: string;
+
+  switch (deploymentEvent.type) {
+    case DeploymentType.DEPLOYMENT:
+    case DeploymentType.PROXY: {
+      eventSignatureToSearch = CONTRACT_CREATED_EVENT_SIGNATURE;
+      break;
+    }
+    case DeploymentType.TRANSACTION: {
+      eventSignatureToSearch = EXECUTED_EVENT_SIGNATURE;
+      break;
+    }
+  }
+
+  if (!eventSignatureToSearch) {
+    throw new Error('Unable to get deployed contract address');
+  }
+
+  const log = logs.find((log) => {
+    return (
+      log.topics.filter((topic) => {
+        return topic === eventSignatureToSearch;
+      }).length > 0
+    );
+  });
+
+  const address = log
+    ? ethers.utils.defaultAbiCoder.decode(['address'], log.topics[2]).toString()
+    : null;
+
+  return address;
+};

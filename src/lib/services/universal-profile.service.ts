@@ -22,6 +22,7 @@ import {
 import {
   convertContractDeploymentOptionsVersion,
   deployContract,
+  getContractAddressFromDeploymentEvent,
   getProxyByteCode,
   initialize,
   waitForBatchedPendingTransactions,
@@ -51,7 +52,7 @@ import {
 } from '../interfaces/lsp3-profile';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 
-import { UniversalReveiverDeploymentEvent } from './universal-receiver.service';
+import { UniversalReveiverDeploymentEvent as UniversalReceiverDeploymentEvent } from './universal-receiver.service';
 
 export type LSP3AccountDeploymentEvent = DeploymentEventContract | DeploymentEventProxyContract;
 
@@ -163,7 +164,7 @@ function initializeProxy(
 export function setDataAndTransferOwnershipTransactions$(
   signer: Signer,
   account$: Observable<LSP3AccountDeploymentEvent>,
-  universalReceiver$: Observable<UniversalReveiverDeploymentEvent>,
+  universalReceiver$: Observable<UniversalReceiverDeploymentEvent>,
   controllerAddresses: (string | ControllerOptions)[],
   lsp3ProfileData$: Observable<string | null>,
   isSignerUniversalProfile$: Observable<boolean>,
@@ -254,16 +255,18 @@ export function setDataAndTransferOwnershipTransactions$(
 export function prepareSetDataTransaction$(
   signer: Signer,
   account$: Observable<LSP3AccountDeploymentEvent>,
-  universalReceiver$: Observable<UniversalReveiverDeploymentEvent>,
+  universalReceiver$: Observable<UniversalReceiverDeploymentEvent>,
   controllerAddresses: (string | ControllerOptions)[],
   lsp3ProfileData$: Observable<string | null>,
   isSignerUniversalProfile$: Observable<boolean>,
   defaultUniversalReceiverDelegateAddress?: string
 ) {
-  const universalReceiverAddress$ = universalReceiver$.pipe(
-    defaultIfEmpty({ receipt: null }),
-    shareReplay()
-  );
+  const universalReceiverAddress$: Observable<
+    | UniversalReceiverDeploymentEvent
+    | {
+        receipt: null;
+      }
+  > = universalReceiver$.pipe(defaultIfEmpty({ receipt: null }), shareReplay());
 
   return forkJoin([
     account$,
@@ -272,28 +275,31 @@ export function prepareSetDataTransaction$(
     isSignerUniversalProfile$,
   ]).pipe(
     switchMap(
-      ([
-        { receipt: lsp3AccountReceipt },
-        { receipt: universalReceiverDelegateReceipt },
-        lsp3ProfileData,
-        isSignerUniversalProfile,
-      ]) => {
+      ([lsp3Result, universalReceiverResult, lsp3ProfileData, isSignerUniversalProfile]) => {
+        const { receipt: lsp3AccountReceipt } = lsp3Result;
+        const { receipt: universalReceiverReceipt } = universalReceiverResult;
+
         const lsp3AccountAddress = isSignerUniversalProfile
-          ? lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.logs[0].address
+          ? lsp3AccountReceipt.contractAddress || getContractAddressFromDeploymentEvent(lsp3Result)
           : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
 
-        const universalReceiverDelegateAddress = isSignerUniversalProfile
-          ? universalReceiverDelegateReceipt?.contractAddress ||
-            universalReceiverDelegateReceipt?.logs[0]?.topics[2]?.slice(26) ||
-            defaultUniversalReceiverDelegateAddress
-          : universalReceiverDelegateReceipt?.contractAddress ||
-            universalReceiverDelegateReceipt?.to ||
-            defaultUniversalReceiverDelegateAddress;
+        let universalReceiverAddress: string;
+        if (isSignerUniversalProfile) {
+          universalReceiverAddress =
+            universalReceiverReceipt?.contractAddress || universalReceiverResult.receipt
+              ? getContractAddressFromDeploymentEvent(
+                  universalReceiverResult as UniversalReceiverDeploymentEvent
+                )
+              : null;
+        } else {
+          universalReceiverAddress =
+            universalReceiverReceipt?.contractAddress || universalReceiverReceipt?.to;
+        }
 
         return prepareSetDataParameters(
           signer,
           lsp3AccountAddress,
-          universalReceiverDelegateAddress,
+          universalReceiverAddress ?? defaultUniversalReceiverDelegateAddress,
           controllerAddresses,
           lsp3ProfileData
         );
@@ -439,7 +445,7 @@ export async function prepareSetDataParameters(
 
   const valuesToSet = [
     universalReceiverDelegateAddress,
-    ERC725.encodePermissions({ SUPER_SETDATA: true }),
+    ERC725.encodePermissions({ SUPER_SETDATA: true, REENTRANCY: true }),
     ethers.utils.defaultAbiCoder.encode(['uint256'], [controllerPermissions.length + 1]),
     ...controllerAddresses,
     ...controllerPermissions,
@@ -622,26 +628,24 @@ export function prepareTransferOwnershipTransaction$(
   isSignerUniversalProfile$: Observable<boolean>
 ) {
   return forkJoin([accountDeployment$, keyManagerDeployment$, isSignerUniversalProfile$]).pipe(
-    switchMap(
-      ([
-        { receipt: lsp3AccountReceipt },
-        { receipt: keyManagerReceipt },
-        isSignerUniversalProfile,
-      ]) => {
-        const erc725AccountAddress = isSignerUniversalProfile
-          ? lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.logs[0].address
-          : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
+    switchMap(([lsp3Result, keyManagerResult, isSignerUniversalProfile]) => {
+      const { receipt: lsp3AccountReceipt } = lsp3Result;
+      const { receipt: keyManagerReceipt } = keyManagerResult;
 
-        const keyManagerAddress = isSignerUniversalProfile
-          ? keyManagerReceipt.contractAddress || keyManagerReceipt.logs[0].address
-          : keyManagerReceipt.contractAddress || keyManagerReceipt.to;
+      const erc725AccountAddress = isSignerUniversalProfile
+        ? lsp3AccountReceipt.contractAddress || getContractAddressFromDeploymentEvent(lsp3Result)
+        : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
 
-        return of({
-          erc725AccountAddress,
-          keyManagerAddress,
-        });
-      }
-    ),
+      const keyManagerAddress = isSignerUniversalProfile
+        ? keyManagerReceipt.contractAddress ||
+          getContractAddressFromDeploymentEvent(keyManagerResult)
+        : keyManagerReceipt.contractAddress || keyManagerReceipt.to;
+
+      return of({
+        erc725AccountAddress,
+        keyManagerAddress,
+      });
+    }),
     shareReplay()
   );
 }
