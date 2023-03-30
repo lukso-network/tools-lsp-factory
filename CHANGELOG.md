@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.1](https://github.com/lukso-network/tools-lsp-factory/compare/v2.5.0...v2.5.1) (2023-03-30)
+
+### Bug Fixes
+
+- Adjust versions of lsp-smart-contracts and erc725.js to match latest. ([c6b04a6](https://github.com/lukso-network/tools-lsp-factory/commit/c6b04a6f27d0aa59bf6d9a910054ec758546031c))
+- get deployed contract addresses from event logs ([e674f69](https://github.com/lukso-network/tools-lsp-factory/commit/e674f693549d8eaa4b0ecbb39f9bf9424c291e50))
+- give permission `REENTRANCY` to LSP1Delegate ([edb0c5e](https://github.com/lukso-network/tools-lsp-factory/commit/edb0c5e665ee22e95a79de6fe429423bd792f693))
+
 ## [2.5.0](https://github.com/lukso-network/tools-lsp-factory/compare/v2.4.0...v2.5.0) (2023-02-21)
 
 ### ⚠ BREAKING CHANGES
