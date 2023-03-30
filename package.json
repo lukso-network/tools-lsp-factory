@@ -33,7 +33,7 @@
     "@erc725/erc725.js": "0.17.1",
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/experimental": "^5.7.0",
-    "@lukso/lsp-smart-contracts": "0.8.0",
+    "@lukso/lsp-smart-contracts": "^0.8.1",
     "axios": "^0.23.0",
     "browser-image-compression": "^2.0.0",
     "ethers": "^5.7.0",
