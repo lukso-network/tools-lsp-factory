@@ -18,7 +18,6 @@ By default LSPFactory deploys the [`Mintable`](https://github.com/lukso-network/
 
 :::
 
-
 ### Parameters
 
 #### 1. `digitalAssetProperties` - Object
@@ -50,9 +49,9 @@ You can read more about the `options` object specification on [its official page
 
 ### Returns
 
-| Type         | Description                                                                                  |
-| :----------- | :------------------------------------------------------------------------------------------- |
-| `Promise`    | Resolves to an object containing deployed contract details.                                  |
+| Type      | Description                                                 |
+| :-------- | :---------------------------------------------------------- |
+| `Promise` | Resolves to an object containing deployed contract details. |
 
 ### Example
 
@@ -113,7 +112,7 @@ await lspFactory.LSP7DigitalAsset.deploy(
         console.log(contracts.LSP7DigitalAsset);
       },
     },
-  },
+  }
 );
 
 /**
@@ -155,7 +154,7 @@ await lspFactory.LSP7DigitalAsset.deploy(
 {
   type: 'TRANSACTION',
   contractName: 'LSP7DigitalAsset',
-  functionName: 'setData(bytes32[],bytes[])',
+  functionName: 'setDataBatch(bytes32[],bytes[])',
   status: 'PENDING',
   transaction: {
     ...
@@ -164,7 +163,7 @@ await lspFactory.LSP7DigitalAsset.deploy(
 {
   type: 'TRANSACTION',
   contractName: 'LSP7DigitalAsset',
-  functionName: 'setData(bytes32[],bytes[])',
+  functionName: 'setDataBatch(bytes32[],bytes[])',
   status: 'COMPLETE',
   receipt: {
     ...

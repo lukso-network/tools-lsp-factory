@@ -33,7 +33,7 @@ export interface ProfileDeploymentOptions {
 }
 
 export interface DeployedUniversalProfileContracts {
-  LSP0ERC725Account?: DeployedContract;
+  LSP0ERC725Account: DeployedContract;
   LSP0ERC725AccountBaseContract?: DeployedContract;
   LSP6KeyManager: DeployedContract;
   LSP6KeyManagerBaseContract: DeployedContract;

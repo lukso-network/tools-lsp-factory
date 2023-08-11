@@ -1,4 +1,5 @@
 import { ERC725 } from '@erc725/erc725.js';
+import { INTERFACE_IDS } from '@lukso/lsp-smart-contracts';
 import axios from 'axios';
 import { BytesLike, Contract, ContractFactory, ethers, Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, from, Observable, of } from 'rxjs';
@@ -13,7 +14,6 @@ import {
 import {
   ADDRESS_PERMISSIONS_ARRAY_KEY,
   DEFAULT_PERMISSIONS,
-  ERC725_ACCOUNT_INTERFACE,
   GAS_BUFFER,
   GAS_PRICE,
   LSP3_UP_KEYS,
@@ -52,7 +52,7 @@ import {
 } from '../interfaces/lsp3-profile';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 
-import { UniversalReveiverDeploymentEvent as UniversalReceiverDeploymentEvent } from './universal-receiver.service';
+import { UniversalReceiverDeploymentEvent as UniversalReceiverDeploymentEvent } from './universal-receiver.service';
 
 export type LSP3AccountDeploymentEvent = DeploymentEventContract | DeploymentEventProxyContract;
 
@@ -452,15 +452,15 @@ export async function prepareSetDataParameters(
     universalReceiverDelegateAddress,
   ];
 
-  // Set CHANGEOWNER + CHANGEPERMISSIONS for deploy key. Revoked after transfer ownerhip step is complete
+  // Set CHANGEOWNER + EDITPERMISSIONS for deploy key. Revoked after transfer ownerhip step is complete
   const signerAddress = await signer.getAddress();
 
   if (!controllerAddresses.includes(signerAddress)) {
     keysToSet.push(PREFIX_PERMISSIONS + signerAddress.substring(2));
-    valuesToSet.push(ERC725.encodePermissions({ CHANGEOWNER: true, CHANGEPERMISSIONS: true }));
+    valuesToSet.push(ERC725.encodePermissions({ CHANGEOWNER: true, EDITPERMISSIONS: true }));
   } else {
     valuesToSet[keysToSet.indexOf(PREFIX_PERMISSIONS + signerAddress.substring(2))] =
-      ERC725.encodePermissions({ CHANGEOWNER: true, CHANGEPERMISSIONS: true });
+      ERC725.encodePermissions({ CHANGEOWNER: true, EDITPERMISSIONS: true });
   }
 
   if (encodedLSP3Profile) {
@@ -485,7 +485,7 @@ export async function sendSetDataAndTransferOwnershipTransactions(
   const erc725Account = new UniversalProfile__factory(signer).attach(erc725AccountAddress);
   const signerAddress = await signer.getAddress();
 
-  const setDataEstimate = await erc725Account.estimateGas['setData(bytes32[],bytes[])'](
+  const setDataEstimate = await erc725Account.estimateGas.setDataBatch(
     keysToSet,
     valuesToSet as BytesLike[]
   );
@@ -498,15 +498,11 @@ export async function sendSetDataAndTransferOwnershipTransactions(
   );
 
   // Send batched transactions together
-  const setDataTransaction = erc725Account['setData(bytes32[],bytes[])'](
-    keysToSet,
-    valuesToSet as BytesLike[],
-    {
-      gasLimit: setDataEstimate.add(GAS_BUFFER),
-      gasPrice: GAS_PRICE,
-      from: signerAddress,
-    }
-  );
+  const setDataTransaction = erc725Account.setDataBatch(keysToSet, valuesToSet as BytesLike[], {
+    gasLimit: setDataEstimate.add(GAS_BUFFER),
+    gasPrice: GAS_PRICE,
+    from: signerAddress,
+  });
 
   const transferOwnershipTransaction = erc725Account.transferOwnership(keyManagerAddress, {
     from: signerAddress,
@@ -519,7 +515,7 @@ export async function sendSetDataAndTransferOwnershipTransactions(
       type: DeploymentType.TRANSACTION,
       contractName: ContractNames.ERC725_Account,
       status: DeploymentStatus.PENDING,
-      functionName: 'setData(bytes32[],bytes[])',
+      functionName: 'setDataBatch(bytes32[],bytes[])',
       pendingTransaction: setDataTransaction,
     },
     {
@@ -591,11 +587,10 @@ export async function revokeSignerPermissions(
     signerPermission = ERC725.encodePermissions({});
   }
 
-  // There is a bug in typechain which means encodeFunctionData does not work properly with overloaded functions so we need to cast to any here
-  const revokeSignerPermissionsPayload = (erc725Account.interface as any).encodeFunctionData(
-    'setData(bytes32,bytes)',
-    [PREFIX_PERMISSIONS + signerAddress.substring(2), signerPermission]
-  );
+  const revokeSignerPermissionsPayload = erc725Account.interface.encodeFunctionData('setData', [
+    PREFIX_PERMISSIONS + signerAddress.substring(2),
+    signerPermission,
+  ]);
 
   const revokeSignerPermissionsEstimate = await keyManager.estimateGas['execute(bytes)'](
     revokeSignerPermissionsPayload,
@@ -661,7 +656,9 @@ export async function addressIsUniversalProfile(address: string, signer: Signer)
   try {
     const universalProfile = UniversalProfile__factory.connect(address, signer);
 
-    let isUniversalProfile = await universalProfile.supportsInterface(ERC725_ACCOUNT_INTERFACE);
+    let isUniversalProfile = await universalProfile.supportsInterface(
+      INTERFACE_IDS.LSP0ERC725Account
+    );
 
     if (!isUniversalProfile) {
       isUniversalProfile = await universalProfile.supportsInterface('0x63cb749b');

@@ -23,17 +23,17 @@ describe('UniversalProfile', () => {
     );
     await erc725AccountProxy.initialize(await signer.getAddress());
 
-    await erc725AccountProxy['setData(bytes32[],bytes[])'](
-      ['0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'],
-      ['0xbeefbeef'],
+    await erc725AccountProxy.setData(
+      '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+      '0xbeefbeef',
       {
         from: await signer.getAddress(),
       }
     );
-    const data = await erc725AccountProxy['getData(bytes32[])']([
-      '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-    ]);
+    const data = await erc725AccountProxy.getData(
+      '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'
+    );
 
-    expect(data).toEqual(['0xbeefbeef']);
+    expect(data).toEqual('0xbeefbeef');
   });
 });
