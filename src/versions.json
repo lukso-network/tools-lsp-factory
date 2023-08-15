@@ -1,63 +1,36 @@
 {
-  "22": {
-    "name": "LUKSO L14",
-    "chainId": 22,
-    "networkId": 22,
-    "contracts": {
-      "ERC725Account": {
-        "versions": {},
-        "baseContract": true
-      },
-      "KeyManager": {
-        "versions": {},
-        "baseContract": true
-      },
-      "UniversalReceiverDelegate": {
-        "versions": {},
-        "baseContract": false
-      },
-      "LSP7Mintable": {
-        "versions": {},
-        "baseContract": true
-      },
-      "LSP8Mintable": {
-        "versions": {},
-        "baseContract": true
-      }
-    }
-  },
-  "2828": {
-    "name": "LUKSO L16",
-    "chainId": 2828,
-    "networkId": 2828,
+  "4201": {
+    "name": "LUKSO Testnet",
+    "chainId": 4201,
+    "networkId": 4201,
     "contracts": {
       "ERC725Account": {
         "versions": {
-          "0.8.0": "0x4b30900F119E11D2A8CAe18176c4f9840E586Cc4"
+          "0.10.3": "0x40114F4f71C3551f79CBfdaa63F41741fA7eC86D"
         },
         "baseContract": true
       },
       "KeyManager": {
         "versions": {
-          "0.8.0": "0x03528d5035E79Cee3D40a06B4d3D638d12BDb030"
+          "0.10.3": "0xDDF7D4650007Bb117c9e3ec29C7263e7D8344211"
         },
         "baseContract": true
       },
       "UniversalReceiverDelegate": {
         "versions": {
-          "0.8.0": "0x747Cf5aD7194aCfaCf366ac61ddD41B04Ba7a935"
+          "0.10.3": "0x3a181401d642ff76eacc13db4fecf4761de135d2"
         },
         "baseContract": false
       },
       "LSP7Mintable": {
         "versions": {
-          "0.8.0": "0xCFEc56cfb5f8c765233A432FaA348f8bfFd37f23"
+          "0.10.3": "0xaf45071fcf03564108f0cf82ba34932fe257565e"
         },
         "baseContract": true
       },
       "LSP8Mintable": {
         "versions": {
-          "0.8.0": "0x900d917f4ea52Ee693b1c64fA1010226f5c4ADaf"
+          "0.10.3": "0xB8e8a2Db3Dcbc8384B62F28165998BB78Db209F3"
         },
         "baseContract": true
       }

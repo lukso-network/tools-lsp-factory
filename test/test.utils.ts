@@ -59,7 +59,7 @@ export async function testUPDeployment(
 
   if (
     contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.deployProxy &&
-    !isAddress(contractDeploymentOptions?.LSP1UniversalReceiverDelegate.version)
+    !isAddress(contractDeploymentOptions?.LSP1UniversalReceiverDelegate.version || '0x')
   ) {
     expect(deployedContracts[`LSP1UniversalReceiverDelegateBaseContract`]).toBeDefined();
   } else {
@@ -86,13 +86,13 @@ export async function testSetData(upAddress: string, keyManagerAddress: string, 
 
   const keyManager = LSP6KeyManager__factory.connect(keyManagerAddress, signer);
 
-  const abi = await universalProfile.populateTransaction['setData(bytes32,bytes)'](key, value);
+  const abi = await universalProfile.populateTransaction.setData(key, value);
 
   const result = await keyManager.connect(signer)['execute(bytes)'](abi.data as string);
 
   expect(result).toBeTruthy();
 
-  const data = await universalProfile['getData(bytes32[])']([key]);
+  const data = await universalProfile.getDataBatch([key]);
   expect(data).toEqual([value]);
 }
 

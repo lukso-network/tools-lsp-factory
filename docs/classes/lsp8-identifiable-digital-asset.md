@@ -48,9 +48,9 @@ You can read more about the `options` object specification on [its official page
 
 ### Returns
 
-| Type         | Description                                                                                  |
-| :----------- | :------------------------------------------------------------------------------------------- |
-| `Promise`    | Resolves to an object containing deployed contract details.                                  |
+| Type      | Description                                                 |
+| :-------- | :---------------------------------------------------------- |
+| `Promise` | Resolves to an object containing deployed contract details. |
 
 ### Example
 
@@ -116,7 +116,7 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy(
         console.log(contracts.LSP8IdentifiableDigitalAsset);
       },
     },
-  },
+  }
 );
 
 /**
@@ -158,7 +158,7 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy(
 {
   type: 'TRANSACTION',
   contractName: 'LSP8IdentifiableDigitalAsset',
-  functionName: 'setData(bytes32[],bytes[])',
+  functionName: 'setDataBatch(bytes32[],bytes[])',
   status: 'PENDING',
   transaction: {
     ...
@@ -167,7 +167,7 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy(
 {
   type: 'TRANSACTION',
   contractName: 'LSP8IdentifiableDigitalAsset',
-  functionName: 'setData(bytes32[],bytes[])',
+  functionName: 'setDataBatch(bytes32[],bytes[])',
   status: 'COMPLETE',
   receipt: {
     ...

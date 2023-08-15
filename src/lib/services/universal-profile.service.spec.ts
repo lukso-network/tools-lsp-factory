@@ -53,7 +53,7 @@ describe('LSP3Account Service', () => {
       const controllerPermissionsValue = valuesToSet[keysToSet.indexOf(controllerPermissionsKey)];
       const expectedPermissions = ERC725.encodePermissions({
         CHANGEOWNER: true,
-        CHANGEPERMISSIONS: true,
+        EDITPERMISSIONS: true,
       });
       expect(controllerPermissionsValue).toEqual(expectedPermissions);
 
@@ -93,7 +93,7 @@ describe('LSP3Account Service', () => {
 
         const expectedPermissions = ERC725.encodePermissions({
           CHANGEOWNER: true,
-          CHANGEPERMISSIONS: true,
+          EDITPERMISSIONS: true,
         });
         expect(controllerPermissionsValue).toEqual(expectedPermissions);
 
@@ -134,7 +134,7 @@ describe('LSP3Account Service', () => {
           controllerAddress === (await signers[0].getAddress())
             ? ERC725.encodePermissions({
                 CHANGEOWNER: true,
-                CHANGEPERMISSIONS: true,
+                EDITPERMISSIONS: true,
               })
             : ERC725.encodePermissions(DEFAULT_PERMISSIONS);
 

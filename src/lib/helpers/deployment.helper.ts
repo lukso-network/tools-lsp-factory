@@ -1,3 +1,4 @@
+import { EventSigHashes } from '@lukso/lsp-smart-contracts';
 import { Contract, ContractFactory, ContractInterface, ethers, providers, Signer } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
 import { concat, from, lastValueFrom, Observable } from 'rxjs';
@@ -22,12 +23,7 @@ import {
   DeploymentType,
 } from '../interfaces/deployment-events';
 
-import {
-  CONTRACT_CREATED_EVENT_SIGNATURE,
-  EXECUTED_EVENT_SIGNATURE,
-  GAS_BUFFER,
-  GAS_PRICE,
-} from './config.helper';
+import { GAS_BUFFER, GAS_PRICE } from './config.helper';
 
 /**
  *
@@ -321,11 +317,11 @@ export const getContractAddressFromDeploymentEvent = (deploymentEvent: Deploymen
   switch (deploymentEvent.type) {
     case DeploymentType.DEPLOYMENT:
     case DeploymentType.PROXY: {
-      eventSignatureToSearch = CONTRACT_CREATED_EVENT_SIGNATURE;
+      eventSignatureToSearch = findLSP0EventSignatureByName('ContractCreated');
       break;
     }
     case DeploymentType.TRANSACTION: {
-      eventSignatureToSearch = EXECUTED_EVENT_SIGNATURE;
+      eventSignatureToSearch = findLSP0EventSignatureByName('Executed');
       break;
     }
   }
@@ -347,4 +343,12 @@ export const getContractAddressFromDeploymentEvent = (deploymentEvent: Deploymen
     : null;
 
   return address;
+};
+
+const findLSP0EventSignatureByName = (name: string): string => {
+  return (
+    Object.entries(EventSigHashes.LSP0ERC725Account).find(
+      ([, value]) => value.name === name
+    )?.[0] || ''
+  );
 };

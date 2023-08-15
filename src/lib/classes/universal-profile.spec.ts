@@ -69,7 +69,7 @@ describe('UniversalProfile', () => {
 
           universalProfile = UniversalProfile__factory.connect(LSP0ERC725Account.address, signer);
 
-          const lsp3Data = await universalProfile['getData(bytes32[])']([
+          const lsp3Data = await universalProfile.getDataBatch([
             '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
           ]);
 
@@ -100,7 +100,7 @@ describe('UniversalProfile', () => {
     });
 
     it('controller address should have DEFAULT_PERMISSIONS set', async () => {
-      const [signerPermissions] = await universalProfile['getData(bytes32[])']([
+      const [signerPermissions] = await universalProfile.getDataBatch([
         PREFIX_PERMISSIONS + uniqueController.address.substring(2),
       ]);
 
@@ -113,7 +113,7 @@ describe('UniversalProfile', () => {
         ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
         ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
-      const [result] = await universalProfile['getData(bytes32[])']([key]);
+      const [result] = await universalProfile.getDataBatch([key]);
       const checkedsumResult = ethers.utils.getAddress(result);
       expect(checkedsumResult).toEqual(uniqueController.address);
     });
@@ -136,7 +136,7 @@ describe('UniversalProfile', () => {
     });
 
     it('controller address should have DEFAULT_PERMISSIONS set', async () => {
-      const [signerPermissions] = await universalProfile['getData(bytes32[])']([
+      const [signerPermissions] = await universalProfile.getDataBatch([
         PREFIX_PERMISSIONS + controller.address.substring(2),
       ]);
 
@@ -144,7 +144,7 @@ describe('UniversalProfile', () => {
     });
 
     it('signer address should have no permissions set', async () => {
-      const [signerPermissions] = await universalProfile['getData(bytes32[])']([
+      const [signerPermissions] = await universalProfile.getDataBatch([
         PREFIX_PERMISSIONS + signers[0].address.substring(2),
       ]);
 
@@ -172,7 +172,7 @@ describe('UniversalProfile', () => {
     });
 
     it('controller address should have custom permissions set', async () => {
-      const [signerPermissions] = await universalProfile['getData(bytes32[])']([
+      const [signerPermissions] = await universalProfile.getDataBatch([
         PREFIX_PERMISSIONS + controller.address.substring(2),
       ]);
 
@@ -217,9 +217,7 @@ describe('UniversalProfile', () => {
     it('1st address should have DEFAULT_PERMISSIONS set', async () => {
       const [signerPermissions] = await universalProfile
         .connect(signers[0])
-        .callStatic['getData(bytes32[])']([
-          PREFIX_PERMISSIONS + firstControllerAddress.substring(2),
-        ]);
+        .callStatic.getDataBatch([PREFIX_PERMISSIONS + firstControllerAddress.substring(2)]);
 
       expect(signerPermissions).toEqual(ERC725.encodePermissions(DEFAULT_PERMISSIONS));
     });
@@ -230,9 +228,7 @@ describe('UniversalProfile', () => {
         ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
         ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
-      const [result] = await universalProfile
-        .connect(signers[0])
-        .callStatic['getData(bytes32[])']([key]);
+      const [result] = await universalProfile.connect(signers[0]).callStatic.getDataBatch([key]);
       const checkedsumResult = ethers.utils.getAddress(result);
       expect(checkedsumResult).toEqual(firstControllerAddress);
     });
@@ -240,9 +236,7 @@ describe('UniversalProfile', () => {
     it('2nd address should have DEFAULT_PERMISSIONS set', async () => {
       const [signerPermissions] = await universalProfile
         .connect(signers[1])
-        .callStatic['getData(bytes32[])']([
-          PREFIX_PERMISSIONS + secondControllerAddress.substring(2),
-        ]);
+        .callStatic.getDataBatch([PREFIX_PERMISSIONS + secondControllerAddress.substring(2)]);
 
       expect(signerPermissions).toEqual(customPermissions);
     });
@@ -253,9 +247,7 @@ describe('UniversalProfile', () => {
         ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
         ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
-      const [result] = await universalProfile
-        .connect(signers[0])
-        .callStatic['getData(bytes32[])']([key]);
+      const [result] = await universalProfile.connect(signers[0]).callStatic.getDataBatch([key]);
       const checkedsumResult = ethers.utils.getAddress(result);
       expect(checkedsumResult).toEqual(secondControllerAddress);
     });
@@ -627,7 +619,7 @@ describe('UniversalProfile', () => {
           signers[0]
         );
 
-        const data = await universalProfile['getData(bytes32[])']([
+        const data = await universalProfile.getDataBatch([
           LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
         ]);
 
@@ -657,7 +649,7 @@ describe('UniversalProfile', () => {
           signers[0]
         );
 
-        const univeralReceiverDelegate = await universalProfile['getData(bytes32[])']([
+        const univeralReceiverDelegate = await universalProfile.getDataBatch([
           LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
         ]);
 

@@ -1,4 +1,5 @@
 import { Signer } from '@ethersproject/abstract-signer';
+import { INTERFACE_IDS } from '@lukso/lsp-smart-contracts';
 import axios from 'axios';
 import { ContractFactory, ethers } from 'ethers';
 import {
@@ -22,12 +23,7 @@ import {
   LSP8MintableInit__factory,
 } from '../../';
 import { LSP4DigitalAssetMetadata } from '../classes/lsp4-digital-asset-metadata';
-import {
-  ERC725_ACCOUNT_INTERFACE,
-  GAS_BUFFER,
-  GAS_PRICE,
-  LSP4_KEYS,
-} from '../helpers/config.helper';
+import { GAS_BUFFER, GAS_PRICE, LSP4_KEYS } from '../helpers/config.helper';
 import {
   convertContractDeploymentOptionsVersion,
   deployContract,
@@ -507,12 +503,9 @@ export async function sendSetDataAndTransferOwnershipTransactions(
   const transactionsArray = [];
 
   if (keysToSet && valuesToSet) {
-    const setDataEstimate = await digitalAsset.estimateGas['setData(bytes32[],bytes[])'](
-      keysToSet,
-      valuesToSet
-    );
+    const setDataEstimate = await digitalAsset.estimateGas.setDataBatch(keysToSet, valuesToSet);
 
-    setDataTransaction = digitalAsset['setData(bytes32[],bytes[])'](keysToSet, valuesToSet, {
+    setDataTransaction = digitalAsset.setDataBatch(keysToSet, valuesToSet, {
       gasLimit: setDataEstimate.add(GAS_BUFFER),
       gasPrice: GAS_PRICE,
     });
@@ -520,7 +513,7 @@ export async function sendSetDataAndTransferOwnershipTransactions(
     transactionsArray.push({
       type: DeploymentType.TRANSACTION,
       contractName,
-      functionName: 'setData',
+      functionName: 'setDataBatch',
       status: DeploymentStatus.PENDING,
       pendingTransaction: setDataTransaction,
     });
@@ -604,7 +597,7 @@ async function prepareSetDataTransaction(
     creatorArrayIndexValues.push(creators[i]);
 
     const isUniversalProfile = await addressIsUniversalProfile(creators[i], signer);
-    const creatorInterface = isUniversalProfile ? ERC725_ACCOUNT_INTERFACE : '0xffffffff';
+    const creatorInterface = isUniversalProfile ? INTERFACE_IDS.LSP0ERC725Account : '0xffffffff';
 
     creatorsMapKeys.push(LSP4_KEYS.LSP4_CREATORS_MAP_PREFIX + creators[i].slice(2));
     creatorsMapValues.push(
