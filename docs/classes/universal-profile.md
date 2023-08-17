@@ -18,7 +18,7 @@ Deploys and **configures** a [Universal Profile](../../../standards/universal-pr
 
 After, it will:
 
-- upload metadata to IPFS and set the [LSP3 Universal Profile](../../../standards/universal-profile/lsp3-universal-profile-metadata) metadata,
+- upload metadata to IPFS and set the [LSP3 Profile](../../../standards/universal-profile/lsp3-profile-metadata.md) metadata,
 - attach the Universal Receiver Delegate to the ERC725 Account contract,
 - set the Key Manager as the owner of the LSP0 ERC725 Account, and
 - set all [LSP6 Permissions](../../../standards/universal-profile/lsp6-key-manager#-types-of-permissions) to the `controllerAddresses` except `DELEGATECALL`.
@@ -26,7 +26,7 @@ After, it will:
 By default the [LSP1 Universal Receiver Delegate](../../../standards/generic-standards/lsp1-universal-receiver-delegate) contract that is specified in the [versions file](https://github.com/lukso-network/tools-lsp-factory/blob/main/src/versions.json) will be attached to the Universal Profile. A custom Universal Receiver Delegate can be optionally deployed, by passing custom bytecode to the [`options`](../deployment/universal-profile#deployment-configuration) object.
 
 :::caution
-The deployment key passed to LSPFactory will be given `CHANGEOWNER` and `CHANGEPERMISSIONS` [LSP6 permissions](../../../standards/universal-profile/lsp6-key-manager#-types-of-permissions) in order to carry out the Universal Profile deployment.
+The deployment key passed to LSPFactory will be given `CHANGEOWNER` and `EDITPERMISSIONS` [LSP6 permissions](../../../standards/universal-profile/lsp6-key-manager#-types-of-permissions) in order to carry out the Universal Profile deployment.
 
 These permisisons are revoked as the final step of deployment. It is important this step is completed correctly to avoid security risks.
 
@@ -43,10 +43,10 @@ Read more about configuring Universal Profile smart contracts deployment [here](
 
 Object containing profile properties set during Universal Profile deployment.
 
-| Name                                                                             | Type             | Description                                                                                                                                                                                              |
-| :------------------------------------------------------------------------------- | :--------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`controllerAddresses`](../deployment/universal-profile#controller-addresses)    | Array            | A list of public addresses which will have all [LSP6 permissions](../../../standards/smart-contracts/lsp6-key-manager.md) except `DELEGATECALL` set on the Universal Profile contract during deployment. |
-| [`lsp3Profile`](../deployment/universal-profile#adding-lsp3-metadata) (optional) | String \| Object | [LSP3 Profile metadata](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-3-UniversalProfile-Metadata.md) which will be uploaded and set during deployment.                                       |
+| Name                                                                             | Type             | Description                                                                                                                                                                                                     |
+| :------------------------------------------------------------------------------- | :--------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`controllerAddresses`](../deployment/universal-profile#controller-addresses)    | Array            | A list of public addresses which will have all [LSP6 permissions](../../../contracts/contracts/LSP6KeyManager/LSP6KeyManager.md) except `DELEGATECALL` set on the Universal Profile contract during deployment. |
+| [`lsp3Profile`](../deployment/universal-profile#adding-lsp3-metadata) (optional) | String \| Object | [LSP3 Profile metadata](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-3-UniversalProfile-Metadata.md) which will be uploaded and set during deployment.                                              |
 
 #### 2. `options` - Object (optional)
 
@@ -63,7 +63,9 @@ Object which specifies how the [UniversalProfile](../../../standards/universal-p
 | [`ipfsGateway`](../deployment/universal-profile#ipfs-upload-options) (optional)    | String \| Object | IPFS gateway url or an object containing IPFS gateway options.                                                                                                                                                |
 
 :::info Contract Deployment Details
+
 See the [configuration specification](../deployment/universal-profile#deployment-configuration) for more information about the `options` property.
+
 :::
 
 ### Returns
@@ -251,7 +253,7 @@ await lspFactory.UniversalProfile.deploy(
 {
   type: 'TRANSACTION',
   contractName: 'LSP0ERC725Account',
-  functionName: 'setData(bytes32[],bytes[])',
+  functionName: 'setDataBatch(bytes32[],bytes[])',
   status: 'PENDING',
   transaction: {
    ...
@@ -260,7 +262,7 @@ await lspFactory.UniversalProfile.deploy(
 {
   type: 'TRANSACTION',
   contractName: 'LSP0ERC725Account',
-  functionName: 'setData(bytes32[],bytes[])',
+  functionName: 'setDataBatch(bytes32[],bytes[])',
   status: 'COMPLETE',
   receipt: {
    ...
@@ -310,7 +312,7 @@ Deployment Complete
 lspFactory.UniversalProfile.uploadProfileData(profileData [, options]);
 ```
 
-Processes and uploads the [LSP3Profile Metadata](../../../standards/universal-profile/lsp3-universal-profile-metadata) to IPFS. The IPFS gateway can be set inside the `options` object.
+Processes and uploads the [LSP3Profile Metadata](../../../standards/universal-profile/lsp3-profile-metadata.md) to IPFS. The IPFS gateway can be set inside the `options` object.
 
 Will resize and upload passed images.
 
@@ -320,9 +322,10 @@ Available as a static or non-static method callable on the LSPFactory library in
 
 #### 1. `profileData` - Object
 
-Object containing the [LSP3 Metadata](../../../standards/universal-profile/lsp3-universal-profile-metadata) fields which will be processed and uploaded to IPFS.
+Object containing the [LSP3 Metadata](../../../standards/universal-profile/lsp3-profile-metadata.md) fields which will be processed and uploaded to IPFS.
 
 :::info
+
 [Read more about how LSP3 Metadata is processed here](../deployment/universal-profile#uploading-lsp3-metadata-to-ipfs).
 
 :::
@@ -559,4 +562,4 @@ await UniversalProfile.uploadProfileData(
 ```
 
 [all permissions]: ../../../../../standards/universal-profile/lsp6-key-manager#-address-permissions
-[lsp3]: ../../../standards/universal-profile/lsp3-universal-profile-metadata
+[lsp3]: ../../../standards/universal-profile/lsp3-profile-metadata.md

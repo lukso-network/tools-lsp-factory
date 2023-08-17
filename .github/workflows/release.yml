@@ -1,28 +1,25 @@
-name: Release package
+name: Create GitHub release and publish to NPM
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - 'main'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
-  release:
-    name: 📦 Create GitHub release and publish to NPM
+  release-please:
+    name: release
     runs-on: ubuntu-latest
 
     steps:
-      - name: Ensure main branch
-        if: github.ref != 'refs/heads/main'
-        run: |-
-          echo "Not running on main - exit"
-          exit 1
-
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Use Node.js 16.x
+      - name: ⚙️ Setup Node.js v16
         uses: actions/setup-node@v2
         with:
           node-version: '16.x'
@@ -30,71 +27,35 @@ jobs:
           scope: '@lukso'
           cache: 'npm'
 
+      - name: 🧰 Install
+        run: npm ci
+
+      - name: 💅 Lint
+        run: npm run lint
+
+      - name: 🎯 Test
+        run: npm test
+
+      - name: 🛠 Build
+        run: npm run build
+
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          release-type: node
+          package-name: '@lukso/lsp-factory.js'
+          bump-minor-pre-major: true
+          default-branch: main
+
       - name: 🔍 Check if version changed
         uses: EndBug/version-check@v1
         if: github.event_name == 'push'
         id: check
 
       - name: 🔄 Check if should release
-        run: echo "SHOULD_RELEASE=${{ steps.check.outputs.changed == 'true' || github.event_name == 'workflow_dispatch' }}" >> $GITHUB_ENV
+        run: echo "SHOULD_RELEASE=${{ steps.check.outputs.changed == 'true' }}" >> $GITHUB_ENV
 
-      - name: 📝 Set Version
-        if: env.SHOULD_RELEASE == 'true'
-        run: |-
-          APP_VERSION="v$(node -pe "require('./package.json').version")"
-          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
-
-      - name: 🧰 Install
-        if: env.SHOULD_RELEASE == 'true'
-        run: npm ci
-
-      - name: 🧹 Lint
-        if: env.SHOULD_RELEASE == 'true'
-        run: npm run lint
-
-      - name: 🛠 Build
-        if: env.SHOULD_RELEASE == 'true'
-        run: npm run build
-
-      - name: 🎯 Test
-        if: env.SHOULD_RELEASE == 'true'
-        run: npm run generate-types && npm run test
-
-      # We assume this will be always triggered by a merge from develop
-      # Therefore we tag the previous commit (the merge commit won't be on develop)
-      - name: 🏷 Create and push Git Tag
-        if: env.SHOULD_RELEASE == 'true'
-        run: |-
-          git config --global user.email "release@lukso.network"
-          git config --global user.name "LUKSO Bot"
-          git tag -a ${{ env.APP_VERSION }} HEAD~ -m "Release Version ${{ env.APP_VERSION }} [CI]"
-          git push --set-upstream origin tag ${{ env.APP_VERSION }}
-
-      # Create GitHub Release
-      - name: 📝 Extract release notes from CHANGELOG
-        if: env.SHOULD_RELEASE == 'true'
-        id: extract-release-notes
-        uses: ffurrer2/extract-release-notes@v1
-        with:
-          release_notes_file: RELEASENOTES.md
-
-      - name: Add PR body to Release Notes
-        if: env.SHOULD_RELEASE == 'true'
-        env:
-          PR_BODY: ${{ steps.findPR.outputs.body }}
-        run: |-
-          echo ${PR_BODY}|cat - RELEASENOTES.md > /tmp/out && mv /tmp/out RELEASENOTES.md
-
-      - name: 🚀 Create GitHub release
-        if: env.SHOULD_RELEASE == 'true'
-        uses: ncipollo/release-action@v1
-        with:
-          bodyFile: 'RELEASENOTES.md'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ env.APP_VERSION }}
-
-      # Publish to NPM
-      - name: Publish
+      - name: 📦 Publish to NPM
         if: env.SHOULD_RELEASE == 'true'
         run: npm publish --access public
         env:

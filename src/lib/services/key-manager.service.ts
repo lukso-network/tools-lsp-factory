@@ -105,9 +105,7 @@ export async function deployKeyManager(
       );
     }
 
-    return await new LSP6KeyManager__factory(signer).deploy(lsp3AccountAddress, {
-      gasLimit: 3_000_000,
-    });
+    return await new LSP6KeyManager__factory(signer).deploy(lsp3AccountAddress);
   };
 
   return baseContractAddress

@@ -16,7 +16,7 @@ import {
 } from '../helpers/deployment.helper';
 import { BaseContractAddresses, ContractNames } from '../interfaces';
 
-export type UniversalReveiverDeploymentEvent =
+export type UniversalReceiverDeploymentEvent =
   | DeploymentEventContract
   | DeploymentEventProxyContract;
 
@@ -56,12 +56,12 @@ export function universalReceiverDelegateDeploymentWithBaseContractAddress$(
   signer: Signer,
   baseContractAddress?: string,
   byteCode?: string
-): Observable<UniversalReveiverDeploymentEvent> {
+): Observable<UniversalReceiverDeploymentEvent> {
   const universalReceiverDelegateDeployment$ = from(
     deployUniversalReceiverDelegate(signer, baseContractAddress, byteCode)
   ).pipe(shareReplay());
 
-  const universalReceiverDelegateStoreReceipt$ = waitForReceipt<UniversalReveiverDeploymentEvent>(
+  const universalReceiverDelegateStoreReceipt$ = waitForReceipt<UniversalReceiverDeploymentEvent>(
     universalReceiverDelegateDeployment$
   );
 
@@ -96,9 +96,7 @@ export async function deployUniversalReceiverDelegate(
       ).deploy();
     }
 
-    return await new LSP1UniversalReceiverDelegateUP__factory(signer).deploy({
-      gasLimit: 3_000_000,
-    });
+    return await new LSP1UniversalReceiverDelegateUP__factory(signer).deploy();
   };
 
   return baseContractAddress

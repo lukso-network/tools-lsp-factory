@@ -22,7 +22,7 @@ export class LSPFactory {
    *
    * @param {string | providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider } rpcUrlOrProvider
    * @param {string | Signer | SignerOptions} privateKeyOrSigner
-   * @param {number} [chainId=22] Lukso Testnet - 22 (0x16)
+   * @param {number} [chainId=4201] Lukso Testnet - 4201 (0x1069)
    */
   constructor(
     rpcUrlOrProvider:
@@ -69,7 +69,7 @@ export class LSPFactory {
     this.options = {
       signer,
       provider,
-      chainId: chainId || 22,
+      chainId: chainId || 4201,
       uploadOptions: ipfsGateway ? { ipfsGateway } : undefined,
     };
 
