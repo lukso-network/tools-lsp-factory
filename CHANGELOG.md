@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/lukso-network/tools-lsp-factory/compare/v2.5.1...v3.0.0) (2023-08-17)
+
+### ⚠ BREAKING CHANGES
+
+- upgrade smart contracts to v0.10.3 ([#204](https://github.com/lukso-network/tools-lsp-factory/issues/204))
+
+### Features
+
+- upgrade smart contracts to v0.10.3 ([#204](https://github.com/lukso-network/tools-lsp-factory/issues/204)) ([db9d147](https://github.com/lukso-network/tools-lsp-factory/commit/db9d147df5b11dcb95c7a8249c683db49db2cce0))
+
 ### [2.5.1](https://github.com/lukso-network/tools-lsp-factory/compare/v2.5.0...v2.5.1) (2023-03-30)
 
 ### Bug Fixes
