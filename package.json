@@ -33,7 +33,7 @@
     "@erc725/erc725.js": "^0.18.0",
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/experimental": "^5.7.0",
-    "@lukso/lsp-smart-contracts": "^0.10.3",
+    "@lukso/lsp-smart-contracts": "^0.11.1",
     "axios": "^0.23.0",
     "browser-image-compression": "^2.0.0",
     "ethers": "^5.7.0",
@@ -78,7 +78,9 @@
     "CHANGELOG.md",
     "LICENSE",
     "CONTRIBUTING.md",
-    "README.md"
+    "README.md",
+    "src/*",
+    "types/*"
   ],
   "ava": {
     "failFast": true,
