@@ -3,6 +3,7 @@
   "compilerOptions": {
     "target": "es2015",
     "outDir": "build/module",
-    "module": "es2015"
+    "module": "es2015",
+    "inlineSourceMap": true
   }
 }

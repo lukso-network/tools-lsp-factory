@@ -78,7 +78,9 @@
     "CHANGELOG.md",
     "LICENSE",
     "CONTRIBUTING.md",
-    "README.md"
+    "README.md",
+    "src/*",
+    "types/*"
   ],
   "ava": {
     "failFast": true,
