@@ -1,6 +1,6 @@
 {
   "name": "@lukso/lsp-factory.js",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Helper Library to allow simple deployments of UniversalProfiles and LSP7 and LSP8 Digital Assets.",
   "main": "build/main/src/index.js",
   "typings": "build/main/src/index.d.ts",
