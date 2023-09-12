@@ -1,6 +1,7 @@
 import { Permissions } from '@erc725/erc725.js/build/main/src/types/Method';
 import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
+import { version as lspSmartContractsVersion } from '@lukso/lsp-smart-contracts/package.json';
 import { Options } from 'ipfs-http-client';
 
 import { UploadOptions } from '../interfaces/profile-upload-options';
@@ -59,7 +60,7 @@ export const DEFAULT_PERMISSIONS: Permissions = {
   REENTRANCY: true,
 };
 
-export const DEFAULT_CONTRACT_VERSION = '0.10.3';
+export const DEFAULT_CONTRACT_VERSION = lspSmartContractsVersion;
 
 export const GAS_PRICE = 10_000_000_000;
 export const GAS_BUFFER = 100_000;
