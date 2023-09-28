@@ -18,7 +18,7 @@ npm install @lukso/lsp-factory.js
 ```javascript
 import { LSPFactory } from '@lukso/lsp-factory.js';
 
-const provider = 'https://rpc.l16.lukso.network'; // RPC url used to connect to the network
+const provider = 'https://rpc.testnet.lukso.network'; // RPC url used to connect to the network
 
 const lspFactory = new LSPFactory(provider, {
   deployKey: '0x...'; // Private key of the account which will deploy UPs
