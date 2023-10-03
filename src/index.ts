@@ -5,3 +5,6 @@ export { LSP8IdentifiableDigitalAsset } from './lib/classes/lsp8-identifiable-di
 export { LSP7DigitalAsset } from './lib/classes/lsp7-digital-asset';
 export * from './lib/interfaces';
 export * from '../types/ethers-v5';
+export * from './lib/providers/ipfs-http-client';
+export * from './lib/providers/pinata';
+export * from './lib/providers/url-converter';

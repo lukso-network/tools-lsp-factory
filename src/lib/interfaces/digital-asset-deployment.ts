@@ -3,7 +3,7 @@ import {
   LSP4MetadataContentBeforeUpload,
   LSP4MetadataForEncoding,
 } from './lsp4-digital-asset';
-import { IPFSGateway, UploadOptions } from './profile-upload-options';
+import { UploadProvider } from './profile-upload-options';
 
 import { ContractOptions, DeployedContract, DeploymentEventCallbacks } from '.';
 
@@ -37,7 +37,7 @@ export interface DeployedLSP7DigitalAsset {
 }
 
 interface ContractDeploymentOptionsBase {
-  ipfsGateway?: IPFSGateway;
+  uploadProvider?: UploadProvider;
 }
 
 export interface LSP7ContractDeploymentOptions extends ContractDeploymentOptionsBase {
@@ -59,5 +59,5 @@ export interface DigitalAssetConfiguration {
   byteCode?: string;
   libAddress?: string;
   deployProxy?: boolean;
-  uploadOptions?: UploadOptions;
+  uploadProvider?: UploadProvider;
 }

@@ -29,7 +29,7 @@ import {
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
-import { formatIPFSUrl, isMetadataEncoded } from '../helpers/uploader.helper';
+import { isMetadataEncoded } from '../helpers/uploader.helper';
 import {
   BaseContractAddresses,
   ContractDeploymentOptions,
@@ -50,7 +50,8 @@ import {
   LSP3ProfileDataForEncoding,
   ProfileDataForEncoding,
 } from '../interfaces/lsp3-profile';
-import { UploadOptions } from '../interfaces/profile-upload-options';
+import { UploadProvider } from '../interfaces/profile-upload-options';
+import { resolveUrl } from '../providers/url-converter';
 
 import { UniversalReceiverDeploymentEvent as UniversalReceiverDeploymentEvent } from './universal-receiver.service';
 
@@ -311,19 +312,14 @@ export function prepareSetDataTransaction$(
 
 export async function getLsp3ProfileDataUrl(
   lsp3Profile: ProfileDataBeforeUpload | string,
-  uploadOptions?: UploadOptions
+  uploadProvider: UploadProvider
 ): Promise<ProfileDataForEncoding> {
   let lsp3ProfileData: LSP3ProfileDataForEncoding;
 
   if (typeof lsp3Profile === 'string') {
-    let lsp3JsonUrl = lsp3Profile;
-    const isIPFSUrl = lsp3Profile.startsWith('ipfs://');
+    const lsp3JsonUrl = resolveUrl(new URL(lsp3Profile));
 
-    if (isIPFSUrl) {
-      lsp3JsonUrl = formatIPFSUrl(uploadOptions?.ipfsGateway, lsp3Profile.split('/').at(-1));
-    }
-
-    const ipfsResponse = await axios.get(lsp3JsonUrl);
+    const ipfsResponse = await axios.get(lsp3JsonUrl.toString());
     const lsp3ProfileJson = ipfsResponse.data;
 
     lsp3ProfileData = {
@@ -331,7 +327,7 @@ export async function getLsp3ProfileDataUrl(
       json: lsp3ProfileJson as LSP3ProfileJSON,
     };
   } else {
-    lsp3ProfileData = await UniversalProfile.uploadProfileData(lsp3Profile, uploadOptions);
+    lsp3ProfileData = await UniversalProfile.uploadProfileData(lsp3Profile, uploadProvider);
   }
 
   return lsp3ProfileData;
@@ -339,12 +335,12 @@ export async function getLsp3ProfileDataUrl(
 
 async function getEncodedLSP3ProfileData(
   lsp3Profile: ProfileDataBeforeUpload | LSP3ProfileDataForEncoding | string,
-  uploadOptions?: UploadOptions
+  uploadProvider?: UploadProvider
 ): Promise<string> {
   let lsp3ProfileDataForEncoding: LSP3ProfileDataForEncoding;
 
   if (typeof lsp3Profile === 'string' || 'name' in lsp3Profile) {
-    lsp3ProfileDataForEncoding = await getLsp3ProfileDataUrl(lsp3Profile, uploadOptions);
+    lsp3ProfileDataForEncoding = await getLsp3ProfileDataUrl(lsp3Profile, uploadProvider);
   } else {
     lsp3ProfileDataForEncoding = lsp3Profile;
   }
@@ -360,7 +356,7 @@ export function lsp3ProfileUpload$(
     | LSP3ProfileBeforeUpload
     | LSP3ProfileDataForEncoding
     | string,
-  uploadOptions?: UploadOptions
+  uploadProvider?: UploadProvider
 ) {
   let lsp3Profile$: Observable<string>;
 
@@ -373,7 +369,7 @@ export function lsp3ProfileUpload$(
 
   if (typeof lsp3Profile !== 'string' || !isMetadataEncoded(lsp3Profile)) {
     lsp3Profile$ = lsp3Profile
-      ? from(getEncodedLSP3ProfileData(lsp3Profile, uploadOptions)).pipe(shareReplay())
+      ? from(getEncodedLSP3ProfileData(lsp3Profile, uploadProvider)).pipe(shareReplay())
       : of(null);
   } else {
     lsp3Profile$ = of(lsp3Profile);
@@ -698,9 +694,8 @@ export function convertUniversalProfileConfigurationObject(
 
   return {
     version: contractDeploymentOptions?.version,
-    uploadOptions: contractDeploymentOptions?.ipfsGateway
-      ? { ipfsGateway: contractDeploymentOptions?.ipfsGateway }
-      : undefined,
+    uploadProvider:
+      contractDeploymentOptions?.uploadProvider || contractDeploymentOptions?.uploadProvider,
     LSP0ERC725Account: {
       version: erc725AccountVersion,
       byteCode: erc725AccountBytecode,

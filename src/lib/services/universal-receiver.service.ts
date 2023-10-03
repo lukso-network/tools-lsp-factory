@@ -25,11 +25,13 @@ export function universalReceiverDelegateDeployment$(
   provider: providers.Web3Provider | providers.JsonRpcProvider,
   baseContractAddresses$: Observable<BaseContractAddresses>,
   providedUniversalReceiverAddress?: string,
-  defaultUniversalReceiverAddress?: string,
+  defaultUniversalReceiverAddress?: Promise<string>,
   byteCode?: string
 ) {
   const defaultURDBytecode$ = from(
-    getDeployedByteCode(defaultUniversalReceiverAddress ?? NULL_ADDRESS, provider)
+    defaultUniversalReceiverAddress?.then((defaultAddress) =>
+      getDeployedByteCode(defaultAddress, provider)
+    ) || getDeployedByteCode(NULL_ADDRESS, provider)
   );
 
   return forkJoin([defaultURDBytecode$, baseContractAddresses$]).pipe(

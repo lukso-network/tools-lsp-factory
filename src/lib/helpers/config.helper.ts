@@ -2,19 +2,12 @@ import { Permissions } from '@erc725/erc725.js/build/main/src/types/Method';
 import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
 import { version as lspSmartContractsVersion } from '@lukso/lsp-smart-contracts/package.json';
-import { Options } from 'ipfs-http-client';
 
-import { UploadOptions } from '../interfaces/profile-upload-options';
-
-const defaultIpfsGateway: Options = {
-  host: 'api.2eff.lukso.dev',
-  port: 443,
-  protocol: 'https',
-};
-
-export const defaultUploadOptions: UploadOptions = {
-  ipfsGateway: defaultIpfsGateway,
-};
+// const defaultIpfsGateway: Options = {
+//   host: 'api.2eff.lukso.dev',
+//   port: 443,
+//   protocol: 'https',
+// };
 
 export const LSP3_UP_KEYS = {
   UNIVERSAL_RECEIVER_DELEGATE_KEY: keccak256(toUtf8Bytes('LSP1UniversalReceiverDelegate')),

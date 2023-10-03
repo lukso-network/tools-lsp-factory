@@ -68,7 +68,7 @@ export class LSP8IdentifiableDigitalAsset {
 
     const lsp4Metadata$ = lsp4MetadataUpload$(
       digitalAssetDeploymentOptions.digitalAssetMetadata,
-      digitalAssetConfiguration?.uploadOptions ?? this.options.uploadOptions
+      digitalAssetConfiguration?.uploadProvider ?? this.options.uploadProvider
     );
 
     const defaultBaseContractAddress: string | undefined =

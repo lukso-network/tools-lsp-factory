@@ -7,56 +7,43 @@
 import imageCompression from 'browser-image-compression';
 import { create } from 'ipfs-http-client';
 
-import { imageUpload, ipfsUpload } from './uploader.helper';
+import { createIPFSUploader } from '../providers/ipfs-http-client';
+
+import { imageUpload } from './uploader.helper';
 
 jest.mock('ipfs-http-client');
 jest.mock('browser-image-compression');
 jest.setTimeout(30000);
 
-const file = new File(['FileContents'], 'file-name');
 describe('uploader.helper.spec.ts', () => {
   beforeEach(() => {
     jest.useRealTimers();
   });
 
-  describe('#ipfsUpload', () => {
-    it('should pin images', async () => {
-      const addMock = jest.fn();
-      (create as jest.Mock).mockReturnValue({
-        add: addMock,
-      });
-
-      const upload = await ipfsUpload(file, {});
-
-      expect(addMock).toHaveBeenCalledWith(file, { pin: true });
-      expect(upload).toEqual(undefined);
-    });
-  });
-
   describe('#imageUpload', () => {
     it('should throw an error on invalid input', async () => {
+      const { uploadProvider } = await mockDependencies();
+
       await expect(
         imageUpload(
           new File(['sdfasdf'], 'file-name', {
             type: 'zip',
           }),
-          {
-            ipfsGateway: {},
-          }
+          uploadProvider
         )
       ).rejects.toThrowError("File type: 'zip' does not start with 'image/'");
     });
 
     it('should pin files when using IPFS', async () => {
-      const { file, addMock } = await mockDependencies();
-      await imageUpload(file, { ipfsGateway: {} });
+      const { file, addMock, uploadProvider } = await mockDependencies();
+      await imageUpload(file, uploadProvider);
 
       expect(addMock).toHaveBeenCalledWith(file, { pin: true });
     });
 
     it('should resize images', async () => {
-      const { file, drawFileInCanvasSpy } = await mockDependencies();
-      await imageUpload(file, { ipfsGateway: {} });
+      const { file, drawFileInCanvasSpy, uploadProvider } = await mockDependencies();
+      await imageUpload(file, uploadProvider);
 
       expect(imageCompression).toHaveBeenCalledTimes(5);
       expect(drawFileInCanvasSpy).toBeCalledTimes(5);
@@ -87,15 +74,13 @@ describe('uploader.helper.spec.ts', () => {
   });
 
   it('should accept custom IPFS client options', async () => {
-    const { addMock } = await mockDependencies();
+    const { addMock, uploadProvider } = await mockDependencies();
 
     const result = await imageUpload(
       new File(['sdfasdf'], 'file-name', {
         type: 'image/zip',
       }),
-      {
-        ipfsGateway: { host: 'ipfs.infura.io', port: 5001, protocol: 'https' },
-      }
+      uploadProvider
     );
 
     expect(addMock).toHaveBeenCalled();
@@ -109,15 +94,13 @@ describe('uploader.helper.spec.ts', () => {
   });
 
   it('should accept IPFS url', async () => {
-    const { addMock } = await mockDependencies();
+    const { addMock, uploadProvider } = await mockDependencies();
 
     const result = await imageUpload(
       new File(['sdfasdf'], 'file-name', {
         type: 'image/zip',
       }),
-      {
-        ipfsGateway: 'https://api.2eff.lukso.dev',
-      }
+      uploadProvider
     );
 
     expect(addMock).toHaveBeenCalled();
@@ -150,13 +133,13 @@ describe('uploader.helper.spec.ts', () => {
   // });
 });
 
-async function mockDependencies() {
+async function mockDependencies(gateway = 'https://api.2eff.lukso.dev') {
   const file = new File(['123123'], 'test-image.jpg', {
     type: 'image/jpg',
   });
   // TODO: fix "is not assignable to type IDE error"
-  file.arrayBuffer = function () {
-    return '';
+  file.arrayBuffer = async function () {
+    return Buffer.from('');
   };
 
   const drawFileInCanvasSpy = jest.spyOn(imageCompression, 'drawFileInCanvas');
@@ -165,20 +148,24 @@ async function mockDependencies() {
     {} as HTMLCanvasElement,
   ]);
   (imageCompression as any as jest.Mock).mockResolvedValue(file);
-  const addMock = jest.fn(() => {
+  const addMock = jest.fn(async () => {
     return {
-      cid: {},
+      cid: 'QmY4Z',
       size: 2,
       path: '',
     };
   });
   (create as jest.Mock).mockReturnValue({
     add: addMock,
+    getEndpointConfig: () => new URL(gateway),
   });
+
+  const uploadProvider = createIPFSUploader(gateway);
 
   return {
     file,
     addMock,
+    uploadProvider,
     drawFileInCanvasSpy,
   };
 }

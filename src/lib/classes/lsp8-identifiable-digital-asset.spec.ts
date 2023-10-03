@@ -1,3 +1,4 @@
+/// <reference types="@nomiclabs/hardhat-ethers" />
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
 import { ethers } from 'hardhat';

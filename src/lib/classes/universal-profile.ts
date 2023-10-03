@@ -4,9 +4,8 @@ import { concatAll, shareReplay } from 'rxjs/operators';
 
 import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
-import { defaultUploadOptions } from '../helpers/config.helper';
 import { resolveContractDeployment, waitForContractDeployment } from '../helpers/deployment.helper';
-import { ipfsUpload, prepareMetadataAsset, prepareMetadataImage } from '../helpers/uploader.helper';
+import { prepareMetadataAsset, prepareMetadataImage } from '../helpers/uploader.helper';
 import {
   LSPFactoryOptions,
   ProfileDataBeforeUpload,
@@ -17,7 +16,7 @@ import {
   ContractDeploymentOptions,
   DeployedUniversalProfileContracts,
 } from '../interfaces/profile-deployment';
-import { UploadOptions } from '../interfaces/profile-upload-options';
+import { assertUploadProvider, UploadProvider } from '../interfaces/profile-upload-options';
 import {
   shouldDeployUniversalProfileBaseContracts$,
   universalProfileBaseContractAddresses$,
@@ -71,13 +70,14 @@ export class UniversalProfile {
     profileDeploymentOptions: ProfileDeploymentOptions,
     contractDeploymentOptions?: ContractDeploymentOptions
   ): Promise<DeployedUniversalProfileContracts> {
+    await this.options.finishInit;
     const deploymentConfiguration =
       convertUniversalProfileConfigurationObject(contractDeploymentOptions);
 
     // -1 > Run IPFS upload process in parallel with contract deployment
     const lsp3Profile$ = lsp3ProfileUpload$(
       profileDeploymentOptions?.lsp3Profile,
-      deploymentConfiguration?.uploadOptions ?? this.options.uploadOptions
+      deploymentConfiguration?.uploadProvider ?? this.options.uploadProvider
     );
 
     const defaultContractVersion = deploymentConfiguration?.version ?? DEFAULT_CONTRACT_VERSION;
@@ -213,18 +213,18 @@ export class UniversalProfile {
    */
   static async uploadProfileData(
     profileData: ProfileDataBeforeUpload | LSP3ProfileBeforeUpload,
-    uploadOptions?: UploadOptions
+    uploadProvider?: UploadProvider
   ): Promise<ProfileDataForEncoding> {
-    uploadOptions = uploadOptions || defaultUploadOptions;
+    uploadProvider = assertUploadProvider(uploadProvider);
 
     profileData = 'LSP3Profile' in profileData ? profileData.LSP3Profile : profileData;
 
     const [profileImage, backgroundImage, avatar] = await Promise.all([
-      prepareMetadataImage(uploadOptions, profileData.profileImage),
-      prepareMetadataImage(uploadOptions, profileData.backgroundImage),
+      prepareMetadataImage(uploadProvider, profileData.profileImage),
+      prepareMetadataImage(uploadProvider, profileData.backgroundImage),
       profileData.avatar
         ? Promise.all(
-            profileData.avatar?.map((avatar) => prepareMetadataAsset(avatar, uploadOptions))
+            profileData.avatar?.map((avatar) => prepareMetadataAsset(avatar, uploadProvider))
           )
         : undefined,
     ]);
@@ -238,16 +238,11 @@ export class UniversalProfile {
       },
     };
 
-    let uploadResponse;
-    if (uploadOptions.url) {
-      // TODO: simple HTTP upload
-    } else {
-      uploadResponse = await ipfsUpload(JSON.stringify(profile), uploadOptions?.ipfsGateway);
-    }
+    const url = await uploadProvider(Buffer.from(JSON.stringify(profile)));
 
     return {
       json: profile,
-      url: uploadResponse.cid ? 'ipfs://' + uploadResponse.cid : 'https upload TBD',
+      url: url.toString(),
     };
   }
 
@@ -257,14 +252,16 @@ export class UniversalProfile {
    *
    * Will upload and process passed images.
    *
-   * Uses UploadOptions specified when instantiating LSPFactory instance.
+   * Uses UploadProvider specified when instantiating LSPFactory instance.
    *
    * @param {ProfileDataBeforeUpload} profileData
    * @return {*}  {(Promise<AddResult | string>)} Returns processed LSP3 Data and upload url
    * @memberof UniversalProfile
    */
-  async uploadProfileData(profileData: ProfileDataBeforeUpload, uploadOptions?: UploadOptions) {
-    const uploadOptionsToUse = uploadOptions || this.options.uploadOptions || defaultUploadOptions;
-    return UniversalProfile.uploadProfileData(profileData, uploadOptionsToUse);
+  async uploadProfileData(profileData: ProfileDataBeforeUpload, uploadProvider: UploadProvider) {
+    if (!uploadProvider) {
+      throw new Error(`Upload provider is required`);
+    }
+    return UniversalProfile.uploadProfileData(profileData, uploadProvider);
   }
 }

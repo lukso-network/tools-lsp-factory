@@ -8,3 +8,4 @@ coverage
 yarn.lock
 types
 .cspell.json
+.env*

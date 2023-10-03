@@ -2,13 +2,15 @@ module.exports = async () => {
   return {
     roots: ['<rootDir>'],
     transform: {
-      '^.+\\.tsx?$': [
+      '^.+\\.(tsx?|jsx?)$': [
         'esbuild-jest',
         {
           sourcemap: true,
+          target: 'es2020',
         },
       ],
     },
+    transformIgnorePatterns: ['node_modules/(?!(form-data-encoder))/'],
     collectCoverageFrom: ['src/**/*.ts'],
     coveragePathIgnorePatterns: [
       'node_modules',

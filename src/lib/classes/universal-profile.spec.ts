@@ -1,3 +1,4 @@
+/// <reference types="@nomiclabs/hardhat-ethers" />
 import { ERC725 } from '@erc725/erc725.js';
 import KeyManagerContract from '@lukso/lsp-smart-contracts/artifacts/LSP6KeyManager.json';
 import UniversalProfileContract from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json';
@@ -209,7 +210,7 @@ describe('UniversalProfile', () => {
         LSP0ERC725Account.address,
         UniversalProfileContract.abi,
         provider
-      );
+      ) as unknown as UniversalProfile;
 
       keyManager = new ethers.Contract(LSP6KeyManager.address, KeyManagerContract.abi, provider);
     });

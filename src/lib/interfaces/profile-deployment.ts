@@ -5,7 +5,7 @@ import {
   LSP3ProfileDataForEncoding,
   ProfileDataBeforeUpload,
 } from './lsp3-profile';
-import { IPFSGateway, UploadOptions } from './profile-upload-options';
+import { UploadProvider } from './profile-upload-options';
 
 import { DeploymentEventCallbacks } from '.';
 
@@ -49,7 +49,7 @@ export interface BaseContractAddresses {
 
 export interface ContractDeploymentOptions {
   version?: string;
-  ipfsGateway?: IPFSGateway;
+  uploadProvider?: UploadProvider;
   LSP0ERC725Account?: ContractOptions;
   ERC725Account?: ContractOptions;
   LSP6KeyManager?: ContractOptions;
@@ -66,7 +66,7 @@ interface ContractConfiguration {
 
 export interface UniversalProfileDeploymentConfiguration {
   version?: string;
-  uploadOptions?: UploadOptions;
+  uploadProvider?: UploadProvider;
   LSP0ERC725Account?: ContractConfiguration;
   LSP6KeyManager?: ContractConfiguration;
   LSP1UniversalReceiverDelegate?: ContractConfiguration;

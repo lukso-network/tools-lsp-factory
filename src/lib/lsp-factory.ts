@@ -7,6 +7,7 @@ import { ProxyDeployer } from './classes/proxy-deployer';
 import { UniversalProfile } from './classes/universal-profile';
 import { EthersExternalProvider, LSPFactoryOptions } from './interfaces';
 import { SignerOptions } from './interfaces/lsp-factory-options';
+import { UploadProvider } from './interfaces/profile-upload-options';
 
 /**
  * Factory for creating UniversalProfiles and Digital Assets
@@ -21,6 +22,19 @@ export class LSPFactory {
   /**
    *
    * @param {string | providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider } rpcUrlOrProvider
+   * @param {UploadProvider} uploadProvider
+   */
+  constructor(
+    rpcUrlOrProvider:
+      | string
+      | providers.Web3Provider
+      | providers.JsonRpcProvider
+      | EthersExternalProvider,
+    uploadProvider?: UploadProvider
+  );
+  /**
+   *
+   * @param {string | providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider } rpcUrlOrProvider
    * @param {string | Signer | SignerOptions} privateKeyOrSigner
    * @param {number} [chainId=4201] Lukso Testnet - 4201 (0x1069)
    */
@@ -30,47 +44,53 @@ export class LSPFactory {
       | providers.Web3Provider
       | providers.JsonRpcProvider
       | EthersExternalProvider,
-    privateKeyOrSigner?: string | Signer | SignerOptions
+    privateKeyOrSigner?: string | Signer | SignerOptions | UploadProvider,
+    uploadProvider?: UploadProvider
   ) {
     let signer: Signer;
     let provider: providers.Web3Provider | providers.JsonRpcProvider;
-    let ipfsGateway;
-    let chainId;
+    let chainId: number;
 
     if (typeof rpcUrlOrProvider === 'string') {
       provider = new ethers.providers.JsonRpcProvider(rpcUrlOrProvider);
     } else if ('chainId' in rpcUrlOrProvider) {
       provider = new ethers.providers.Web3Provider(rpcUrlOrProvider);
-      chainId = parseInt(rpcUrlOrProvider.chainId);
     } else if (typeof rpcUrlOrProvider !== 'string') {
       provider = rpcUrlOrProvider as providers.Web3Provider | providers.JsonRpcProvider;
     }
 
+    if (!uploadProvider && privateKeyOrSigner && typeof privateKeyOrSigner === 'function') {
+      uploadProvider = privateKeyOrSigner as UploadProvider;
+      privateKeyOrSigner = undefined;
+    }
     if (privateKeyOrSigner instanceof Signer) {
       signer = privateKeyOrSigner;
     } else if (typeof privateKeyOrSigner === 'string') {
       signer = new ethers.Wallet(privateKeyOrSigner, provider);
     } else {
-      if (privateKeyOrSigner?.deployKey instanceof Signer) {
-        signer = privateKeyOrSigner.deployKey;
-      } else if (typeof privateKeyOrSigner?.deployKey === 'string') {
-        signer = new ethers.Wallet(privateKeyOrSigner.deployKey, provider);
+      const signerOptions = privateKeyOrSigner as SignerOptions;
+      if (signerOptions?.deployKey instanceof Signer) {
+        signer = signerOptions.deployKey;
+      } else if (typeof signerOptions?.deployKey === 'string') {
+        signer = new ethers.Wallet(signerOptions.deployKey, provider);
+        if (signerOptions?.chainId) {
+          chainId = signerOptions.chainId;
+        }
       } else {
         signer = provider.getSigner();
       }
-
-      if (privateKeyOrSigner?.chainId) {
-        chainId = privateKeyOrSigner?.chainId;
-      }
-
-      ipfsGateway = privateKeyOrSigner?.ipfsGateway;
     }
-
+    const finishInit: Promise<void> = chainId
+      ? Promise.resolve()
+      : this.options.provider.getNetwork().then((network) => {
+          this.options.chainId = network.chainId;
+        });
     this.options = {
       signer,
       provider,
-      chainId: chainId || 4201,
-      uploadOptions: ipfsGateway ? { ipfsGateway } : undefined,
+      uploadProvider,
+      chainId,
+      finishInit,
     };
 
     this.UniversalProfile = new UniversalProfile(this.options);

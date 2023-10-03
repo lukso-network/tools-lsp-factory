@@ -32,7 +32,7 @@ import {
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
-import { formatIPFSUrl, isMetadataEncoded } from '../helpers/uploader.helper';
+import { isMetadataEncoded } from '../helpers/uploader.helper';
 import {
   DeploymentEvent$,
   DeploymentEventContract,
@@ -55,7 +55,7 @@ import {
   LSP4MetadataForEncoding,
   LSP4MetadataUrlForEncoding,
 } from '../interfaces/lsp4-digital-asset';
-import { UploadOptions } from '../interfaces/profile-upload-options';
+import { UploadProvider } from '../interfaces/profile-upload-options';
 
 import { addressIsUniversalProfile } from './universal-profile.service';
 
@@ -341,7 +341,7 @@ export function lsp4MetadataUpload$(
     | LSP4MetadataContentBeforeUpload
     | LSP4MetadataForEncoding
     | string,
-  uploadOptions?: UploadOptions
+  uploadProvider?: UploadProvider
 ) {
   let lsp4Metadata$: Observable<string>;
 
@@ -354,7 +354,7 @@ export function lsp4MetadataUpload$(
 
   if (typeof lsp4Metadata !== 'string' || !isMetadataEncoded(lsp4Metadata)) {
     lsp4Metadata$ = lsp4Metadata
-      ? from(getEncodedLSP4Metadata(lsp4Metadata, uploadOptions)).pipe(shareReplay())
+      ? from(getEncodedLSP4Metadata(lsp4Metadata, uploadProvider)).pipe(shareReplay())
       : of(null);
   } else {
     lsp4Metadata$ = of(lsp4Metadata);
@@ -365,17 +365,15 @@ export function lsp4MetadataUpload$(
 
 export async function getLSP4MetadataUrl(
   lsp4Metadata: LSP4MetadataContentBeforeUpload | string,
-  uploadOptions: UploadOptions
+  uploadProvider: UploadProvider
 ): Promise<LSP4MetadataUrlForEncoding> {
+  if (!uploadProvider) {
+    throw new Error('No upload provider provided');
+  }
   let lsp4MetadataForEncoding: LSP4MetadataUrlForEncoding;
 
   if (typeof lsp4Metadata === 'string') {
-    let lsp4JsonUrl = lsp4Metadata;
-    const isIPFSUrl = lsp4Metadata.startsWith('ipfs://');
-
-    if (isIPFSUrl) {
-      lsp4JsonUrl = formatIPFSUrl(uploadOptions?.ipfsGateway, lsp4Metadata.split('/').at(-1));
-    }
+    const lsp4JsonUrl = uploadProvider.decodeUrl(lsp4Metadata);
 
     const ipfsResponse = await axios.get(lsp4JsonUrl);
     const lsp4MetadataJSON = ipfsResponse.data;
@@ -387,7 +385,7 @@ export async function getLSP4MetadataUrl(
   } else {
     lsp4MetadataForEncoding = await LSP4DigitalAssetMetadata.uploadMetadata(
       lsp4Metadata,
-      uploadOptions
+      uploadProvider
     );
   }
 
@@ -396,11 +394,14 @@ export async function getLSP4MetadataUrl(
 
 export async function getEncodedLSP4Metadata(
   lsp4Metadata: LSP4MetadataContentBeforeUpload | LSP4MetadataForEncoding | string,
-  uploadOptions: UploadOptions
+  uploadProvider: UploadProvider
 ): Promise<string> {
+  if (!uploadProvider) {
+    throw new Error('No upload provider provided');
+  }
   let lsp4MetadataForEncoding: LSP4MetadataForEncoding;
   if (typeof lsp4Metadata === 'string' || 'description' in lsp4Metadata) {
-    lsp4MetadataForEncoding = await getLSP4MetadataUrl(lsp4Metadata, uploadOptions);
+    lsp4MetadataForEncoding = await getLSP4MetadataUrl(lsp4Metadata, uploadProvider);
   } else {
     lsp4MetadataForEncoding = lsp4Metadata;
   }
@@ -668,9 +669,8 @@ export function convertDigitalAssetConfigurationObject(
 
   return {
     deployProxy: providedDeployProxy,
-    uploadOptions: contractDeploymentOptions?.ipfsGateway
-      ? { ipfsGateway: contractDeploymentOptions?.ipfsGateway }
-      : undefined,
+    uploadProvider:
+      contractDeploymentOptions.uploadProvider || contractDeploymentOptions.uploadProvider,
     version,
     byteCode,
     libAddress,

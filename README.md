@@ -16,14 +16,44 @@ npm install @lukso/lsp-factory.js
 ## Setup
 
 ```javascript
-import { LSPFactory } from '@lukso/lsp-factory.js';
+import { LSPFactory, createPrefixConverter, addURLResolver, resolveURL } from '@lukso/lsp-factory.js';
 
+const uploadProvider = createIPFSUploader('https://api.2eff.lukso.dev')
 const provider = 'https://rpc.testnet.lukso.network'; // RPC url used to connect to the network
 
 const lspFactory = new LSPFactory(provider, {
   deployKey: '0x...'; // Private key of the account which will deploy UPs
   chainId: 2828, // Chain Id of the network you want to connect to
+  uploadProvider,
 });
+
+lspFactory.addURLResolver('ipfs:', createPrefixConverter('https://2eff.lukso.dev/ipfs'))
+
+```
+
+## Resolve URLs for uploaded files
+
+```javascript
+// Utility to conver URLs after addURLResolver has been called.
+const url = lspFactory.resolveURL(
+  new URL('ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp')
+);
+console.log(url.toString());
+```
+
+## Implementing a custom upload provider
+
+```javascript
+const uploadProvider = async (data) => {
+  // upload data to ipfs here.
+  // The data can be a File (Blob) object (can have type to contain mime information)
+  // An AssetBuffer object (has mimeType)
+  // or a Buffer object
+
+  // Return a URL object containing the URL. For IPFS the protocol is "ipfs:"
+  // and the CID is in the hostname.
+  return new URL('ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp');
+};
 ```
 
 ## Usage

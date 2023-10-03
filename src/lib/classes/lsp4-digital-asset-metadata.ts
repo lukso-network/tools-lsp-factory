@@ -1,12 +1,11 @@
-import { defaultUploadOptions } from '../helpers/config.helper';
-import { ipfsUpload, prepareMetadataAsset, prepareMetadataImage } from '../helpers/uploader.helper';
+import { prepareMetadataAsset, prepareMetadataImage } from '../helpers/uploader.helper';
 import { LSPFactoryOptions } from '../interfaces';
 import {
   LSP4MetadataBeforeUpload,
   LSP4MetadataContentBeforeUpload,
   LSP4MetadataUrlForEncoding,
 } from '../interfaces/lsp4-digital-asset';
-import { UploadOptions } from '../interfaces/profile-upload-options';
+import { assertUploadProvider, UploadProvider } from '../interfaces/profile-upload-options';
 
 export class LSP4DigitalAssetMetadata {
   options: LSPFactoryOptions;
@@ -17,20 +16,20 @@ export class LSP4DigitalAssetMetadata {
 
   static async uploadMetadata(
     metaData: LSP4MetadataContentBeforeUpload | LSP4MetadataBeforeUpload,
-    uploadOptions?: UploadOptions
+    uploadProvider: UploadProvider
   ): Promise<LSP4MetadataUrlForEncoding> {
-    uploadOptions = uploadOptions || defaultUploadOptions;
+    uploadProvider = assertUploadProvider(uploadProvider);
 
     metaData = 'LSP4Metadata' in metaData ? metaData.LSP4Metadata : metaData;
 
     const [images, assets, icon] = await Promise.all([
       metaData.images
-        ? Promise.all(metaData.images.map((image) => prepareMetadataImage(uploadOptions, image)))
+        ? Promise.all(metaData.images.map((image) => prepareMetadataImage(uploadProvider, image)))
         : null,
       metaData.assets
-        ? Promise.all(metaData.assets?.map((asset) => prepareMetadataAsset(asset, uploadOptions)))
+        ? Promise.all(metaData.assets?.map((asset) => prepareMetadataAsset(asset, uploadProvider)))
         : null,
-      prepareMetadataImage(uploadOptions, metaData.icon, [256, 32]),
+      prepareMetadataImage(uploadProvider, metaData.icon, [256, 32]),
     ]);
 
     const lsp4Metadata = {
@@ -43,24 +42,18 @@ export class LSP4DigitalAssetMetadata {
       },
     };
 
-    let uploadResponse;
-    if (uploadOptions.url) {
-      // TODO: implement simple HTTP upload
-    } else {
-      uploadResponse = await ipfsUpload(JSON.stringify(lsp4Metadata), uploadOptions?.ipfsGateway);
-    }
+    const url = await uploadProvider(Buffer.from(JSON.stringify(lsp4Metadata)));
 
     return {
       json: lsp4Metadata,
-      url: uploadResponse.cid ? 'ipfs://' + uploadResponse.cid : 'https upload TBD',
+      url: url.toString(),
     };
   }
 
   async uploadMetadata(
     metaData: LSP4MetadataContentBeforeUpload | LSP4MetadataBeforeUpload,
-    uploadOptions?: UploadOptions
+    uploadProvider?: UploadProvider
   ) {
-    uploadOptions = uploadOptions || this.options.uploadOptions || defaultUploadOptions;
-    return LSP4DigitalAssetMetadata.uploadMetadata(metaData, uploadOptions);
+    return LSP4DigitalAssetMetadata.uploadMetadata(metaData, uploadProvider);
   }
 }
