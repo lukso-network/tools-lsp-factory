@@ -6,8 +6,12 @@ import { NonceManager } from '@ethersproject/experimental';
 import { UniversalProfile__factory } from '../types/ethers-v5/factories/UniversalProfile__factory';
 import { LSP6KeyManager__factory } from '../types/ethers-v5/factories/LSP6KeyManager__factory';
 import { LSP1UniversalReceiverDelegateUP__factory } from '../types/ethers-v5/factories/LSP1UniversalReceiverDelegateUP__factory';
-import { ContractDeploymentOptions, LSPFactory } from '../build/main/src';
-import { ContractNames, DeployedContracts } from '../src/lib/interfaces';
+import {
+  ContractDeploymentOptions,
+  DeployedUniversalProfileContracts,
+  LSPFactory,
+} from '../build/main/src';
+import { ContractNames } from '../src/lib/interfaces';
 import { getDeployedByteCode } from '../src/lib/helpers/deployment.helper';
 import { providers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
@@ -58,15 +62,16 @@ export async function testUPDeployment(
   }
 
   if (
-    contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.deployProxy &&
-    !isAddress(contractDeploymentOptions?.LSP1UniversalReceiverDelegate.version || '0x')
+    !contractDeploymentOptions?.LSP1UniversalReceiverDelegate ||
+    (contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.deployProxy &&
+      !isAddress(contractDeploymentOptions?.LSP1UniversalReceiverDelegate.version || '0x'))
   ) {
     expect(deployedContracts[`LSP1UniversalReceiverDelegateBaseContract`]).toBeDefined();
   } else {
     expect(deployedContracts[`LSP1UniversalReceiverDelegateBaseContract`]).toBeUndefined();
   }
 
-  return deployedContracts as DeployedContracts;
+  return deployedContracts as DeployedUniversalProfileContracts;
 }
 
 function isAddress(address: string) {

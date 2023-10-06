@@ -13,23 +13,48 @@
 npm install @lukso/lsp-factory.js
 ```
 
+# Peer dependencies
+
+| Provider | Dependency        | Version | Browser | Node |
+| -------- | ----------------- | ------- | ------- | ---- |
+| pinata   | @pinata/sdk       | ^2.1.0  | ✅      | ✅   |
+| pinata   | cross-blob        | ^3.0.2  | ❌      | ✅   |
+| pinata   | form-data         | ^4.0.0  | ❌      | ✅   |
+| pinata   | form-data-encoder | ^3.0.0  | ❌      | ✅   |
+| ipfs     | ipfs-http-client  | 52.0.3  | ✅      | ✅   |
+| ipfs     | ipfs-utils        | 8.1.6   | ✅      | ✅   |
+
+## Providers
+
+Native open IPFS pinning (or local IPFS node upload)
+
+```javascript
+import { createIPFSUploader } from '@lukso/lsp-factory.js';
+const uploadProvider = createIPFSUploader('https://api.2eff.lukso.dev');
+```
+
+Pinata node environment
+
+````javascript
+import { createPinataUploader } from '@lukso/lsp-factory.js';
+const uploadProvider = createPinataUploader({ })
 ## Setup
 
 ```javascript
-import { LSPFactory, createPrefixConverter, addURLResolver, resolveURL } from '@lukso/lsp-factory.js';
+import { LSPFactory, createPrefixConverter, createIPFSUploader, addURLResolver, resolveURL } from '@lukso/lsp-factory.js';
 
 const uploadProvider = createIPFSUploader('https://api.2eff.lukso.dev')
 const provider = 'https://rpc.testnet.lukso.network'; // RPC url used to connect to the network
 
 const lspFactory = new LSPFactory(provider, {
   deployKey: '0x...'; // Private key of the account which will deploy UPs
-  chainId: 2828, // Chain Id of the network you want to connect to
+  chainId: 4201, // Chain Id of the network you want to connect to
   uploadProvider,
 });
 
 lspFactory.addURLResolver('ipfs:', createPrefixConverter('https://2eff.lukso.dev/ipfs'))
 
-```
+````
 
 ## Resolve URLs for uploaded files
 

@@ -15,15 +15,16 @@ export function resolveUrl(url: URL) {
 /**
  *
  * @param <URL> gateway where to direct the URL to
+ * @param <string> search string to append to the gateway URL
  * @returns
  */
-export function createPrefixConverter(_gateway: string | URL) {
+export function createPrefixConverter(_gateway: string | URL, search?: string) {
   const gateway = typeof _gateway === 'string' ? new URL(_gateway) : _gateway;
   if (!gateway.host || !gateway.protocol) {
     throw new Error('Invalid gateway URL');
   }
   return (url: URL) => {
-    const base = `${gateway.pathname}/${url.hostname}`;
+    const base = `${gateway.pathname}/${url.hostname}${search || ''}`;
     return new URL(base, gateway);
   };
 }

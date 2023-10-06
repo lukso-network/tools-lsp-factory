@@ -27,6 +27,7 @@ import {
 } from '../helpers/config.helper';
 import { getDeployedByteCode } from '../helpers/deployment.helper';
 import { ContractNames, DeployedUniversalProfileContracts, DeploymentEvent } from '../interfaces';
+import { UploadProvider } from '../interfaces/profile-upload-options';
 
 import { ProxyDeployer } from './proxy-deployer';
 
@@ -36,12 +37,13 @@ describe('UniversalProfile', () => {
   let signers: SignerWithAddress[];
   let provider: providers.JsonRpcProvider;
   let lspFactory: LSPFactory;
+  let uploadProvider: UploadProvider = () => Promise.resolve(new URL('ipfs://QmY4Z'));
 
   beforeAll(async () => {
     signers = await ethers.getSigners();
     provider = ethers.provider;
 
-    lspFactory = new LSPFactory(provider, signers[0]);
+    lspFactory = new LSPFactory(provider, uploadProvider);
   });
 
   describe('Deploying with LSP3Profile Metadata', () => {
@@ -56,6 +58,11 @@ describe('UniversalProfile', () => {
       { json: lsp3ProfileJson, url: 'ipfs://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D' },
     ];
 
+    beforeEach(() => {
+      uploadProvider = () =>
+        Promise.resolve(new URL('ipfs://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D'));
+      lspFactory = new LSPFactory(provider, uploadProvider);
+    });
     allowedLSP3Formats.forEach((lsp3ProfileMetadata) => {
       describe('passing metadata to be uploaded', () => {
         it('should deploy and set LSP3Profile data', async () => {
@@ -263,7 +270,7 @@ describe('UniversalProfile', () => {
 
   describe('Async deployment', () => {
     it('should have correct controller address', (done) => {
-      lspFactory = new LSPFactory(provider, signers[0]);
+      lspFactory = new LSPFactory(provider, uploadProvider);
 
       let erc725Address: string;
       let keyManagerAddress: string;
@@ -423,7 +430,7 @@ describe('UniversalProfile', () => {
               version: UniversalProfile__factory.bytecode,
             },
           },
-          4,
+          5,
           lspFactory,
           [signers[0].address]
         );
@@ -452,7 +459,7 @@ describe('UniversalProfile', () => {
     describe('Deploy KeyManager from custom bytecode', () => {
       let deployedContracts: DeployedUniversalProfileContracts;
       it('should not deploy KeyManager base contract', async () => {
-        lspFactory = new LSPFactory(provider, signers[1]);
+        lspFactory = new LSPFactory(provider, uploadProvider);
 
         deployedContracts = await testUPDeployment(
           {
@@ -566,7 +573,7 @@ describe('UniversalProfile', () => {
           {
             LSP6KeyManager: { version: baseContracts.keyManager.address },
           },
-          4,
+          5,
           lspFactory,
           [signers[0].address]
         );

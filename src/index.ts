@@ -8,3 +8,4 @@ export * from '../types/ethers-v5';
 export * from './lib/providers/ipfs-http-client';
 export * from './lib/providers/pinata';
 export * from './lib/providers/url-converter';
+export * from './lib/providers/pinata-browser';

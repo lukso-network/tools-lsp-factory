@@ -15,7 +15,7 @@ import { UploadProvider } from '../interfaces/profile-upload-options';
  * @param pinOptions pin options to use for all uploads
  * @returns <URL> return URL of uploaded file
  */
-export function createPinataUploader(
+export function createPinataBrowserUploader(
   pinataConfig: PinataConfig,
   pinOptions?: PinataPinOptions
 ): UploadProvider<PinataPinOptions> {

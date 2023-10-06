@@ -1,6 +1,5 @@
 import { ERC725 } from '@erc725/erc725.js';
 import { INTERFACE_IDS } from '@lukso/lsp-smart-contracts';
-import axios from 'axios';
 import { BytesLike, Contract, ContractFactory, ethers, Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, from, Observable, of } from 'rxjs';
 import { defaultIfEmpty, shareReplay, switchMap, takeLast } from 'rxjs/operators';
@@ -319,8 +318,9 @@ export async function getLsp3ProfileDataUrl(
   if (typeof lsp3Profile === 'string') {
     const lsp3JsonUrl = resolveUrl(new URL(lsp3Profile));
 
-    const ipfsResponse = await axios.get(lsp3JsonUrl.toString());
-    const lsp3ProfileJson = ipfsResponse.data;
+    const lsp3ProfileJson = await (globalThis.fetch || fetch)(lsp3JsonUrl.toString()).then((res) =>
+      res.json()
+    );
 
     lsp3ProfileData = {
       url: lsp3Profile,

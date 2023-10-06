@@ -53,15 +53,26 @@ export class LSPFactory {
 
     if (typeof rpcUrlOrProvider === 'string') {
       provider = new ethers.providers.JsonRpcProvider(rpcUrlOrProvider);
-    } else if ('chainId' in rpcUrlOrProvider) {
+    } else if (typeof rpcUrlOrProvider === 'object' && 'chainId' in rpcUrlOrProvider) {
       provider = new ethers.providers.Web3Provider(rpcUrlOrProvider);
-    } else if (typeof rpcUrlOrProvider !== 'string') {
+    } else if (
+      typeof rpcUrlOrProvider === 'object' &&
+      typeof rpcUrlOrProvider['getNetwork'] === 'function' &&
+      typeof rpcUrlOrProvider['getChain'] === 'function' &&
+      typeof rpcUrlOrProvider['getSigner'] === 'function'
+    ) {
       provider = rpcUrlOrProvider as providers.Web3Provider | providers.JsonRpcProvider;
+    } else {
+      throw new Error(
+        'Invalid provider, must be string, object with chainId, or a provider containing "getNetwork", "getChain" and "getSigner" methods'
+      );
     }
-
     if (!uploadProvider && privateKeyOrSigner && typeof privateKeyOrSigner === 'function') {
       uploadProvider = privateKeyOrSigner as UploadProvider;
       privateKeyOrSigner = undefined;
+    }
+    if (uploadProvider && typeof uploadProvider !== 'function') {
+      throw new Error('Invalid upload provider, must be a function');
     }
     if (privateKeyOrSigner instanceof Signer) {
       signer = privateKeyOrSigner;
@@ -80,18 +91,21 @@ export class LSPFactory {
         signer = provider.getSigner();
       }
     }
-    const finishInit: Promise<void> = chainId
-      ? Promise.resolve()
-      : this.options.provider.getNetwork().then((network) => {
-          this.options.chainId = network.chainId;
-        });
     this.options = {
       signer,
       provider,
       uploadProvider,
       chainId,
-      finishInit,
+      finishInit: Promise.resolve(),
     };
+    // Must come after because this.options will otherwise be undefined,
+    // but finishInit needs to have a value before we can create this.options.
+    // The egg came first.
+    this.options.finishInit = chainId
+      ? Promise.resolve()
+      : this.options.provider.getNetwork().then((network) => {
+          this.options.chainId = network.chainId;
+        });
 
     this.UniversalProfile = new UniversalProfile(this.options);
     this.LSP4DigitalAssetMetadata = new LSP4DigitalAssetMetadata(this.options);

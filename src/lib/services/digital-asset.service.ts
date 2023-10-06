@@ -1,7 +1,7 @@
 import { Signer } from '@ethersproject/abstract-signer';
 import { INTERFACE_IDS } from '@lukso/lsp-smart-contracts';
-import axios from 'axios';
 import { ContractFactory, ethers } from 'ethers';
+import fetch from 'isomorphic-fetch';
 import {
   concat,
   defaultIfEmpty,
@@ -21,6 +21,7 @@ import {
   LSP7MintableInit__factory,
   LSP8Mintable__factory,
   LSP8MintableInit__factory,
+  resolveUrl,
 } from '../../';
 import { LSP4DigitalAssetMetadata } from '../classes/lsp4-digital-asset-metadata';
 import { GAS_BUFFER, GAS_PRICE, LSP4_KEYS } from '../helpers/config.helper';
@@ -373,10 +374,11 @@ export async function getLSP4MetadataUrl(
   let lsp4MetadataForEncoding: LSP4MetadataUrlForEncoding;
 
   if (typeof lsp4Metadata === 'string') {
-    const lsp4JsonUrl = uploadProvider.decodeUrl(lsp4Metadata);
+    const lsp4JsonUrl = resolveUrl(new URL(lsp4Metadata)).toString();
 
-    const ipfsResponse = await axios.get(lsp4JsonUrl);
-    const lsp4MetadataJSON = ipfsResponse.data;
+    const lsp4MetadataJSON = await (globalThis.fetch || fetch)(lsp4JsonUrl).then((res) =>
+      res.json()
+    );
 
     lsp4MetadataForEncoding = {
       url: lsp4Metadata,

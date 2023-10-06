@@ -175,7 +175,7 @@ export function uploadToIPFS(pinataConfig: PinataConfig, dataContent: FormData):
     ...createConfigForAxiosHeadersWithFormData(pinataConfig),
   } as RequestInit;
   input.headers = { ...input.headers /* ...headers */ };
-  return (global.fetch || fetch)(endpoint, {
+  return (globalThis.fetch || fetch)(endpoint, {
     ...input,
     body: dataContent,
   })
