@@ -23,11 +23,11 @@ export function createPrefixConverter(_gateway: string | URL, search?: string) {
   if (!gateway.host || !gateway.protocol) {
     throw new Error('Invalid gateway URL');
   }
-  if (gateway.pathname.endsWith('/')) {
-    gateway.pathname = gateway.pathname.slice(0, -1);
+  if (!gateway.pathname.endsWith('/')) {
+    gateway.pathname = gateway.pathname + '/';
   }
   return (url: URL) => {
-    const base = `${gateway.pathname}/${url.hostname}${search || ''}`;
+    const base = `${gateway.pathname}${url.hostname}${search || ''}`;
     return new URL(base, gateway);
   };
 }
