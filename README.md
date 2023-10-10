@@ -35,9 +35,18 @@ const uploadProvider = createIPFSUploader('https://api.2eff.lukso.dev');
 
 Pinata node environment
 
-````javascript
+```javascript
 import { createPinataUploader } from '@lukso/lsp-factory.js';
-const uploadProvider = createPinataUploader({ })
+const uploadProvider = createPinataUploader({});
+```
+
+Pinata browser environment
+
+```javascript
+import { createPinataBrowserUploader } from '@lukso/lsp-factory.js';
+const uploadProvider = createPinataBrowserUploader({});
+```
+
 ## Setup
 
 ```javascript
@@ -53,8 +62,7 @@ const lspFactory = new LSPFactory(provider, {
 });
 
 lspFactory.addURLResolver('ipfs:', createPrefixConverter('https://2eff.lukso.dev/ipfs'))
-
-````
+```
 
 ## Resolve URLs for uploaded files
 
