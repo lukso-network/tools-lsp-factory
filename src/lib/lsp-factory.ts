@@ -1,11 +1,11 @@
-import { ethers } from 'ethers';
+import { ethers, providers } from 'ethers';
 
 import { LSP4DigitalAssetMetadata } from './classes/lsp4-digital-asset-metadata';
 import { LSP7DigitalAsset } from './classes/lsp7-digital-asset';
 import { LSP8IdentifiableDigitalAsset } from './classes/lsp8-identifiable-digital-asset';
 import { ProxyDeployer } from './classes/proxy-deployer';
 import { UniversalProfile } from './classes/universal-profile';
-import { LSPFactoryOptions } from './interfaces';
+import { EthersExternalProvider, LSPFactoryOptions } from './interfaces';
 import { LSPFactoryInternalOptions } from './interfaces/lsp-factory-options';
 
 export const errorUploadProvider = () => {
@@ -23,21 +23,29 @@ export class LSPFactory {
   LSP8IdentifiableDigitalAsset: LSP8IdentifiableDigitalAsset;
   ProxyDeployer: ProxyDeployer;
 
-  constructor(options: Partial<LSPFactoryOptions> = {}) {
+  constructor(
+    _provider: providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider,
+    options: Partial<LSPFactoryOptions> = {}
+  ) {
     if (!options) {
       throw new TypeError('Options required');
     }
-    if (!options.provider) {
+    if (!_provider) {
       throw new TypeError('Provider value required');
     }
     const provider =
-      typeof options.provider === 'string'
-        ? new ethers.providers.JsonRpcProvider(options.provider)
-        : options.provider;
-    const signer =
-      typeof options.signer === 'string'
-        ? provider.getSigner(options.signer)
-        : options.signer || provider.getSigner();
+      typeof _provider === 'string' ? new ethers.providers.JsonRpcProvider(_provider) : _provider;
+    let signer: providers.JsonRpcSigner | ethers.Signer;
+    if (typeof options.signer === 'object' && options.signer) {
+      signer = options.signer;
+    } else if (typeof options.signer === 'string') {
+      if (!('getSigner' in provider)) {
+        throw new Error('There is no getSigner accepting a string on this provider to call');
+      }
+      signer = provider.getSigner(options.signer);
+    } else {
+      signer = 'getSigner' in provider ? provider.getSigner() : (provider as ethers.Signer);
+    }
     this.options = {
       signer,
       provider,
@@ -50,10 +58,10 @@ export class LSPFactory {
     // but finishInit needs to have a value before we can create this.options.
     // The egg came first.
     if (!options.chainId) {
-      if (!('getNetwork' in this.options.provider)) {
+      if (!('getNetwork' in _provider)) {
         throw new TypeError('Provider must have getNetwork method or chainId must be set');
       }
-      this.options.finishInit = this.options.provider.getNetwork().then((network) => {
+      this.options.finishInit = _provider.getNetwork().then((network) => {
         this.options.chainId = network.chainId;
       });
     }

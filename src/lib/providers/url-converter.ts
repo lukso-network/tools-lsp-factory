@@ -5,12 +5,17 @@ const resolvers: Map<string, (url: URL) => URL> = new Map();
  * @param <URL> url to resolve
  * @returns <URL> resolved url (if resolver is found, otherwise the parameter url is returned)
  */
-export function resolveUrl(url: URL) {
+export function resolveUrl(url: string): string;
+export function resolveUrl(url: URL): URL;
+export function resolveUrl(_url: URL | string): URL | string {
+  const wasUrl = _url instanceof URL;
+  const url = wasUrl ? _url : new URL(_url as string);
   const resolver = resolvers.get(url.protocol);
   if (resolver) {
-    return resolver(url);
+    const output = resolver(url);
+    return wasUrl ? output : output.toString();
   }
-  return url;
+  return _url;
 }
 
 /**

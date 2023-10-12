@@ -55,8 +55,7 @@ import { LSPFactory, createPrefixConverter, createIPFSUploader, addURLResolver, 
 const uploadProvider = createIPFSUploader('https://api.2eff.lukso.dev')
 const provider = 'https://rpc.testnet.lukso.network'; // RPC url used to connect to the network
 
-const lspFactory = new LSPFactory({
-  provider,
+const lspFactory = new LSPFactory(provider, {
   signer: '0x...'; // Private key of the account which will deploy UPs
   chainId: 4201, // Chain Id of the network you want to connect to
   uploadProvider,

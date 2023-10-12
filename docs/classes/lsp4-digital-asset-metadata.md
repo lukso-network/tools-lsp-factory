@@ -341,8 +341,7 @@ await LSP4DigitalAssetMetadata.uploadMetadata(
 ```
 
 ```javascript title="Uploading LSP4Metadata using upload options passed when instantiating LSPFactory"
-const lspFactory = new LSPFactory({
-  provider,
+const lspFactory = new LSPFactory(provider, {
   signer: myDeployKey,
   chainId: myChainId,
   uploadProvider: createIPFSUploader('https://api.2eff.lukso.dev'),

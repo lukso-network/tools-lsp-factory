@@ -59,7 +59,7 @@ describe('UniversalProfile', () => {
     beforeEach(() => {
       uploadProvider = (): Promise<URL> =>
         Promise.resolve(new URL('ipfs://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D'));
-      lspFactory = new LSPFactory({ provider, uploadProvider });
+      lspFactory = new LSPFactory(provider, { uploadProvider });
     });
     allowedLSP3Formats.forEach((lsp3ProfileMetadata) => {
       describe('passing metadata to be uploaded', () => {
@@ -96,7 +96,7 @@ describe('UniversalProfile', () => {
       signers = await ethers.getSigners();
       provider = ethers.provider;
 
-      lspFactory = new LSPFactory({ provider, uploadProvider });
+      lspFactory = new LSPFactory(provider, { uploadProvider });
     });
 
     let uniqueController: SignerWithAddress;
@@ -147,7 +147,7 @@ describe('UniversalProfile', () => {
       signers = await ethers.getSigners();
       provider = ethers.provider;
 
-      lspFactory = new LSPFactory({ provider, uploadProvider });
+      lspFactory = new LSPFactory(provider, { uploadProvider });
     });
 
     let controller: SignerWithAddress;
@@ -197,7 +197,7 @@ describe('UniversalProfile', () => {
       signers = await ethers.getSigners();
       provider = ethers.provider;
 
-      lspFactory = new LSPFactory({ provider, uploadProvider });
+      lspFactory = new LSPFactory(provider, { uploadProvider });
 
       controller = signers[0];
       controllerAddress = signers[0].address;
@@ -230,7 +230,7 @@ describe('UniversalProfile', () => {
       signers = await ethers.getSigners();
       provider = ethers.provider;
 
-      lspFactory = new LSPFactory({ provider, uploadProvider });
+      lspFactory = new LSPFactory(provider, { uploadProvider });
     });
 
     let universalProfile: UniversalProfile;
@@ -322,11 +322,11 @@ describe('UniversalProfile', () => {
       signers = await ethers.getSigners();
       provider = ethers.provider;
 
-      lspFactory = new LSPFactory({ provider, uploadProvider });
+      lspFactory = new LSPFactory(provider, { uploadProvider });
     });
 
     it('should have correct controller address', (done) => {
-      lspFactory = new LSPFactory({ provider, uploadProvider });
+      lspFactory = new LSPFactory(provider, { uploadProvider });
 
       let erc725Address: string;
       let keyManagerAddress: string;
@@ -381,7 +381,7 @@ describe('UniversalProfile', () => {
       signers = await ethers.getSigners();
       provider = ethers.provider;
 
-      lspFactory = new LSPFactory({ provider, uploadProvider });
+      lspFactory = new LSPFactory(provider, { uploadProvider });
     });
 
     describe('Deployment with all baseContract flags set to false', () => {
@@ -533,7 +533,7 @@ describe('UniversalProfile', () => {
       signers = await ethers.getSigners();
       provider = ethers.provider;
 
-      lspFactory = new LSPFactory({ provider, uploadProvider });
+      lspFactory = new LSPFactory(provider, { uploadProvider });
     });
 
     describe('Deploy ERC725Accout from custom bytecode', () => {
@@ -595,7 +595,7 @@ describe('UniversalProfile', () => {
     });
     describe('Deploy KeyManager from custom bytecode', () => {
       beforeAll(() => {
-        lspFactory = new LSPFactory({ provider, signer: signers[6], uploadProvider });
+        lspFactory = new LSPFactory(provider, { signer: signers[6], uploadProvider });
       });
       it('should not deploy KeyManager base contract', async () => {
         await testUPDeployment(
@@ -647,7 +647,7 @@ describe('UniversalProfile', () => {
     });
     describe('Deploy Universal Receiver Delegate from custom bytecode', () => {
       beforeAll(() => {
-        lspFactory = new LSPFactory({ provider, signer: signers[2], uploadProvider });
+        lspFactory = new LSPFactory(provider, { signer: signers[2], uploadProvider });
       });
 
       it('should not deploy KeyManager base contract', async () => {
@@ -718,7 +718,7 @@ describe('UniversalProfile', () => {
         signers = await ethers.getSigners();
         provider = ethers.provider;
 
-        lspFactory = new LSPFactory({ provider, uploadProvider, signer: signers[8] });
+        lspFactory = new LSPFactory(provider, { uploadProvider, signer: signers[8] });
         const proxyDeployer = new ProxyDeployer(signers[8]);
         baseContracts = await proxyDeployer.deployUniversalProfileBaseContracts();
       });
@@ -783,7 +783,7 @@ describe('UniversalProfile', () => {
         signers = await ethers.getSigners();
         provider = ethers.provider;
 
-        lspFactory = new LSPFactory({ provider, uploadProvider, signer: signers[9] });
+        lspFactory = new LSPFactory(provider, { uploadProvider, signer: signers[9] });
 
         const proxyDeployer = new ProxyDeployer(signers[9]);
         baseContracts = await proxyDeployer.deployUniversalProfileBaseContracts();
@@ -846,7 +846,7 @@ describe('UniversalProfile', () => {
       beforeAll(async () => {
         signers = await ethers.getSigners();
         provider = ethers.provider;
-        lspFactory = new LSPFactory({ provider, signer: signers[10], uploadProvider });
+        lspFactory = new LSPFactory(provider, { signer: signers[10], uploadProvider });
         const proxyDeployer = new ProxyDeployer(signers[10]);
         baseContracts = await proxyDeployer.deployUniversalProfileBaseContracts();
       });
@@ -923,7 +923,7 @@ describe('UniversalProfile', () => {
       beforeAll(async () => {
         signers = await ethers.getSigners();
         provider = ethers.provider;
-        lspFactory = new LSPFactory({ provider, signer: signers[11], uploadProvider });
+        lspFactory = new LSPFactory(provider, { signer: signers[11], uploadProvider });
         const proxyDeployer = new ProxyDeployer(signers[11]);
         baseContracts = await proxyDeployer.deployUniversalProfileBaseContracts();
       });

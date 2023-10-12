@@ -22,8 +22,7 @@ import { LSPFactory } from '@lukso/lsp-factory.js';
 
 const provider = 'https://rpc.testnet.lukso.network';
 
-const lspFactory = new LSPFactory({
-  provider,
+const lspFactory = new LSPFactory(provider, {
   signer: '0x...', // Private key of the account which will deploy smart contracts
   chainId: 2828,
 });
@@ -117,8 +116,7 @@ const myUPAddress = myContracts.LSP0ERC725Account.address;
 When instantiating LSPFactory options can be passed to specify parameters such as `chainId` and `ipfsGateway`.
 
 ```javascript title="Instantiating LSPFactory with custom options set"
-const lspFactory = new LSPFactory({
-  provider: 'https://rpc.testnet.lukso.network',
+const lspFactory = new LSPFactory('https://rpc.testnet.lukso.network', {
   signer: '0x...',
   chainId: 2828,
   ipfsGateway: 'https://ipfs.infura.io:5001',

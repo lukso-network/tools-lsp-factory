@@ -32,7 +32,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
   });
 
   it('should deploy LSP8 Identifiable Digital asset with no passed deployment options', async () => {
-    const myLSPFactory = new LSPFactory({ provider, uploadProvider });
+    const myLSPFactory = new LSPFactory(provider, { uploadProvider });
 
     const lsp8IdentifiableDigitalAsset = await myLSPFactory.LSP8IdentifiableDigitalAsset.deploy({
       controllerAddress: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
@@ -53,7 +53,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
   });
 
   it('should deploy LSP8 Identifiable Digital asset from a specified base contract', async () => {
-    const myLSPFactory = new LSPFactory({ provider, uploadProvider });
+    const myLSPFactory = new LSPFactory(provider, { uploadProvider });
 
     const lsp8IdentifiableDigitalAsset = await myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
       {
@@ -81,7 +81,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
   });
 
   it('should deploy async', (done) => {
-    const myLSPFactory = new LSPFactory({ provider, uploadProvider });
+    const myLSPFactory = new LSPFactory(provider, { uploadProvider });
     let lsp8Address: string;
 
     myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
@@ -117,7 +117,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
     );
   });
   it('Should be compatible with RxJS', (done) => {
-    const myLSPFactory = new LSPFactory({ provider, uploadProvider });
+    const myLSPFactory = new LSPFactory(provider, { uploadProvider });
     let lsp8Address: string;
 
     const subject = new Subject<DeploymentEvent>();
@@ -170,7 +170,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
   });
 
   it('should deploy LSP8 Identifiable Digital without a base contract', async () => {
-    const myLSPFactory = new LSPFactory({ provider, uploadProvider });
+    const myLSPFactory = new LSPFactory(provider, { uploadProvider });
 
     const lsp8IdentifiableDigitalAsset = await myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
       {
@@ -198,7 +198,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
   });
 
   it('should deploy lsp8 with custom bytecode', async () => {
-    const lspFactory = new LSPFactory({ provider, uploadProvider });
+    const lspFactory = new LSPFactory(provider, { uploadProvider });
 
     const passedBytecode = LSP8Mintable__factory.bytecode;
 
@@ -265,7 +265,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
     });
     allowedLSP4Formats.forEach((lsp4Metadata) => {
       it('should deploy lsp8 with metadata', async () => {
-        const lspFactory = new LSPFactory({ provider, uploadProvider });
+        const lspFactory = new LSPFactory(provider, { uploadProvider });
         const lsp8DigitalAsset = await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
           controllerAddress,
           name,
@@ -316,7 +316,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       let lspFactory: LSPFactory;
 
       beforeAll(async () => {
-        lspFactory = new LSPFactory({ provider, uploadProvider });
+        lspFactory = new LSPFactory(provider, { uploadProvider });
         const contracts = await lspFactory.UniversalProfile.deploy({
           controllerAddresses: [controllerAddress],
         });

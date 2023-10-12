@@ -8,13 +8,13 @@ import { LSP6KeyManager__factory } from '../types/ethers-v5/factories/LSP6KeyMan
 import { LSP1UniversalReceiverDelegateUP__factory } from '../types/ethers-v5/factories/LSP1UniversalReceiverDelegateUP__factory';
 import {
   ContractDeploymentOptions,
+  ContractNames,
   DeployedUniversalProfileContracts,
-  LSPFactory,
-} from '../build/main/src';
-import { ContractNames } from '../src/lib/interfaces';
+} from '../src/lib/interfaces';
 import { getDeployedByteCode } from '../src/lib/helpers/deployment.helper';
 import { providers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
+import { LSPFactory } from '../src';
 
 export async function deployUniversalProfileContracts(signer: Signer, owner: string) {
   let nonceManager = new NonceManager(signer);
