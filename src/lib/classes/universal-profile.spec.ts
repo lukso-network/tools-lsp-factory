@@ -967,10 +967,7 @@ describe('UniversalProfile', () => {
 
         const checkedsumResult = ethers.utils.getAddress(univeralReceiverDelegate[0]);
 
-        expect(checkedsumResult).toEqual(
-          deployedContracts?.LSP1UniversalReceiverDelegate?.address ||
-            baseContracts.universalReceiverDelegate.address
-        );
+        expect(checkedsumResult).toEqual(deployedContracts?.LSP1UniversalReceiverDelegate?.address);
       });
       it('URD contract bytecode should contain base contract address', async () => {
         const deployedContracts = await testUPDeployment(
