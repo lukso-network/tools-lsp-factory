@@ -37,6 +37,11 @@ jobs:
         run: npm run build
 
       - name: 🎯 Test
+        env:
+          PINATAAPIKEY: ${{ secrets.PINATAAPIKEY }}
+          PINATASECRETAPIKEY: ${{ secrets.PINATASECRETAPIKEY }}
+          PINATAJWTKEY: ${{ secrets.PINATAJWTKEY }}
+
         run: npm run generate-types && npm run test
 
       - uses: google-github-actions/release-please-action@v3
