@@ -88,12 +88,12 @@ export async function prepareMetadataImage(
   uploadProvider: UploadProvider,
   image?: File | ImageBuffer | ImageMetadata[],
   sizes?: number[]
-): Promise<ImageMetadata[]> | null {
+): Promise<ImageMetadata[]> {
   uploadProvider = assertUploadProvider(uploadProvider);
-  let metadataImage: ImageMetadata[] | null;
+  let metadataImage: ImageMetadata[] = [];
 
   if (Array.isArray(image)) {
-    metadataImage = image ?? null;
+    metadataImage = image;
   } else if (image) {
     metadataImage = await imageUpload(image, uploadProvider, sizes);
   }
@@ -107,7 +107,7 @@ export async function prepareMetadataAsset(
 ): Promise<AssetMetadata> {
   uploadProvider = assertUploadProvider(uploadProvider);
 
-  let assetMetadata: AssetMetadata | null;
+  let assetMetadata: AssetMetadata | null = null as unknown as AssetMetadata;
   if ('hashFunction' in asset) {
     assetMetadata = asset ?? null;
   } else if (asset) {

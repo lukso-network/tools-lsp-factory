@@ -6,8 +6,9 @@ const resolvers: Map<string, (url: URL) => URL> = new Map();
  * @returns <URL> resolved url (if resolver is found, otherwise the parameter url is returned)
  */
 export function resolveUrl(url: URL) {
-  if (resolvers.has(url.protocol)) {
-    return resolvers.get(url.protocol)(url);
+  const resolver = resolvers.get(url.protocol);
+  if (resolver) {
+    return resolver(url);
   }
   return url;
 }

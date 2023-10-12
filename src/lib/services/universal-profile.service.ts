@@ -65,7 +65,7 @@ export function accountDeployment$(
     switchMap((baseContractAddresses) => {
       return accountDeploymentWithBaseContractAddress$(
         signer,
-        baseContractAddresses.LSP0ERC725Account,
+        baseContractAddresses.LSP0ERC725Account || '',
         bytecode
       );
     }),
@@ -166,7 +166,7 @@ export function setDataAndTransferOwnershipTransactions$(
   account$: Observable<LSP3AccountDeploymentEvent>,
   universalReceiver$: Observable<UniversalReceiverDeploymentEvent>,
   controllerAddresses: (string | ControllerOptions)[],
-  lsp3ProfileData$: Observable<string | null>,
+  lsp3ProfileData$: Observable<string>,
   isSignerUniversalProfile$: Observable<boolean>,
   keyManagerDeployment$: DeploymentEvent$,
   defaultUniversalReceiverDelegateAddress?: string
@@ -257,7 +257,7 @@ export function prepareSetDataTransaction$(
   account$: Observable<LSP3AccountDeploymentEvent>,
   universalReceiver$: Observable<UniversalReceiverDeploymentEvent>,
   controllerAddresses: (string | ControllerOptions)[],
-  lsp3ProfileData$: Observable<string | null>,
+  lsp3ProfileData$: Observable<string>,
   isSignerUniversalProfile$: Observable<boolean>,
   defaultUniversalReceiverDelegateAddress?: string
 ) {
@@ -280,8 +280,12 @@ export function prepareSetDataTransaction$(
         const { receipt: universalReceiverReceipt } = universalReceiverResult;
 
         const lsp3AccountAddress = isSignerUniversalProfile
-          ? lsp3AccountReceipt.contractAddress || getContractAddressFromDeploymentEvent(lsp3Result)
-          : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
+          ? lsp3AccountReceipt?.contractAddress ||
+            getContractAddressFromDeploymentEvent(lsp3Result) ||
+            (null as unknown as string)
+          : lsp3AccountReceipt?.contractAddress ||
+            lsp3AccountReceipt?.to ||
+            (null as unknown as string);
 
         let universalReceiverAddress: string;
         if (isSignerUniversalProfile) {
@@ -290,10 +294,12 @@ export function prepareSetDataTransaction$(
               ? getContractAddressFromDeploymentEvent(
                   universalReceiverResult as UniversalReceiverDeploymentEvent
                 )
-              : null;
+              : (null as unknown as string);
         } else {
           universalReceiverAddress =
-            universalReceiverReceipt?.contractAddress || universalReceiverReceipt?.to;
+            universalReceiverReceipt?.contractAddress ||
+            universalReceiverReceipt?.to ||
+            (null as unknown as string);
         }
 
         return prepareSetDataParameters(
@@ -311,7 +317,7 @@ export function prepareSetDataTransaction$(
 
 export async function getLsp3ProfileDataUrl(
   lsp3Profile: ProfileDataBeforeUpload | string,
-  uploadProvider: UploadProvider
+  uploadProvider?: UploadProvider
 ): Promise<ProfileDataForEncoding> {
   let lsp3ProfileData: LSP3ProfileDataForEncoding;
 
@@ -351,7 +357,7 @@ async function getEncodedLSP3ProfileData(
 }
 
 export function lsp3ProfileUpload$(
-  passedProfileData:
+  passedProfileData?:
     | ProfileDataBeforeUpload
     | LSP3ProfileBeforeUpload
     | LSP3ProfileDataForEncoding
@@ -368,9 +374,10 @@ export function lsp3ProfileUpload$(
       : passedProfileData;
 
   if (typeof lsp3Profile !== 'string' || !isMetadataEncoded(lsp3Profile)) {
-    lsp3Profile$ = lsp3Profile
-      ? from(getEncodedLSP3ProfileData(lsp3Profile, uploadProvider)).pipe(shareReplay())
-      : of(null);
+    lsp3Profile$ =
+      lsp3Profile != undefined
+        ? from(getEncodedLSP3ProfileData(lsp3Profile, uploadProvider)).pipe(shareReplay())
+        : of('');
   } else {
     lsp3Profile$ = of(lsp3Profile);
   }
@@ -406,7 +413,8 @@ export async function prepareSetDataParameters(
       controllerPermissions[index] = ERC725.encodePermissions(DEFAULT_PERMISSIONS);
     } else {
       controllerAddresses[index] = controller.address;
-      controllerPermissions[index] = controller.permissions;
+      controllerPermissions[index] =
+        controller.permissions || ERC725.encodePermissions(DEFAULT_PERMISSIONS);
     }
   });
 
@@ -624,17 +632,17 @@ export function prepareTransferOwnershipTransaction$(
       const { receipt: keyManagerReceipt } = keyManagerResult;
 
       const erc725AccountAddress = isSignerUniversalProfile
-        ? lsp3AccountReceipt.contractAddress || getContractAddressFromDeploymentEvent(lsp3Result)
-        : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
+        ? lsp3AccountReceipt?.contractAddress || getContractAddressFromDeploymentEvent(lsp3Result)
+        : lsp3AccountReceipt?.contractAddress || lsp3AccountReceipt?.to;
 
       const keyManagerAddress = isSignerUniversalProfile
-        ? keyManagerReceipt.contractAddress ||
+        ? keyManagerReceipt?.contractAddress ||
           getContractAddressFromDeploymentEvent(keyManagerResult)
-        : keyManagerReceipt.contractAddress || keyManagerReceipt.to;
+        : keyManagerReceipt?.contractAddress || keyManagerReceipt?.to;
 
       return of({
-        erc725AccountAddress,
-        keyManagerAddress,
+        erc725AccountAddress: erc725AccountAddress || (null as unknown as string),
+        keyManagerAddress: keyManagerAddress || (null as unknown as string),
       });
     }),
     shareReplay()

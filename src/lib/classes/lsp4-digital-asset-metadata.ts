@@ -6,6 +6,7 @@ import {
   LSP4MetadataUrlForEncoding,
 } from '../interfaces/lsp4-digital-asset';
 import { assertUploadProvider, UploadProvider } from '../interfaces/profile-upload-options';
+import { errorUploadProvider } from '../lsp-factory';
 
 export class LSP4DigitalAssetMetadata {
   options: LSPFactoryOptions;
@@ -25,17 +26,17 @@ export class LSP4DigitalAssetMetadata {
     const [images, assets, icon] = await Promise.all([
       metaData.images
         ? Promise.all(metaData.images.map((image) => prepareMetadataImage(uploadProvider, image)))
-        : null,
+        : [],
       metaData.assets
         ? Promise.all(metaData.assets?.map((asset) => prepareMetadataAsset(asset, uploadProvider)))
-        : null,
+        : [],
       prepareMetadataImage(uploadProvider, metaData.icon, [256, 32]),
     ]);
 
     const lsp4Metadata = {
       LSP4Metadata: {
         ...metaData,
-        links: metaData.links ?? null,
+        links: metaData.links ?? [],
         images,
         assets,
         icon,
@@ -54,6 +55,6 @@ export class LSP4DigitalAssetMetadata {
     metaData: LSP4MetadataContentBeforeUpload | LSP4MetadataBeforeUpload,
     uploadProvider?: UploadProvider
   ) {
-    return LSP4DigitalAssetMetadata.uploadMetadata(metaData, uploadProvider);
+    return LSP4DigitalAssetMetadata.uploadMetadata(metaData, uploadProvider || errorUploadProvider);
   }
 }

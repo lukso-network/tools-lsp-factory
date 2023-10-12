@@ -42,7 +42,7 @@
     "types": ["node", "jest", "node_modules/@nomiclabs/hardhat-ethers/internal/type-extensions"],
     "typeRoots": ["node_modules/@types", "types"]
   },
-  "include": ["src/**/*.ts", "types/ethers-v5/**/*.ts"],
+  "include": ["src/**/*.ts", "types/ethers-v5/**/*.ts", "*.ts", "*.js"],
   "exclude": ["node_modules/**"],
   "compileOnSave": false
 }

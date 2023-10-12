@@ -33,45 +33,73 @@ export async function deployUniversalProfileContracts(signer: Signer, owner: str
   };
 }
 
+let randomInstance = 0;
+const instances: Map<string, Promise<DeployedUniversalProfileContracts>> = new Map();
+
+/**
+ * Allow multiple tests to rely on the same deployment
+ * without using shared variables.
+ *
+ * @param contractDeploymentOptions
+ * @param expectedContractNumber
+ * @param lspFactory
+ * @param controllerAddresses
+ * @param instanceName
+ * @returns
+ */
 export async function testUPDeployment(
   contractDeploymentOptions: ContractDeploymentOptions,
   expectedContractNumber: number,
   lspFactory: LSPFactory,
-  controllerAddresses: string[]
-) {
-  const deployedContracts = await lspFactory.UniversalProfile.deploy(
-    {
-      controllerAddresses,
-    },
-    contractDeploymentOptions
-  );
-
-  expect(Object.keys(deployedContracts).length).toEqual(expectedContractNumber);
-
-  const contractNames = [ContractNames.ERC725_Account, ContractNames.KEY_MANAGER];
-
-  for (const contractName of contractNames) {
-    if (
-      contractDeploymentOptions[contractName]?.version?.startsWith('0x') ||
-      contractDeploymentOptions[contractName]?.deployProxy === false
-    ) {
-      expect(deployedContracts[`${contractName}BaseContract`]).toBeUndefined();
-    } else {
-      expect(deployedContracts[`${contractName}BaseContract`]).toBeDefined();
-    }
+  controllerAddresses: string[],
+  instanceName: string = `random${randomInstance++}`
+): Promise<DeployedUniversalProfileContracts> {
+  let promise: Promise<DeployedUniversalProfileContracts> | undefined = instances.get(instanceName);
+  if (promise) {
+    return promise;
   }
+  let kick: () => void = () => {};
+  const start = new Promise<void>((resolve) => {
+    kick = resolve;
+  });
+  promise = (async () => {
+    await start;
+    return await lspFactory.UniversalProfile.deploy(
+      {
+        controllerAddresses,
+      },
+      contractDeploymentOptions
+    ).then((deployedContracts) => {
+      expect(Object.keys(deployedContracts).length).toEqual(expectedContractNumber);
 
-  if (
-    !contractDeploymentOptions?.LSP1UniversalReceiverDelegate ||
-    (contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.deployProxy &&
-      !isAddress(contractDeploymentOptions?.LSP1UniversalReceiverDelegate.version || '0x'))
-  ) {
-    expect(deployedContracts[`LSP1UniversalReceiverDelegateBaseContract`]).toBeDefined();
-  } else {
-    expect(deployedContracts[`LSP1UniversalReceiverDelegateBaseContract`]).toBeUndefined();
-  }
+      const contractNames = [ContractNames.ERC725_Account, ContractNames.KEY_MANAGER];
 
-  return deployedContracts as DeployedUniversalProfileContracts;
+      for (const contractName of contractNames) {
+        if (
+          contractDeploymentOptions[contractName]?.version?.startsWith('0x') ||
+          contractDeploymentOptions[contractName]?.deployProxy === false
+        ) {
+          expect(deployedContracts[`${contractName}BaseContract`]).toBeUndefined();
+        } else {
+          expect(deployedContracts[`${contractName}BaseContract`]).toBeDefined();
+        }
+      }
+
+      if (
+        !contractDeploymentOptions?.LSP1UniversalReceiverDelegate ||
+        (contractDeploymentOptions?.LSP1UniversalReceiverDelegate?.deployProxy &&
+          !isAddress(contractDeploymentOptions?.LSP1UniversalReceiverDelegate.version || '0x'))
+      ) {
+        expect(deployedContracts[`LSP1UniversalReceiverDelegateBaseContract`]).toBeDefined();
+      } else {
+        expect(deployedContracts[`LSP1UniversalReceiverDelegateBaseContract`]).toBeUndefined();
+      }
+      return deployedContracts as DeployedUniversalProfileContracts;
+    });
+  })() as Promise<DeployedUniversalProfileContracts>;
+  instances.set(instanceName, promise);
+  kick();
+  return promise;
 }
 
 function isAddress(address: string) {

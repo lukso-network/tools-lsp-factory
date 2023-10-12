@@ -22,8 +22,9 @@ import { LSPFactory } from '@lukso/lsp-factory.js';
 
 const provider = 'https://rpc.testnet.lukso.network';
 
-const lspFactory = new LSPFactory(provider, {
-  deployKey: '0x...', // Private key of the account which will deploy smart contracts
+const lspFactory = new LSPFactory({
+  provider,
+  signer: '0x...', // Private key of the account which will deploy smart contracts
   chainId: 2828,
 });
 ```
@@ -116,8 +117,9 @@ const myUPAddress = myContracts.LSP0ERC725Account.address;
 When instantiating LSPFactory options can be passed to specify parameters such as `chainId` and `ipfsGateway`.
 
 ```javascript title="Instantiating LSPFactory with custom options set"
-const lspFactory = new LSPFactory('https://rpc.testnet.lukso.network', {
-  deployKey: '0x...',
+const lspFactory = new LSPFactory({
+  provider: 'https://rpc.testnet.lukso.network',
+  signer: '0x...',
   chainId: 2828,
   ipfsGateway: 'https://ipfs.infura.io:5001',
 });
@@ -125,7 +127,7 @@ const lspFactory = new LSPFactory('https://rpc.testnet.lukso.network', {
 
 #### Deploy Key
 
-`deployKey` is the private key which should sign the transactions sent by LSPFactory. This account must have enough gas to carry out the transactions.
+`signer` is the private key which should sign the transactions sent by LSPFactory. This account must have enough gas to carry out the transactions.
 
 If no value is set here, LSPFactory will attempt to sign transactions via a browser extension.
 
@@ -139,7 +141,7 @@ If no value is set here, LSPFactory will attempt to sign transactions via a brow
 
 ```javascript title="Instantiating LSPFactory with custom ipfsGateway options set"
 const lspFactory = new LSPFactory('https://rpc.testnet.lukso.network', {
-  deployKey: '0x...',
+  signer: '0x...',
   chainId: 2828,
   ipfsGateway: {
     host: 'ipfs.infura.io',

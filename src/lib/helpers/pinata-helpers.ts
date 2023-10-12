@@ -177,7 +177,7 @@ export function uploadToIPFS(pinataConfig: PinataConfig, dataContent: FormData):
   input.headers = { ...input.headers /* ...headers */ };
   return (globalThis.fetch || fetch)(endpoint, {
     ...input,
-    body: dataContent,
+    body: dataContent as any,
   })
     .then((response) => {
       if (response.status !== 200) {

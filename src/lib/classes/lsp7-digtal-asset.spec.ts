@@ -2,14 +2,11 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
 import { ethers } from 'hardhat';
 
-import {
-  DeploymentEvent,
-  LSP7Mintable,
-  LSP7Mintable__factory,
-  LSPFactory,
-} from '../../../build/main/src/index';
 import { testDeployWithSpecifiedCreators } from '../../../test/digital-asset.utils';
+import { LSP7Mintable, LSP7Mintable__factory } from '../../../types/ethers-v5';
+import { DeploymentEvent } from '../interfaces';
 import { UploadProvider } from '../interfaces/profile-upload-options';
+import { LSPFactory } from '../lsp-factory';
 
 import { lsp4DigitalAsset } from './../../../test/lsp4-digital-asset.mock';
 import { ProxyDeployer } from './proxy-deployer';
@@ -33,7 +30,7 @@ describe('LSP7DigitalAsset', () => {
   });
 
   it('should deploy LSP7 Digital asset with no passed deployment options', async () => {
-    const myLSPFactory = new LSPFactory(provider, uploadProvider);
+    const myLSPFactory = new LSPFactory({ provider, uploadProvider });
 
     const lsp7DigitalAsset = await myLSPFactory.LSP7DigitalAsset.deploy({
       controllerAddress: signer.address,
@@ -55,7 +52,7 @@ describe('LSP7DigitalAsset', () => {
   });
 
   it('should deploy LSP7 Digital asset from specified base contract', async () => {
-    const myLSPFactory = new LSPFactory(provider, uploadProvider);
+    const myLSPFactory = new LSPFactory({ provider, uploadProvider });
 
     const lsp7DigitalAsset = await myLSPFactory.LSP7DigitalAsset.deploy(
       {
@@ -84,7 +81,7 @@ describe('LSP7DigitalAsset', () => {
   });
 
   it('should deploy LSP7 Digital asset without a base contract', async () => {
-    const myLSPFactory = new LSPFactory(provider, uploadProvider);
+    const myLSPFactory = new LSPFactory({ provider, uploadProvider });
 
     const lsp7DigitalAsset = await myLSPFactory.LSP7DigitalAsset.deploy(
       {
@@ -113,7 +110,7 @@ describe('LSP7DigitalAsset', () => {
   });
 
   it('should deploy async', (done) => {
-    const myLSPFactory = new LSPFactory(provider, uploadProvider);
+    const myLSPFactory = new LSPFactory({ provider, uploadProvider });
 
     let lsp7Address: string;
 
@@ -153,7 +150,7 @@ describe('LSP7DigitalAsset', () => {
   });
 
   it('should deploy lsp7 with custom bytecode', async () => {
-    const lspFactory = new LSPFactory(provider, uploadProvider);
+    const lspFactory = new LSPFactory({ provider, uploadProvider });
 
     const passedBytecode = LSP7Mintable__factory.bytecode;
 
@@ -214,7 +211,7 @@ describe('LSP7DigitalAsset', () => {
     });
     allowedLSP4Formats.forEach((lsp4Metadata) => {
       it('should deploy lsp7 with metadata', async () => {
-        const lspFactory = new LSPFactory(provider, uploadProvider);
+        const lspFactory = new LSPFactory({ provider, uploadProvider });
         const lsp7DigitalAsset = await lspFactory.LSP7DigitalAsset.deploy({
           controllerAddress,
           isNFT: false,
@@ -267,7 +264,7 @@ describe('LSP7DigitalAsset', () => {
     let lspFactory: LSPFactory;
 
     beforeAll(async () => {
-      lspFactory = new LSPFactory(provider, uploadProvider);
+      lspFactory = new LSPFactory({ provider, uploadProvider });
       const contracts = await lspFactory.UniversalProfile.deploy({
         controllerAddresses: [controllerAddress],
       });

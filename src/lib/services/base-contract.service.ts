@@ -199,22 +199,23 @@ export function universalProfileBaseContractAddresses$(
       (contractDeploymentOptions?.LSP0ERC725Account?.deployProxy !== false &&
         !contractDeploymentOptions?.LSP0ERC725Account?.byteCode)
         ? defaultUPBaseContractAddress
-        : null,
+        : (null as unknown as string),
     [UniversalProfileContractNames.UNIVERSAL_RECEIVER]:
       deployUniversalReceiverProxy && providedUniversalReceiverContractAddress
         ? providedUniversalReceiverContractAddress
-        : null,
+        : (null as unknown as string),
     [UniversalProfileContractNames.KEY_MANAGER]:
       providedKeyManagerContractAddress ??
       (contractDeploymentOptions?.LSP6KeyManager?.deployProxy !== false &&
         !contractDeploymentOptions?.LSP6KeyManager?.byteCode)
         ? defaultKeyManagerBaseContractAddress
-        : null,
+        : (null as unknown as string),
   };
 
   return baseContractDeployment$.pipe(
     tap((deploymentEvent: DeploymentEventContract) => {
-      baseContractAddresses[deploymentEvent.contractName] = deploymentEvent.receipt.contractAddress;
+      baseContractAddresses[deploymentEvent.contractName] =
+        deploymentEvent.receipt?.contractAddress;
     }),
     defaultIfEmpty(of(baseContractAddresses)),
     last(),
@@ -238,7 +239,7 @@ export function waitForBaseContractAddress$(
     }),
     defaultIfEmpty(
       (function () {
-        if (deployProxy === false || providedByteCode) return null;
+        if (deployProxy === false || providedByteCode) return '';
         return defaultBaseContractAddress;
       })()
     )

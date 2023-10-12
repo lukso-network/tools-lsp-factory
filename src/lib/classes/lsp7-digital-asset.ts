@@ -4,13 +4,13 @@ import { concat, concatAll, EMPTY, shareReplay, switchMap } from 'rxjs';
 import versions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { resolveContractDeployment, waitForContractDeployment } from '../helpers/deployment.helper';
-import { LSPFactoryOptions } from '../interfaces';
 import {
   ContractNames,
   DeployedLSP7DigitalAsset,
   LSP7ContractDeploymentOptions,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
+import { LSPFactoryInternalOptions } from '../interfaces/lsp-factory-options';
 import {
   lsp7BaseContractDeployment$,
   shouldDeployBaseContract$,
@@ -32,9 +32,9 @@ import { isSignerUniversalProfile$ } from '../services/universal-profile.service
  * @memberof LSPFactory
  */
 export class LSP7DigitalAsset {
-  options: LSPFactoryOptions;
+  options: LSPFactoryInternalOptions;
   signer: NonceManager;
-  constructor(options: LSPFactoryOptions) {
+  constructor(options: LSPFactoryInternalOptions) {
     this.options = options;
     this.signer = new NonceManager(options.signer);
   }
@@ -72,7 +72,7 @@ export class LSP7DigitalAsset {
       digitalAssetConfiguration?.uploadProvider ?? this.options.uploadProvider
     );
 
-    const defaultBaseContractAddress: string | undefined =
+    const defaultBaseContractAddress: string =
       digitalAssetConfiguration?.libAddress ??
       versions[this.options.chainId]?.contracts.LSP7Mintable?.versions[
         digitalAssetConfiguration?.version ?? DEFAULT_CONTRACT_VERSION
@@ -136,7 +136,6 @@ export class LSP7DigitalAsset {
     }
 
     const contractsPromise = waitForContractDeployment<DeployedLSP7DigitalAsset>(deployment$);
-
     return resolveContractDeployment(contractsPromise, contractDeploymentOptions?.onDeployEvents);
   }
 }

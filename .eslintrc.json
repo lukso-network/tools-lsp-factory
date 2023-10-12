@@ -6,7 +6,7 @@
     "tsconfigRootDir": "./"
   },
   "env": { "es6": true },
-  "ignorePatterns": ["node_modules", "build", "coverage", "test", "jest.config.js", "tmp"],
+  "ignorePatterns": ["node_modules", "build", "coverage", "test", "tmp"],
   "plugins": ["import", "eslint-comments"],
   "extends": [
     "eslint:recommended",

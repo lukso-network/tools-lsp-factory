@@ -39,7 +39,7 @@ export function universalReceiverDelegateDeployment$(
       if (baseContractAddresses.LSP1UniversalReceiverDelegate || byteCode) {
         return universalReceiverDelegateDeploymentWithBaseContractAddress$(
           signer,
-          baseContractAddresses.LSP1UniversalReceiverDelegate,
+          baseContractAddresses.LSP1UniversalReceiverDelegate || (null as unknown as string),
           byteCode
         );
       }
@@ -82,7 +82,7 @@ export function universalReceiverDelegateDeploymentWithBaseContractAddress$(
  */
 export async function deployUniversalReceiverDelegate(
   signer: Signer,
-  baseContractAddress: string,
+  baseContractAddress?: string,
   bytecode?: string
 ) {
   const deploymentFunction = async () => {

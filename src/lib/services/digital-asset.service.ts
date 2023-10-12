@@ -57,6 +57,7 @@ import {
   LSP4MetadataUrlForEncoding,
 } from '../interfaces/lsp4-digital-asset';
 import { UploadProvider } from '../interfaces/profile-upload-options';
+import { errorUploadProvider } from '../lsp-factory';
 
 import { addressIsUniversalProfile } from './universal-profile.service';
 
@@ -163,7 +164,7 @@ function initializeLSP7Proxy(
     takeLast(1),
     switchMap(async (result) => {
       const contract = await new LSP7MintableInit__factory(signer).attach(
-        result.receipt.contractAddress || getContractAddressFromDeploymentEvent(result)
+        result.receipt?.contractAddress || getContractAddressFromDeploymentEvent(result) || ''
       );
 
       const controllerAddress = await signer.getAddress();
@@ -302,7 +303,7 @@ function initializeLSP8Proxy(
     takeLast(1),
     switchMap(async (result) => {
       const contract = await new LSP8MintableInit__factory(signer).attach(
-        result.receipt.contractAddress || getContractAddressFromDeploymentEvent(result)
+        result.receipt?.contractAddress || getContractAddressFromDeploymentEvent(result) || ''
       );
 
       const controllerAddress = await signer.getAddress();
@@ -337,14 +338,14 @@ function initializeLSP8Proxy(
 }
 
 export function lsp4MetadataUpload$(
-  passedDigitalAssetMetadata:
+  passedDigitalAssetMetadata?:
     | LSP4MetadataBeforeUpload
     | LSP4MetadataContentBeforeUpload
     | LSP4MetadataForEncoding
     | string,
   uploadProvider?: UploadProvider
 ) {
-  let lsp4Metadata$: Observable<string>;
+  let lsp4Metadata$: Observable<string | undefined>;
 
   const lsp4Metadata =
     typeof passedDigitalAssetMetadata !== 'string' &&
@@ -354,9 +355,12 @@ export function lsp4MetadataUpload$(
       : passedDigitalAssetMetadata;
 
   if (typeof lsp4Metadata !== 'string' || !isMetadataEncoded(lsp4Metadata)) {
-    lsp4Metadata$ = lsp4Metadata
-      ? from(getEncodedLSP4Metadata(lsp4Metadata, uploadProvider)).pipe(shareReplay())
-      : of(null);
+    lsp4Metadata$ =
+      lsp4Metadata != undefined
+        ? from(getEncodedLSP4Metadata(lsp4Metadata, uploadProvider || errorUploadProvider)).pipe(
+            shareReplay()
+          )
+        : of(undefined);
   } else {
     lsp4Metadata$ = of(lsp4Metadata);
   }
@@ -405,7 +409,7 @@ export async function getEncodedLSP4Metadata(
   if (typeof lsp4Metadata === 'string' || 'description' in lsp4Metadata) {
     lsp4MetadataForEncoding = await getLSP4MetadataUrl(lsp4Metadata, uploadProvider);
   } else {
-    lsp4MetadataForEncoding = lsp4Metadata;
+    lsp4MetadataForEncoding = lsp4Metadata as LSP4MetadataForEncoding;
   }
 
   const encodedLSP4Metadata = erc725EncodeData(lsp4MetadataForEncoding, 'LSP4Metadata');
@@ -416,7 +420,7 @@ export async function getEncodedLSP4Metadata(
 export function setMetadataAndTransferOwnership$(
   signer: Signer,
   digitalAsset$: Observable<DigitalAssetDeploymentEvent>,
-  lsp4Metadata$: Observable<string | null>,
+  lsp4Metadata$: Observable<string | undefined>,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
   contractName: string,
   isSignerUniversalProfile$: Observable<boolean>
@@ -446,9 +450,9 @@ export function setMetadataAndTransferOwnership$(
     switchMap(([{ keysToSet, valuesToSet }, digitalAssetAddress]) => {
       return sendSetDataAndTransferOwnershipTransactions(
         signer,
-        digitalAssetAddress,
-        keysToSet,
-        valuesToSet,
+        digitalAssetAddress || '',
+        keysToSet || [],
+        valuesToSet || [],
         digitalAssetDeploymentOptions.controllerAddress,
         contractName
       );
@@ -503,9 +507,15 @@ export async function sendSetDataAndTransferOwnershipTransactions(
 
   const signerAddress = await signer.getAddress();
 
-  const transactionsArray = [];
+  const transactionsArray: Array<{
+    type: DeploymentType;
+    contractName: string;
+    functionName: string;
+    status: DeploymentStatus;
+    pendingTransaction: Promise<ethers.ContractTransaction>;
+  }> = [];
 
-  if (keysToSet && valuesToSet) {
+  if (keysToSet && valuesToSet && keysToSet.length && valuesToSet.length) {
     const setDataEstimate = await digitalAsset.estimateGas.setDataBatch(keysToSet, valuesToSet);
 
     setDataTransaction = digitalAsset.setDataBatch(keysToSet, valuesToSet, {
@@ -550,7 +560,7 @@ export async function sendSetDataAndTransferOwnershipTransactions(
 
 export function prepareLSP4SetDataTransaction$(
   digitalAsset$: Observable<DigitalAssetDeploymentEvent>,
-  lsp4Metadata$: Observable<string | null>,
+  lsp4Metadata$: Observable<string | undefined>,
   contractName: string,
   digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
   isSignerUniversalProfile$: Observable<boolean>,
@@ -561,12 +571,12 @@ export function prepareLSP4SetDataTransaction$(
       const { receipt: digitalAssetReceipt } = result;
 
       const digitalAssetAddress = isSignerUniversalProfile
-        ? digitalAssetReceipt.contractAddress || getContractAddressFromDeploymentEvent(result)
-        : digitalAssetReceipt.contractAddress || digitalAssetReceipt.to;
+        ? digitalAssetReceipt?.contractAddress || getContractAddressFromDeploymentEvent(result)
+        : digitalAssetReceipt?.contractAddress || digitalAssetReceipt?.to;
 
       return prepareSetDataTransaction(
-        digitalAssetAddress,
-        lsp4Metadata,
+        digitalAssetAddress || '',
+        lsp4Metadata || '',
         digitalAssetDeploymentOptions,
         contractName,
         signer
@@ -642,9 +652,9 @@ export function digitalAssetAddress$(
       const { receipt: digitalAssetDeploymentReceipt } = deploymentEvent;
 
       const digitalAssetAddress = isSignerUniversalProfile
-        ? digitalAssetDeploymentReceipt.contractAddress ||
+        ? digitalAssetDeploymentReceipt?.contractAddress ||
           getContractAddressFromDeploymentEvent(deploymentEvent)
-        : digitalAssetDeploymentReceipt.contractAddress || digitalAssetDeploymentReceipt.to;
+        : digitalAssetDeploymentReceipt?.contractAddress || digitalAssetDeploymentReceipt?.to;
 
       return of(digitalAssetAddress);
     }),
@@ -655,15 +665,17 @@ export function digitalAssetAddress$(
 export function convertDigitalAssetConfigurationObject(
   contractDeploymentOptions?: DigitalAssetContractDeploymentOptions
 ): DigitalAssetConfiguration {
-  let providedVersion: string;
-  let providedDeployProxy: boolean;
+  let providedVersion: string | undefined;
+  let providedDeployProxy: boolean | undefined;
 
-  if ('LSP7DigitalAsset' in contractDeploymentOptions) {
-    providedVersion = contractDeploymentOptions?.LSP7DigitalAsset?.version;
-    providedDeployProxy = contractDeploymentOptions?.LSP7DigitalAsset?.deployProxy;
-  } else if ('LSP8IdentifiableDigitalAsset' in contractDeploymentOptions) {
-    providedVersion = contractDeploymentOptions?.LSP8IdentifiableDigitalAsset?.version;
-    providedDeployProxy = contractDeploymentOptions?.LSP8IdentifiableDigitalAsset?.deployProxy;
+  if (typeof contractDeploymentOptions === 'object') {
+    if ('LSP7DigitalAsset' in contractDeploymentOptions) {
+      providedVersion = contractDeploymentOptions?.LSP7DigitalAsset?.version;
+      providedDeployProxy = contractDeploymentOptions?.LSP7DigitalAsset?.deployProxy;
+    } else if ('LSP8IdentifiableDigitalAsset' in contractDeploymentOptions) {
+      providedVersion = contractDeploymentOptions?.LSP8IdentifiableDigitalAsset?.version;
+      providedDeployProxy = contractDeploymentOptions?.LSP8IdentifiableDigitalAsset?.deployProxy;
+    }
   }
 
   const { version, byteCode, libAddress } =
@@ -672,7 +684,7 @@ export function convertDigitalAssetConfigurationObject(
   return {
     deployProxy: providedDeployProxy,
     uploadProvider:
-      contractDeploymentOptions.uploadProvider || contractDeploymentOptions.uploadProvider,
+      contractDeploymentOptions?.uploadProvider || contractDeploymentOptions?.uploadProvider,
     version,
     byteCode,
     libAddress,

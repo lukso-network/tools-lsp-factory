@@ -6,11 +6,8 @@ import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { resolveContractDeployment, waitForContractDeployment } from '../helpers/deployment.helper';
 import { prepareMetadataAsset, prepareMetadataImage } from '../helpers/uploader.helper';
-import {
-  LSPFactoryOptions,
-  ProfileDataBeforeUpload,
-  ProfileDeploymentOptions,
-} from '../interfaces';
+import { ProfileDataBeforeUpload, ProfileDeploymentOptions } from '../interfaces';
+import { LSPFactoryInternalOptions } from '../interfaces/lsp-factory-options';
 import { LSP3ProfileBeforeUpload, ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import {
   ContractDeploymentOptions,
@@ -35,14 +32,14 @@ import { universalReceiverDelegateDeployment$ } from '../services/universal-rece
 /**
  * Class responsible for deploying UniversalProfiles and uploading LSP3 metadata to IPFS
  *
- * @property {LSPFactoryOptions} options
+ * @property {LSPFactoryInternalOptions} options
  * @property {NonceManager} signer
  * @memberof LSPFactory
  */
 export class UniversalProfile {
-  options: LSPFactoryOptions;
+  options: LSPFactoryInternalOptions;
   signer: NonceManager;
-  constructor(options: LSPFactoryOptions) {
+  constructor(options: LSPFactoryInternalOptions) {
     this.options = options;
     this.signer = new NonceManager(options.signer);
   }
@@ -71,8 +68,9 @@ export class UniversalProfile {
     contractDeploymentOptions?: ContractDeploymentOptions
   ): Promise<DeployedUniversalProfileContracts> {
     await this.options.finishInit;
-    const deploymentConfiguration =
-      convertUniversalProfileConfigurationObject(contractDeploymentOptions);
+    const deploymentConfiguration = contractDeploymentOptions
+      ? convertUniversalProfileConfigurationObject(contractDeploymentOptions)
+      : undefined;
 
     // -1 > Run IPFS upload process in parallel with contract deployment
     const lsp3Profile$ = lsp3ProfileUpload$(
