@@ -21,6 +21,7 @@ import {
   DeploymentEventTransaction,
   DeploymentStatus,
   DeploymentType,
+  EthersExternalProvider,
 } from '../interfaces/deployment-events';
 
 import { GAS_BUFFER, GAS_PRICE } from './config.helper';
@@ -167,8 +168,11 @@ export function getProxyByteCode(address: string) {
 
 export function getDeployedByteCode(
   contractAddress: string,
-  provider: providers.Web3Provider | providers.JsonRpcProvider
+  provider: providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider
 ) {
+  if (!('getCode' in provider)) {
+    return provider.request({ method: 'eth_getCode', params: [contractAddress, 'latest'] });
+  }
   return provider.getCode(contractAddress);
 }
 

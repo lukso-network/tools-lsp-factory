@@ -6,6 +6,7 @@ import { defaultIfEmpty, last, shareReplay, switchMap, tap } from 'rxjs/operator
 import {
   BaseContractAddresses,
   DeploymentEventContract,
+  EthersExternalProvider,
   LSP1UniversalReceiverDelegateUP__factory,
   LSP6KeyManagerInit__factory,
   LSP7MintableInit__factory,
@@ -116,7 +117,7 @@ function deployBaseContract$(
 }
 
 export function shouldDeployBaseContract$(
-  provider: providers.Web3Provider | providers.JsonRpcProvider,
+  provider: providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider,
   defaultDeployProxy?: boolean,
   providedDeployProxy?: boolean,
   defaultBaseContractAddress?: string,
@@ -149,7 +150,7 @@ export function shouldDeployUniversalProfileBaseContracts$(
   defaultUPBaseContractAddress: string,
   defaultUniversalReceiverBaseContractAddress: string,
   defaultKeyManagerBaseContractAddress: string,
-  provider: providers.Web3Provider | providers.JsonRpcProvider,
+  provider: providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider,
   chainId: number,
   contractDeploymentOptions?: UniversalProfileDeploymentConfiguration
 ) {

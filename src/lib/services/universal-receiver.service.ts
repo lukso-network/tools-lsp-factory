@@ -14,7 +14,7 @@ import {
   getDeployedByteCode,
   waitForReceipt,
 } from '../helpers/deployment.helper';
-import { BaseContractAddresses, ContractNames } from '../interfaces';
+import { BaseContractAddresses, ContractNames, EthersExternalProvider } from '../interfaces';
 
 export type UniversalReceiverDeploymentEvent =
   | DeploymentEventContract
@@ -22,7 +22,7 @@ export type UniversalReceiverDeploymentEvent =
 
 export function universalReceiverDelegateDeployment$(
   signer: Signer,
-  provider: providers.Web3Provider | providers.JsonRpcProvider,
+  provider: providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider,
   baseContractAddresses$: Observable<BaseContractAddresses>,
   providedUniversalReceiverAddress?: string,
   defaultUniversalReceiverAddress?: Promise<string>,
