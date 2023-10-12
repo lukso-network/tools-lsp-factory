@@ -30,6 +30,7 @@ jobs:
           restore-keys: npm-
 
       - name: Configure
+        if: ${{ matrix.node-version == '16.x'}}
         run: npm config set scripts-prepend-node-path auto
 
       - name: Install
