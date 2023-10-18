@@ -93,8 +93,8 @@ export async function testSetData(upAddress: string, keyManagerAddress: string, 
 
   expect(result).toBeTruthy();
 
-  const data = await universalProfile.getDataBatch([key]);
-  expect(data).toEqual([value]);
+  const data = await universalProfile.getData(key);
+  expect(data).toEqual(value);
 }
 
 export async function testProxyBytecodeContainsAddress(

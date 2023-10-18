@@ -15,6 +15,7 @@ import { lsp4DigitalAsset } from '../../../test/lsp4-digital-asset.mock';
 import { JSONURL_KNOWN_HASH_FUNCTIONS } from '../helpers/config.helper';
 
 import { ProxyDeployer } from './proxy-deployer';
+import ERC725 from '@erc725/erc725.js';
 
 jest.setTimeout(30000);
 jest.useRealTimers();
@@ -120,6 +121,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       }
     );
   });
+
   it('Should be compatible with RxJS', (done) => {
     const myLSPFactory = new LSPFactory(provider, signer);
     let lsp8Address: string;
@@ -287,6 +289,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
           signer
         );
       });
+
       it('should deploy and set LSP4DigitalAsset data', async () => {
         const ownerAddress = await digitalAsset.owner();
         expect(ownerAddress).toEqual(controllerAddress);
@@ -296,14 +299,20 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         expect(data.startsWith(JSONURL_KNOWN_HASH_FUNCTIONS['keccak256(utf8)'])).toBe(true);
         expect(data).toEqual(expectedLSP4Value);
       });
-      it('should have correct name and symbol set', async () => {
-        const [retrievedName, retrievedSymbol] = await digitalAsset.getDataBatch([
-          '0xdeba1e292f8ba88238e10ab3c7f88bd4be4fac56cad5194b6ecceaf653468af1',
-          '0x2f0a68ab07768e01943a599e73362a0e17a63a72e94dd2e384d2c1d4db932756',
-        ]);
+
+      it('should have correct name, symbol and token ID type set', async () => {
+        const [retrievedName, retrievedSymbol, retrievedTokenIdType] =
+          await digitalAsset.getDataBatch([
+            ERC725YDataKeys.LSP4.LSP4TokenName,
+            ERC725YDataKeys.LSP4.LSP4TokenSymbol,
+            ERC725YDataKeys.LSP8.LSP8TokenIdType,
+          ]);
+
+        const tokenIdTypeDecoded = ethers.BigNumber.from(retrievedTokenIdType).toNumber();
 
         expect(ethers.utils.toUtf8String(retrievedName)).toEqual(name);
         expect(ethers.utils.toUtf8String(retrievedSymbol)).toEqual(symbol);
+        expect(tokenIdTypeDecoded).toEqual(tokenIdType);
       });
     });
 
