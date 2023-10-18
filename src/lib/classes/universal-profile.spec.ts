@@ -1,4 +1,5 @@
 import { ERC725 } from '@erc725/erc725.js';
+import { ALL_PERMISSIONS, ERC725YDataKeys } from '@lukso/lsp-smart-contracts';
 import KeyManagerContract from '@lukso/lsp-smart-contracts/artifacts/LSP6KeyManager.json';
 import UniversalProfileContract from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
@@ -18,12 +19,6 @@ import {
   testUPDeployment,
 } from '../../../test/test.utils';
 import { UniversalProfile } from '../../../types/ethers-v5';
-import {
-  ADDRESS_PERMISSIONS_ARRAY_KEY,
-  DEFAULT_PERMISSIONS,
-  LSP3_UP_KEYS,
-  PREFIX_PERMISSIONS,
-} from '../helpers/config.helper';
 import { getDeployedByteCode } from '../helpers/deployment.helper';
 import { ContractNames, DeployedUniversalProfileContracts, DeploymentEvent } from '../interfaces';
 
@@ -99,18 +94,19 @@ describe('UniversalProfile', () => {
       );
     });
 
-    it('controller address should have DEFAULT_PERMISSIONS set', async () => {
+    it('controller address should have ALL_PERMISSIONS set', async () => {
       const [signerPermissions] = await universalProfile.getDataBatch([
-        PREFIX_PERMISSIONS + uniqueController.address.substring(2),
+        ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] +
+          uniqueController.address.substring(2),
       ]);
 
-      expect(signerPermissions).toEqual(ERC725.encodePermissions(DEFAULT_PERMISSIONS));
+      expect(signerPermissions).toEqual(ALL_PERMISSIONS);
     });
 
     it('controller address should be registered in AddressPermissions[0] array', async () => {
       const hexIndex = ethers.utils.hexlify([0]);
       const key =
-        ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
+        ERC725YDataKeys.LSP6['AddressPermissions[]'].index +
         ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
       const [result] = await universalProfile.getDataBatch([key]);
@@ -135,17 +131,17 @@ describe('UniversalProfile', () => {
       universalProfile = UniversalProfile__factory.connect(LSP0ERC725Account.address, controller);
     });
 
-    it('controller address should have DEFAULT_PERMISSIONS set', async () => {
+    it('controller address should have ALL_PERMISSIONS set', async () => {
       const [signerPermissions] = await universalProfile.getDataBatch([
-        PREFIX_PERMISSIONS + controller.address.substring(2),
+        ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + controller.address.substring(2),
       ]);
 
-      expect(signerPermissions).toEqual(ERC725.encodePermissions(DEFAULT_PERMISSIONS));
+      expect(signerPermissions).toEqual(ALL_PERMISSIONS);
     });
 
     it('signer address should have no permissions set', async () => {
       const [signerPermissions] = await universalProfile.getDataBatch([
-        PREFIX_PERMISSIONS + signers[0].address.substring(2),
+        ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signers[0].address.substring(2),
       ]);
 
       expect(signerPermissions).toEqual(ERC725.encodePermissions({}));
@@ -173,7 +169,7 @@ describe('UniversalProfile', () => {
 
     it('controller address should have custom permissions set', async () => {
       const [signerPermissions] = await universalProfile.getDataBatch([
-        PREFIX_PERMISSIONS + controller.address.substring(2),
+        ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + controller.address.substring(2),
       ]);
 
       expect(signerPermissions).toEqual(customPermissions);
@@ -214,18 +210,21 @@ describe('UniversalProfile', () => {
       keyManager = new ethers.Contract(LSP6KeyManager.address, KeyManagerContract.abi, provider);
     });
 
-    it('1st address should have DEFAULT_PERMISSIONS set', async () => {
+    it('1st address should have ALL_PERMISSIONS set', async () => {
       const [signerPermissions] = await universalProfile
         .connect(signers[0])
-        .callStatic.getDataBatch([PREFIX_PERMISSIONS + firstControllerAddress.substring(2)]);
+        .callStatic.getDataBatch([
+          ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] +
+            firstControllerAddress.substring(2),
+        ]);
 
-      expect(signerPermissions).toEqual(ERC725.encodePermissions(DEFAULT_PERMISSIONS));
+      expect(signerPermissions).toEqual(ALL_PERMISSIONS);
     });
 
     it('1st address should be registered in AddressPermissions[0] array', async () => {
       const hexIndex = ethers.utils.hexlify([0]);
       const key =
-        ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
+        ERC725YDataKeys.LSP6['AddressPermissions[]'].index +
         ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
       const [result] = await universalProfile.connect(signers[0]).callStatic.getDataBatch([key]);
@@ -233,10 +232,13 @@ describe('UniversalProfile', () => {
       expect(checkedsumResult).toEqual(firstControllerAddress);
     });
 
-    it('2nd address should have DEFAULT_PERMISSIONS set', async () => {
+    it('2nd address should have ALL_PERMISSIONS set', async () => {
       const [signerPermissions] = await universalProfile
         .connect(signers[1])
-        .callStatic.getDataBatch([PREFIX_PERMISSIONS + secondControllerAddress.substring(2)]);
+        .callStatic.getDataBatch([
+          ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] +
+            secondControllerAddress.substring(2),
+        ]);
 
       expect(signerPermissions).toEqual(customPermissions);
     });
@@ -244,7 +246,7 @@ describe('UniversalProfile', () => {
     it('2nd address should be registered in AddressPermissions[1] array', async () => {
       const hexIndex = ethers.utils.hexlify([1]);
       const key =
-        ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
+        ERC725YDataKeys.LSP6['AddressPermissions[]'].index +
         ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
       const [result] = await universalProfile.connect(signers[0]).callStatic.getDataBatch([key]);
@@ -325,6 +327,7 @@ describe('UniversalProfile', () => {
 
     describe('Deployment with only ERC725 baseContract set to true', () => {
       let deployedContracts: DeployedUniversalProfileContracts;
+
       it('Should deploy only ERC725 Base contract', async () => {
         deployedContracts = await testUPDeployment(
           {
@@ -337,6 +340,7 @@ describe('UniversalProfile', () => {
           [signers[0].address]
         );
       });
+
       it('UP contract bytecode should contain base contract address', async () => {
         if (!deployedContracts.LSP0ERC725Account) fail();
         if (!deployedContracts.LSP0ERC725AccountBaseContract) fail();
@@ -620,7 +624,7 @@ describe('UniversalProfile', () => {
         );
 
         const data = await universalProfile.getDataBatch([
-          LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
+          ERC725YDataKeys.LSP1.LSP1UniversalReceiverDelegate,
         ]);
 
         const checkedsumResult = ethers.utils.getAddress(data[0]);
@@ -650,7 +654,7 @@ describe('UniversalProfile', () => {
         );
 
         const univeralReceiverDelegate = await universalProfile.getDataBatch([
-          LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
+          ERC725YDataKeys.LSP1.LSP1UniversalReceiverDelegate,
         ]);
 
         const checkedsumResult = ethers.utils.getAddress(univeralReceiverDelegate[0]);
