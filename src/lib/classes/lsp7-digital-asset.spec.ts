@@ -10,9 +10,9 @@ import {
   LSPFactory,
 } from '../../../build/main/src/index';
 import { testDeployWithSpecifiedCreators } from '../../../test/digital-asset.utils';
+import { lsp4DigitalAsset } from '../../../test/lsp4-digital-asset.mock';
 import { JSONURL_KNOWN_HASH_FUNCTIONS } from '../helpers/config.helper';
 
-import { lsp4DigitalAsset } from './../../../test/lsp4-digital-asset.mock';
 import { ProxyDeployer } from './proxy-deployer';
 
 jest.setTimeout(30000);
