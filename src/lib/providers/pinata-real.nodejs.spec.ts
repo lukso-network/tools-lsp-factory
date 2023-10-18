@@ -7,7 +7,7 @@
 import { createReadStream } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { createPinataUploader } from './pinata';
+import { createPinataUploader } from './pinata-provider';
 
 describe('Pinata upload provider (node)', () => {
   beforeEach(() => {

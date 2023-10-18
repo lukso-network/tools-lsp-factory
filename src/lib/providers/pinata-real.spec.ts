@@ -10,7 +10,7 @@ import { resolve } from 'node:path';
 
 import Blob from 'cross-blob';
 
-import { createPinataBrowserUploader } from './pinata-browser';
+import { createPinataUploader } from './pinata-provider';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -39,7 +39,7 @@ async function mockDependencies() {
     pinataJWTKey: process.env.PINATAJWTKEY,
   };
   const pinOpts = { pinataMetadata: { name: 'test-image.jpg' } };
-  const uploadProvider = createPinataBrowserUploader(config, pinOpts);
+  const uploadProvider = createPinataUploader(config, pinOpts);
   return {
     file,
     config,

@@ -6,17 +6,17 @@
  */
 import { Readable } from 'node:stream';
 
-import { uploadToIPFS } from '../helpers/pinata-helpers';
+import { uploadToIPFS } from '../helpers/pinata-provider-helpers';
 
-jest.mock('../helpers/pinata-helpers', () => {
-  const actual = jest.requireActual('../helpers/pinata-helpers');
+jest.mock('../helpers/pinata-provider-helpers', () => {
+  const actual = jest.requireActual('../helpers/pinata-provider-helpers');
   return {
     ...actual,
     uploadToIPFS: jest.fn(),
   };
 });
 
-import { createPinataUploader } from './pinata';
+import { createPinataUploader } from './pinata-provider';
 
 describe('Pinata upload provider (node)', () => {
   beforeEach(() => {

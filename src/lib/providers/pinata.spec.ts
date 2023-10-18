@@ -7,12 +7,12 @@
 import 'whatwg-fetch';
 import FormData from 'form-data';
 
-import { uploadToIPFS } from '../helpers/pinata-helpers-browser';
+import { uploadToIPFS } from '../helpers/pinata-provider-helpers';
 
-import { createPinataBrowserUploader } from './pinata-browser';
+import { createPinataUploader } from './pinata-provider';
 
-jest.mock('../helpers/pinata-helpers-browser', () => {
-  const actual = jest.requireActual('../helpers/pinata-helpers-browser');
+jest.mock('../helpers/pinata-provider-helpers', () => {
+  const actual = jest.requireActual('../helpers/pinata-provider-helpers');
   return {
     ...actual,
     uploadToIPFS: jest.fn(),
@@ -39,7 +39,7 @@ async function mockDependencies() {
   const file = new Blob([Buffer.from('123123')], { type: 'image/png' });
 
   const pinOpts = { pinataMetadata: { name: 'test-image.png' } };
-  const uploadProvider = createPinataBrowserUploader(config, pinOpts);
+  const uploadProvider = createPinataUploader(config, pinOpts);
   (uploadToIPFS as jest.Mock).mockImplementation(async () => {
     return new URL('ipfs://QmY4Z');
   });
