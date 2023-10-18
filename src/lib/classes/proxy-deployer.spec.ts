@@ -1,3 +1,4 @@
+import { ERC725YDataKeys } from '@lukso/lsp-smart-contracts';
 import { ethers, SignerWithAddress } from 'hardhat';
 
 import { ProxyDeployer } from './proxy-deployer';
@@ -23,16 +24,10 @@ describe('UniversalProfile', () => {
     );
     await erc725AccountProxy.initialize(await signer.getAddress());
 
-    await erc725AccountProxy.setData(
-      '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-      '0xbeefbeef',
-      {
-        from: await signer.getAddress(),
-      }
-    );
-    const data = await erc725AccountProxy.getData(
-      '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'
-    );
+    await erc725AccountProxy.setData(ERC725YDataKeys.LSP3.LSP3Profile, '0xbeefbeef', {
+      from: await signer.getAddress(),
+    });
+    const data = await erc725AccountProxy.getData(ERC725YDataKeys.LSP3.LSP3Profile);
 
     expect(data).toEqual('0xbeefbeef');
   });

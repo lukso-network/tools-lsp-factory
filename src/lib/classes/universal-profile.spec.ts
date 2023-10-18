@@ -19,6 +19,7 @@ import {
   testUPDeployment,
 } from '../../../test/test.utils';
 import { UniversalProfile } from '../../../types/ethers-v5';
+import { JSONURL_KNOWN_HASH_FUNCTIONS } from '../helpers/config.helper';
 import { getDeployedByteCode } from '../helpers/deployment.helper';
 import { ContractNames, DeployedUniversalProfileContracts, DeploymentEvent } from '../interfaces';
 
@@ -64,11 +65,9 @@ describe('UniversalProfile', () => {
 
           universalProfile = UniversalProfile__factory.connect(LSP0ERC725Account.address, signer);
 
-          const lsp3Data = await universalProfile.getData(
-            '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'
-          );
+          const lsp3Data = await universalProfile.getData(ERC725YDataKeys.LSP3.LSP3Profile);
 
-          expect(lsp3Data.startsWith('0x6f357c6a')).toBe(true);
+          expect(lsp3Data.startsWith(JSONURL_KNOWN_HASH_FUNCTIONS['keccak256(utf8)'])).toBe(true);
           expect(lsp3Data).toEqual(expectedLSP3Value);
         });
       });
