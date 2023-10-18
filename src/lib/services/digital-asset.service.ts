@@ -47,7 +47,7 @@ import {
   DigitalAssetContractDeploymentOptions,
   DigitalAssetDeploymentOptions,
   LSP7DigitalAssetDeploymentOptions,
-  LSP8IdentifiableDigitalAssetDeploymentOptions
+  LSP8IdentifiableDigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
 import {
   LSP4DigitalAssetJSON,
@@ -168,23 +168,17 @@ function initializeLSP7Proxy(
 
       const controllerAddress = await signer.getAddress();
 
-      const gasEstimate = await contract.estimateGas[`initialize(string,string,address,bool)`](
+      const gasEstimate = await contract.estimateGas.initialize(
         name,
         symbol,
         controllerAddress,
         isNFT
       );
 
-      const transaction = await contract[`initialize(string,string,address,bool)`](
-        name,
-        symbol,
-        controllerAddress,
-        isNFT,
-        {
-          gasLimit: gasEstimate.add(GAS_BUFFER),
-          gasPrice: GAS_PRICE,
-        }
-      );
+      const transaction = await contract.initialize(name, symbol, controllerAddress, isNFT, {
+        gasLimit: gasEstimate.add(GAS_BUFFER),
+        gasPrice: GAS_PRICE,
+      });
 
       return {
         type: DeploymentType.TRANSACTION,
@@ -270,7 +264,8 @@ async function deployLSP8IdentifiableDigitalAsset(
       return new ContractFactory(LSP8Mintable__factory.abi, byteCode, signer).deploy(
         digitalAssetDeploymentOptions.name,
         digitalAssetDeploymentOptions.symbol,
-        controllerAddress
+        controllerAddress,
+        digitalAssetDeploymentOptions.tokenIdType
       );
     }
 
@@ -295,9 +290,9 @@ async function deployLSP8IdentifiableDigitalAsset(
 function initializeLSP8Proxy(
   signer: Signer,
   digitalAssetDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
-  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions
+  digitalAssetDeploymentOptions: LSP8IdentifiableDigitalAssetDeploymentOptions
 ) {
-  const { name, symbol } = digitalAssetDeploymentOptions;
+  const { name, symbol, tokenIdType } = digitalAssetDeploymentOptions;
 
   const initialize$ = digitalAssetDeploymentReceipt$.pipe(
     takeLast(1),
@@ -308,25 +303,22 @@ function initializeLSP8Proxy(
 
       const controllerAddress = await signer.getAddress();
 
-      const gasEstimate = await contract.estimateGas[`initialize(string,string,address)`](
-        name,
-        symbol,
-        controllerAddress
-      );
-
-      const transaction = await contract[`initialize(string,string,address)`](
+      const gasEstimate = await contract.estimateGas.initialize(
         name,
         symbol,
         controllerAddress,
-        {
-          gasLimit: gasEstimate.add(GAS_BUFFER),
-          gasPrice: GAS_PRICE,
-        }
+        tokenIdType
       );
+
+      const transaction = await contract.initialize(name, symbol, controllerAddress, tokenIdType, {
+        gasLimit: gasEstimate.add(GAS_BUFFER),
+        gasPrice: GAS_PRICE,
+      });
+
       return {
         type: DeploymentType.TRANSACTION,
         contractName: result.contractName,
-        functionName: 'initialize(string,string,address)',
+        functionName: 'initialize(string,string,address,uint256)',
         status: DeploymentStatus.PENDING,
         transaction,
       };
@@ -614,7 +606,7 @@ async function prepareSetDataTransaction(
     keysToSet.push(...creatorArrayIndexKeys);
     keysToSet.push(...creatorsMapKeys);
 
-    valuesToSet.push(ethers.utils.hexZeroPad(ethers.utils.hexlify([creators.length]), 32));
+    valuesToSet.push(ethers.utils.hexZeroPad(ethers.utils.hexlify(creators.length), 16));
     valuesToSet.push(...creatorArrayIndexValues);
     valuesToSet.push(...creatorsMapValues);
   }

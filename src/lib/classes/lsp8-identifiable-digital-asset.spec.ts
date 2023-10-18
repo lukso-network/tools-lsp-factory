@@ -1,3 +1,4 @@
+import { LSP8_TOKEN_ID_TYPES } from '@lukso/lsp-smart-contracts';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
 import { ethers } from 'hardhat';
@@ -37,6 +38,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       controllerAddress: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
       name: 'TOKEN',
       symbol: 'TKN',
+      tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
     });
 
     expect(lsp8IdentifiableDigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
@@ -59,6 +61,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
+        tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: {
@@ -88,6 +91,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
+        tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: { version: baseContract.address },
@@ -157,6 +161,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
+        tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: { version: baseContract.address },
@@ -176,6 +181,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
         name: 'TOKEN',
         symbol: 'TKN',
+        tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: {
@@ -206,6 +212,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
+        tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: {
@@ -249,6 +256,8 @@ describe('LSP8IdentifiableDigitalAsset', () => {
     const controllerAddress = '0xaDa25A4424b08F5337DacD619D4bCb21536a9B95';
     const name = 'TOKEN';
     const symbol = 'TKN';
+    const tokenIdType = LSP8_TOKEN_ID_TYPES.UNIQUE_ID;
+
     const expectedLSP4Value =
       '0x6f357c6a88c86e704ea6cb386d5952122035901f5ea5bb4a695b17d3fccc845d84032b0d697066733a2f2f516d5272714254514c33683256633950454c33643138566e526b6e7a73744547564378685657366a50615a7a5346';
 
@@ -266,6 +275,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
           name,
           symbol,
           digitalAssetMetadata: lsp4Metadata,
+          tokenIdType,
         });
 
         expect(lsp8DigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
@@ -307,6 +317,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         '0xFCA72D5763b8cFc686C2285099D5F35a2F094E9f',
         '0x591c236982b089Ad4B60758C075fA50Ec53CD674',
       ];
+      const tokenIdType = LSP8_TOKEN_ID_TYPES.UNIQUE_ID;
 
       let lspFactory: LSPFactory;
 
@@ -326,6 +337,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
           name,
           symbol,
           creators,
+          tokenIdType,
         });
 
         digitalAsset = LSP8Mintable__factory.connect(
