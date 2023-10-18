@@ -64,12 +64,12 @@ describe('UniversalProfile', () => {
 
           universalProfile = UniversalProfile__factory.connect(LSP0ERC725Account.address, signer);
 
-          const lsp3Data = await universalProfile.getDataBatch([
-            '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-          ]);
+          const lsp3Data = await universalProfile.getData(
+            '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'
+          );
 
-          expect(lsp3Data[0].startsWith('0x6f357c6a')).toBe(true);
-          expect(lsp3Data[0]).toEqual(expectedLSP3Value);
+          expect(lsp3Data.startsWith('0x6f357c6a')).toBe(true);
+          expect(lsp3Data).toEqual(expectedLSP3Value);
         });
       });
     });
@@ -95,10 +95,10 @@ describe('UniversalProfile', () => {
     });
 
     it('controller address should have ALL_PERMISSIONS set', async () => {
-      const [signerPermissions] = await universalProfile.getDataBatch([
+      const signerPermissions = await universalProfile.getData(
         ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] +
-          uniqueController.address.substring(2),
-      ]);
+          uniqueController.address.substring(2)
+      );
 
       expect(signerPermissions).toEqual(ALL_PERMISSIONS);
     });
@@ -109,7 +109,7 @@ describe('UniversalProfile', () => {
         ERC725YDataKeys.LSP6['AddressPermissions[]'].index +
         ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
-      const [result] = await universalProfile.getDataBatch([key]);
+      const result = await universalProfile.getData(key);
       const checkedsumResult = ethers.utils.getAddress(result);
       expect(checkedsumResult).toEqual(uniqueController.address);
     });
@@ -132,17 +132,17 @@ describe('UniversalProfile', () => {
     });
 
     it('controller address should have ALL_PERMISSIONS set', async () => {
-      const [signerPermissions] = await universalProfile.getDataBatch([
-        ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + controller.address.substring(2),
-      ]);
+      const signerPermissions = await universalProfile.getData(
+        ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + controller.address.substring(2)
+      );
 
       expect(signerPermissions).toEqual(ALL_PERMISSIONS);
     });
 
     it('signer address should have no permissions set', async () => {
-      const [signerPermissions] = await universalProfile.getDataBatch([
-        ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signers[0].address.substring(2),
-      ]);
+      const signerPermissions = await universalProfile.getData(
+        ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signers[0].address.substring(2)
+      );
 
       expect(signerPermissions).toEqual(ERC725.encodePermissions({}));
     });
@@ -168,9 +168,9 @@ describe('UniversalProfile', () => {
     });
 
     it('controller address should have custom permissions set', async () => {
-      const [signerPermissions] = await universalProfile.getDataBatch([
-        ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + controller.address.substring(2),
-      ]);
+      const signerPermissions = await universalProfile.getData(
+        ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + controller.address.substring(2)
+      );
 
       expect(signerPermissions).toEqual(customPermissions);
     });
@@ -211,12 +211,12 @@ describe('UniversalProfile', () => {
     });
 
     it('1st address should have ALL_PERMISSIONS set', async () => {
-      const [signerPermissions] = await universalProfile
+      const signerPermissions = await universalProfile
         .connect(signers[0])
-        .callStatic.getDataBatch([
+        .getData(
           ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] +
-            firstControllerAddress.substring(2),
-        ]);
+            firstControllerAddress.substring(2)
+        );
 
       expect(signerPermissions).toEqual(ALL_PERMISSIONS);
     });
@@ -227,18 +227,18 @@ describe('UniversalProfile', () => {
         ERC725YDataKeys.LSP6['AddressPermissions[]'].index +
         ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
-      const [result] = await universalProfile.connect(signers[0]).callStatic.getDataBatch([key]);
+      const result = await universalProfile.connect(signers[0]).callStatic.getData(key);
       const checkedsumResult = ethers.utils.getAddress(result);
       expect(checkedsumResult).toEqual(firstControllerAddress);
     });
 
     it('2nd address should have ALL_PERMISSIONS set', async () => {
-      const [signerPermissions] = await universalProfile
+      const signerPermissions = await universalProfile
         .connect(signers[1])
-        .callStatic.getDataBatch([
+        .getData(
           ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] +
-            secondControllerAddress.substring(2),
-        ]);
+            secondControllerAddress.substring(2)
+        );
 
       expect(signerPermissions).toEqual(customPermissions);
     });
@@ -249,7 +249,7 @@ describe('UniversalProfile', () => {
         ERC725YDataKeys.LSP6['AddressPermissions[]'].index +
         ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
-      const [result] = await universalProfile.connect(signers[0]).callStatic.getDataBatch([key]);
+      const result = await universalProfile.connect(signers[0]).getData(key);
       const checkedsumResult = ethers.utils.getAddress(result);
       expect(checkedsumResult).toEqual(secondControllerAddress);
     });
@@ -623,11 +623,11 @@ describe('UniversalProfile', () => {
           signers[0]
         );
 
-        const data = await universalProfile.getDataBatch([
-          ERC725YDataKeys.LSP1.LSP1UniversalReceiverDelegate,
-        ]);
+        const data = await universalProfile.getData(
+          ERC725YDataKeys.LSP1.LSP1UniversalReceiverDelegate
+        );
 
-        const checkedsumResult = ethers.utils.getAddress(data[0]);
+        const checkedsumResult = ethers.utils.getAddress(data);
 
         expect(checkedsumResult).toEqual(baseContracts.universalReceiverDelegate.address);
       });
@@ -653,11 +653,11 @@ describe('UniversalProfile', () => {
           signers[0]
         );
 
-        const univeralReceiverDelegate = await universalProfile.getDataBatch([
-          ERC725YDataKeys.LSP1.LSP1UniversalReceiverDelegate,
-        ]);
+        const univeralReceiverDelegate = await universalProfile.getData(
+          ERC725YDataKeys.LSP1.LSP1UniversalReceiverDelegate
+        );
 
-        const checkedsumResult = ethers.utils.getAddress(univeralReceiverDelegate[0]);
+        const checkedsumResult = ethers.utils.getAddress(univeralReceiverDelegate);
 
         expect(checkedsumResult).toEqual(deployedContracts.LSP1UniversalReceiverDelegate.address);
       });

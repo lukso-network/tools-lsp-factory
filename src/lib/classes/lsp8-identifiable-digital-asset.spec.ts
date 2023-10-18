@@ -280,12 +280,12 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         const ownerAddress = await digitalAsset.owner();
         expect(ownerAddress).toEqual(controllerAddress);
 
-        const data = await digitalAsset.getDataBatch([
-          '0x9afb95cacc9f95858ec44aa8c3b685511002e30ae54415823f406128b85b238e',
-        ]);
+        const data = await digitalAsset.getData(
+          '0x9afb95cacc9f95858ec44aa8c3b685511002e30ae54415823f406128b85b238e'
+        );
 
-        expect(data[0].startsWith('0x6f357c6a')).toBe(true);
-        expect(data[0]).toEqual(expectedLSP4Value);
+        expect(data.startsWith('0x6f357c6a')).toBe(true);
+        expect(data).toEqual(expectedLSP4Value);
       });
       it('should have correct name and symbol set', async () => {
         const [retrievedName, retrievedSymbol] = await digitalAsset.getDataBatch([
