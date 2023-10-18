@@ -1,5 +1,5 @@
 import { Signer } from '@ethersproject/abstract-signer';
-import { providers } from 'ethers';
+import { constants as ethersConstants, providers } from 'ethers';
 import { defer, EMPTY, forkJoin, from, merge, Observable, of } from 'rxjs';
 import { defaultIfEmpty, last, shareReplay, switchMap, tap } from 'rxjs/operators';
 

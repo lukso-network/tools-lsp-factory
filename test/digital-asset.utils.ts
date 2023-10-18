@@ -7,11 +7,11 @@ export async function testDeployWithSpecifiedCreators(
   digitalAsset: LSP7Mintable | LSP8Mintable,
   creators: string[]
 ) {
-  const [creatorArrayLength] = await digitalAsset.getDataBatch([LSP4_KEYS.LSP4_CREATORS_ARRAY]);
-
-  expect(creatorArrayLength).toEqual(
-    '0x0000000000000000000000000000000000000000000000000000000000000003'
+  const creatorArrayLength = await digitalAsset.getData(
+    ERC725YDataKeys.LSP4['LSP4Creators[]'].length
   );
+
+  expect(creatorArrayLength).toEqual('0x00000000000000000000000000000003');
 
   const [creator1, creator2, creator3] = await digitalAsset.getDataBatch([
     LSP4_KEYS.LSP4_CREATORS_ARRAY.slice(0, 34) +
