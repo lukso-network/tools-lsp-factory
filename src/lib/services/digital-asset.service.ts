@@ -1,5 +1,5 @@
 import { Signer } from '@ethersproject/abstract-signer';
-import { INTERFACE_IDS } from '@lukso/lsp-smart-contracts';
+import { ERC725YDataKeys, INTERFACE_IDS } from '@lukso/lsp-smart-contracts';
 import axios from 'axios';
 import { ContractFactory, ethers } from 'ethers';
 import {
@@ -23,7 +23,7 @@ import {
   LSP8MintableInit__factory,
 } from '../../';
 import { LSP4DigitalAssetMetadata } from '../classes/lsp4-digital-asset-metadata';
-import { GAS_BUFFER, GAS_PRICE, LSP4_KEYS } from '../helpers/config.helper';
+import { GAS_BUFFER, GAS_PRICE } from '../helpers/config.helper';
 import {
   convertContractDeploymentOptionsVersion,
   deployContract,
@@ -584,7 +584,7 @@ async function prepareSetDataTransaction(
 
   for (let i = 0; i < creators.length; i++) {
     creatorArrayIndexKeys.push(
-      LSP4_KEYS.LSP4_CREATORS_ARRAY.slice(0, 34) +
+      ERC725YDataKeys.LSP4['LSP4Creators[]'].index +
         ethers.utils.hexZeroPad(ethers.utils.hexlify([i]), 16).substring(2)
     );
 
@@ -593,7 +593,7 @@ async function prepareSetDataTransaction(
     const isUniversalProfile = await addressIsUniversalProfile(creators[i], signer);
     const creatorInterface = isUniversalProfile ? INTERFACE_IDS.LSP0ERC725Account : '0xffffffff';
 
-    creatorsMapKeys.push(LSP4_KEYS.LSP4_CREATORS_MAP_PREFIX + creators[i].slice(2));
+    creatorsMapKeys.push(ERC725YDataKeys.LSP4.LSP4CreatorsMap + creators[i].slice(2));
     creatorsMapValues.push(
       creatorInterface.slice(0, 10) + ethers.utils.hexZeroPad(ethers.utils.hexlify([i]), 8).slice(2)
     );
@@ -602,7 +602,7 @@ async function prepareSetDataTransaction(
   const valuesToSet: string[] = [];
 
   if (creators.length) {
-    keysToSet.push(LSP4_KEYS.LSP4_CREATORS_ARRAY);
+    keysToSet.push(ERC725YDataKeys.LSP4['LSP4Creators[]'].length);
     keysToSet.push(...creatorArrayIndexKeys);
     keysToSet.push(...creatorsMapKeys);
 
@@ -612,7 +612,7 @@ async function prepareSetDataTransaction(
   }
 
   if (lsp4Metadata) {
-    keysToSet.push(LSP4_KEYS.LSP4_METADATA);
+    keysToSet.push(ERC725YDataKeys.LSP4.LSP4Metadata);
     valuesToSet.push(lsp4Metadata);
   }
 

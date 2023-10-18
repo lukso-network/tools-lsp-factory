@@ -15,13 +15,15 @@ import {
   UniversalProfileInit__factory,
 } from '../..';
 import contractVersions from '../../versions.json';
-import { GAS_PRICE, NULL_ADDRESS } from '../helpers/config.helper';
+import { GAS_PRICE } from '../helpers/config.helper';
 import {
   deployBaseContract,
   getDeployedByteCode,
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { ContractNames as DigitalAssetContractNames } from '../interfaces/digital-asset-deployment';
+
+const { AddressZero } = ethersConstants;
 
 export function universalProfileBaseContractsDeployment$(
   signer: Signer,
@@ -124,7 +126,7 @@ export function shouldDeployBaseContract$(
   providedByteCode?: string
 ) {
   const defaultBaseContractBytecode$ = from(
-    getDeployedByteCode(defaultBaseContractAddress ?? NULL_ADDRESS, provider)
+    getDeployedByteCode(defaultBaseContractAddress ?? AddressZero, provider)
   );
 
   const deployProxy =

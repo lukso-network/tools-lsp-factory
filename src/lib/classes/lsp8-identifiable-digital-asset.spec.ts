@@ -1,4 +1,4 @@
-import { LSP8_TOKEN_ID_TYPES } from '@lukso/lsp-smart-contracts';
+import { ERC725YDataKeys, LSP8_TOKEN_ID_TYPES } from '@lukso/lsp-smart-contracts';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
 import { ethers } from 'hardhat';
@@ -12,6 +12,7 @@ import {
 } from '../../../build/main/src/index';
 import { testDeployWithSpecifiedCreators } from '../../../test/digital-asset.utils';
 import { lsp4DigitalAsset } from '../../../test/lsp4-digital-asset.mock';
+import { JSONURL_KNOWN_HASH_FUNCTIONS } from '../helpers/config.helper';
 
 import { ProxyDeployer } from './proxy-deployer';
 
@@ -290,12 +291,10 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         const ownerAddress = await digitalAsset.owner();
         expect(ownerAddress).toEqual(controllerAddress);
 
-        const data = await digitalAsset.getDataBatch([
-          '0x9afb95cacc9f95858ec44aa8c3b685511002e30ae54415823f406128b85b238e',
-        ]);
+        const data = await digitalAsset.getData(ERC725YDataKeys.LSP4.LSP4Metadata);
 
-        expect(data[0].startsWith('0x6f357c6a')).toBe(true);
-        expect(data[0]).toEqual(expectedLSP4Value);
+        expect(data.startsWith(JSONURL_KNOWN_HASH_FUNCTIONS['keccak256(utf8)'])).toBe(true);
+        expect(data).toEqual(expectedLSP4Value);
       });
       it('should have correct name and symbol set', async () => {
         const [retrievedName, retrievedSymbol] = await digitalAsset.getDataBatch([

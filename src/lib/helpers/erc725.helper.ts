@@ -1,4 +1,5 @@
 import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
+import { ERC725YDataKeys } from '@lukso/lsp-smart-contracts';
 import { providers } from 'ethers';
 
 import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
@@ -7,14 +8,14 @@ import { LSP4MetadataForEncoding } from '../interfaces/lsp4-digital-asset';
 export const schema: ERC725JSONSchema[] = [
   {
     name: 'LSP3Profile',
-    key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+    key: ERC725YDataKeys.LSP3.LSP3Profile,
     keyType: 'Singleton',
-    valueContent: 'JSONURL',
     valueType: 'bytes',
+    valueContent: 'JSONURL',
   },
   {
     name: 'LSP4Metadata',
-    key: '0x9afb95cacc9f95858ec44aa8c3b685511002e30ae54415823f406128b85b238e',
+    key: ERC725YDataKeys.LSP4.LSP4Metadata,
     keyType: 'Singleton',
     valueType: 'bytes',
     valueContent: 'JSONURL',

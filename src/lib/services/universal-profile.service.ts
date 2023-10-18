@@ -1,5 +1,5 @@
 import { ERC725 } from '@erc725/erc725.js';
-import { INTERFACE_IDS } from '@lukso/lsp-smart-contracts';
+import { ALL_PERMISSIONS, ERC725YDataKeys, INTERFACE_IDS } from '@lukso/lsp-smart-contracts';
 import axios from 'axios';
 import { BytesLike, Contract, ContractFactory, ethers, Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, from, Observable, of } from 'rxjs';
@@ -11,14 +11,7 @@ import {
   UniversalProfile__factory,
   UniversalProfileInit__factory,
 } from '../..';
-import {
-  ADDRESS_PERMISSIONS_ARRAY_KEY,
-  DEFAULT_PERMISSIONS,
-  GAS_BUFFER,
-  GAS_PRICE,
-  LSP3_UP_KEYS,
-  PREFIX_PERMISSIONS,
-} from '../helpers/config.helper';
+import { GAS_BUFFER, GAS_PRICE } from '../helpers/config.helper';
 import {
   convertContractDeploymentOptionsVersion,
   deployContract,
@@ -407,7 +400,7 @@ export async function prepareSetDataParameters(
   controllers.map((controller, index) => {
     if (typeof controller === 'string') {
       controllerAddresses[index] = controller;
-      controllerPermissions[index] = ERC725.encodePermissions(DEFAULT_PERMISSIONS);
+      controllerPermissions[index] = ALL_PERMISSIONS;
     } else {
       controllerAddresses[index] = controller.address;
       controllerPermissions[index] = controller.permissions;
@@ -416,7 +409,7 @@ export async function prepareSetDataParameters(
 
   // see: https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md#addresspermissionspermissionsaddress
   const addressPermissionsKeys = controllerAddresses.map(
-    (address) => PREFIX_PERMISSIONS + address.substring(2)
+    (address) => ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + address.substring(2)
   );
 
   // see: https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md#addresspermissions
@@ -424,7 +417,7 @@ export async function prepareSetDataParameters(
     const hexIndex = ethers.utils.hexlify([index]);
 
     return (
-      ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
+      ERC725YDataKeys.LSP6['AddressPermissions[]'].index +
       ethers.utils.hexZeroPad(hexIndex, 16).substring(2)
     );
   });
@@ -432,12 +425,14 @@ export async function prepareSetDataParameters(
   const hexIndex = ethers.utils.hexlify([controllerAddresses.length]);
 
   const universalReceiverPermissionIndex =
-    ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) + ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
+    ERC725YDataKeys.LSP6['AddressPermissions[]'].index +
+    ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
   const keysToSet = [
-    LSP3_UP_KEYS.UNIVERSAL_RECEIVER_DELEGATE_KEY,
-    PREFIX_PERMISSIONS + universalReceiverDelegateAddress.substring(2),
-    ADDRESS_PERMISSIONS_ARRAY_KEY,
+    ERC725YDataKeys.LSP1.LSP1UniversalReceiverDelegate,
+    ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] +
+      universalReceiverDelegateAddress.substring(2),
+    ERC725YDataKeys.LSP6['AddressPermissions[]'].length,
     ...addressPermissionsArrayElements, // AddressPermission[index] = controllerAddress
     ...addressPermissionsKeys, // AddressPermissions:Permissions:<address> = controllerPermission,
     universalReceiverPermissionIndex,
@@ -456,15 +451,20 @@ export async function prepareSetDataParameters(
   const signerAddress = await signer.getAddress();
 
   if (!controllerAddresses.includes(signerAddress)) {
-    keysToSet.push(PREFIX_PERMISSIONS + signerAddress.substring(2));
+    keysToSet.push(
+      ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signerAddress.substring(2)
+    );
     valuesToSet.push(ERC725.encodePermissions({ CHANGEOWNER: true, EDITPERMISSIONS: true }));
   } else {
-    valuesToSet[keysToSet.indexOf(PREFIX_PERMISSIONS + signerAddress.substring(2))] =
-      ERC725.encodePermissions({ CHANGEOWNER: true, EDITPERMISSIONS: true });
+    valuesToSet[
+      keysToSet.indexOf(
+        ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signerAddress.substring(2)
+      )
+    ] = ERC725.encodePermissions({ CHANGEOWNER: true, EDITPERMISSIONS: true });
   }
 
   if (encodedLSP3Profile) {
-    keysToSet.push(LSP3_UP_KEYS.LSP3_PROFILE);
+    keysToSet.push(ERC725YDataKeys.LSP3.LSP3Profile);
     valuesToSet.push(encodedLSP3Profile);
   }
 
@@ -580,15 +580,13 @@ export async function revokeSignerPermissions(
   if (controllerAddress.includes(signerAddress)) {
     const controller = controllers[controllerAddress.indexOf(signerAddress)];
     signerPermission =
-      typeof controller === 'string'
-        ? ERC725.encodePermissions(DEFAULT_PERMISSIONS)
-        : controller.permissions ?? ERC725.encodePermissions(DEFAULT_PERMISSIONS);
+      typeof controller === 'string' ? ALL_PERMISSIONS : controller.permissions ?? ALL_PERMISSIONS;
   } else {
     signerPermission = ERC725.encodePermissions({});
   }
 
   const revokeSignerPermissionsPayload = erc725Account.interface.encodeFunctionData('setData', [
-    PREFIX_PERMISSIONS + signerAddress.substring(2),
+    ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signerAddress.substring(2),
     signerPermission,
   ]);
 
