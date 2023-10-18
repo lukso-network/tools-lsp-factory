@@ -1,4 +1,4 @@
-import { ContractFactory, providers, Signer } from 'ethers';
+import { ContractFactory, providers, Signer, constants as ethersConstants } from 'ethers';
 import { concat, EMPTY, forkJoin, from, Observable } from 'rxjs';
 import { shareReplay, switchMap } from 'rxjs/operators';
 
@@ -7,7 +7,6 @@ import {
   DeploymentEventProxyContract,
   LSP1UniversalReceiverDelegateUP__factory,
 } from '../..';
-import { NULL_ADDRESS } from '../helpers/config.helper';
 import {
   deployContract,
   deployProxyContract,
@@ -15,6 +14,8 @@ import {
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { BaseContractAddresses, ContractNames } from '../interfaces';
+
+const { AddressZero } = ethersConstants;
 
 export type UniversalReceiverDeploymentEvent =
   | DeploymentEventContract
@@ -29,7 +30,7 @@ export function universalReceiverDelegateDeployment$(
   byteCode?: string
 ) {
   const defaultURDBytecode$ = from(
-    getDeployedByteCode(defaultUniversalReceiverAddress ?? NULL_ADDRESS, provider)
+    getDeployedByteCode(defaultUniversalReceiverAddress ?? AddressZero, provider)
   );
 
   return forkJoin([defaultURDBytecode$, baseContractAddresses$]).pipe(

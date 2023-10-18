@@ -1,4 +1,3 @@
-import { Permissions } from '@erc725/erc725.js/build/main/src/types/Method';
 import { version as lspSmartContractsVersion } from '@lukso/lsp-smart-contracts/package.json';
 import { Options } from 'ipfs-http-client';
 
@@ -13,8 +12,6 @@ const defaultIpfsGateway: Options = {
 export const defaultUploadOptions: UploadOptions = {
   ipfsGateway: defaultIpfsGateway,
 };
-
-export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 export const DEFAULT_CONTRACT_VERSION = lspSmartContractsVersion;
 
