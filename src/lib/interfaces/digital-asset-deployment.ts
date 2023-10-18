@@ -28,6 +28,10 @@ export interface LSP7DigitalAssetDeploymentOptions extends DigitalAssetDeploymen
   isNFT: boolean;
 }
 
+export interface LSP8IdentifiableDigitalAssetDeploymentOptions extends DigitalAssetDeploymentOptions {
+  tokenIdType: 1 | 2 | 3 | 4 | 5;
+}
+
 export interface DeployedLSP8IdentifiableDigitalAsset {
   LSP8IdentifiableDigitalAsset: DeployedContract;
 }

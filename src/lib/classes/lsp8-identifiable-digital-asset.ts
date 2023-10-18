@@ -8,8 +8,8 @@ import { LSPFactoryOptions } from '../interfaces';
 import {
   ContractNames,
   DeployedLSP8IdentifiableDigitalAsset,
-  DigitalAssetDeploymentOptions,
   LSP8ContractDeploymentOptions,
+  LSP8IdentifiableDigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
 import {
   lsp8BaseContractDeployment$,
@@ -59,7 +59,7 @@ export class LSP8IdentifiableDigitalAsset {
    *```
    */
   async deploy(
-    digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
+    digitalAssetDeploymentOptions: LSP8IdentifiableDigitalAssetDeploymentOptions,
     contractDeploymentOptions?: LSP8ContractDeploymentOptions
   ): Promise<DeployedLSP8IdentifiableDigitalAsset> {
     const digitalAssetConfiguration = contractDeploymentOptions

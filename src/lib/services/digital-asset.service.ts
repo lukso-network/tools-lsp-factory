@@ -47,6 +47,7 @@ import {
   DigitalAssetContractDeploymentOptions,
   DigitalAssetDeploymentOptions,
   LSP7DigitalAssetDeploymentOptions,
+  LSP8IdentifiableDigitalAssetDeploymentOptions
 } from '../interfaces/digital-asset-deployment';
 import {
   LSP4DigitalAssetJSON,
@@ -203,7 +204,7 @@ function initializeLSP7Proxy(
 
 export function lsp8IdentifiableDigitalAssetDeployment$(
   signer: Signer,
-  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
+  digitalAssetDeploymentOptions: LSP8IdentifiableDigitalAssetDeploymentOptions,
   baseContractAddress$: Observable<string>,
   byteCode?: string
 ) {
@@ -222,7 +223,7 @@ export function lsp8IdentifiableDigitalAssetDeployment$(
 
 export function lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
   signer: Signer,
-  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
+  digitalAssetDeploymentOptions: LSP8IdentifiableDigitalAssetDeploymentOptions,
   baseContractAddress: string,
   byteCode?: string
 ) {
@@ -254,7 +255,7 @@ export function lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
 
 async function deployLSP8IdentifiableDigitalAsset(
   signer: Signer,
-  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
+  digitalAssetDeploymentOptions: LSP8IdentifiableDigitalAssetDeploymentOptions,
   baseContractAddress: string,
   byteCode?: string
 ) {
@@ -276,7 +277,8 @@ async function deployLSP8IdentifiableDigitalAsset(
     return new LSP8Mintable__factory(signer).deploy(
       digitalAssetDeploymentOptions.name,
       digitalAssetDeploymentOptions.symbol,
-      controllerAddress
+      controllerAddress,
+      digitalAssetDeploymentOptions.tokenIdType
     );
   };
 
