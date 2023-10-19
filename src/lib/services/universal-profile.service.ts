@@ -441,7 +441,7 @@ export async function prepareSetDataParameters(
   const valuesToSet = [
     universalReceiverDelegateAddress,
     ERC725.encodePermissions({ SUPER_SETDATA: true, REENTRANCY: true }),
-    ethers.utils.defaultAbiCoder.encode(['uint256'], [controllerPermissions.length + 1]),
+    ethers.utils.hexZeroPad(ethers.utils.hexlify(controllerAddresses.length + 1), 16),
     ...controllerAddresses,
     ...controllerPermissions,
     universalReceiverDelegateAddress,
