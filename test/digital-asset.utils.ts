@@ -12,6 +12,7 @@ export async function testDeployWithSpecifiedCreators(
 
   expect(creatorArrayLength).toEqual('0x00000000000000000000000000000003');
 
+  // TODO: use erc725.js
   const [creator1, creator2, creator3] = await digitalAsset.getDataBatch([
     ERC725YDataKeys.LSP4['LSP4Creators[]'].index +
       ethers.utils.hexZeroPad(ethers.utils.hexlify([0]), 16).substring(2),

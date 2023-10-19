@@ -1,4 +1,5 @@
-import { ERC725 } from '@erc725/erc725.js';
+import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
+import LSP6Schema from '@erc725/erc725.js/schemas/LSP6KeyManager.json';
 import { ALL_PERMISSIONS, ERC725YDataKeys, INTERFACE_IDS } from '@lukso/lsp-smart-contracts';
 import axios from 'axios';
 import { BytesLike, Contract, ContractFactory, ethers, Signer } from 'ethers';
@@ -398,69 +399,65 @@ export async function prepareSetDataParameters(
   const controllerPermissions: string[] = [];
 
   controllers.map((controller, index) => {
+    // If just a list of controllers is given, given them all the same default "admin" permission
     if (typeof controller === 'string') {
       controllerAddresses[index] = controller;
       controllerPermissions[index] = ALL_PERMISSIONS;
+      // Otherwise, set the specific permission assigned to each controller
     } else {
       controllerAddresses[index] = controller.address;
       controllerPermissions[index] = controller.permissions;
     }
   });
 
-  // see: https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md#addresspermissionspermissionsaddress
-  const addressPermissionsKeys = controllerAddresses.map(
-    (address) => ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + address.substring(2)
+  const erc725js = new ERC725(LSP6Schema as ERC725JSONSchema[]);
+
+  let { keys: keysToSet, values: valuesToSet } = erc725js.encodeData([
+    {
+      keyName: 'LSP1UniversalReceiverDelegate',
+      value: universalReceiverDelegateAddress,
+    },
+    {
+      keyName: 'AddressPermissions[]',
+      value: [...controllerAddresses, universalReceiverDelegateAddress],
+    },
+    {
+      keyName: 'AddressPermissions:Permissions',
+      dynamicKeyParts: universalReceiverDelegateAddress,
+      value: ERC725.encodePermissions({ SUPER_SETDATA: true, REENTRANCY: true }),
+    },
+    // Set the permissions for each controller
+    ...controllers.map((_, index) => {
+      return {
+        keyName: 'AddressPermissions:Permissions',
+        dynamicKeyParts: controllerAddresses[index],
+        value: controllerPermissions[index],
+      };
+    }),
+  ]);
+
+  const deployerAddress = await signer.getAddress();
+
+  // Set CHANGEOWNER + EDITPERMISSIONS for the deployer
+  // Revoked after transfer ownerhip step is complete
+  const deployerPermissionDataKey = erc725js.encodeKeyName(
+    'AddressPermissions:Permissions:<address>',
+    [deployerAddress]
   );
-
-  // see: https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md#addresspermissions
-  const addressPermissionsArrayElements = controllerAddresses.map((_, index) => {
-    const hexIndex = ethers.utils.hexlify([index]);
-
-    return (
-      ERC725YDataKeys.LSP6['AddressPermissions[]'].index +
-      ethers.utils.hexZeroPad(hexIndex, 16).substring(2)
-    );
+  const deployerPermissions = ERC725.encodePermissions({
+    CHANGEOWNER: true,
+    EDITPERMISSIONS: true,
   });
 
-  const hexIndex = ethers.utils.hexlify([controllerAddresses.length]);
-
-  const universalReceiverPermissionIndex =
-    ERC725YDataKeys.LSP6['AddressPermissions[]'].index +
-    ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
-
-  const keysToSet = [
-    ERC725YDataKeys.LSP1.LSP1UniversalReceiverDelegate,
-    ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] +
-      universalReceiverDelegateAddress.substring(2),
-    ERC725YDataKeys.LSP6['AddressPermissions[]'].length,
-    ...addressPermissionsArrayElements, // AddressPermission[index] = controllerAddress
-    ...addressPermissionsKeys, // AddressPermissions:Permissions:<address> = controllerPermission,
-    universalReceiverPermissionIndex,
-  ];
-
-  const valuesToSet = [
-    universalReceiverDelegateAddress,
-    ERC725.encodePermissions({ SUPER_SETDATA: true, REENTRANCY: true }),
-    ethers.utils.hexZeroPad(ethers.utils.hexlify(controllerAddresses.length + 1), 16),
-    ...controllerAddresses,
-    ...controllerPermissions,
-    universalReceiverDelegateAddress,
-  ];
-
-  // Set CHANGEOWNER + EDITPERMISSIONS for deploy key. Revoked after transfer ownerhip step is complete
-  const signerAddress = await signer.getAddress();
-
-  if (!controllerAddresses.includes(signerAddress)) {
-    keysToSet.push(
-      ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signerAddress.substring(2)
-    );
-    valuesToSet.push(ERC725.encodePermissions({ CHANGEOWNER: true, EDITPERMISSIONS: true }));
+  // If the list of Permissions data keys already includes the deployer key,
+  //update the permission value to only CHANGEOWNER + EDITPERMISSIONS
+  if (keysToSet.includes(deployerPermissionDataKey)) {
+    const indexToUpdate = keysToSet.indexOf(deployerPermissionDataKey);
+    valuesToSet[indexToUpdate] = deployerPermissions;
+    // Otherwise we need to add the deployer key to the list of Permissions to set
   } else {
-    valuesToSet[
-      keysToSet.indexOf(
-        ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signerAddress.substring(2)
-      )
-    ] = ERC725.encodePermissions({ CHANGEOWNER: true, EDITPERMISSIONS: true });
+    keysToSet.push(deployerPermissionDataKey);
+    valuesToSet.push(deployerPermissions);
   }
 
   if (encodedLSP3Profile) {
@@ -469,8 +466,8 @@ export async function prepareSetDataParameters(
   }
 
   return {
-    keysToSet,
-    valuesToSet,
+    ...keysToSet,
+    ...valuesToSet,
     erc725AccountAddress,
   };
 }

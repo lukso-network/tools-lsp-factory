@@ -5,6 +5,7 @@ import { providers } from 'ethers';
 import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import { LSP4MetadataForEncoding } from '../interfaces/lsp4-digital-asset';
 
+// TODO: get schema from erc725.js
 export const schema: ERC725JSONSchema[] = [
   {
     name: 'LSP3Profile',
