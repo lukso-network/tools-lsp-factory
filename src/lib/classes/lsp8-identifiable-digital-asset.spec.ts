@@ -15,7 +15,6 @@ import { lsp4DigitalAsset } from '../../../test/lsp4-digital-asset.mock';
 import { JSONURL_KNOWN_HASH_FUNCTIONS } from '../helpers/config.helper';
 
 import { ProxyDeployer } from './proxy-deployer';
-import ERC725 from '@erc725/erc725.js';
 
 jest.setTimeout(30000);
 jest.useRealTimers();

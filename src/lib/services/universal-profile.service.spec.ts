@@ -17,7 +17,6 @@ describe('LSP3Account Service', () => {
   });
 
   describe('prepareSetDataParameters', () => {
-    let abiCoder;
     let universalProfile, universalReceiverDelegate;
 
     beforeAll(async () => {
@@ -42,7 +41,7 @@ describe('LSP3Account Service', () => {
       // AddressPermissions[] array length should be 1
       const totalPermissionsSet =
         valuesToSet[keysToSet.indexOf(ERC725YDataKeys.LSP6['AddressPermissions[]'].length)];
-      const expectedLength = abiCoder.encode(['uint256'], [2]);
+      const expectedLength = ethers.utils.hexZeroPad(2, 16);
       expect(totalPermissionsSet).toEqual(expectedLength);
 
       // controller address should have default permissions set
@@ -80,7 +79,7 @@ describe('LSP3Account Service', () => {
       // AddressPermissions[] array length should be 2
       const totalPermissionsSet =
         valuesToSet[keysToSet.indexOf(ERC725YDataKeys.LSP6['AddressPermissions[]'].length)];
-      const expectedLength = abiCoder.encode(['uint256'], [controllerAddresses.length + 1]);
+      const expectedLength = ethers.utils.hexZeroPad(controllerAddresses.length + 1, 16);
       expect(totalPermissionsSet).toEqual(expectedLength);
 
       for (let index = 0; index < controllerAddresses.length; index++) {
@@ -121,7 +120,7 @@ describe('LSP3Account Service', () => {
       // AddressPermissions[] array length should be 11 (including Universal Receiver Delegate address)
       const totalPermissionsSet =
         valuesToSet[keysToSet.indexOf(ERC725YDataKeys.LSP6['AddressPermissions[]'].length)];
-      const expectedLength = abiCoder.encode(['uint256'], [controllerAddresses.length + 1]);
+      const expectedLength = ethers.utils.hexZeroPad(controllerAddresses.length + 1, 16);
       expect(totalPermissionsSet).toEqual(expectedLength);
 
       for (let index = 0; index < controllerAddresses.length; index++) {

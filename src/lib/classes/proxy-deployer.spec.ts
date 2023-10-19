@@ -1,5 +1,5 @@
-import { ethers, SignerWithAddress } from 'hardhat';
 import { hexlify, randomBytes } from 'ethers/lib/utils';
+import { ethers, SignerWithAddress } from 'hardhat';
 
 import { ProxyDeployer } from './proxy-deployer';
 

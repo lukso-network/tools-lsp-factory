@@ -6,7 +6,7 @@ export async function testDeployWithSpecifiedCreators(
   digitalAsset: LSP7Mintable | LSP8Mintable,
   creators: string[]
 ) {
-  const [creatorArrayLength] = await digitalAsset.getData(
+  const creatorArrayLength = await digitalAsset.getData(
     ERC725YDataKeys.LSP4['LSP4Creators[]'].length
   );
 
