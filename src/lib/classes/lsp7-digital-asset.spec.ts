@@ -1,3 +1,4 @@
+import { SUPPORTED_HASH_FUNCTION_HASHES } from '@erc725/erc725.js/build/main/src/constants/constants';
 import { ERC725YDataKeys } from '@lukso/lsp-smart-contracts';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
@@ -11,7 +12,6 @@ import {
 } from '../../../build/main/src/index';
 import { testDeployWithSpecifiedCreators } from '../../../test/digital-asset.utils';
 import { lsp4DigitalAsset } from '../../../test/lsp4-digital-asset.mock';
-import { JSONURL_KNOWN_HASH_FUNCTIONS } from '../helpers/config.helper';
 
 import { ProxyDeployer } from './proxy-deployer';
 
@@ -232,7 +232,7 @@ describe('LSP7DigitalAsset', () => {
 
         const data = await digitalAsset.getData(ERC725YDataKeys.LSP4.LSP4Metadata);
 
-        expect(data.startsWith(JSONURL_KNOWN_HASH_FUNCTIONS['keccak256(utf8)'])).toBe(true);
+        expect(data.startsWith(SUPPORTED_HASH_FUNCTION_HASHES.HASH_KECCAK256_UTF8)).toBe(true);
         expect(data).toEqual(expectedLSP4Value);
       });
       it('should have correct name and symbol set', async () => {

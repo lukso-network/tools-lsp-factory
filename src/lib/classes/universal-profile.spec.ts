@@ -1,4 +1,5 @@
 import { ERC725 } from '@erc725/erc725.js';
+import { SUPPORTED_HASH_FUNCTION_HASHES } from '@erc725/erc725.js/build/main/src/constants/constants';
 import { ALL_PERMISSIONS, ERC725YDataKeys } from '@lukso/lsp-smart-contracts';
 import KeyManagerContract from '@lukso/lsp-smart-contracts/artifacts/LSP6KeyManager.json';
 import UniversalProfileContract from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json';
@@ -19,7 +20,6 @@ import {
   testUPDeployment,
 } from '../../../test/test.utils';
 import { UniversalProfile } from '../../../types/ethers-v5';
-import { JSONURL_KNOWN_HASH_FUNCTIONS } from '../helpers/config.helper';
 import { getDeployedByteCode } from '../helpers/deployment.helper';
 import { ContractNames, DeployedUniversalProfileContracts, DeploymentEvent } from '../interfaces';
 
@@ -67,7 +67,9 @@ describe('UniversalProfile', () => {
 
           const lsp3Data = await universalProfile.getData(ERC725YDataKeys.LSP3.LSP3Profile);
 
-          expect(lsp3Data.startsWith(JSONURL_KNOWN_HASH_FUNCTIONS['keccak256(utf8)'])).toBe(true);
+          expect(lsp3Data.startsWith(SUPPORTED_HASH_FUNCTION_HASHES.HASH_KECCAK256_UTF8)).toBe(
+            true
+          );
           expect(lsp3Data).toEqual(expectedLSP3Value);
         });
       });
