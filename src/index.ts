@@ -8,3 +8,6 @@ export * from '../types/ethers-v5';
 export * from './lib/providers/ipfs-http-client';
 export * from './lib/providers/url-resolver';
 export * from './lib/providers/ipfs-formdata-clients';
+export * from './lib/providers/formdata-base-client';
+export * from './lib/providers/pinata-formdata-client';
+export * from './lib/helpers/uploader.helper';
