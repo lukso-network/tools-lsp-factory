@@ -8,3 +8,9 @@ coverage
 hardhat.config.ts
 tsconfig.json
 tsconfig.module.json
+jest.config.json
+yarn.lock
+jest.setup.ts
+package-lock.json
+**/*.png
+**/*.spec.*

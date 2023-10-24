@@ -14,7 +14,7 @@ import {
   getDeployedByteCode,
   waitForReceipt,
 } from '../helpers/deployment.helper';
-import { BaseContractAddresses, ContractNames } from '../interfaces';
+import { BaseContractAddresses, ContractNames, EthersExternalProvider } from '../interfaces';
 
 export type UniversalReceiverDeploymentEvent =
   | DeploymentEventContract
@@ -22,14 +22,16 @@ export type UniversalReceiverDeploymentEvent =
 
 export function universalReceiverDelegateDeployment$(
   signer: Signer,
-  provider: providers.Web3Provider | providers.JsonRpcProvider,
+  provider: providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider,
   baseContractAddresses$: Observable<BaseContractAddresses>,
   providedUniversalReceiverAddress?: string,
-  defaultUniversalReceiverAddress?: string,
+  defaultUniversalReceiverAddress?: Promise<string>,
   byteCode?: string
 ) {
   const defaultURDBytecode$ = from(
-    getDeployedByteCode(defaultUniversalReceiverAddress ?? NULL_ADDRESS, provider)
+    defaultUniversalReceiverAddress?.then((defaultAddress) =>
+      getDeployedByteCode(defaultAddress, provider)
+    ) || getDeployedByteCode(NULL_ADDRESS, provider)
   );
 
   return forkJoin([defaultURDBytecode$, baseContractAddresses$]).pipe(
@@ -37,7 +39,7 @@ export function universalReceiverDelegateDeployment$(
       if (baseContractAddresses.LSP1UniversalReceiverDelegate || byteCode) {
         return universalReceiverDelegateDeploymentWithBaseContractAddress$(
           signer,
-          baseContractAddresses.LSP1UniversalReceiverDelegate,
+          baseContractAddresses.LSP1UniversalReceiverDelegate || (null as unknown as string),
           byteCode
         );
       }
@@ -80,7 +82,7 @@ export function universalReceiverDelegateDeploymentWithBaseContractAddress$(
  */
 export async function deployUniversalReceiverDelegate(
   signer: Signer,
-  baseContractAddress: string,
+  baseContractAddress?: string,
   bytecode?: string
 ) {
   const deploymentFunction = async () => {

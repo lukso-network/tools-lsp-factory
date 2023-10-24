@@ -6,6 +6,7 @@ import { defaultIfEmpty, last, shareReplay, switchMap, tap } from 'rxjs/operator
 import {
   BaseContractAddresses,
   DeploymentEventContract,
+  EthersExternalProvider,
   LSP1UniversalReceiverDelegateUP__factory,
   LSP6KeyManagerInit__factory,
   LSP7MintableInit__factory,
@@ -116,7 +117,7 @@ function deployBaseContract$(
 }
 
 export function shouldDeployBaseContract$(
-  provider: providers.Web3Provider | providers.JsonRpcProvider,
+  provider: providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider,
   defaultDeployProxy?: boolean,
   providedDeployProxy?: boolean,
   defaultBaseContractAddress?: string,
@@ -149,7 +150,7 @@ export function shouldDeployUniversalProfileBaseContracts$(
   defaultUPBaseContractAddress: string,
   defaultUniversalReceiverBaseContractAddress: string,
   defaultKeyManagerBaseContractAddress: string,
-  provider: providers.Web3Provider | providers.JsonRpcProvider,
+  provider: providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider,
   chainId: number,
   contractDeploymentOptions?: UniversalProfileDeploymentConfiguration
 ) {
@@ -199,22 +200,23 @@ export function universalProfileBaseContractAddresses$(
       (contractDeploymentOptions?.LSP0ERC725Account?.deployProxy !== false &&
         !contractDeploymentOptions?.LSP0ERC725Account?.byteCode)
         ? defaultUPBaseContractAddress
-        : null,
+        : (null as unknown as string),
     [UniversalProfileContractNames.UNIVERSAL_RECEIVER]:
       deployUniversalReceiverProxy && providedUniversalReceiverContractAddress
         ? providedUniversalReceiverContractAddress
-        : null,
+        : (null as unknown as string),
     [UniversalProfileContractNames.KEY_MANAGER]:
       providedKeyManagerContractAddress ??
       (contractDeploymentOptions?.LSP6KeyManager?.deployProxy !== false &&
         !contractDeploymentOptions?.LSP6KeyManager?.byteCode)
         ? defaultKeyManagerBaseContractAddress
-        : null,
+        : (null as unknown as string),
   };
 
   return baseContractDeployment$.pipe(
     tap((deploymentEvent: DeploymentEventContract) => {
-      baseContractAddresses[deploymentEvent.contractName] = deploymentEvent.receipt.contractAddress;
+      baseContractAddresses[deploymentEvent.contractName] =
+        deploymentEvent.receipt?.contractAddress;
     }),
     defaultIfEmpty(of(baseContractAddresses)),
     last(),
@@ -238,7 +240,7 @@ export function waitForBaseContractAddress$(
     }),
     defaultIfEmpty(
       (function () {
-        if (deployProxy === false || providedByteCode) return null;
+        if (deployProxy === false || providedByteCode) return '';
         return defaultBaseContractAddress;
       })()
     )

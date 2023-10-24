@@ -1,17 +1,15 @@
 import imageCompression from 'browser-image-compression';
 import { keccak256 } from 'ethers/lib/utils';
-import { AddResult } from 'ipfs-core-types/src/root';
-import { ImportCandidate } from 'ipfs-core-types/src/utils';
-import { create, IPFSHTTPClient } from 'ipfs-http-client';
 
 import { ImageBuffer, ImageMetadata } from '../interfaces';
 import { AssetBuffer, AssetMetadata } from '../interfaces/metadata';
-import { IPFSGateway, UploadOptions } from '../interfaces/profile-upload-options';
+import { assertUploadProvider } from '../interfaces/profile-upload-options';
+import { BaseFormDataUploader } from '../providers/formdata-base-client';
 
 export const defaultSizes = [1800, 1024, 640, 320, 180];
 export async function imageUpload(
   givenFile: File | ImageBuffer,
-  uploadOptions: UploadOptions,
+  uploader: BaseFormDataUploader,
   sizes?: number[]
 ): Promise<ImageMetadata[]> {
   const type = 'type' in givenFile ? givenFile.type : givenFile.mimeType;
@@ -19,6 +17,7 @@ export async function imageUpload(
   if (!isImage) {
     throw new Error(`File type: '${type}' does not start with 'image/'`);
   }
+  uploader = assertUploadProvider(uploader);
 
   sizes = sizes ?? defaultSizes;
 
@@ -47,19 +46,14 @@ export async function imageUpload(
         width = loadedImg[0].width;
       }
 
-      let uploadResponse;
-      if (uploadOptions.url) {
-        // TODO: add simple HTTP upload
-      } else {
-        uploadResponse = await ipfsUpload(imgToUpload, uploadOptions?.ipfsGateway);
-      }
+      const url = await uploader.upload(imgToUpload);
 
       return {
         width,
         height,
         hashFunction: 'keccak256(bytes)',
         hash: keccak256(imgBuffer),
-        url: 'ipfs://' + uploadResponse.cid.toString(),
+        url: url.toString(),
       };
     })
   );
@@ -67,11 +61,12 @@ export async function imageUpload(
 
 export async function assetUpload(
   asset: File | AssetBuffer,
-  uploadOptions: UploadOptions
+  uploader?: BaseFormDataUploader
 ): Promise<AssetMetadata> {
+  uploader = assertUploadProvider(uploader);
+
   let fileBuffer;
   let fileType: string;
-
   if ('buffer' in asset) {
     fileBuffer = asset.buffer;
     fileType = asset.mimeType;
@@ -80,61 +75,28 @@ export async function assetUpload(
     fileType = asset.type;
   }
 
-  let ipfsResult;
-  if (uploadOptions.url) {
-    // TODO: Simple HTTP upload
-  } else {
-    ipfsResult = await ipfsUpload(fileBuffer, uploadOptions?.ipfsGateway);
-  }
+  const url = await uploader.upload(fileBuffer);
 
   return {
     hashFunction: 'keccak256(bytes)',
     hash: keccak256(fileBuffer),
-    url: 'ipfs://' + ipfsResult.cid.toString(),
+    url: url.toString(),
     fileType,
   };
 }
 
-export async function ipfsUpload(
-  file: ImportCandidate,
-  ipfsGateway: IPFSGateway
-): Promise<AddResult> {
-  let ipfs: IPFSHTTPClient;
-
-  if (typeof ipfsGateway === 'string') {
-    const isPortProvided = ipfsGateway.split(':').length > 2;
-
-    let url: string;
-
-    if (ipfsGateway.endsWith('/')) {
-      url = isPortProvided
-        ? ipfsGateway
-        : `${ipfsGateway.slice(0, ipfsGateway.length - 1)}:${5001}`;
-    } else {
-      url = isPortProvided ? ipfsGateway : `${ipfsGateway}:${5001}`;
-    }
-
-    ipfs = create({ url });
-  } else {
-    ipfs = create(ipfsGateway);
-  }
-
-  return await ipfs.add(file, {
-    pin: true,
-  });
-}
-
 export async function prepareMetadataImage(
-  uploadOptions?: UploadOptions,
+  uploader: BaseFormDataUploader,
   image?: File | ImageBuffer | ImageMetadata[],
   sizes?: number[]
-): Promise<ImageMetadata[]> | null {
-  let metadataImage: ImageMetadata[] | null;
+): Promise<ImageMetadata[]> {
+  uploader = assertUploadProvider(uploader);
+  let metadataImage: ImageMetadata[] = [];
 
   if (Array.isArray(image)) {
-    metadataImage = image ?? null;
+    metadataImage = image;
   } else if (image) {
-    metadataImage = await imageUpload(image, uploadOptions, sizes);
+    metadataImage = await imageUpload(image, uploader, sizes);
   }
 
   return metadataImage;
@@ -142,16 +104,16 @@ export async function prepareMetadataImage(
 
 export async function prepareMetadataAsset(
   asset: File | AssetBuffer | AssetMetadata,
-  uploadOptions?: UploadOptions
+  uploader?: BaseFormDataUploader
 ): Promise<AssetMetadata> {
-  let assetMetadata: AssetMetadata | null;
+  uploader = assertUploadProvider(uploader);
 
+  let assetMetadata: AssetMetadata | null = null as unknown as AssetMetadata;
   if ('hashFunction' in asset) {
     assetMetadata = asset ?? null;
   } else if (asset) {
-    assetMetadata = await assetUpload(asset, uploadOptions);
+    assetMetadata = await assetUpload(asset, uploader);
   }
-
   return assetMetadata;
 }
 
@@ -170,21 +132,4 @@ export function isMetadataEncoded(metdata: string): boolean {
   }
 
   return false;
-}
-
-export function formatIPFSUrl(ipfsGateway: IPFSGateway, ipfsHash: string) {
-  let ipfsUrl: string;
-
-  if (typeof ipfsGateway === 'string') {
-    ipfsUrl = ipfsGateway.endsWith('/')
-      ? `${ipfsGateway}${ipfsHash}`
-      : `${ipfsGateway}/${ipfsHash}`;
-  } else {
-    const protocol = ipfsGateway?.host ?? 'https';
-    const host = ipfsGateway?.host ?? '2eff.lukso.dev';
-
-    ipfsUrl = `${[protocol]}://${host}/ipfs/${ipfsHash}`;
-  }
-
-  return ipfsUrl;
 }

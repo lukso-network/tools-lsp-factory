@@ -21,6 +21,7 @@ import {
   DeploymentEventTransaction,
   DeploymentStatus,
   DeploymentType,
+  EthersExternalProvider,
 } from '../interfaces/deployment-events';
 
 import { GAS_BUFFER, GAS_PRICE } from './config.helper';
@@ -47,7 +48,7 @@ export function waitForReceipt<T>(deploymentEvent$): Observable<T> {
           functionName = deploymentEvent.functionName;
           break;
       }
-      const receipt = await deploymentEvent.transaction.wait();
+      const receipt = (await deploymentEvent.transaction?.wait()) || { contractAddress: '' };
       return {
         type: deploymentEvent.type,
         contractName: deploymentEvent.contractName,
@@ -75,9 +76,9 @@ export function initialize(
   const initialize$ = deploymentEvent$.pipe(
     takeLast(1),
     switchMap(async (result) => {
-      const contract = await factory.attach(
-        result.receipt.contractAddress || getContractAddressFromDeploymentEvent(result)
-      );
+      const contractAddress =
+        result.receipt?.contractAddress || getContractAddressFromDeploymentEvent(result);
+      const contract = await factory.attach(contractAddress || '');
       const initializeParams = await initArguments(result);
       const gasEstimate = await contract.estimateGas.initialize(...initializeParams);
       const transaction = await contract.initialize(...initializeParams, {
@@ -167,22 +168,26 @@ export function getProxyByteCode(address: string) {
 
 export function getDeployedByteCode(
   contractAddress: string,
-  provider: providers.Web3Provider | providers.JsonRpcProvider
+  provider: providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider
 ) {
+  if (!('getCode' in provider)) {
+    return provider.request({ method: 'eth_getCode', params: [contractAddress, 'latest'] });
+  }
   return provider.getCode(contractAddress);
 }
 
 export function waitForContractDeployment<T>(deployment$: Observable<DeploymentEvent>): Promise<T> {
-  const contractAccumulator = {} as T;
+  const contractAccumulator: T | DeploymentEvent = {} as T | DeploymentEvent;
 
   return lastValueFrom(
     deployment$.pipe(
-      tap((deploymentEvent) => {
-        let contractAddress: string;
+      tap((_deploymentEvent) => {
+        const deploymentEvent = _deploymentEvent as DeploymentEvent;
+        let contractAddress = '';
 
         try {
           contractAddress =
-            deploymentEvent.receipt.contractAddress ||
+            deploymentEvent.receipt?.contractAddress ||
             getContractAddressFromDeploymentEvent(deploymentEvent);
         } catch {
           return;
@@ -192,7 +197,7 @@ export function waitForContractDeployment<T>(deployment$: Observable<DeploymentE
 
         if (deploymentEvent.type === DeploymentType.BASE_CONTRACT) {
           contractAccumulator[`${deploymentEvent.contractName}BaseContract`] = {
-            address: deploymentEvent.receipt.contractAddress,
+            address: deploymentEvent.receipt?.contractAddress,
             receipt: deploymentEvent.receipt,
           };
         } else {
@@ -202,7 +207,8 @@ export function waitForContractDeployment<T>(deployment$: Observable<DeploymentE
           };
         }
       }),
-      endWith(contractAccumulator),
+      // Erase type to allow T | DeploymentEvent
+      endWith(contractAccumulator as any),
       shareReplay()
     )
   ) as Promise<T>;
@@ -218,7 +224,7 @@ export function isAddress(testAddress: string) {
 }
 
 export function convertContractDeploymentOptionsVersion(providedVersion?: string) {
-  let version: string, byteCode: string, libAddress: string;
+  let version: string | undefined, byteCode: string | undefined, libAddress: string | undefined;
 
   if (providedVersion && providedVersion.startsWith('0x')) {
     if (isAddress(providedVersion)) {
@@ -235,9 +241,9 @@ export function convertContractDeploymentOptionsVersion(providedVersion?: string
 
 export async function resolveContractDeployment<T>(
   contractsPromise: Promise<T>,
-  onDeployEvents: DeploymentEventCallbacks<T>
+  onDeployEvents?: DeploymentEventCallbacks<T>
 ) {
-  let contracts: T;
+  let contracts: T = null as T;
 
   if (onDeployEvents?.error) {
     try {
@@ -310,11 +316,11 @@ export function waitForBatchedPendingTransactions(
  * @returns contract address
  */
 export const getContractAddressFromDeploymentEvent = (deploymentEvent: DeploymentEvent) => {
-  const { logs } = deploymentEvent.receipt;
+  const { logs } = deploymentEvent.receipt || { logs: [] };
 
-  let eventSignatureToSearch: string;
+  let eventSignatureToSearch = '';
 
-  switch (deploymentEvent.type) {
+  switch (deploymentEvent?.type) {
     case DeploymentType.DEPLOYMENT:
     case DeploymentType.PROXY: {
       eventSignatureToSearch = findLSP0EventSignatureByName('ContractCreated');
@@ -340,7 +346,7 @@ export const getContractAddressFromDeploymentEvent = (deploymentEvent: Deploymen
 
   const address = log
     ? ethers.utils.defaultAbiCoder.decode(['address'], log.topics[2]).toString()
-    : null;
+    : '';
 
   return address;
 };

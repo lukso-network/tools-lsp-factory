@@ -1,16 +1,18 @@
 import { providers, Signer } from 'ethers';
 
-import { IPFSGateway, UploadOptions } from './profile-upload-options';
+import { EthersExternalProvider } from './deployment-events';
+import { UploadProvider } from './profile-upload-options';
 
 export interface LSPFactoryOptions {
-  provider: providers.Web3Provider | providers.JsonRpcProvider;
-  chainId: number;
-  signer: Signer;
-  uploadOptions: UploadOptions;
+  signer: Signer | string;
+  uploadProvider?: UploadProvider;
+  chainId?: number;
 }
 
-export interface SignerOptions {
-  deployKey?: string | Signer;
-  chainId?: number;
-  ipfsGateway?: IPFSGateway;
+export interface LSPFactoryInternalOptions {
+  provider: providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider;
+  signer: Signer;
+  uploadProvider: UploadProvider;
+  chainId: number;
+  finishInit: Promise<void>;
 }

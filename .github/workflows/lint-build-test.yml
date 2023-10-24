@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [16.x, 20.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -30,6 +30,7 @@ jobs:
           restore-keys: npm-
 
       - name: Configure
+        if: ${{ matrix.node-version == '16.x'}}
         run: npm config set scripts-prepend-node-path auto
 
       - name: Install
@@ -42,6 +43,10 @@ jobs:
         run: npm run build
 
       - name: Test
+        env:
+          PINATAAPIKEY: ${{ secrets.PINATAAPIKEY }}
+          PINATASECRETAPIKEY: ${{ secrets.PINATASECRETAPIKEY }}
+          PINATAJWTKEY: ${{ secrets.PINATAJWTKEY }}
         run: npm run generate-types && npm run test # Types needed for tests
 
       - name: Upload coverage to Codecov

@@ -1,17 +1,25 @@
-import { Options } from 'ipfs-http-client';
+import { BaseFormDataUploader } from '../providers/formdata-base-client';
 
-export interface UploadOptionsHTTP {
-  url: string;
-  port?: number;
-  ipfsGateway?: never;
+/**
+ * Default upload provider
+ */
+export let defaultUploader: BaseFormDataUploader | undefined;
+
+/**
+ * Register a default upload provider with this library
+ *
+ * @param <UploadProvider> provider
+ */
+export function setDefaultUploadProvider(provider: BaseFormDataUploader): void {
+  defaultUploader = provider;
 }
 
-export interface UploadOptionsIPFS {
-  url?: never;
-  port?: never;
-  ipfsGateway: IPFSGateway;
+/**
+ * assert if upload provider is missing and there is no default.
+ * If there is a default return it if value was not provided
+ *
+ * @param <UploadProvider> provider
+ */
+export function assertUploadProvider(provider?: BaseFormDataUploader): BaseFormDataUploader {
+  return provider || defaultUploader;
 }
-
-export type IPFSGateway = Options | string;
-
-export type UploadOptions = UploadOptionsHTTP | UploadOptionsIPFS;

@@ -1,6 +1,5 @@
 import { ERC725 } from '@erc725/erc725.js';
 import { INTERFACE_IDS } from '@lukso/lsp-smart-contracts';
-import axios from 'axios';
 import { BytesLike, Contract, ContractFactory, ethers, Signer } from 'ethers';
 import { concat, defer, EMPTY, forkJoin, from, Observable, of } from 'rxjs';
 import { defaultIfEmpty, shareReplay, switchMap, takeLast } from 'rxjs/operators';
@@ -29,7 +28,7 @@ import {
   waitForReceipt,
 } from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
-import { formatIPFSUrl, isMetadataEncoded } from '../helpers/uploader.helper';
+import { isMetadataEncoded } from '../helpers/uploader.helper';
 import {
   BaseContractAddresses,
   ContractDeploymentOptions,
@@ -50,7 +49,8 @@ import {
   LSP3ProfileDataForEncoding,
   ProfileDataForEncoding,
 } from '../interfaces/lsp3-profile';
-import { UploadOptions } from '../interfaces/profile-upload-options';
+import { UploadProvider } from '../interfaces/profile-upload-options';
+import { resolveUrl } from '../providers/url-resolver';
 
 import { UniversalReceiverDeploymentEvent as UniversalReceiverDeploymentEvent } from './universal-receiver.service';
 
@@ -65,7 +65,7 @@ export function accountDeployment$(
     switchMap((baseContractAddresses) => {
       return accountDeploymentWithBaseContractAddress$(
         signer,
-        baseContractAddresses.LSP0ERC725Account,
+        baseContractAddresses.LSP0ERC725Account || '',
         bytecode
       );
     }),
@@ -166,7 +166,7 @@ export function setDataAndTransferOwnershipTransactions$(
   account$: Observable<LSP3AccountDeploymentEvent>,
   universalReceiver$: Observable<UniversalReceiverDeploymentEvent>,
   controllerAddresses: (string | ControllerOptions)[],
-  lsp3ProfileData$: Observable<string | null>,
+  lsp3ProfileData$: Observable<string>,
   isSignerUniversalProfile$: Observable<boolean>,
   keyManagerDeployment$: DeploymentEvent$,
   defaultUniversalReceiverDelegateAddress?: string
@@ -257,7 +257,7 @@ export function prepareSetDataTransaction$(
   account$: Observable<LSP3AccountDeploymentEvent>,
   universalReceiver$: Observable<UniversalReceiverDeploymentEvent>,
   controllerAddresses: (string | ControllerOptions)[],
-  lsp3ProfileData$: Observable<string | null>,
+  lsp3ProfileData$: Observable<string>,
   isSignerUniversalProfile$: Observable<boolean>,
   defaultUniversalReceiverDelegateAddress?: string
 ) {
@@ -280,8 +280,12 @@ export function prepareSetDataTransaction$(
         const { receipt: universalReceiverReceipt } = universalReceiverResult;
 
         const lsp3AccountAddress = isSignerUniversalProfile
-          ? lsp3AccountReceipt.contractAddress || getContractAddressFromDeploymentEvent(lsp3Result)
-          : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
+          ? lsp3AccountReceipt?.contractAddress ||
+            getContractAddressFromDeploymentEvent(lsp3Result) ||
+            (null as unknown as string)
+          : lsp3AccountReceipt?.contractAddress ||
+            lsp3AccountReceipt?.to ||
+            (null as unknown as string);
 
         let universalReceiverAddress: string;
         if (isSignerUniversalProfile) {
@@ -290,10 +294,12 @@ export function prepareSetDataTransaction$(
               ? getContractAddressFromDeploymentEvent(
                   universalReceiverResult as UniversalReceiverDeploymentEvent
                 )
-              : null;
+              : (null as unknown as string);
         } else {
           universalReceiverAddress =
-            universalReceiverReceipt?.contractAddress || universalReceiverReceipt?.to;
+            universalReceiverReceipt?.contractAddress ||
+            universalReceiverReceipt?.to ||
+            (null as unknown as string);
         }
 
         return prepareSetDataParameters(
@@ -311,27 +317,23 @@ export function prepareSetDataTransaction$(
 
 export async function getLsp3ProfileDataUrl(
   lsp3Profile: ProfileDataBeforeUpload | string,
-  uploadOptions?: UploadOptions
+  uploadProvider?: UploadProvider
 ): Promise<ProfileDataForEncoding> {
   let lsp3ProfileData: LSP3ProfileDataForEncoding;
 
   if (typeof lsp3Profile === 'string') {
-    let lsp3JsonUrl = lsp3Profile;
-    const isIPFSUrl = lsp3Profile.startsWith('ipfs://');
+    const lsp3JsonUrl = resolveUrl(new URL(lsp3Profile));
 
-    if (isIPFSUrl) {
-      lsp3JsonUrl = formatIPFSUrl(uploadOptions?.ipfsGateway, lsp3Profile.split('/').at(-1));
-    }
-
-    const ipfsResponse = await axios.get(lsp3JsonUrl);
-    const lsp3ProfileJson = ipfsResponse.data;
+    const lsp3ProfileJson = await (globalThis.fetch || fetch)(lsp3JsonUrl.toString()).then((res) =>
+      res.json()
+    );
 
     lsp3ProfileData = {
       url: lsp3Profile,
       json: lsp3ProfileJson as LSP3ProfileJSON,
     };
   } else {
-    lsp3ProfileData = await UniversalProfile.uploadProfileData(lsp3Profile, uploadOptions);
+    lsp3ProfileData = await UniversalProfile.uploadProfileData(lsp3Profile, uploadProvider);
   }
 
   return lsp3ProfileData;
@@ -339,12 +341,12 @@ export async function getLsp3ProfileDataUrl(
 
 async function getEncodedLSP3ProfileData(
   lsp3Profile: ProfileDataBeforeUpload | LSP3ProfileDataForEncoding | string,
-  uploadOptions?: UploadOptions
+  uploadProvider?: UploadProvider
 ): Promise<string> {
   let lsp3ProfileDataForEncoding: LSP3ProfileDataForEncoding;
 
   if (typeof lsp3Profile === 'string' || 'name' in lsp3Profile) {
-    lsp3ProfileDataForEncoding = await getLsp3ProfileDataUrl(lsp3Profile, uploadOptions);
+    lsp3ProfileDataForEncoding = await getLsp3ProfileDataUrl(lsp3Profile, uploadProvider);
   } else {
     lsp3ProfileDataForEncoding = lsp3Profile;
   }
@@ -355,12 +357,12 @@ async function getEncodedLSP3ProfileData(
 }
 
 export function lsp3ProfileUpload$(
-  passedProfileData:
+  passedProfileData?:
     | ProfileDataBeforeUpload
     | LSP3ProfileBeforeUpload
     | LSP3ProfileDataForEncoding
     | string,
-  uploadOptions?: UploadOptions
+  uploadProvider?: UploadProvider
 ) {
   let lsp3Profile$: Observable<string>;
 
@@ -372,9 +374,10 @@ export function lsp3ProfileUpload$(
       : passedProfileData;
 
   if (typeof lsp3Profile !== 'string' || !isMetadataEncoded(lsp3Profile)) {
-    lsp3Profile$ = lsp3Profile
-      ? from(getEncodedLSP3ProfileData(lsp3Profile, uploadOptions)).pipe(shareReplay())
-      : of(null);
+    lsp3Profile$ =
+      lsp3Profile != undefined
+        ? from(getEncodedLSP3ProfileData(lsp3Profile, uploadProvider)).pipe(shareReplay())
+        : of('');
   } else {
     lsp3Profile$ = of(lsp3Profile);
   }
@@ -410,7 +413,8 @@ export async function prepareSetDataParameters(
       controllerPermissions[index] = ERC725.encodePermissions(DEFAULT_PERMISSIONS);
     } else {
       controllerAddresses[index] = controller.address;
-      controllerPermissions[index] = controller.permissions;
+      controllerPermissions[index] =
+        controller.permissions || ERC725.encodePermissions(DEFAULT_PERMISSIONS);
     }
   });
 
@@ -628,17 +632,17 @@ export function prepareTransferOwnershipTransaction$(
       const { receipt: keyManagerReceipt } = keyManagerResult;
 
       const erc725AccountAddress = isSignerUniversalProfile
-        ? lsp3AccountReceipt.contractAddress || getContractAddressFromDeploymentEvent(lsp3Result)
-        : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
+        ? lsp3AccountReceipt?.contractAddress || getContractAddressFromDeploymentEvent(lsp3Result)
+        : lsp3AccountReceipt?.contractAddress || lsp3AccountReceipt?.to;
 
       const keyManagerAddress = isSignerUniversalProfile
-        ? keyManagerReceipt.contractAddress ||
+        ? keyManagerReceipt?.contractAddress ||
           getContractAddressFromDeploymentEvent(keyManagerResult)
-        : keyManagerReceipt.contractAddress || keyManagerReceipt.to;
+        : keyManagerReceipt?.contractAddress || keyManagerReceipt?.to;
 
       return of({
-        erc725AccountAddress,
-        keyManagerAddress,
+        erc725AccountAddress: erc725AccountAddress || (null as unknown as string),
+        keyManagerAddress: keyManagerAddress || (null as unknown as string),
       });
     }),
     shareReplay()
@@ -698,9 +702,8 @@ export function convertUniversalProfileConfigurationObject(
 
   return {
     version: contractDeploymentOptions?.version,
-    uploadOptions: contractDeploymentOptions?.ipfsGateway
-      ? { ipfsGateway: contractDeploymentOptions?.ipfsGateway }
-      : undefined,
+    uploadProvider:
+      contractDeploymentOptions?.uploadProvider || contractDeploymentOptions?.uploadProvider,
     LSP0ERC725Account: {
       version: erc725AccountVersion,
       byteCode: erc725AccountBytecode,

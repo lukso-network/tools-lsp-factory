@@ -33,13 +33,12 @@ export function keyManagerDeployment$(
       const { receipt: lsp3AccountReceipt } = result;
 
       const erc725AccountAddress = isSignerUniversalProfile
-        ? lsp3AccountReceipt.contractAddress || getContractAddressFromDeploymentEvent(result)
-        : lsp3AccountReceipt.contractAddress || lsp3AccountReceipt.to;
-
+        ? lsp3AccountReceipt?.contractAddress || getContractAddressFromDeploymentEvent(result)
+        : lsp3AccountReceipt?.contractAddress || lsp3AccountReceipt?.to;
       return keyManagerDeploymentForAccount$(
         signer,
-        erc725AccountAddress,
-        baseContractAddress.LSP6KeyManager,
+        erc725AccountAddress || (null as unknown as string),
+        baseContractAddress.LSP6KeyManager || (null as unknown as string),
         byteCode
       );
     }),

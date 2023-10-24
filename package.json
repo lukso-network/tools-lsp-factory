@@ -1,6 +1,6 @@
 {
   "name": "@lukso/lsp-factory.js",
-  "version": "2.5.1",
+  "version": "3.1.1",
   "description": "Helper Library to allow simple deployments of UniversalProfiles and LSP7 and LSP8 Digital Assets.",
   "main": "build/main/src/index.js",
   "typings": "build/main/src/index.d.ts",
@@ -34,12 +34,19 @@
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/experimental": "^5.7.0",
     "@lukso/lsp-smart-contracts": "^0.11.1",
-    "axios": "^0.23.0",
     "browser-image-compression": "^2.0.0",
-    "ethers": "^5.7.0",
-    "ipfs-http-client": "52.0.3",
-    "ipfs-utils": "8.1.6",
+    "ethers": "^5.7.2",
+    "hardhat-ethers": "^1.0.1",
+    "isomorphic-fetch": "^3.0.0",
     "rxjs": "^7.8.0"
+  },
+  "peerDependencies": {
+    "@pinata/sdk": "^2.1.0",
+    "cross-blob": "^3.0.2",
+    "form-data": "^4.0.0",
+    "form-data-encoder": "^3.0.0",
+    "ipfs-http-client": "52.0.3",
+    "ipfs-utils": "8.1.6"
   },
   "devDependencies": {
     "@ethereum-waffle/jest": "^3.3.2",
@@ -52,6 +59,7 @@
     "codecov": "^3.5.0",
     "cspell": "^6.26.1",
     "cz-conventional-changelog": "^3.3.0",
+    "dotenv": "^16.3.1",
     "esbuild": "^0.17.8",
     "esbuild-jest": "^0.5.0",
     "eslint": "^8.34.0",
@@ -74,12 +82,15 @@
   "files": [
     "build/main",
     "build/module",
+    "!build/**/*.spec.*",
     "!**/*.spec.*",
     "CHANGELOG.md",
     "LICENSE",
     "CONTRIBUTING.md",
     "README.md",
     "src/*",
+    "!src/**/*.png",
+    "!src/**/*.spec.*",
     "types/*"
   ],
   "ava": {

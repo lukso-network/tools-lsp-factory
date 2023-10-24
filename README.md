@@ -13,17 +13,80 @@
 npm install @lukso/lsp-factory.js
 ```
 
+# Peer dependencies
+
+| Provider | Dependency        | Version | Browser | Node |
+| -------- | ----------------- | ------- | ------- | ---- |
+| pinata   | @pinata/sdk       | ^2.1.0  | ✅      | ✅   |
+| pinata   | cross-blob        | ^3.0.2  | ❌      | ✅   |
+| pinata   | form-data         | ^4.0.0  | ❌      | ✅   |
+| pinata   | form-data-encoder | ^3.0.0  | ❌      | ✅   |
+| ipfs     | ipfs-http-client  | 52.0.3  | ✅      | ✅   |
+| ipfs     | ipfs-utils        | 8.1.6   | ✅      | ✅   |
+
+## Providers
+
+Native open IPFS pinning (or local IPFS node upload)
+
+```javascript
+import { createIPFSUploader } from '@lukso/lsp-factory.js';
+const uploadProvider = createIPFSUploader('https://api.2eff.lukso.dev');
+```
+
+Pinata node environment
+
+```javascript
+import { createPinataUploader } from '@lukso/lsp-factory.js';
+const uploadProvider = createPinataUploader({});
+```
+
+Pinata browser environment
+
+```javascript
+import { createPinataBrowserUploader } from '@lukso/lsp-factory.js';
+const uploadProvider = createPinataBrowserUploader({});
+```
+
 ## Setup
 
 ```javascript
-import { LSPFactory } from '@lukso/lsp-factory.js';
+import { LSPFactory, createPrefixConverter, createIPFSUploader, addURLResolver, resolveURL } from '@lukso/lsp-factory.js';
 
+const uploadProvider = createIPFSUploader('https://api.2eff.lukso.dev')
 const provider = 'https://rpc.testnet.lukso.network'; // RPC url used to connect to the network
 
 const lspFactory = new LSPFactory(provider, {
-  deployKey: '0x...'; // Private key of the account which will deploy UPs
-  chainId: 2828, // Chain Id of the network you want to connect to
+  signer: '0x...'; // Private key of the account which will deploy UPs
+  chainId: 4201, // Chain Id of the network you want to connect to
+  uploadProvider,
 });
+
+lspFactory.addURLResolver('ipfs:', createPrefixConverter('https://2eff.lukso.dev/ipfs'))
+```
+
+## Resolve URLs for uploaded files
+
+```javascript
+// Utility to conver URLs after addURLResolver has been called.
+const url = lspFactory.resolveURL(
+  new URL('ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp')
+);
+console.log(url.toString());
+```
+
+## Implementing a custom upload provider
+
+```javascript
+const uploadProvider = async (data) => {
+  // upload data to ipfs here.
+  // The data can be a File (Blob) object (can have type to contain mime information)
+  // An AssetBuffer object (has mimeType)
+  // or a Buffer object
+
+  // Return a URL object containing the URL. For IPFS the protocol is "ipfs:"
+  // and the CID is in the hostname.
+  return new URL('ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp');
+};
 ```
 
 ## Usage

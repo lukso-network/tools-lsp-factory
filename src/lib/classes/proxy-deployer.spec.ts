@@ -1,4 +1,6 @@
-import { ethers, SignerWithAddress } from 'hardhat';
+/// <reference types="@nomiclabs/hardhat-ethers" />
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { ethers } from 'hardhat';
 
 import { ProxyDeployer } from './proxy-deployer';
 
@@ -11,7 +13,7 @@ describe('UniversalProfile', () => {
     jest.useRealTimers();
 
     const provider = ethers.provider;
-    signer = provider.getSigner();
+    signer = provider.getSigner(0) as unknown as SignerWithAddress;
     proxyDeployer = new ProxyDeployer(signer);
     baseContracts = await proxyDeployer.deployUniversalProfileBaseContracts();
   });
