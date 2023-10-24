@@ -6,14 +6,14 @@
  */
 import { create } from 'ipfs-http-client';
 
-import { createIPFSUploader } from './ipfs-http-client';
+import { HttpIPFSClientUploader } from './ipfs-http-client';
 
 jest.mock('ipfs-http-client');
 
 it('should pin images', async () => {
-  const { addMock, uploadProvider, file } = await mockDependencies();
+  const { addMock, uploader, file } = await mockDependencies();
 
-  const upload = await uploadProvider(file);
+  const upload = await uploader.upload(file);
 
   expect(addMock).toHaveBeenCalledWith(file, { pin: true });
   expect(upload.toString()).toEqual('ipfs://QmY4Z');
@@ -41,11 +41,11 @@ async function mockDependencies(gateway = 'https://api.2eff.lukso.dev') {
     getEndpointConfig: () => new URL(gateway),
   });
 
-  const uploadProvider = createIPFSUploader(gateway);
+  const uploader = new HttpIPFSClientUploader(gateway);
 
   return {
     file,
     addMock,
-    uploadProvider,
+    uploader,
   };
 }

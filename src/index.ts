@@ -6,5 +6,5 @@ export { LSP7DigitalAsset } from './lib/classes/lsp7-digital-asset';
 export * from './lib/interfaces';
 export * from '../types/ethers-v5';
 export * from './lib/providers/ipfs-http-client';
-export * from './lib/providers/url-converter';
-export * from './lib/providers/pinata-provider';
+export * from './lib/providers/url-resolver';
+export * from './lib/providers/ipfs-formdata-clients';

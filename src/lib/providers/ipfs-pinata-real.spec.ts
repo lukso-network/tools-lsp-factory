@@ -10,16 +10,16 @@ import { resolve } from 'node:path';
 
 import Blob from 'cross-blob';
 
-import { createPinataUploader } from './pinata-provider';
+import { PinataFormDataUploader } from './pinata-formdata-client';
 
 beforeEach(() => {
   jest.resetAllMocks();
 });
 
 it('should pin images (web)', async () => {
-  const { uploadProvider, file } = await mockDependencies();
+  const { uploader, file } = await mockDependencies();
 
-  const upload = await uploadProvider(file);
+  const upload = await uploader.upload(file);
 
   expect(upload.toString()).toEqual('ipfs://QmPhT2FsbyQ2p2gmKBt42Voqr9izxhUn8yLPKg2NqtrGWi');
 });
@@ -38,12 +38,10 @@ async function mockDependencies() {
     pinataSecretApiKey: process.env.PINATASECRETAPIKEY,
     pinataJWTKey: process.env.PINATAJWTKEY,
   };
-  const pinOpts = { pinataMetadata: { name: 'test-image.jpg' } };
-  const uploadProvider = createPinataUploader(config, pinOpts);
+  const uploader = new PinataFormDataUploader(config);
   return {
     file,
     config,
-    pinOpts,
-    uploadProvider,
+    uploader,
   };
 }

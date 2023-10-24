@@ -7,7 +7,7 @@
 import imageCompression from 'browser-image-compression';
 import { create } from 'ipfs-http-client';
 
-import { createIPFSUploader } from '../providers/ipfs-http-client';
+import { HttpIPFSClientUploader } from '../providers/ipfs-http-client';
 
 import { imageUpload } from './uploader.helper';
 
@@ -22,41 +22,41 @@ describe('uploader.helper.spec.ts', () => {
 
   describe('#imageUpload', () => {
     it('should throw an error on invalid input', async () => {
-      const { uploadProvider } = await mockDependencies();
+      const { uploader } = await mockDependencies();
 
       await expect(
         imageUpload(
           new File(['sdfasdf'], 'file-name', {
             type: 'zip',
           }),
-          uploadProvider
+          uploader
         )
       ).rejects.toThrowError("File type: 'zip' does not start with 'image/'");
     });
 
     it('should pin files when using IPFS', async () => {
-      const { file, addMock, uploadProvider } = await mockDependencies();
-      await imageUpload(file, uploadProvider);
+      const { file, addMock, uploader } = await mockDependencies();
+      await imageUpload(file, uploader);
 
       expect(addMock).toHaveBeenCalledWith(file, { pin: true });
     });
 
     it('should resize images', async () => {
-      const { file, drawFileInCanvasSpy, uploadProvider } = await mockDependencies();
-      await imageUpload(file, uploadProvider);
+      const { file, drawFileInCanvasSpy, uploader } = await mockDependencies();
+      await imageUpload(file, uploader);
 
       expect(imageCompression).toHaveBeenCalledTimes(5);
       expect(drawFileInCanvasSpy).toBeCalledTimes(5);
     });
   });
   it('should accept custom IPFS client options', async () => {
-    const { addMock, uploadProvider } = await mockDependencies();
+    const { addMock, uploader } = await mockDependencies();
 
     const result = await imageUpload(
       new File(['sdfasdf'], 'file-name', {
         type: 'image/zip',
       }),
-      uploadProvider
+      uploader
     );
 
     expect(addMock).toHaveBeenCalled();
@@ -70,13 +70,13 @@ describe('uploader.helper.spec.ts', () => {
   });
 
   it('should accept IPFS url', async () => {
-    const { addMock, uploadProvider } = await mockDependencies();
+    const { addMock, uploader } = await mockDependencies();
 
     const result = await imageUpload(
       new File(['sdfasdf'], 'file-name', {
         type: 'image/zip',
       }),
-      uploadProvider
+      uploader
     );
 
     expect(addMock).toHaveBeenCalled();
@@ -117,12 +117,12 @@ async function mockDependencies(gateway = 'https://api.2eff.lukso.dev') {
     getEndpointConfig: () => new URL(gateway),
   });
 
-  const uploadProvider = createIPFSUploader(gateway);
+  const uploader = new HttpIPFSClientUploader(gateway);
 
   return {
     file,
     addMock,
-    uploadProvider,
+    uploader,
     drawFileInCanvasSpy,
   };
 }

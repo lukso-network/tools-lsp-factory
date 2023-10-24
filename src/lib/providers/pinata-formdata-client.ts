@@ -1,7 +1,11 @@
-import { PinataConfig, PinataPinResponse } from '@pinata/sdk';
-import FormData from 'form-data';
+import { PinataConfig } from '@pinata/sdk';
 import isIPFS from 'is-ipfs';
-import fetch from 'isomorphic-fetch';
+
+import {
+  BaseFormDataUploader,
+  FormDataPostHeaders,
+  FormDataRequestOptions,
+} from './formdata-base-client';
 
 export const ERROR_NO_CREDENTIALS_PROVIDED =
   'No credentials provided! Please provide your pinata api key and pinata secret api key or your pinata JWT key as an argument when you start this script';
@@ -16,23 +20,6 @@ export function validateHostNodes(hostNodes: any) {
     }
   });
 }
-
-export const handleError = (error: any) => {
-  if (
-    error &&
-    error.response &&
-    error.response &&
-    error.response.data &&
-    error.response.data.error
-  ) {
-    return error.response.data.error;
-  } else if (error.data && error.data.error) {
-    return error.data.error;
-  } else if (error.response && error.response.error) {
-    return error.response.error;
-  }
-  return error;
-};
 
 export function validateMetadata(metadata: any) {
   if (metadata.name) {
@@ -92,6 +79,42 @@ export function validatePinPolicyStructure(pinPolicy: { regions: any[] }) {
   }
 }
 
+export function createConfigForAxiosHeaders(config: PinataConfig) {
+  if (
+    config.pinataApiKey &&
+    config.pinataApiKey.length > 0 &&
+    config.pinataSecretApiKey &&
+    config.pinataSecretApiKey.length > 0
+  ) {
+    return {
+      withCredentials: true,
+      headers: {
+        pinata_api_key: config.pinataApiKey,
+        pinata_secret_api_key: config.pinataSecretApiKey,
+      },
+    };
+  }
+
+  if (config.pinataJWTKey && config.pinataJWTKey.length > 0) {
+    return {
+      headers: {
+        Authorization: `Bearer ${config.pinataJWTKey}`,
+      },
+    };
+  }
+
+  throw new Error(ERROR_NO_CREDENTIALS_PROVIDED);
+}
+
+export function createConfigForAxiosHeadersWithFormData(config: PinataConfig) {
+  const requestOptions: FormDataPostHeaders = {
+    ...createConfigForAxiosHeaders(config),
+    maxContentLength: Infinity, //this is needed to prevent axios from erroring out with large files
+    maxBodyLength: Infinity,
+  };
+  return requestOptions;
+}
+
 export function validatePinataOptions(options: {
   cidVersion?: number;
   wrapWithDirectory?: boolean;
@@ -121,83 +144,24 @@ export function validatePinataOptions(options: {
     validatePinPolicyStructure(options.customPinPolicy);
   }
 }
-
-export interface axiosHeaders {
-  maxContentLength: number;
-  maxBodyLength: number;
-  headers: {
-    [key: string]: any;
-  };
-  withCredentials?: boolean;
-}
-
-export function createConfigForAxiosHeaders(config: PinataConfig) {
-  if (
-    config.pinataApiKey &&
-    config.pinataApiKey.length > 0 &&
-    config.pinataSecretApiKey &&
-    config.pinataSecretApiKey.length > 0
-  ) {
-    return {
-      withCredentials: true,
-      headers: {
-        pinata_api_key: config.pinataApiKey,
-        pinata_secret_api_key: config.pinataSecretApiKey,
-      },
-    };
+export class PinataFormDataUploader extends BaseFormDataUploader {
+  constructor(private pinataConfig: PinataConfig) {
+    super();
   }
-
-  if (config.pinataJWTKey && config.pinataJWTKey.length > 0) {
-    return {
-      headers: {
-        Authorization: `Bearer ${config.pinataJWTKey}`,
-      },
-    };
+  getRequestOptions(_dataContent: FormData, meta?: FormDataPostHeaders): FormDataRequestOptions {
+    const { headers, ...rest } = createConfigForAxiosHeadersWithFormData(this.pinataConfig);
+    return { ...rest, headers: { ...headers, ...meta } };
   }
-
-  throw new Error(ERROR_NO_CREDENTIALS_PROVIDED);
-}
-
-export function createConfigForAxiosHeadersWithFormData(config: PinataConfig) {
-  const requestOptions: axiosHeaders = {
-    ...createConfigForAxiosHeaders(config),
-    maxContentLength: Infinity, //this is needed to prevent axios from erroring out with large files
-    maxBodyLength: Infinity,
-  };
-  return requestOptions;
-}
-
-const endpoint = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
-
-export function uploadToIPFS(pinataConfig: PinataConfig, dataContent: FormData): Promise<URL> {
-  const input = {
-    method: 'POST',
-    ...createConfigForAxiosHeadersWithFormData(pinataConfig),
-  } as RequestInit;
-  input.headers = { ...input.headers /* ...headers */ };
-  return (globalThis.fetch || fetch)(endpoint, {
-    ...input,
-    body: dataContent as any,
-  })
-    .then((response) => {
-      if (response.status !== 200) {
-        return response.text().then((text) => {
-          let error = text;
-          try {
-            error = JSON.parse(text);
-          } catch {
-            // Ignore
-          }
-          error = (error as any).error || error;
-          throw new Error(
-            `unknown server response while pinning File to IPFS: ${error || response.status}`
-          );
-        });
-      }
-      return response.json() as Promise<PinataPinResponse>;
-    })
-    .catch(function (error) {
-      return Promise.reject(handleError(error));
-    })
-    .then(({ IpfsHash }) => new URL(`ipfs://${IpfsHash}`));
+  addMetadata(dataContent: FormData, meta?: FormDataPostHeaders) {
+    if (meta?.pinataMetadata) {
+      validateMetadata(meta);
+      dataContent.append('pinataMetadata', JSON.stringify(meta?.pinataMetadata));
+    }
+  }
+  getPostEndpoint(): string {
+    return 'https://api.pinata.cloud/pinning/pinFileToIPFS';
+  }
+  resolveUrl(result: any): string {
+    return `ipfs://${result.IpfsHash}`;
+  }
 }

@@ -3,12 +3,13 @@ import { keccak256 } from 'ethers/lib/utils';
 
 import { ImageBuffer, ImageMetadata } from '../interfaces';
 import { AssetBuffer, AssetMetadata } from '../interfaces/metadata';
-import { assertUploadProvider, UploadProvider } from '../interfaces/profile-upload-options';
+import { assertUploadProvider } from '../interfaces/profile-upload-options';
+import { BaseFormDataUploader } from '../providers/formdata-base-client';
 
 export const defaultSizes = [1800, 1024, 640, 320, 180];
 export async function imageUpload(
   givenFile: File | ImageBuffer,
-  uploadProvider: UploadProvider,
+  uploader: BaseFormDataUploader,
   sizes?: number[]
 ): Promise<ImageMetadata[]> {
   const type = 'type' in givenFile ? givenFile.type : givenFile.mimeType;
@@ -16,7 +17,7 @@ export async function imageUpload(
   if (!isImage) {
     throw new Error(`File type: '${type}' does not start with 'image/'`);
   }
-  uploadProvider = assertUploadProvider(uploadProvider);
+  uploader = assertUploadProvider(uploader);
 
   sizes = sizes ?? defaultSizes;
 
@@ -45,7 +46,7 @@ export async function imageUpload(
         width = loadedImg[0].width;
       }
 
-      const url = await uploadProvider(imgToUpload);
+      const url = await uploader.upload(imgToUpload);
 
       return {
         width,
@@ -60,9 +61,9 @@ export async function imageUpload(
 
 export async function assetUpload(
   asset: File | AssetBuffer,
-  uploadProvider?: UploadProvider
+  uploader?: BaseFormDataUploader
 ): Promise<AssetMetadata> {
-  uploadProvider = assertUploadProvider(uploadProvider);
+  uploader = assertUploadProvider(uploader);
 
   let fileBuffer;
   let fileType: string;
@@ -74,7 +75,7 @@ export async function assetUpload(
     fileType = asset.type;
   }
 
-  const url = await uploadProvider(fileBuffer);
+  const url = await uploader.upload(fileBuffer);
 
   return {
     hashFunction: 'keccak256(bytes)',
@@ -85,17 +86,17 @@ export async function assetUpload(
 }
 
 export async function prepareMetadataImage(
-  uploadProvider: UploadProvider,
+  uploader: BaseFormDataUploader,
   image?: File | ImageBuffer | ImageMetadata[],
   sizes?: number[]
 ): Promise<ImageMetadata[]> {
-  uploadProvider = assertUploadProvider(uploadProvider);
+  uploader = assertUploadProvider(uploader);
   let metadataImage: ImageMetadata[] = [];
 
   if (Array.isArray(image)) {
     metadataImage = image;
   } else if (image) {
-    metadataImage = await imageUpload(image, uploadProvider, sizes);
+    metadataImage = await imageUpload(image, uploader, sizes);
   }
 
   return metadataImage;
@@ -103,15 +104,15 @@ export async function prepareMetadataImage(
 
 export async function prepareMetadataAsset(
   asset: File | AssetBuffer | AssetMetadata,
-  uploadProvider?: UploadProvider
+  uploader?: BaseFormDataUploader
 ): Promise<AssetMetadata> {
-  uploadProvider = assertUploadProvider(uploadProvider);
+  uploader = assertUploadProvider(uploader);
 
   let assetMetadata: AssetMetadata | null = null as unknown as AssetMetadata;
   if ('hashFunction' in asset) {
     assetMetadata = asset ?? null;
   } else if (asset) {
-    assetMetadata = await assetUpload(asset, uploadProvider);
+    assetMetadata = await assetUpload(asset, uploader);
   }
   return assetMetadata;
 }

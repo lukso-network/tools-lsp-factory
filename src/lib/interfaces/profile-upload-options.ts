@@ -1,21 +1,17 @@
-/**
- * @param data - File, Readable, ReadStream, AssetBuffer (file to upload)
- * @returns - URL of uploaded file
- */
-export type UploadProvider<Options = any> = (data: any, options?: Options) => Promise<URL>;
+import { BaseFormDataUploader } from '../providers/formdata-base-client';
 
 /**
  * Default upload provider
  */
-export let defaultUploadProvider: UploadProvider | undefined;
+export let defaultUploader: BaseFormDataUploader | undefined;
 
 /**
  * Register a default upload provider with this library
  *
  * @param <UploadProvider> provider
  */
-export function setDefaultUploadProvider(provider: UploadProvider): void {
-  defaultUploadProvider = provider;
+export function setDefaultUploadProvider(provider: BaseFormDataUploader): void {
+  defaultUploader = provider;
 }
 
 /**
@@ -24,10 +20,6 @@ export function setDefaultUploadProvider(provider: UploadProvider): void {
  *
  * @param <UploadProvider> provider
  */
-export function assertUploadProvider(provider?: UploadProvider): UploadProvider {
-  provider = provider || defaultUploadProvider;
-  if (!provider || typeof provider !== 'function') {
-    throw new Error(`Upload provider is required`);
-  }
-  return provider;
+export function assertUploadProvider(provider?: BaseFormDataUploader): BaseFormDataUploader {
+  return provider || defaultUploader;
 }

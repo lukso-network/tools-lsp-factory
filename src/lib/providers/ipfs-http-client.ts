@@ -1,42 +1,39 @@
 import { create, IPFSHTTPClient, Options } from 'ipfs-http-client';
 
-import { UploadProvider } from '../interfaces/profile-upload-options';
+import { BaseFormDataUploader, FormDataPostHeaders } from './formdata-base-client';
 
-/**
- * Create an upload provider that uses the IPFS HTTP client
- *
- * @param gateway IPFS client configuration
- * @returns <UploadProvider> provider
- */
-export function createIPFSUploader(gateway?: string | Options | URL): UploadProvider {
-  let ipfs: IPFSHTTPClient;
+export class HttpIPFSClientUploader extends BaseFormDataUploader {
+  private ipfs: IPFSHTTPClient;
+  constructor(gateway: string | URL | Options) {
+    super();
+    if (typeof gateway === 'string') {
+      const isPortProvided = gateway.split(':').length > 2;
 
-  if (typeof gateway === 'string') {
-    const isPortProvided = gateway.split(':').length > 2;
+      let url: string;
 
-    let url: string;
+      if (gateway.endsWith('/')) {
+        url = isPortProvided ? gateway : `${gateway.slice(0, gateway.length - 1)}:${5001}`;
+      } else {
+        url = isPortProvided ? gateway : `${gateway}:${5001}`;
+      }
 
-    if (gateway.endsWith('/')) {
-      url = isPortProvided ? gateway : `${gateway.slice(0, gateway.length - 1)}:${5001}`;
+      this.ipfs = create({ url });
+    } else if (gateway instanceof URL) {
+      const { hostname, port, protocol } = gateway;
+      this.ipfs = create({ host: hostname, port: Number.parseInt(port, 10), protocol: protocol });
     } else {
-      url = isPortProvided ? gateway : `${gateway}:${5001}`;
+      this.ipfs = create(gateway);
     }
-
-    ipfs = create({ url });
-  } else if (gateway instanceof URL) {
-    const { hostname, port, protocol } = gateway;
-    ipfs = create({ host: hostname, port: Number.parseInt(port, 10), protocol: protocol });
-  } else {
-    ipfs = create(gateway);
   }
-  return async (data: ReadableStream | Buffer) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async upload(data: any, meta?: FormDataPostHeaders): Promise<string> {
     const { cid } =
-      (await ipfs.add(data, {
+      (await this.ipfs.add(data, {
         pin: true,
       })) || {};
     if (!cid) {
       throw new Error('IPFS upload failed');
     }
-    return new URL(`ipfs://${cid.toString()}`);
-  };
+    return `ipfs://${cid.toString()}`;
+  }
 }

@@ -50,7 +50,7 @@ import {
   ProfileDataForEncoding,
 } from '../interfaces/lsp3-profile';
 import { UploadProvider } from '../interfaces/profile-upload-options';
-import { resolveUrl } from '../providers/url-converter';
+import { resolveUrl } from '../providers/url-resolver';
 
 import { UniversalReceiverDeploymentEvent as UniversalReceiverDeploymentEvent } from './universal-receiver.service';
 
