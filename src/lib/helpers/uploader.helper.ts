@@ -57,8 +57,8 @@ export async function imageUpload(
       return {
         width,
         height,
-        hashFunction: 'keccak256(bytes)',
-        hash: keccak256(imgBuffer),
+        verificationFunction: 'keccak256(bytes)',
+        verificationData: keccak256(imgBuffer),
         url: 'ipfs://' + uploadResponse.cid.toString(),
       };
     })
@@ -88,8 +88,8 @@ export async function assetUpload(
   }
 
   return {
-    hashFunction: 'keccak256(bytes)',
-    hash: keccak256(fileBuffer),
+    verificationFunction: 'keccak256(bytes)',
+    verificationData: keccak256(fileBuffer),
     url: 'ipfs://' + ipfsResult.cid.toString(),
     fileType,
   };
@@ -146,7 +146,7 @@ export async function prepareMetadataAsset(
 ): Promise<AssetMetadata> {
   let assetMetadata: AssetMetadata | null;
 
-  if ('hashFunction' in asset) {
+  if ('verificationFunction' in asset) {
     assetMetadata = asset ?? null;
   } else if (asset) {
     assetMetadata = await assetUpload(asset, uploadOptions);

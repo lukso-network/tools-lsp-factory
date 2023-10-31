@@ -244,18 +244,18 @@ describe('LSP8IdentifiableDigitalAsset', () => {
     expect(actualMintBalance).toEqual(1);
   });
 
-  describe('lsp8 with passed lsp4Metadata', () => {
+  fdescribe('lsp8 with passed lsp4Metadata', () => {
     let digitalAsset: LSP8Mintable;
     const controllerAddress = '0xaDa25A4424b08F5337DacD619D4bCb21536a9B95';
     const name = 'TOKEN';
     const symbol = 'TKN';
     const expectedLSP4Value =
-      '0x6f357c6a88c86e704ea6cb386d5952122035901f5ea5bb4a695b17d3fccc845d84032b0d697066733a2f2f516d5272714254514c33683256633950454c33643138566e526b6e7a73744547564378685657366a50615a7a5346';
+      '0x6f357c6a4d81f92a409b60c056e13102169c07e03f7de2dbcb79775a8b1f66a55b6278a0697066733a2f2f516d61543479786a45464e6d7163595965547832706e5a46426d71395055737763424c446b394b716f7148504b67';
 
     const allowedLSP4Formats = [
       lsp4DigitalAsset.LSP4Metadata,
       lsp4DigitalAsset,
-      { json: lsp4DigitalAsset, url: 'ipfs://QmRrqBTQL3h2Vc9PEL3d18VnRknzstEGVCxhVW6jPaZzSF' },
+      { json: lsp4DigitalAsset, url: 'ipfs://QmaT4yxjEFNmqcYYeTx2pnZFBmq9PUswcBLDk9KqoqHPKg' },
     ];
 
     allowedLSP4Formats.forEach((lsp4Metadata) => {

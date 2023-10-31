@@ -80,8 +80,8 @@ describe('uploader.helper.spec.ts', () => {
     //   expect(result.length === 5);
     //   expect(result[0]).toHaveProperty('width');
     //   expect(result[0]).toHaveProperty('height');
-    //   expect(result[0]).toHaveProperty('hashFunction');
-    //   expect(result[0]).toHaveProperty('hash');
+    //   expect(result[0]).toHaveProperty('verificationFunction');
+    //   expect(result[0]).toHaveProperty('verificationData');
     //   expect(result[0]).toHaveProperty('url');
     // });
   });
@@ -103,8 +103,8 @@ describe('uploader.helper.spec.ts', () => {
     expect(result.length === 5);
     expect(result[0]).toHaveProperty('width');
     expect(result[0]).toHaveProperty('height');
-    expect(result[0]).toHaveProperty('hashFunction');
-    expect(result[0]).toHaveProperty('hash');
+    expect(result[0]).toHaveProperty('verificationFunction');
+    expect(result[0]).toHaveProperty('verificationData');
     expect(result[0]).toHaveProperty('url');
   });
 
@@ -125,8 +125,8 @@ describe('uploader.helper.spec.ts', () => {
     expect(result.length === 5);
     expect(result[0]).toHaveProperty('width');
     expect(result[0]).toHaveProperty('height');
-    expect(result[0]).toHaveProperty('hashFunction');
-    expect(result[0]).toHaveProperty('hash');
+    expect(result[0]).toHaveProperty('verificationFunction');
+    expect(result[0]).toHaveProperty('verificationData');
     expect(result[0]).toHaveProperty('url');
   });
 

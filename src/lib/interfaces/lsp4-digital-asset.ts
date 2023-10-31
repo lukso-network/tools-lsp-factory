@@ -30,8 +30,8 @@ export interface LSP4MetadataUrlForEncoding {
 }
 
 export interface HashedLSP4MetadataForEncoding {
-  hashFunction: string;
-  hash: string;
+  verificationFunction: string;
+  verificationData: string;
   url: string;
 }
 

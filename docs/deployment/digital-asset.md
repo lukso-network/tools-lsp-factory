@@ -197,7 +197,7 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
 });
 ```
 
-You can also provide the JSON file yourself to generate the hash value:
+You can also provide the JSON file yourself to generate the verificationData value:
 
 ```javascript title='Providing a previously uploaded LSP4 metadata URL and JSON file itself'
 await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
@@ -209,13 +209,13 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
 });
 ```
 
-Or you can provide the hash value and then uploaded file URL:
+Or you can provide the verificationData value and then uploaded file URL:
 
-```javascript title='Providing a previously uploaded LSP4 metadata URL and hash values'
+```javascript title='Providing a previously uploaded LSP4 metadata URL and verificationData values'
 await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
   digitalAssetMetadata: {
-    hash: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
-    hashFunction: 'keccak256(utf8)',
+    verificationData: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
+    verificationFunction: 'keccak256(utf8)',
     url: 'https://mycoolserver.com/file.json'
   },
   ...
@@ -244,8 +244,8 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
         {
           width: 500,
           height: 500,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0xfdafad027ecfe57eb4ad044b938805d1dec209d6e9f960fc320d7b9b11cced14',
+          verificationFunction: 'keccak256(bytes)',
+          verificationData: '0xfdafad027ecfe57eb4ad044b938805d1dec209d6e9f960fc320d7b9b11cced14',
           url: 'ipfs://QmPLqMFDxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrajSGp',
         }
         ... // Multiple sizes of the image should be included
@@ -266,8 +266,8 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
       {
         width: 256,
         height: 256,
-        hashFunction: 'keccak256(bytes)',
-        hash: '0xfdafad027ecfe57eb4ad044b938805d1dec209d6e9f960fc320d7b9b11cced14',
+        verificationFunction: 'keccak256(bytes)',
+        verificationData: '0xfdafad027ecfe57eb4ad044b938805d1dec209d6e9f960fc320d7b9b11cced14',
         url: 'ipfs://QmPLqMFDxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrajSGp',
       }
       ... // Multiple sizes of the icon image should be included
@@ -286,8 +286,8 @@ await lspFactory.LSP8IdentifiableDigitalAsset.deploy({
   digitalAssetMetadata: {
     assets: [
         {
-          hashFunction: 'keccak256(bytes)',
-          hash: '0xfdafad027ecfe57eb4ad044b938805d1dec209d6e9f960fc320d7b9b11cced14',
+          verificationFunction: 'keccak256(bytes)',
+          verificationData: '0xfdafad027ecfe57eb4ad044b938805d1dec209d6e9f960fc320d7b9b11cced14',
           url: 'ipfs://QmPLqMFDxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrajSGp',
           fileType: 'fbx'
         }

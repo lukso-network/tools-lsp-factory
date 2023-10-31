@@ -47,12 +47,12 @@ describe('UniversalProfile', () => {
     let signer: SignerWithAddress;
     let universalProfile: UniversalProfile;
     const expectedLSP3Value =
-      '0x6f357c6a5af8bb903787236579aff8a6518c022fe655646fded5e1ea23ca7aedddb221a4697066733a2f2f516d624b76435645655069444b78756f7579747939624d73574241785a444772326a68786434704c474c78393544';
+      '0x6f357c6a55ef1fb1a95f7a6467071879e47a60ad4792dd1707f79cf7e6333bdb09de57cf697066733a2f2f516d635a6a737a314d61565963313167324743456a5258516a34546934765737625a705031653655464c526b434d';
 
     const allowedLSP3Formats = [
       lsp3ProfileJson.LSP3Profile,
       lsp3ProfileJson,
-      { json: lsp3ProfileJson, url: 'ipfs://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D' },
+      { json: lsp3ProfileJson, url: 'ipfs://QmcZjsz1MaVYc11g2GCEjRXQj4Ti4vW7bZpP1e6UFLRkCM' },
     ];
 
     allowedLSP3Formats.forEach((lsp3ProfileMetadata) => {
