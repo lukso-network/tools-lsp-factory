@@ -1,13 +1,9 @@
 import ERC725 from '@erc725/erc725.js';
+import { ALL_PERMISSIONS, ERC725YDataKeys } from '@lukso/lsp-smart-contracts';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { ethers } from 'hardhat';
 
 import { deployUniversalProfileContracts } from '../../../test/test.utils';
-import {
-  ADDRESS_PERMISSIONS_ARRAY_KEY,
-  DEFAULT_PERMISSIONS,
-  PREFIX_PERMISSIONS,
-} from '../helpers/config.helper';
 
 import { prepareSetDataParameters } from './universal-profile.service';
 
@@ -21,7 +17,6 @@ describe('LSP3Account Service', () => {
   });
 
   describe('prepareSetDataParameters', () => {
-    let abiCoder;
     let universalProfile, universalReceiverDelegate;
 
     beforeAll(async () => {
@@ -44,12 +39,14 @@ describe('LSP3Account Service', () => {
       expect(universalProfile.address).toEqual(erc725AccountAddress);
 
       // AddressPermissions[] array length should be 1
-      const totalPermissionsSet = valuesToSet[keysToSet.indexOf(ADDRESS_PERMISSIONS_ARRAY_KEY)];
-      const expectedLength = abiCoder.encode(['uint256'], [2]);
+      const totalPermissionsSet =
+        valuesToSet[keysToSet.indexOf(ERC725YDataKeys.LSP6['AddressPermissions[]'].length)];
+      const expectedLength = ethers.utils.hexZeroPad(2, 16);
       expect(totalPermissionsSet).toEqual(expectedLength);
 
       // controller address should have default permissions set
-      const controllerPermissionsKey = PREFIX_PERMISSIONS + signers[0].address.substring(2);
+      const controllerPermissionsKey =
+        ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signers[0].address.substring(2);
       const controllerPermissionsValue = valuesToSet[keysToSet.indexOf(controllerPermissionsKey)];
       const expectedPermissions = ERC725.encodePermissions({
         CHANGEOWNER: true,
@@ -61,7 +58,7 @@ describe('LSP3Account Service', () => {
       const hexIndex = ethers.utils.hexlify([0]);
 
       const addressPermissionArrayIndexKey =
-        ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34) +
+        ERC725YDataKeys.LSP6['AddressPermissions[]'].index +
         ethers.utils.hexZeroPad(hexIndex, 16).substring(2);
 
       const result = valuesToSet[keysToSet.indexOf(addressPermissionArrayIndexKey)];
@@ -80,15 +77,17 @@ describe('LSP3Account Service', () => {
       );
 
       // AddressPermissions[] array length should be 2
-      const totalPermissionsSet = valuesToSet[keysToSet.indexOf(ADDRESS_PERMISSIONS_ARRAY_KEY)];
-      const expectedLength = abiCoder.encode(['uint256'], [controllerAddresses.length + 1]);
+      const totalPermissionsSet =
+        valuesToSet[keysToSet.indexOf(ERC725YDataKeys.LSP6['AddressPermissions[]'].length)];
+      const expectedLength = ethers.utils.hexZeroPad(controllerAddresses.length + 1, 16);
       expect(totalPermissionsSet).toEqual(expectedLength);
 
       for (let index = 0; index < controllerAddresses.length; index++) {
         const controllerAddress = controllerAddresses[index];
 
         // controller address should have default permissions set
-        const controllerPermissionsKey = PREFIX_PERMISSIONS + controllerAddress.substring(2);
+        const controllerPermissionsKey =
+          ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + controllerAddress.substring(2);
         const controllerPermissionsValue = valuesToSet[keysToSet.indexOf(controllerPermissionsKey)];
 
         const expectedPermissions = ERC725.encodePermissions({
@@ -99,7 +98,7 @@ describe('LSP3Account Service', () => {
 
         // controller address in the array at AddressPermissions[index]
         const hexIndex = ethers.utils.hexlify([index]);
-        const leftSideKey = ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34);
+        const leftSideKey = ERC725YDataKeys.LSP6['AddressPermissions[]'].index;
         const rightSideKey = ethers.utils.hexZeroPad(hexIndex, 16);
         const addressPermissionArrayIndexKey = leftSideKey + rightSideKey.substring(2);
 
@@ -119,15 +118,17 @@ describe('LSP3Account Service', () => {
       );
 
       // AddressPermissions[] array length should be 11 (including Universal Receiver Delegate address)
-      const totalPermissionsSet = valuesToSet[keysToSet.indexOf(ADDRESS_PERMISSIONS_ARRAY_KEY)];
-      const expectedLength = abiCoder.encode(['uint256'], [controllerAddresses.length + 1]);
+      const totalPermissionsSet =
+        valuesToSet[keysToSet.indexOf(ERC725YDataKeys.LSP6['AddressPermissions[]'].length)];
+      const expectedLength = ethers.utils.hexZeroPad(controllerAddresses.length + 1, 16);
       expect(totalPermissionsSet).toEqual(expectedLength);
 
       for (let index = 0; index < controllerAddresses.length; index++) {
         const controllerAddress = controllerAddresses[index];
 
         // controller address should have default permissions set
-        const controllerPermissionsKey = PREFIX_PERMISSIONS + controllerAddress.substring(2);
+        const controllerPermissionsKey =
+          ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + controllerAddress.substring(2);
         const controllerPermissionsValue = valuesToSet[keysToSet.indexOf(controllerPermissionsKey)];
 
         const expectedPermissions =
@@ -136,13 +137,13 @@ describe('LSP3Account Service', () => {
                 CHANGEOWNER: true,
                 EDITPERMISSIONS: true,
               })
-            : ERC725.encodePermissions(DEFAULT_PERMISSIONS);
+            : ALL_PERMISSIONS;
 
         expect(controllerPermissionsValue).toEqual(expectedPermissions);
 
         // controller address in the array at AddressPermissions[index]
         const hexIndex = ethers.utils.hexlify([index]);
-        const leftSideKey = ADDRESS_PERMISSIONS_ARRAY_KEY.slice(0, 34);
+        const leftSideKey = ERC725YDataKeys.LSP6['AddressPermissions[]'].index;
         const rightSideKey = ethers.utils.hexZeroPad(hexIndex, 16);
         const addressPermissionArrayIndexKey = leftSideKey + rightSideKey.substring(2);
 

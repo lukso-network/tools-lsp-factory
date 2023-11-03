@@ -1,3 +1,5 @@
+import { SUPPORTED_VERIFICATION_FUNCTION_HASHES } from '@erc725/erc725.js/build/main/src/constants/constants';
+import { ERC725YDataKeys, LSP8_TOKEN_ID_TYPES } from '@lukso/lsp-smart-contracts';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
 import { ethers } from 'hardhat';
@@ -37,6 +39,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       controllerAddress: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
       name: 'TOKEN',
       symbol: 'TKN',
+      tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
     });
 
     expect(lsp8IdentifiableDigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
@@ -59,6 +62,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
+        tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: {
@@ -88,6 +92,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
+        tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: { version: baseContract.address },
@@ -115,6 +120,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       }
     );
   });
+
   it('Should be compatible with RxJS', (done) => {
     const myLSPFactory = new LSPFactory(provider, signer);
     let lsp8Address: string;
@@ -157,6 +163,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
+        tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: { version: baseContract.address },
@@ -176,6 +183,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
         name: 'TOKEN',
         symbol: 'TKN',
+        tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: {
@@ -206,6 +214,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
+        tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: {
@@ -249,6 +258,8 @@ describe('LSP8IdentifiableDigitalAsset', () => {
     const controllerAddress = '0xaDa25A4424b08F5337DacD619D4bCb21536a9B95';
     const name = 'TOKEN';
     const symbol = 'TKN';
+    const tokenIdType = LSP8_TOKEN_ID_TYPES.UNIQUE_ID;
+
     const expectedLSP4Value =
       '0x6f357c6a4d81f92a409b60c056e13102169c07e03f7de2dbcb79775a8b1f66a55b6278a0697066733a2f2f516d61543479786a45464e6d7163595965547832706e5a46426d71395055737763424c446b394b716f7148504b67';
 
@@ -266,6 +277,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
           name,
           symbol,
           digitalAssetMetadata: lsp4Metadata,
+          tokenIdType,
         });
 
         expect(lsp8DigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
@@ -276,25 +288,32 @@ describe('LSP8IdentifiableDigitalAsset', () => {
           signer
         );
       });
+
       it('should deploy and set LSP4DigitalAsset data', async () => {
         const ownerAddress = await digitalAsset.owner();
         expect(ownerAddress).toEqual(controllerAddress);
 
-        const data = await digitalAsset.getDataBatch([
-          '0x9afb95cacc9f95858ec44aa8c3b685511002e30ae54415823f406128b85b238e',
-        ]);
+        const data = await digitalAsset.getData(ERC725YDataKeys.LSP4.LSP4Metadata);
 
-        expect(data[0].startsWith('0x6f357c6a')).toBe(true);
-        expect(data[0]).toEqual(expectedLSP4Value);
+        expect(data.startsWith(SUPPORTED_VERIFICATION_FUNCTION_HASHES.HASH_KECCAK256_UTF8)).toBe(
+          true
+        );
+        expect(data).toEqual(expectedLSP4Value);
       });
-      it('should have correct name and symbol set', async () => {
-        const [retrievedName, retrievedSymbol] = await digitalAsset.getDataBatch([
-          '0xdeba1e292f8ba88238e10ab3c7f88bd4be4fac56cad5194b6ecceaf653468af1',
-          '0x2f0a68ab07768e01943a599e73362a0e17a63a72e94dd2e384d2c1d4db932756',
-        ]);
+
+      it('should have correct name, symbol and token ID type set', async () => {
+        const [retrievedName, retrievedSymbol, retrievedTokenIdType] =
+          await digitalAsset.getDataBatch([
+            ERC725YDataKeys.LSP4.LSP4TokenName,
+            ERC725YDataKeys.LSP4.LSP4TokenSymbol,
+            ERC725YDataKeys.LSP8.LSP8TokenIdType,
+          ]);
+
+        const tokenIdTypeDecoded = ethers.BigNumber.from(retrievedTokenIdType).toNumber();
 
         expect(ethers.utils.toUtf8String(retrievedName)).toEqual(name);
         expect(ethers.utils.toUtf8String(retrievedSymbol)).toEqual(symbol);
+        expect(tokenIdTypeDecoded).toEqual(tokenIdType);
       });
     });
 
@@ -307,6 +326,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         '0xFCA72D5763b8cFc686C2285099D5F35a2F094E9f',
         '0x591c236982b089Ad4B60758C075fA50Ec53CD674',
       ];
+      const tokenIdType = LSP8_TOKEN_ID_TYPES.UNIQUE_ID;
 
       let lspFactory: LSPFactory;
 
@@ -326,6 +346,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
           name,
           symbol,
           creators,
+          tokenIdType,
         });
 
         digitalAsset = LSP8Mintable__factory.connect(

@@ -1,5 +1,5 @@
 import { Signer } from '@ethersproject/abstract-signer';
-import { INTERFACE_IDS } from '@lukso/lsp-smart-contracts';
+import { ERC725YDataKeys, INTERFACE_IDS } from '@lukso/lsp-smart-contracts';
 import axios from 'axios';
 import { ContractFactory, ethers } from 'ethers';
 import {
@@ -23,7 +23,7 @@ import {
   LSP8MintableInit__factory,
 } from '../../';
 import { LSP4DigitalAssetMetadata } from '../classes/lsp4-digital-asset-metadata';
-import { GAS_BUFFER, GAS_PRICE, LSP4_KEYS } from '../helpers/config.helper';
+import { GAS_BUFFER, GAS_PRICE } from '../helpers/config.helper';
 import {
   convertContractDeploymentOptionsVersion,
   deployContract,
@@ -47,6 +47,7 @@ import {
   DigitalAssetContractDeploymentOptions,
   DigitalAssetDeploymentOptions,
   LSP7DigitalAssetDeploymentOptions,
+  LSP8IdentifiableDigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
 import {
   LSP4DigitalAssetJSON,
@@ -167,23 +168,17 @@ function initializeLSP7Proxy(
 
       const controllerAddress = await signer.getAddress();
 
-      const gasEstimate = await contract.estimateGas[`initialize(string,string,address,bool)`](
+      const gasEstimate = await contract.estimateGas.initialize(
         name,
         symbol,
         controllerAddress,
         isNFT
       );
 
-      const transaction = await contract[`initialize(string,string,address,bool)`](
-        name,
-        symbol,
-        controllerAddress,
-        isNFT,
-        {
-          gasLimit: gasEstimate.add(GAS_BUFFER),
-          gasPrice: GAS_PRICE,
-        }
-      );
+      const transaction = await contract.initialize(name, symbol, controllerAddress, isNFT, {
+        gasLimit: gasEstimate.add(GAS_BUFFER),
+        gasPrice: GAS_PRICE,
+      });
 
       return {
         type: DeploymentType.TRANSACTION,
@@ -203,7 +198,7 @@ function initializeLSP7Proxy(
 
 export function lsp8IdentifiableDigitalAssetDeployment$(
   signer: Signer,
-  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
+  digitalAssetDeploymentOptions: LSP8IdentifiableDigitalAssetDeploymentOptions,
   baseContractAddress$: Observable<string>,
   byteCode?: string
 ) {
@@ -222,7 +217,7 @@ export function lsp8IdentifiableDigitalAssetDeployment$(
 
 export function lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
   signer: Signer,
-  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
+  digitalAssetDeploymentOptions: LSP8IdentifiableDigitalAssetDeploymentOptions,
   baseContractAddress: string,
   byteCode?: string
 ) {
@@ -254,7 +249,7 @@ export function lsp8IdentifiableDigitalAssetDeploymentWithBaseContractAddress$(
 
 async function deployLSP8IdentifiableDigitalAsset(
   signer: Signer,
-  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions,
+  digitalAssetDeploymentOptions: LSP8IdentifiableDigitalAssetDeploymentOptions,
   baseContractAddress: string,
   byteCode?: string
 ) {
@@ -269,14 +264,16 @@ async function deployLSP8IdentifiableDigitalAsset(
       return new ContractFactory(LSP8Mintable__factory.abi, byteCode, signer).deploy(
         digitalAssetDeploymentOptions.name,
         digitalAssetDeploymentOptions.symbol,
-        controllerAddress
+        controllerAddress,
+        digitalAssetDeploymentOptions.tokenIdType
       );
     }
 
     return new LSP8Mintable__factory(signer).deploy(
       digitalAssetDeploymentOptions.name,
       digitalAssetDeploymentOptions.symbol,
-      controllerAddress
+      controllerAddress,
+      digitalAssetDeploymentOptions.tokenIdType
     );
   };
 
@@ -293,9 +290,9 @@ async function deployLSP8IdentifiableDigitalAsset(
 function initializeLSP8Proxy(
   signer: Signer,
   digitalAssetDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
-  digitalAssetDeploymentOptions: DigitalAssetDeploymentOptions
+  digitalAssetDeploymentOptions: LSP8IdentifiableDigitalAssetDeploymentOptions
 ) {
-  const { name, symbol } = digitalAssetDeploymentOptions;
+  const { name, symbol, tokenIdType } = digitalAssetDeploymentOptions;
 
   const initialize$ = digitalAssetDeploymentReceipt$.pipe(
     takeLast(1),
@@ -306,25 +303,22 @@ function initializeLSP8Proxy(
 
       const controllerAddress = await signer.getAddress();
 
-      const gasEstimate = await contract.estimateGas[`initialize(string,string,address)`](
-        name,
-        symbol,
-        controllerAddress
-      );
-
-      const transaction = await contract[`initialize(string,string,address)`](
+      const gasEstimate = await contract.estimateGas.initialize(
         name,
         symbol,
         controllerAddress,
-        {
-          gasLimit: gasEstimate.add(GAS_BUFFER),
-          gasPrice: GAS_PRICE,
-        }
+        tokenIdType
       );
+
+      const transaction = await contract.initialize(name, symbol, controllerAddress, tokenIdType, {
+        gasLimit: gasEstimate.add(GAS_BUFFER),
+        gasPrice: GAS_PRICE,
+      });
+
       return {
         type: DeploymentType.TRANSACTION,
         contractName: result.contractName,
-        functionName: 'initialize(string,string,address)',
+        functionName: 'initialize(string,string,address,uint256)',
         status: DeploymentStatus.PENDING,
         transaction,
       };
@@ -590,7 +584,7 @@ async function prepareSetDataTransaction(
 
   for (let i = 0; i < creators.length; i++) {
     creatorArrayIndexKeys.push(
-      LSP4_KEYS.LSP4_CREATORS_ARRAY.slice(0, 34) +
+      ERC725YDataKeys.LSP4['LSP4Creators[]'].index +
         ethers.utils.hexZeroPad(ethers.utils.hexlify([i]), 16).substring(2)
     );
 
@@ -599,7 +593,7 @@ async function prepareSetDataTransaction(
     const isUniversalProfile = await addressIsUniversalProfile(creators[i], signer);
     const creatorInterface = isUniversalProfile ? INTERFACE_IDS.LSP0ERC725Account : '0xffffffff';
 
-    creatorsMapKeys.push(LSP4_KEYS.LSP4_CREATORS_MAP_PREFIX + creators[i].slice(2));
+    creatorsMapKeys.push(ERC725YDataKeys.LSP4.LSP4CreatorsMap + creators[i].slice(2));
     creatorsMapValues.push(
       creatorInterface.slice(0, 10) + ethers.utils.hexZeroPad(ethers.utils.hexlify([i]), 8).slice(2)
     );
@@ -608,17 +602,17 @@ async function prepareSetDataTransaction(
   const valuesToSet: string[] = [];
 
   if (creators.length) {
-    keysToSet.push(LSP4_KEYS.LSP4_CREATORS_ARRAY);
+    keysToSet.push(ERC725YDataKeys.LSP4['LSP4Creators[]'].length);
     keysToSet.push(...creatorArrayIndexKeys);
     keysToSet.push(...creatorsMapKeys);
 
-    valuesToSet.push(ethers.utils.hexZeroPad(ethers.utils.hexlify([creators.length]), 32));
+    valuesToSet.push(ethers.utils.hexZeroPad(ethers.utils.hexlify(creators.length), 16));
     valuesToSet.push(...creatorArrayIndexValues);
     valuesToSet.push(...creatorsMapValues);
   }
 
   if (lsp4Metadata) {
-    keysToSet.push(LSP4_KEYS.LSP4_METADATA);
+    keysToSet.push(ERC725YDataKeys.LSP4.LSP4Metadata);
     valuesToSet.push(lsp4Metadata);
   }
 
