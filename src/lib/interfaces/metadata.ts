@@ -1,8 +1,8 @@
 export interface ImageMetadata {
   width: number;
   height: number;
-  hashFunction: string;
-  hash: string;
+  verificationFunction: string;
+  verificationData: string;
   url: string;
 }
 
@@ -12,8 +12,8 @@ export interface LinkMetadata {
 }
 
 export interface AssetMetadata {
-  hashFunction: string;
-  hash: string;
+  verificationFunction: string;
+  verificationData: string;
   url: string;
   fileType: string;
 }

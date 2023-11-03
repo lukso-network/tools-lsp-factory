@@ -47,8 +47,8 @@ export interface ProfileDataForEncoding {
 }
 
 export interface HashedProfileDataForEncoding {
-  hashFunction: string;
-  hash: string;
+  verificationFunction: string;
+  verificationData: string;
   url: string;
 }
 
