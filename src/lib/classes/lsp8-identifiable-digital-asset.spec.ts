@@ -1,4 +1,4 @@
-import { SUPPORTED_HASH_FUNCTION_HASHES } from '@erc725/erc725.js/build/main/src/constants/constants';
+import { SUPPORTED_VERIFICATION_FUNCTION_HASHES } from '@erc725/erc725.js/build/main/src/constants/constants';
 import { ERC725YDataKeys, LSP8_TOKEN_ID_TYPES } from '@lukso/lsp-smart-contracts';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
@@ -295,7 +295,9 @@ describe('LSP8IdentifiableDigitalAsset', () => {
 
         const data = await digitalAsset.getData(ERC725YDataKeys.LSP4.LSP4Metadata);
 
-        expect(data.startsWith(SUPPORTED_HASH_FUNCTION_HASHES.HASH_KECCAK256_UTF8)).toBe(true);
+        expect(data.startsWith(SUPPORTED_VERIFICATION_FUNCTION_HASHES.HASH_KECCAK256_UTF8)).toBe(
+          true
+        );
         expect(data).toEqual(expectedLSP4Value);
       });
 
