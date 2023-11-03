@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.0](https://github.com/lukso-network/tools-lsp-factory/compare/v3.1.1...v3.2.0) (2023-11-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* add tokenIdType to LSP8 deployment
+* update LSP3 and LSP4 to new verification schema
+
+### Features
+
+* add `keccak256(utf8)` constant in helpers ([16b66ca](https://github.com/lukso-network/tools-lsp-factory/commit/16b66ca6189c4c9cbc200df32203b9382538d7cd))
+
+
+### Bug Fixes
+
+* add v12 base contract versions ([adbaadc](https://github.com/lukso-network/tools-lsp-factory/commit/adbaadcb2e68a7b0e1e171055165875ebee2e30d))
+* encode LSP2 array length as 16 bytes long ([919c5a4](https://github.com/lukso-network/tools-lsp-factory/commit/919c5a4078169a4a5e60735b6a7d313a8b2ea106))
+* erc725.js imports ([1a4e210](https://github.com/lukso-network/tools-lsp-factory/commit/1a4e2108cf81ad646e7f0cfc0571924d863fc889))
+* trigger release ([9f5fdf0](https://github.com/lukso-network/tools-lsp-factory/commit/9f5fdf046523110a411187f08e25b71598798ecd))
+
+
+### Miscellaneous Chores
+
+* release 3.2.0 ([ba8398f](https://github.com/lukso-network/tools-lsp-factory/commit/ba8398f69ab24c8a75cb4d582cce51c9f9d8e5ed))
+
+
+### Code Refactoring
+
+* add tokenIdType to LSP8 deployment ([425e23f](https://github.com/lukso-network/tools-lsp-factory/commit/425e23fea89723cbf7784f500171d1d57109c537))
+* update LSP3 and LSP4 to new verification schema ([acaa377](https://github.com/lukso-network/tools-lsp-factory/commit/acaa377db21a53e9f1803ae121b57da68ad49ee2))
+
 ## [3.1.1](https://github.com/lukso-network/tools-lsp-factory/compare/v3.1.0...v3.1.1) (2023-09-12)
 
 
