@@ -1,3 +1,4 @@
+import { hexlify, randomBytes } from 'ethers/lib/utils';
 import { ethers, SignerWithAddress } from 'hardhat';
 
 import { ProxyDeployer } from './proxy-deployer';
@@ -16,24 +17,19 @@ describe('UniversalProfile', () => {
     baseContracts = await proxyDeployer.deployUniversalProfileBaseContracts();
   });
 
-  it('should deploy the ERC725Account proxy and setData', async () => {
+  it('should deploy the ERC725Account proxy and be able to set any data key/value pair', async () => {
     // LSPAccount
     const erc725AccountProxy = await proxyDeployer.deployProxyContract(
       baseContracts.universalProfile
     );
     await erc725AccountProxy.initialize(await signer.getAddress());
 
-    await erc725AccountProxy.setData(
-      '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-      '0xbeefbeef',
-      {
-        from: await signer.getAddress(),
-      }
-    );
-    const data = await erc725AccountProxy.getData(
-      '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'
-    );
+    const randomDataKey = hexlify(randomBytes(32));
+    const randomDataValueExpected = hexlify(randomBytes(4));
 
-    expect(data).toEqual('0xbeefbeef');
+    await erc725AccountProxy.setData(randomDataKey, randomDataValueExpected, {
+      from: await signer.getAddress(),
+    });
+    expect(await erc725AccountProxy.getData(randomDataKey)).toEqual(randomDataValueExpected);
   });
 });

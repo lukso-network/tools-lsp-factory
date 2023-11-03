@@ -2,6 +2,7 @@ import crypto from 'crypto';
 
 import { Signer } from '@ethersproject/abstract-signer';
 import { NonceManager } from '@ethersproject/experimental';
+import { ERC725YDataKeys } from '@lukso/lsp-smart-contracts';
 
 import { UniversalProfile__factory } from '../types/ethers-v5/factories/UniversalProfile__factory';
 import { LSP6KeyManager__factory } from '../types/ethers-v5/factories/LSP6KeyManager__factory';
@@ -79,7 +80,7 @@ function isAddress(address: string) {
 }
 
 export async function testSetData(upAddress: string, keyManagerAddress: string, signer: Signer) {
-  const key = '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5';
+  const key = ERC725YDataKeys.LSP3.LSP3Profile;
   const value = '0x' + crypto.randomBytes(32).toString('hex');
 
   const universalProfile = UniversalProfile__factory.connect(upAddress, signer);
@@ -92,8 +93,8 @@ export async function testSetData(upAddress: string, keyManagerAddress: string, 
 
   expect(result).toBeTruthy();
 
-  const data = await universalProfile.getDataBatch([key]);
-  expect(data).toEqual([value]);
+  const data = await universalProfile.getData(key);
+  expect(data).toEqual(value);
 }
 
 export async function testProxyBytecodeContainsAddress(
