@@ -1,4 +1,11 @@
-import { AssetBuffer, AssetMetadata, ImageBuffer, ImageMetadata, LinkMetadata } from './metadata';
+import {
+  AssetBuffer,
+  AssetMetadata,
+  ImageBuffer,
+  ImageMetadata,
+  LinkMetadata,
+  Verification,
+} from './metadata';
 
 export interface LSP4DigitalAssetJSON {
   LSP4Metadata: LSP4DigitalAsset;
@@ -30,8 +37,7 @@ export interface LSP4MetadataUrlForEncoding {
 }
 
 export interface HashedLSP4MetadataForEncoding {
-  verificationFunction: string;
-  verificationData: string;
+  verification: Verification;
   url: string;
 }
 

@@ -1,4 +1,4 @@
-import { AssetMetadata, ImageBuffer, ImageMetadata, LinkMetadata } from './metadata';
+import { AssetMetadata, ImageBuffer, ImageMetadata, LinkMetadata, Verification } from './metadata';
 
 export interface LSP3ProfileJSON {
   LSP3Profile: LSP3Profile;
@@ -47,8 +47,7 @@ export interface ProfileDataForEncoding {
 }
 
 export interface HashedProfileDataForEncoding {
-  verificationFunction: string;
-  verificationData: string;
+  verification: Verification;
   url: string;
 }
 

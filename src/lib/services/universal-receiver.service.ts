@@ -59,7 +59,7 @@ export function universalReceiverDelegateDeploymentWithBaseContractAddress$(
   byteCode?: string
 ): Observable<UniversalReceiverDeploymentEvent> {
   const universalReceiverDelegateDeployment$ = from(
-    deployUniversalReceiverDelegate(signer, baseContractAddress, byteCode)
+    deployUniversalReceiverDelegate(signer, baseContractAddress || '', byteCode)
   ).pipe(shareReplay());
 
   const universalReceiverDelegateStoreReceipt$ = waitForReceipt<UniversalReceiverDeploymentEvent>(

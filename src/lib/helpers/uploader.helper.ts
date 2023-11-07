@@ -57,8 +57,10 @@ export async function imageUpload(
       return {
         width,
         height,
-        verificationFunction: 'keccak256(bytes)',
-        verificationData: keccak256(imgBuffer),
+        verification: {
+          method: 'keccak256(bytes)',
+          data: keccak256(imgBuffer),
+        },
         url: 'ipfs://' + uploadResponse.cid.toString(),
       };
     })
@@ -84,12 +86,17 @@ export async function assetUpload(
   if (uploadOptions.url) {
     // TODO: Simple HTTP upload
   } else {
+    if (!uploadOptions?.ipfsGateway) {
+      throw new Error('IPFS gateway is required');
+    }
     ipfsResult = await ipfsUpload(fileBuffer, uploadOptions?.ipfsGateway);
   }
 
   return {
-    verificationFunction: 'keccak256(bytes)',
-    verificationData: keccak256(fileBuffer),
+    verification: {
+      method: 'keccak256(bytes)',
+      data: keccak256(fileBuffer),
+    },
     url: 'ipfs://' + ipfsResult.cid.toString(),
     fileType,
   };
@@ -116,6 +123,11 @@ export async function ipfsUpload(
 
     ipfs = create({ url });
   } else {
+    ipfsGateway =
+      ipfsGateway?.url || ipfsGateway?.host ? ipfsGateway : { url: 'https://2eff.lukso.dev' };
+    if (/localhost/.test(`${ipfsGateway.host} ${ipfsGateway.url}`)) {
+      throw new Error('IPFS gateway must not be localhost');
+    }
     ipfs = create(ipfsGateway);
   }
 
@@ -128,8 +140,8 @@ export async function prepareMetadataImage(
   uploadOptions?: UploadOptions,
   image?: File | ImageBuffer | ImageMetadata[],
   sizes?: number[]
-): Promise<ImageMetadata[]> | null {
-  let metadataImage: ImageMetadata[] | null;
+): Promise<ImageMetadata[] | null> {
+  let metadataImage: ImageMetadata[] | null = null;
 
   if (Array.isArray(image)) {
     metadataImage = image ?? null;
@@ -146,7 +158,7 @@ export async function prepareMetadataAsset(
 ): Promise<AssetMetadata> {
   let assetMetadata: AssetMetadata | null;
 
-  if ('verificationFunction' in asset) {
+  if ('verification' in asset) {
     assetMetadata = asset ?? null;
   } else if (asset) {
     assetMetadata = await assetUpload(asset, uploadOptions);

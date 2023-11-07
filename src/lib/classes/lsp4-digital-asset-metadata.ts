@@ -1,11 +1,12 @@
 import { defaultUploadOptions } from '../helpers/config.helper';
 import { ipfsUpload, prepareMetadataAsset, prepareMetadataImage } from '../helpers/uploader.helper';
-import { LSPFactoryOptions } from '../interfaces';
+import { ImageMetadata, LSPFactoryOptions } from '../interfaces';
 import {
   LSP4MetadataBeforeUpload,
   LSP4MetadataContentBeforeUpload,
   LSP4MetadataUrlForEncoding,
 } from '../interfaces/lsp4-digital-asset';
+import { AssetMetadata } from '../interfaces/metadata';
 import { UploadOptions } from '../interfaces/profile-upload-options';
 
 export class LSP4DigitalAssetMetadata {
@@ -26,20 +27,20 @@ export class LSP4DigitalAssetMetadata {
     const [images, assets, icon] = await Promise.all([
       metaData.images
         ? Promise.all(metaData.images.map((image) => prepareMetadataImage(uploadOptions, image)))
-        : null,
+        : undefined,
       metaData.assets
         ? Promise.all(metaData.assets?.map((asset) => prepareMetadataAsset(asset, uploadOptions)))
-        : null,
+        : undefined,
       prepareMetadataImage(uploadOptions, metaData.icon, [256, 32]),
     ]);
 
     const lsp4Metadata = {
       LSP4Metadata: {
         ...metaData,
-        links: metaData.links ?? null,
-        images,
-        assets,
-        icon,
+        links: metaData.links ?? [],
+        images: (images ?? []).filter((image) => image) as ImageMetadata[][],
+        assets: (assets ?? []).filter((asset) => asset) as AssetMetadata[],
+        icon: icon?.filter((image) => image) as ImageMetadata[],
       },
     };
 

@@ -1,5 +1,5 @@
 import { ERC725 } from '@erc725/erc725.js';
-import { SUPPORTED_VERIFICATION_FUNCTION_HASHES } from '@erc725/erc725.js/build/main/src/constants/constants';
+import { SUPPORTED_VERIFICATION_METHOD_HASHES } from '@erc725/erc725.js/build/main/src/constants/constants';
 import { ALL_PERMISSIONS, ERC725YDataKeys } from '@lukso/lsp-smart-contracts';
 import KeyManagerContract from '@lukso/lsp-smart-contracts/artifacts/LSP6KeyManager.json';
 import UniversalProfileContract from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json';
@@ -43,12 +43,12 @@ describe('UniversalProfile', () => {
     let signer: SignerWithAddress;
     let universalProfile: UniversalProfile;
     const expectedLSP3Value =
-      '0x6f357c6a55ef1fb1a95f7a6467071879e47a60ad4792dd1707f79cf7e6333bdb09de57cf697066733a2f2f516d635a6a737a314d61565963313167324743456a5258516a34546934765737625a705031653655464c526b434d';
+      '0x6f357c6a5c47034b7eb7776e2d0c2b481e91309ec8688b11422621ed2538528e2a071c80697066733a2f2f516d52316f736332444b64427038635a4b7934737a5044417362504c6a5a4e696a786567393444574c314c765148';
 
     const allowedLSP3Formats = [
       lsp3ProfileJson.LSP3Profile,
       lsp3ProfileJson,
-      { json: lsp3ProfileJson, url: 'ipfs://QmcZjsz1MaVYc11g2GCEjRXQj4Ti4vW7bZpP1e6UFLRkCM' },
+      { json: lsp3ProfileJson, url: 'ipfs://QmR1osc2DKdBp8cZKy4szPDAsbPLjZNijxeg94DWL1LvQH' },
     ];
 
     allowedLSP3Formats.forEach((lsp3ProfileMetadata) => {
@@ -68,7 +68,7 @@ describe('UniversalProfile', () => {
           const lsp3Data = await universalProfile.getData(ERC725YDataKeys.LSP3.LSP3Profile);
 
           expect(
-            lsp3Data.startsWith(SUPPORTED_VERIFICATION_FUNCTION_HASHES.HASH_KECCAK256_UTF8)
+            lsp3Data.startsWith(SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_UTF8)
           ).toBe(true);
           expect(lsp3Data).toEqual(expectedLSP3Value);
         });

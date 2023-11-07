@@ -41,8 +41,10 @@ const myContracts = await lspFactory.UniversalProfile.deploy({
       {
         width: 500,
         height: 500,
-        verificationFunction: 'keccak256(bytes)',
-        verificationData: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
+        verification: {
+          method: 'keccak256(bytes)',
+          data: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
+        },
         url: 'ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp',
       },
     ],
@@ -50,8 +52,10 @@ const myContracts = await lspFactory.UniversalProfile.deploy({
       {
         width: 500,
         height: 500,
-        verificationFunction: 'keccak256(bytes)',
-        verificationData: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
+        verification: {
+          method: 'keccak256(bytes)',
+          data: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
+        },
         url: 'ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp',
       },
     ],

@@ -1,4 +1,4 @@
-import { SUPPORTED_VERIFICATION_FUNCTION_HASHES } from '@erc725/erc725.js/build/main/src/constants/constants';
+import { SUPPORTED_VERIFICATION_METHOD_HASHES } from '@erc725/erc725.js/build/main/src/constants/constants';
 import { ERC725YDataKeys, LSP8_TOKEN_ID_TYPES } from '@lukso/lsp-smart-contracts';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
@@ -157,7 +157,6 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         expect(1).toEqual(error);
       },
     });
-
     myLSPFactory.LSP8IdentifiableDigitalAsset.deploy(
       {
         controllerAddress: signer.address,
@@ -253,7 +252,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
     expect(actualMintBalance).toEqual(1);
   });
 
-  fdescribe('lsp8 with passed lsp4Metadata', () => {
+  describe('lsp8 with passed lsp4Metadata', () => {
     let digitalAsset: LSP8Mintable;
     const controllerAddress = '0xaDa25A4424b08F5337DacD619D4bCb21536a9B95';
     const name = 'TOKEN';
@@ -261,12 +260,15 @@ describe('LSP8IdentifiableDigitalAsset', () => {
     const tokenIdType = LSP8_TOKEN_ID_TYPES.UNIQUE_ID;
 
     const expectedLSP4Value =
-      '0x6f357c6a4d81f92a409b60c056e13102169c07e03f7de2dbcb79775a8b1f66a55b6278a0697066733a2f2f516d61543479786a45464e6d7163595965547832706e5a46426d71395055737763424c446b394b716f7148504b67';
+      '0x6f357c6a7fedfaf6ebf7908ff7e1fffc988678c706f12bff90e4a34b2408af71d0392597697066733a2f2f516d56384d6e4a4c333659673562574d5a4e5053474e504a516f42524c64436255314d473942706e44414757626f';
 
     const allowedLSP4Formats = [
       lsp4DigitalAsset.LSP4Metadata,
       lsp4DigitalAsset,
-      { json: lsp4DigitalAsset, url: 'ipfs://QmaT4yxjEFNmqcYYeTx2pnZFBmq9PUswcBLDk9KqoqHPKg' },
+      {
+        json: lsp4DigitalAsset,
+        url: 'ipfs://QmV8MnJL36Yg5bWMZNPSGNPJQoBRLdCbU1MG9BpnDAGWbo',
+      },
     ];
 
     allowedLSP4Formats.forEach((lsp4Metadata) => {
@@ -295,9 +297,10 @@ describe('LSP8IdentifiableDigitalAsset', () => {
 
         const data = await digitalAsset.getData(ERC725YDataKeys.LSP4.LSP4Metadata);
 
-        expect(data.startsWith(SUPPORTED_VERIFICATION_FUNCTION_HASHES.HASH_KECCAK256_UTF8)).toBe(
+        expect(data.startsWith(SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_UTF8)).toBe(
           true
         );
+
         expect(data).toEqual(expectedLSP4Value);
       });
 

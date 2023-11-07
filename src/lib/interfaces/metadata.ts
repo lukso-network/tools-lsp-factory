@@ -1,8 +1,7 @@
 export interface ImageMetadata {
   width: number;
   height: number;
-  verificationFunction: string;
-  verificationData: string;
+  verification: Verification;
   url: string;
 }
 
@@ -12,8 +11,7 @@ export interface LinkMetadata {
 }
 
 export interface AssetMetadata {
-  verificationFunction: string;
-  verificationData: string;
+  verification: Verification;
   url: string;
   fileType: string;
 }
@@ -33,4 +31,10 @@ export enum SupportedImageBufferFormats {
 export interface AssetBuffer {
   buffer: Buffer;
   mimeType: string;
+}
+
+export interface Verification {
+  method: string;
+  data: string;
+  source?: string;
 }
