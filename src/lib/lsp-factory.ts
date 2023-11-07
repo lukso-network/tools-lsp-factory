@@ -41,9 +41,11 @@ export class LSPFactory {
       provider = new ethers.providers.JsonRpcProvider(rpcUrlOrProvider);
     } else if ('chainId' in rpcUrlOrProvider) {
       provider = new ethers.providers.Web3Provider(rpcUrlOrProvider);
-      chainId = parseInt(rpcUrlOrProvider.chainId);
+      chainId = parseInt(rpcUrlOrProvider.chainId || '42');
     } else if (typeof rpcUrlOrProvider !== 'string') {
       provider = rpcUrlOrProvider as providers.Web3Provider | providers.JsonRpcProvider;
+    } else {
+      throw new Error('Invalid rpcUrlOrProvider');
     }
 
     if (privateKeyOrSigner instanceof Signer) {

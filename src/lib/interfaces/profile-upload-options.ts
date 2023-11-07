@@ -9,7 +9,7 @@ export interface UploadOptionsHTTP {
 export interface UploadOptionsIPFS {
   url?: never;
   port?: never;
-  ipfsGateway: IPFSGateway;
+  ipfsGateway?: IPFSGateway;
 }
 
 export type IPFSGateway = Options | string;

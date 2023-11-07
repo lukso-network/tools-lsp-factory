@@ -8,7 +8,7 @@ import { UniversalProfile__factory } from '../types/ethers-v5/factories/Universa
 import { LSP6KeyManager__factory } from '../types/ethers-v5/factories/LSP6KeyManager__factory';
 import { LSP1UniversalReceiverDelegateUP__factory } from '../types/ethers-v5/factories/LSP1UniversalReceiverDelegateUP__factory';
 import { ContractDeploymentOptions, LSPFactory } from '../build/main/src';
-import { ContractNames, DeployedContracts } from '../src/lib/interfaces';
+import { ContractNames, DeployedUniversalProfileContracts } from '../src/lib/interfaces';
 import { getDeployedByteCode } from '../src/lib/helpers/deployment.helper';
 import { providers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
@@ -67,7 +67,7 @@ export async function testUPDeployment(
     expect(deployedContracts[`LSP1UniversalReceiverDelegateBaseContract`]).toBeUndefined();
   }
 
-  return deployedContracts as DeployedContracts;
+  return deployedContracts as DeployedUniversalProfileContracts;
 }
 
 function isAddress(address: string) {
