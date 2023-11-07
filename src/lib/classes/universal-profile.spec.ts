@@ -13,7 +13,6 @@ import {
   UniversalProfile__factory,
 } from '../../../build/main/src';
 import { LSPFactory } from '../../../build/main/src/lib/lsp-factory';
-import { getIPFSConfig } from '../../../test/ipfgGateway';
 import { lsp3ProfileJson } from '../../../test/lsp3-profile.mock';
 import {
   testProxyBytecodeContainsAddress,
