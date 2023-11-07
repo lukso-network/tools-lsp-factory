@@ -103,9 +103,11 @@ describe('uploader.helper.spec.ts', () => {
     expect(result.length === 5);
     expect(result[0]).toHaveProperty('width');
     expect(result[0]).toHaveProperty('height');
-    expect(result[0]).toHaveProperty('verificationFunction');
-    expect(result[0]).toHaveProperty('verificationData');
+    expect(result[0]).toHaveProperty('verification');
     expect(result[0]).toHaveProperty('url');
+
+    expect(result[0].verification).toHaveProperty('method');
+    expect(result[0].verification).toHaveProperty('data');
   });
 
   it('should accept IPFS url', async () => {
@@ -125,9 +127,11 @@ describe('uploader.helper.spec.ts', () => {
     expect(result.length === 5);
     expect(result[0]).toHaveProperty('width');
     expect(result[0]).toHaveProperty('height');
-    expect(result[0]).toHaveProperty('verificationFunction');
-    expect(result[0]).toHaveProperty('verificationData');
+    expect(result[0]).toHaveProperty('verification');
     expect(result[0]).toHaveProperty('url');
+
+    expect(result[0].verification).toHaveProperty('method');
+    expect(result[0].verification).toHaveProperty('data');
   });
 
   // describe('#resizeBuffer', () => {
