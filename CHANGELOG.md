@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.1](https://github.com/lukso-network/tools-lsp-factory/compare/v3.2.0...v3.2.1) (2023-11-07)
+
+
+### Bug Fixes
+
+* Repaise additional import ([36fe3e9](https://github.com/lukso-network/tools-lsp-factory/commit/36fe3e91b743ff4b328bcb2b88e20d51fc0ad99b))
+* Upgrade and try again ([51895c1](https://github.com/lukso-network/tools-lsp-factory/commit/51895c1a7017728f45cc15b5e7581d1326a76c00))
+
 ## [3.2.0](https://github.com/lukso-network/tools-lsp-factory/compare/v3.1.1...v3.2.0) (2023-11-03)
 
 
