@@ -34,7 +34,7 @@
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/experimental": "^5.7.0",
     "@lukso/lsp-smart-contracts": "^0.12.1",
-    "axios": "^0.23.0",
+    "axios": "^1.6.0",
     "browser-image-compression": "^2.0.0",
     "ethers": "^5.7.0",
     "ipfs-http-client": "52.0.3",
