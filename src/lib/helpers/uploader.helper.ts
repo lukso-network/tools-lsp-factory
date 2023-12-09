@@ -191,11 +191,14 @@ export function formatIPFSUrl(ipfsGateway: IPFSGateway, ipfsHash: string) {
     ipfsUrl = ipfsGateway.endsWith('/')
       ? `${ipfsGateway}${ipfsHash}`
       : `${ipfsGateway}/${ipfsHash}`;
+  } else if (
+    ipfsGateway.url &&
+    (typeof ipfsGateway.url === 'string' || ipfsGateway.url instanceof URL)
+  ) {
+    const url = new URL(ipfsGateway.url);
+    ipfsUrl = new URL(`/ipfs/${ipfsHash}`, url).toString();
   } else {
-    const protocol = ipfsGateway?.host ?? 'https';
-    const host = ipfsGateway?.host ?? '2eff.lukso.dev';
-
-    ipfsUrl = `${[protocol]}://${host}/ipfs/${ipfsHash}`;
+    throw new Error('IPFS gateway as Multiaddr is currently not supported');
   }
 
   return ipfsUrl;
