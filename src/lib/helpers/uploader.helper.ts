@@ -186,20 +186,24 @@ export function isMetadataEncoded(metdata: string): boolean {
 
 export function formatIPFSUrl(ipfsGateway: IPFSGateway, ipfsHash: string) {
   let ipfsUrl: string;
-
   if (typeof ipfsGateway === 'string') {
     ipfsUrl = ipfsGateway.endsWith('/')
       ? `${ipfsGateway}${ipfsHash}`
       : `${ipfsGateway}/${ipfsHash}`;
   } else if (
-    ipfsGateway.url &&
+    ipfsGateway?.url &&
     (typeof ipfsGateway.url === 'string' || ipfsGateway.url instanceof URL)
   ) {
     const url = new URL(ipfsGateway.url);
     ipfsUrl = new URL(`/ipfs/${ipfsHash}`, url).toString();
-  } else {
+  } else if (ipfsGateway?.host) {
+    const url = new URL(ipfsGateway.host);
+    url.protocol = 'https:';
+    ipfsUrl = new URL(`/ipfs/${ipfsHash}`, url).toString();
+  } else if (ipfsGateway?.url) {
     throw new Error('IPFS gateway as Multiaddr is currently not supported');
+  } else {
+    ipfsUrl = new URL(`/ipfs/${ipfsHash}`, 'https://api.universalprofile.cloud').toString();
   }
-
   return ipfsUrl;
 }
