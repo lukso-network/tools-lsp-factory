@@ -1,5 +1,9 @@
 import { SUPPORTED_VERIFICATION_METHOD_HASHES } from '@erc725/erc725.js/build/main/src/constants/constants';
-import { ERC725YDataKeys, LSP8_TOKEN_ID_TYPES } from '@lukso/lsp-smart-contracts';
+import {
+  ERC725YDataKeys,
+  LSP4_TOKEN_TYPES,
+  LSP8_TOKEN_ID_FORMAT,
+} from '@lukso/lsp-smart-contracts';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
 import { ethers } from 'hardhat';
@@ -39,7 +43,8 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       controllerAddress: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
       name: 'TOKEN',
       symbol: 'TKN',
-      tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
+      tokenIdType: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
+      tokenType: LSP4_TOKEN_TYPES.NFT,
     });
 
     expect(lsp8IdentifiableDigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
@@ -62,7 +67,8 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
-        tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
+        tokenIdType: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
+        tokenType: LSP4_TOKEN_TYPES.NFT,
       },
       {
         LSP8IdentifiableDigitalAsset: {
@@ -92,7 +98,8 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
-        tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
+        tokenIdType: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
+        tokenType: LSP4_TOKEN_TYPES.NFT,
       },
       {
         LSP8IdentifiableDigitalAsset: { version: baseContract.address },
@@ -162,7 +169,8 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
-        tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
+        tokenType: LSP4_TOKEN_TYPES.NFT,
+        tokenIdType: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: { version: baseContract.address },
@@ -182,7 +190,8 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
         name: 'TOKEN',
         symbol: 'TKN',
-        tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
+        tokenType: LSP4_TOKEN_TYPES.NFT,
+        tokenIdType: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: {
@@ -213,7 +222,8 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
-        tokenIdType: LSP8_TOKEN_ID_TYPES.UNIQUE_ID,
+        tokenType: LSP4_TOKEN_TYPES.NFT,
+        tokenIdType: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: {
@@ -257,7 +267,8 @@ describe('LSP8IdentifiableDigitalAsset', () => {
     const controllerAddress = '0xaDa25A4424b08F5337DacD619D4bCb21536a9B95';
     const name = 'TOKEN';
     const symbol = 'TKN';
-    const tokenIdType = LSP8_TOKEN_ID_TYPES.UNIQUE_ID;
+    const tokenType = LSP4_TOKEN_TYPES.NFT;
+    const tokenIdType = LSP8_TOKEN_ID_FORMAT.UNIQUE_ID;
 
     const expectedLSP4Value =
       '0x6f357c6a7fedfaf6ebf7908ff7e1fffc988678c706f12bff90e4a34b2408af71d0392597697066733a2f2f516d56384d6e4a4c333659673562574d5a4e5053474e504a516f42524c64436255314d473942706e44414757626f';
@@ -278,6 +289,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
           controllerAddress,
           name,
           symbol,
+          tokenType,
           digitalAssetMetadata: lsp4Metadata,
           tokenIdType,
         });
@@ -309,7 +321,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
           await digitalAsset.getDataBatch([
             ERC725YDataKeys.LSP4.LSP4TokenName,
             ERC725YDataKeys.LSP4.LSP4TokenSymbol,
-            ERC725YDataKeys.LSP8.LSP8TokenIdType,
+            ERC725YDataKeys.LSP8.LSP8TokenIdFormat,
           ]);
 
         const tokenIdTypeDecoded = ethers.BigNumber.from(retrievedTokenIdType).toNumber();
@@ -325,11 +337,12 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       const controllerAddress = '0xaDa25A4424b08F5337DacD619D4bCb21536a9B95';
       const name = 'TOKEN';
       const symbol = 'TKN';
+      const tokenType = LSP4_TOKEN_TYPES.NFT;
       const creators = [
         '0xFCA72D5763b8cFc686C2285099D5F35a2F094E9f',
         '0x591c236982b089Ad4B60758C075fA50Ec53CD674',
       ];
-      const tokenIdType = LSP8_TOKEN_ID_TYPES.UNIQUE_ID;
+      const tokenIdType = LSP8_TOKEN_ID_FORMAT.UNIQUE_ID;
 
       let lspFactory: LSPFactory;
 
@@ -348,6 +361,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
           controllerAddress,
           name,
           symbol,
+          tokenType,
           creators,
           tokenIdType,
         });

@@ -1,5 +1,5 @@
 import { Signer } from '@ethersproject/abstract-signer';
-import { ERC725YDataKeys, INTERFACE_IDS } from '@lukso/lsp-smart-contracts';
+import { ERC725YDataKeys, INTERFACE_IDS, LSP4_TOKEN_TYPES } from '@lukso/lsp-smart-contracts';
 import axios from 'axios';
 import { ContractFactory, ethers } from 'ethers';
 import {
@@ -120,6 +120,11 @@ async function deployLSP7DigitalAsset(
 ) {
   const controllerAddress = await signer.getAddress();
 
+  const lsp4TokenType =
+    typeof digitalAssetDeploymentOptions.tokenType === 'string'
+      ? LSP4_TOKEN_TYPES[digitalAssetDeploymentOptions.tokenType]
+      : digitalAssetDeploymentOptions.tokenType;
+
   const deploymentFunction = async () => {
     if (baseContractAddress) {
       return new LSP7MintableInit__factory(signer).attach(baseContractAddress);
@@ -130,6 +135,7 @@ async function deployLSP7DigitalAsset(
         digitalAssetDeploymentOptions.name,
         digitalAssetDeploymentOptions.symbol,
         controllerAddress,
+        lsp4TokenType,
         digitalAssetDeploymentOptions.isNFT
       );
     }
@@ -138,6 +144,7 @@ async function deployLSP7DigitalAsset(
       digitalAssetDeploymentOptions.name,
       digitalAssetDeploymentOptions.symbol,
       controllerAddress,
+      lsp4TokenType,
       digitalAssetDeploymentOptions.isNFT
     );
   };
@@ -157,7 +164,9 @@ function initializeLSP7Proxy(
   digitalAssetDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
   digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions
 ) {
-  const { name, symbol, isNFT } = digitalAssetDeploymentOptions;
+  const { name, symbol, tokenType, isNFT } = digitalAssetDeploymentOptions;
+
+  const lsp4TokenType = typeof tokenType === 'string' ? LSP4_TOKEN_TYPES[tokenType] : tokenType;
 
   const initialize$ = digitalAssetDeploymentReceipt$.pipe(
     takeLast(1),
@@ -172,18 +181,26 @@ function initializeLSP7Proxy(
         name,
         symbol,
         controllerAddress,
+        lsp4TokenType,
         isNFT
       );
 
-      const transaction = await contract.initialize(name, symbol, controllerAddress, isNFT, {
-        gasLimit: gasEstimate.add(GAS_BUFFER),
-        gasPrice: GAS_PRICE,
-      });
+      const transaction = await contract.initialize(
+        name,
+        symbol,
+        controllerAddress,
+        lsp4TokenType,
+        isNFT,
+        {
+          gasLimit: gasEstimate.add(GAS_BUFFER),
+          gasPrice: GAS_PRICE,
+        }
+      );
 
       return {
         type: DeploymentType.TRANSACTION,
         contractName: result.contractName,
-        functionName: 'initialize(string,string,address,bool)',
+        functionName: 'initialize(string,string,address,uint256,bool)',
         status: DeploymentStatus.PENDING,
         transaction,
       };
@@ -255,6 +272,10 @@ async function deployLSP8IdentifiableDigitalAsset(
 ) {
   const controllerAddress = await signer.getAddress();
 
+  const { tokenType } = digitalAssetDeploymentOptions;
+
+  const lsp4TokenType = typeof tokenType === 'string' ? LSP4_TOKEN_TYPES[tokenType] : tokenType;
+
   const deploymentFunction = async () => {
     if (baseContractAddress) {
       return new LSP8MintableInit__factory(signer).attach(baseContractAddress);
@@ -265,6 +286,7 @@ async function deployLSP8IdentifiableDigitalAsset(
         digitalAssetDeploymentOptions.name,
         digitalAssetDeploymentOptions.symbol,
         controllerAddress,
+        lsp4TokenType,
         digitalAssetDeploymentOptions.tokenIdType
       );
     }
@@ -273,6 +295,7 @@ async function deployLSP8IdentifiableDigitalAsset(
       digitalAssetDeploymentOptions.name,
       digitalAssetDeploymentOptions.symbol,
       controllerAddress,
+      lsp4TokenType,
       digitalAssetDeploymentOptions.tokenIdType
     );
   };
@@ -292,7 +315,9 @@ function initializeLSP8Proxy(
   digitalAssetDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
   digitalAssetDeploymentOptions: LSP8IdentifiableDigitalAssetDeploymentOptions
 ) {
-  const { name, symbol, tokenIdType } = digitalAssetDeploymentOptions;
+  const { name, symbol, tokenIdType, tokenType } = digitalAssetDeploymentOptions;
+
+  const lsp4TokenType = typeof tokenType === 'string' ? LSP4_TOKEN_TYPES[tokenType] : tokenType;
 
   const initialize$ = digitalAssetDeploymentReceipt$.pipe(
     takeLast(1),
@@ -307,18 +332,26 @@ function initializeLSP8Proxy(
         name,
         symbol,
         controllerAddress,
+        lsp4TokenType,
         tokenIdType
       );
 
-      const transaction = await contract.initialize(name, symbol, controllerAddress, tokenIdType, {
-        gasLimit: gasEstimate.add(GAS_BUFFER),
-        gasPrice: GAS_PRICE,
-      });
+      const transaction = await contract.initialize(
+        name,
+        symbol,
+        controllerAddress,
+        lsp4TokenType,
+        tokenIdType,
+        {
+          gasLimit: gasEstimate.add(GAS_BUFFER),
+          gasPrice: GAS_PRICE,
+        }
+      );
 
       return {
         type: DeploymentType.TRANSACTION,
         contractName: result.contractName,
-        functionName: 'initialize(string,string,address,uint256)',
+        functionName: 'initialize(string,string,address,uint256,uint256)',
         status: DeploymentStatus.PENDING,
         transaction,
       };
