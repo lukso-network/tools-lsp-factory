@@ -36,7 +36,7 @@ export interface LSP7DigitalAssetDeploymentOptions extends DigitalAssetDeploymen
 
 export interface LSP8IdentifiableDigitalAssetDeploymentOptions
   extends DigitalAssetDeploymentOptions {
-  tokenIdType: number | string;
+  tokenIdFormat: number | string;
 }
 
 export interface DeployedLSP8IdentifiableDigitalAsset {

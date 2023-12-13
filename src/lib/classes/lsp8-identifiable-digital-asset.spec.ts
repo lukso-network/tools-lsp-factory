@@ -43,7 +43,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       controllerAddress: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
       name: 'TOKEN',
       symbol: 'TKN',
-      tokenIdType: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
+      tokenIdFormat: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
       tokenType: LSP4_TOKEN_TYPES.NFT,
     });
 
@@ -67,7 +67,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
-        tokenIdType: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
+        tokenIdFormat: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
         tokenType: LSP4_TOKEN_TYPES.NFT,
       },
       {
@@ -98,7 +98,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         controllerAddress: signer.address,
         name: 'TOKEN',
         symbol: 'TKN',
-        tokenIdType: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
+        tokenIdFormat: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
         tokenType: LSP4_TOKEN_TYPES.NFT,
       },
       {
@@ -170,7 +170,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         name: 'TOKEN',
         symbol: 'TKN',
         tokenType: LSP4_TOKEN_TYPES.NFT,
-        tokenIdType: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
+        tokenIdFormat: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: { version: baseContract.address },
@@ -191,7 +191,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         name: 'TOKEN',
         symbol: 'TKN',
         tokenType: LSP4_TOKEN_TYPES.NFT,
-        tokenIdType: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
+        tokenIdFormat: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: {
@@ -223,7 +223,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         name: 'TOKEN',
         symbol: 'TKN',
         tokenType: LSP4_TOKEN_TYPES.NFT,
-        tokenIdType: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
+        tokenIdFormat: LSP8_TOKEN_ID_FORMAT.UNIQUE_ID,
       },
       {
         LSP8IdentifiableDigitalAsset: {
@@ -268,7 +268,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
     const name = 'TOKEN';
     const symbol = 'TKN';
     const tokenType = LSP4_TOKEN_TYPES.NFT;
-    const tokenIdType = LSP8_TOKEN_ID_FORMAT.UNIQUE_ID;
+    const tokenIdFormat = LSP8_TOKEN_ID_FORMAT.UNIQUE_ID;
 
     const expectedLSP4Value =
       '0x6f357c6a7fedfaf6ebf7908ff7e1fffc988678c706f12bff90e4a34b2408af71d0392597697066733a2f2f516d56384d6e4a4c333659673562574d5a4e5053474e504a516f42524c64436255314d473942706e44414757626f';
@@ -291,7 +291,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
           symbol,
           tokenType,
           digitalAssetMetadata: lsp4Metadata,
-          tokenIdType,
+          tokenIdFormat,
         });
 
         expect(lsp8DigitalAsset.LSP8IdentifiableDigitalAsset.address).toBeDefined();
@@ -317,18 +317,18 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       });
 
       it('should have correct name, symbol and token ID type set', async () => {
-        const [retrievedName, retrievedSymbol, retrievedTokenIdType] =
+        const [retrievedName, retrievedSymbol, retrievedtokenIdFormat] =
           await digitalAsset.getDataBatch([
             ERC725YDataKeys.LSP4.LSP4TokenName,
             ERC725YDataKeys.LSP4.LSP4TokenSymbol,
             ERC725YDataKeys.LSP8.LSP8TokenIdFormat,
           ]);
 
-        const tokenIdTypeDecoded = ethers.BigNumber.from(retrievedTokenIdType).toNumber();
+        const tokenIdFormatDecoded = ethers.BigNumber.from(retrievedtokenIdFormat).toNumber();
 
         expect(ethers.utils.toUtf8String(retrievedName)).toEqual(name);
         expect(ethers.utils.toUtf8String(retrievedSymbol)).toEqual(symbol);
-        expect(tokenIdTypeDecoded).toEqual(tokenIdType);
+        expect(tokenIdFormatDecoded).toEqual(tokenIdFormat);
       });
     });
 
@@ -342,7 +342,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         '0xFCA72D5763b8cFc686C2285099D5F35a2F094E9f',
         '0x591c236982b089Ad4B60758C075fA50Ec53CD674',
       ];
-      const tokenIdType = LSP8_TOKEN_ID_FORMAT.UNIQUE_ID;
+      const tokenIdFormat = LSP8_TOKEN_ID_FORMAT.UNIQUE_ID;
 
       let lspFactory: LSPFactory;
 
@@ -363,7 +363,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
           symbol,
           tokenType,
           creators,
-          tokenIdType,
+          tokenIdFormat,
         });
 
         digitalAsset = LSP8Mintable__factory.connect(

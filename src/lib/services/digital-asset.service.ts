@@ -287,7 +287,7 @@ async function deployLSP8IdentifiableDigitalAsset(
         digitalAssetDeploymentOptions.symbol,
         controllerAddress,
         lsp4TokenType,
-        digitalAssetDeploymentOptions.tokenIdType
+        digitalAssetDeploymentOptions.tokenIdFormat
       );
     }
 
@@ -296,7 +296,7 @@ async function deployLSP8IdentifiableDigitalAsset(
       digitalAssetDeploymentOptions.symbol,
       controllerAddress,
       lsp4TokenType,
-      digitalAssetDeploymentOptions.tokenIdType
+      digitalAssetDeploymentOptions.tokenIdFormat
     );
   };
 
@@ -315,7 +315,7 @@ function initializeLSP8Proxy(
   digitalAssetDeploymentReceipt$: Observable<DeploymentEventProxyContract>,
   digitalAssetDeploymentOptions: LSP8IdentifiableDigitalAssetDeploymentOptions
 ) {
-  const { name, symbol, tokenIdType, tokenType } = digitalAssetDeploymentOptions;
+  const { name, symbol, tokenIdFormat, tokenType } = digitalAssetDeploymentOptions;
 
   const lsp4TokenType = typeof tokenType === 'string' ? LSP4_TOKEN_TYPES[tokenType] : tokenType;
 
@@ -333,7 +333,7 @@ function initializeLSP8Proxy(
         symbol,
         controllerAddress,
         lsp4TokenType,
-        tokenIdType
+        tokenIdFormat
       );
 
       const transaction = await contract.initialize(
@@ -341,7 +341,7 @@ function initializeLSP8Proxy(
         symbol,
         controllerAddress,
         lsp4TokenType,
-        tokenIdType,
+        tokenIdFormat,
         {
           gasLimit: gasEstimate.add(GAS_BUFFER),
           gasPrice: GAS_PRICE,
