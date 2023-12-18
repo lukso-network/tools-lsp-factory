@@ -397,14 +397,14 @@ export async function getLSP4MetadataUrl(
   let lsp4MetadataForEncoding: LSP4MetadataUrlForEncoding;
 
   if (typeof lsp4Metadata === 'string') {
-    let lsp4JsonUrl = lsp4Metadata;
+    let lsp4VerifiableURI = lsp4Metadata;
     const isIPFSUrl = lsp4Metadata.startsWith('ipfs://');
 
     if (isIPFSUrl) {
-      lsp4JsonUrl = formatIPFSUrl(uploadOptions?.ipfsGateway, lsp4Metadata.split('/').at(-1));
+      lsp4VerifiableURI = formatIPFSUrl(uploadOptions?.ipfsGateway, lsp4Metadata.split('/').at(-1));
     }
 
-    const ipfsResponse = await axios.get(lsp4JsonUrl);
+    const ipfsResponse = await axios.get(lsp4VerifiableURI);
     const lsp4MetadataJSON = ipfsResponse.data;
 
     lsp4MetadataForEncoding = {

@@ -271,7 +271,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
     const tokenIdFormat = LSP8_TOKEN_ID_FORMAT.UNIQUE_ID;
 
     const expectedLSP4Value =
-      '0x6f357c6a7fedfaf6ebf7908ff7e1fffc988678c706f12bff90e4a34b2408af71d0392597697066733a2f2f516d56384d6e4a4c333659673562574d5a4e5053474e504a516f42524c64436255314d473942706e44414757626f';
+      '0x00006f357c6a00207fedfaf6ebf7908ff7e1fffc988678c706f12bff90e4a34b2408af71d0392597697066733a2f2f516d56384d6e4a4c333659673562574d5a4e5053474e504a516f42524c64436255314d473942706e44414757626f';
 
     const allowedLSP4Formats = [
       lsp4DigitalAsset.LSP4Metadata,
@@ -309,9 +309,12 @@ describe('LSP8IdentifiableDigitalAsset', () => {
 
         const data = await digitalAsset.getData(ERC725YDataKeys.LSP4.LSP4Metadata);
 
-        expect(data.startsWith(SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_UTF8)).toBe(
-          true
-        );
+        const verificationMethodPart = '0x' + data.slice(6, 14);
+        expect(
+          verificationMethodPart.startsWith(
+            SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_UTF8
+          )
+        ).toBe(true);
 
         expect(data).toEqual(expectedLSP4Value);
       });
