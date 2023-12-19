@@ -43,7 +43,7 @@ describe('UniversalProfile', () => {
     let signer: SignerWithAddress;
     let universalProfile: UniversalProfile;
     const expectedLSP3Value =
-      '0x6f357c6a5c47034b7eb7776e2d0c2b481e91309ec8688b11422621ed2538528e2a071c80697066733a2f2f516d52316f736332444b64427038635a4b7934737a5044417362504c6a5a4e696a786567393444574c314c765148';
+      '0x00006f357c6a00205c47034b7eb7776e2d0c2b481e91309ec8688b11422621ed2538528e2a071c80697066733a2f2f516d52316f736332444b64427038635a4b7934737a5044417362504c6a5a4e696a786567393444574c314c765148';
 
     const allowedLSP3Formats = [
       lsp3ProfileJson.LSP3Profile,
@@ -66,9 +66,12 @@ describe('UniversalProfile', () => {
           universalProfile = UniversalProfile__factory.connect(LSP0ERC725Account.address, signer);
 
           const lsp3Data = await universalProfile.getData(ERC725YDataKeys.LSP3.LSP3Profile);
+          const verificationMethodPart = '0x' + lsp3Data.slice(6, 14);
 
           expect(
-            lsp3Data.startsWith(SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_UTF8)
+            verificationMethodPart.startsWith(
+              SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_UTF8
+            )
           ).toBe(true);
           expect(lsp3Data).toEqual(expectedLSP3Value);
         });
