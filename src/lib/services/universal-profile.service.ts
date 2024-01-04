@@ -309,14 +309,14 @@ export async function getLsp3ProfileDataUrl(
   let lsp3ProfileData: LSP3ProfileDataForEncoding;
 
   if (typeof lsp3Profile === 'string') {
-    let lsp3JsonUrl = lsp3Profile;
+    let lsp3VerifiableURI = lsp3Profile;
     const isIPFSUrl = lsp3Profile.startsWith('ipfs://');
 
     if (isIPFSUrl) {
-      lsp3JsonUrl = formatIPFSUrl(uploadOptions?.ipfsGateway, lsp3Profile.split('/').at(-1));
+      lsp3VerifiableURI = formatIPFSUrl(uploadOptions?.ipfsGateway, lsp3Profile.split('/').at(-1));
     }
 
-    const ipfsResponse = await axios.get(lsp3JsonUrl);
+    const ipfsResponse = await axios.get(lsp3VerifiableURI);
     const lsp3ProfileJson = ipfsResponse.data;
 
     lsp3ProfileData = {

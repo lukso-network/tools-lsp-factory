@@ -1,3 +1,5 @@
+import { LSP4_TOKEN_TYPES } from '@lukso/lsp-smart-contracts';
+
 import {
   LSP4MetadataBeforeUpload,
   LSP4MetadataContentBeforeUpload,
@@ -12,10 +14,14 @@ export enum ContractNames {
   LSP8_DIGITAL_ASSET = 'LSP8IdentifiableDigitalAsset',
 }
 
+export type LSP4TokenTypeNames = keyof typeof LSP4_TOKEN_TYPES;
+export type LSP4TokenTypeValues = (typeof LSP4_TOKEN_TYPES)[LSP4TokenTypeNames];
+
 export interface DigitalAssetDeploymentOptions {
   controllerAddress: string;
   name: string;
   symbol: string;
+  tokenType: LSP4TokenTypeNames | LSP4TokenTypeValues;
   digitalAssetMetadata?:
     | LSP4MetadataBeforeUpload
     | LSP4MetadataContentBeforeUpload
@@ -30,7 +36,7 @@ export interface LSP7DigitalAssetDeploymentOptions extends DigitalAssetDeploymen
 
 export interface LSP8IdentifiableDigitalAssetDeploymentOptions
   extends DigitalAssetDeploymentOptions {
-  tokenIdType: number | string;
+  tokenIdFormat: number | string;
 }
 
 export interface DeployedLSP8IdentifiableDigitalAsset {

@@ -1,5 +1,5 @@
 import { SUPPORTED_VERIFICATION_METHOD_HASHES } from '@erc725/erc725.js/build/main/src/constants/constants';
-import { ERC725YDataKeys } from '@lukso/lsp-smart-contracts';
+import { ERC725YDataKeys, LSP4_TOKEN_TYPES } from '@lukso/lsp-smart-contracts';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { providers } from 'ethers';
 import { ethers } from 'hardhat';
@@ -39,6 +39,7 @@ describe('LSP7DigitalAsset', () => {
       isNFT: false,
       name: 'TOKEN',
       symbol: 'TKN',
+      tokenType: LSP4_TOKEN_TYPES.TOKEN,
     });
 
     expect(lsp7DigitalAsset.LSP7DigitalAsset.address).toBeDefined();
@@ -62,6 +63,7 @@ describe('LSP7DigitalAsset', () => {
         isNFT: false,
         name: 'TOKEN',
         symbol: 'TKN',
+        tokenType: LSP4_TOKEN_TYPES.TOKEN,
       },
       {
         LSP7DigitalAsset: {
@@ -91,6 +93,7 @@ describe('LSP7DigitalAsset', () => {
         isNFT: false,
         name: 'TOKEN',
         symbol: 'TKN',
+        tokenType: LSP4_TOKEN_TYPES.TOKEN,
       },
       {
         LSP7DigitalAsset: {
@@ -122,6 +125,7 @@ describe('LSP7DigitalAsset', () => {
         isNFT: false,
         name: 'TOKEN',
         symbol: 'TKN',
+        tokenType: LSP4_TOKEN_TYPES.TOKEN,
       },
       {
         onDeployEvents: {
@@ -162,6 +166,7 @@ describe('LSP7DigitalAsset', () => {
         isNFT: false,
         name: 'TOKEN',
         symbol: 'TKN',
+        tokenType: LSP4_TOKEN_TYPES.TOKEN,
       },
       {
         LSP7DigitalAsset: {
@@ -198,8 +203,9 @@ describe('LSP7DigitalAsset', () => {
     const controllerAddress = '0xaDa25A4424b08F5337DacD619D4bCb21536a9B95';
     const name = 'TOKEN';
     const symbol = 'TKN';
+    const tokenType = LSP4_TOKEN_TYPES.TOKEN;
     const expectedLSP4Value =
-      '0x6f357c6a7fedfaf6ebf7908ff7e1fffc988678c706f12bff90e4a34b2408af71d0392597697066733a2f2f516d56384d6e4a4c333659673562574d5a4e5053474e504a516f42524c64436255314d473942706e44414757626f';
+      '0x00006f357c6a00207fedfaf6ebf7908ff7e1fffc988678c706f12bff90e4a34b2408af71d0392597697066733a2f2f516d56384d6e4a4c333659673562574d5a4e5053474e504a516f42524c64436255314d473942706e44414757626f';
 
     const allowedLSP4Formats = [
       lsp4DigitalAsset.LSP4Metadata,
@@ -215,6 +221,7 @@ describe('LSP7DigitalAsset', () => {
           isNFT: false,
           name,
           symbol,
+          tokenType,
           digitalAssetMetadata: lsp4Metadata,
         });
 
@@ -231,10 +238,13 @@ describe('LSP7DigitalAsset', () => {
         expect(ownerAddress).toEqual(controllerAddress);
 
         const data = await digitalAsset.getData(ERC725YDataKeys.LSP4.LSP4Metadata);
+        const verificationMethodPart = '0x' + data.slice(6, 14);
 
-        expect(data.startsWith(SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_UTF8)).toBe(
-          true
-        );
+        expect(
+          verificationMethodPart.startsWith(
+            SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_UTF8
+          )
+        ).toBe(true);
         expect(data).toEqual(expectedLSP4Value);
       });
       it('should have correct name and symbol set', async () => {
@@ -255,6 +265,7 @@ describe('LSP7DigitalAsset', () => {
     const name = 'TOKEN';
     const symbol = 'TKN';
     const isNFT = true;
+    const tokenType = LSP4_TOKEN_TYPES.TOKEN;
     const creators = [
       '0xFCA72D5763b8cFc686C2285099D5F35a2F094E9f',
       '0x591c236982b089Ad4B60758C075fA50Ec53CD674',
@@ -276,6 +287,7 @@ describe('LSP7DigitalAsset', () => {
         controllerAddress,
         name,
         symbol,
+        tokenType,
         creators,
         isNFT,
       });

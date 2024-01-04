@@ -11,14 +11,14 @@ export const schema: ERC725JSONSchema[] = [
     key: ERC725YDataKeys.LSP3.LSP3Profile,
     keyType: 'Singleton',
     valueType: 'bytes',
-    valueContent: 'JSONURL',
+    valueContent: 'VerifiableURI',
   },
   {
     name: 'LSP4Metadata',
     key: ERC725YDataKeys.LSP4.LSP4Metadata,
     keyType: 'Singleton',
     valueType: 'bytes',
-    valueContent: 'JSONURL',
+    valueContent: 'VerifiableURI',
   },
 ];
 
