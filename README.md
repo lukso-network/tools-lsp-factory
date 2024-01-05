@@ -1,8 +1,27 @@
-# lsp-factory.js &middot; [![GitHub license](https://img.shields.io/badge/license-Apache-blue.svg)](./LICENSE) [![npm version](https://img.shields.io/npm/v/@lukso/lsp-factory.js.svg?style=flat)](https://www.npmjs.com/package/@lukso/lsp-factory.js) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/lukso-network/tools-lsp-factory/pulls)
+<p align="center">
+ <h1 align="center"><strong>@lukso/lsp-factory.js</strong></h1>
+ <p align="center">Helper library to allow simple deployments of <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-0-ERC725Account.md">UniversalProfiles</a> and <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-4-DigitalCertificate.md">LSP7</a> and <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-8-IdentifiableDigitalAsset.md">LSP8 </a>Digital Assets.</p>
+</p>
 
 <p align="center">
- <h2 align="center"><strong>@lukso/lsp-factory.js</strong></h2>
- <p align="center">Helper library to allow simple deployments of <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-0-ERC725Account.md">UniversalProfiles</a> and <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-4-DigitalCertificate.md">LSP7</a> and <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-8-IdentifiableDigitalAsset.md">LSP8 </a>Digital Assets.</p>
+  <a href="https://www.npmjs.com/package/@lukso/lsp-factory.js">
+    <img alt="NPM version" src="https://img.shields.io/npm/v/@lukso/lsp-factory.js.svg?style=flat" />
+  </a>
+  <a href="https://github.com/lukso-network/tools-lsp-factory/actions">
+    <img alt="Tests Passing" src="https://github.com/lukso-network/tools-lsp-factory/actions/workflows/lint-build-test.yml/badge.svg" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/lukso-network/tools-lsp-factory/pulls">
+    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" />
+  </a>
+  <a href="https://github.com/lukso-network/tools-lsp-factory/issues">
+    <img alt="Issues" src="https://img.shields.io/github/issues/lukso-network/tools-lsp-factory?color=0088ff" />
+  </a>
+  <a href="https://github.com/lukso-network/tools-lsp-factory/pulls">
+    <img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/lukso-network/tools-lsp-factory?color=0088ff" />
+  </a>
 </p>
 
 <p align="center">For more information see <a href="https://docs.lukso.tech/tools/lsp-factoryjs/getting-started">Documentation</a>.</p>
