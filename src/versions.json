@@ -69,35 +69,40 @@
       "ERC725Account": {
         "versions": {
           "0.12.0": "0xF95ae7ABD05D5aB39fBf8Cc128c1b5C6C8171e7f",
-          "0.12.1": "0x52c90985AF970D4E0DC26Cb5D052505278aF32A9"
+          "0.12.1": "0x52c90985AF970D4E0DC26Cb5D052505278aF32A9",
+          "0.14.0": "0x3024D38EA2434BA6635003Dc1BDC0daB5882ED4F"
         },
         "baseContract": true
       },
       "KeyManager": {
         "versions": {
           "0.12.0": "0xb228510D275b86ffF65829dD5be51bAD96b536D0",
-          "0.12.1": "0xa75684d7D048704a2DB851D05Ba0c3cbe226264C"
+          "0.12.1": "0xa75684d7D048704a2DB851D05Ba0c3cbe226264C",
+          "0.14.0": "0x2Fe3AeD98684E7351aD2D408A43cE09a738BF8a4"
         },
         "baseContract": true
       },
       "UniversalReceiverDelegate": {
         "versions": {
           "0.12.0": "0x4555ed733f58Da8Cc6A2Fd6A050874192Ac97985",
-          "0.12.1": "0xA5467dfe7019bF2C7C5F7A707711B9d4cAD118c8"
+          "0.12.1": "0xA5467dfe7019bF2C7C5F7A707711B9d4cAD118c8",
+          "0.14.0": "0x7870C5B8BC9572A8001C3f96f7ff59961B23500D"
         },
         "baseContract": false
       },
       "LSP7Mintable": {
         "versions": {
           "0.12.0": "0x75d56CE25DdFa3760f7cC216B939519Bc9Da079B",
-          "0.12.1": "0xA5d24D81E12bC71F0b78B4696E825Efd46bdE494"
+          "0.12.1": "0xA5d24D81E12bC71F0b78B4696E825Efd46bdE494",
+          "0.14.0": "0x28B7CcdaD1E15cCbDf380c439Cc1F2EBe7f5B2d8"
         },
         "baseContract": true
       },
       "LSP8Mintable": {
         "versions": {
           "0.12.0": "0x1B7799CB9bEDF8CcB6e8C3F992F35d35c9AC9823",
-          "0.12.1": "0x894cD1D8Fd0e9d07609ea4a69ab0Cc118166BC7e"
+          "0.12.1": "0x894cD1D8Fd0e9d07609ea4a69ab0Cc118166BC7e",
+          "0.14.0": "0xd787a2f6B14d4dcC2fb897f40b87f2Ff63a07997"
         },
         "baseContract": true
       }
