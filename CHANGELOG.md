@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.3.0](https://github.com/lukso-network/tools-lsp-factory/compare/v3.2.1...v3.3.0) (2024-01-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* upgrade `@lukso/lsp-smart-contracts` to v0.14.0 ([#247](https://github.com/lukso-network/tools-lsp-factory/issues/247))
+
+### Bug Fixes
+
+* Add default api for ipfs. ([2ae904a](https://github.com/lukso-network/tools-lsp-factory/commit/2ae904ad6565d9194fb264ef2a104022f055691f))
+* add v14 base contracts for mainnet ([2065e79](https://github.com/lukso-network/tools-lsp-factory/commit/2065e79e4b44d2fd1183c2c12f4b1f1a337aa0f4))
+* Repair IPFS decoding in lsp-factory when using custom authenticated gateway. ([0becba4](https://github.com/lukso-network/tools-lsp-factory/commit/0becba4b673931689dbcb13e80306b65da26ba7d))
+* update contract versions ([223ac8d](https://github.com/lukso-network/tools-lsp-factory/commit/223ac8d7777d17cad9dd6bf10f468571489ce1e6))
+
+
+### Miscellaneous Chores
+
+* release 3.3.0 ([3168e35](https://github.com/lukso-network/tools-lsp-factory/commit/3168e357c9d9023a3f0c931b4e421804e9a69b19))
+
+
+### Code Refactoring
+
+* upgrade `@lukso/lsp-smart-contracts` to v0.14.0 ([#247](https://github.com/lukso-network/tools-lsp-factory/issues/247)) ([58edb58](https://github.com/lukso-network/tools-lsp-factory/commit/58edb58069f001169d52547ac8b3a57250a3725c))
+
 ## [3.2.1](https://github.com/lukso-network/tools-lsp-factory/compare/v3.2.0...v3.2.1) (2023-11-07)
 
 
