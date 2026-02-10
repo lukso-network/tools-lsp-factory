@@ -1,9 +1,9 @@
 {
   "extends": "./tsconfig",
   "compilerOptions": {
-    "target": "es2015",
+    "target": "es2020",
     "outDir": "build/module",
-    "module": "es2015",
+    "module": "es2020",
     "inlineSourceMap": true
   }
 }

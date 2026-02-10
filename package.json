@@ -1,6 +1,6 @@
 {
   "name": "@lukso/lsp-factory.js",
-  "version": "3.1.1",
+  "version": "4.0.0",
   "description": "Helper Library to allow simple deployments of UniversalProfiles and LSP7 and LSP8 Digital Assets.",
   "main": "build/main/src/index.js",
   "typings": "build/main/src/index.d.ts",
@@ -9,49 +9,30 @@
   "license": "MIT",
   "keywords": [],
   "scripts": {
-    "build": "npm run generate-types && run-p build:*",
+    "build": "run-p build:*",
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p tsconfig.module.json",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
-    "test": "HARDHAT_VERBOSE=true DEBUG=true NODE_NO_WARNINGS=1 TS_NODE_FILES=true jest --coverage",
+    "test": "NODE_NO_WARNINGS=1 jest --coverage",
     "test-build": "npm run build && npm run test",
-    "check-cli": "run-s test diff-integration-tests",
-    "diff-integration-tests": "mkdir -p diff && rm -rf diff/test && cp -r test diff/test && rm -rf diff/test/test-*/.git && cd diff && git init --quiet && git add -A && git commit --quiet --no-verify --allow-empty -m 'WIP' && echo '\\n\\nCommitted most recent integration test output in the \"diff\" directory. Review the changes with \"cd diff && git diff HEAD\" or your preferred git diff viewer.'",
     "watch:build": "tsc -p tsconfig.json -w",
-    "watch:test": "HARDHAT_VERBOSE=true DEBUG=true NODE_NO_WARNINGS=1 jest --watch",
-    "version": "standard-version",
-    "reset-hard": "git clean -dfx && git reset --hard && npm i",
-    "prepare-release": "run-s reset-hard test cov:check doc:html version doc:publish",
-    "generate-types": "typechain --target ethers-v5 --out-dir 'types/ethers-v5' './node_modules/@lukso/lsp-smart-contracts/artifacts/*.json'",
-    "test:upgrade": "npm install && npm run test-build"
+    "watch:test": "NODE_NO_WARNINGS=1 jest --watch",
+    "version": "standard-version"
   },
   "engines": {
-    "node": ">=10"
+    "node": ">=16"
   },
   "dependencies": {
     "@erc725/erc725.js": "^0.22.0",
-    "@ethersproject/abi": "^5.7.0",
-    "@ethersproject/experimental": "^5.7.0",
     "@lukso/lsp-smart-contracts": "^0.14.0",
-    "axios": "^0.23.0",
-    "browser-image-compression": "^2.0.0",
-    "ethers": "^5.7.0",
-    "ipfs-http-client": "52.0.3",
-    "ipfs-utils": "8.1.6",
-    "rxjs": "^7.8.0"
+    "viem": "^2.0.0"
   },
   "devDependencies": {
-    "@ethereum-waffle/jest": "^3.3.2",
-    "@nomiclabs/hardhat-ethers": "^2.2.2",
-    "@typechain/ethers-v5": "10.2.0",
     "@types/jest": "^27.0.2",
     "@types/node": "^18.13.0",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
     "@typescript-eslint/parser": "^5.52.0",
-    "codecov": "^3.5.0",
-    "cspell": "^6.26.1",
-    "cz-conventional-changelog": "^3.3.0",
     "esbuild": "^0.17.8",
     "esbuild-jest": "^0.5.0",
     "eslint": "^8.34.0",
@@ -59,17 +40,13 @@
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^4.2.1",
-    "hardhat": "^2.12.7",
     "jest": "^27.3.1",
     "npm-run-all": "^4.1.5",
-    "open-cli": "^7.1.0",
     "prettier": "^2.8.4",
     "standard-version": "^9.5.0",
     "ts-jest": "^27.0.7",
     "ts-node": "^10.9.1",
-    "typechain": "8.1.1",
-    "typescript": "^4.9.5",
-    "wait-on": "7.0.1"
+    "typescript": "^5.3.0"
   },
   "files": [
     "build/main",
@@ -79,21 +56,8 @@
     "LICENSE",
     "CONTRIBUTING.md",
     "README.md",
-    "src/*",
-    "types/*"
+    "src/*"
   ],
-  "ava": {
-    "failFast": true,
-    "timeout": "60s",
-    "typescript": {
-      "rewritePaths": {
-        "src/": "build/main/"
-      }
-    },
-    "files": [
-      "!build/module/**"
-    ]
-  },
   "config": {
     "commitizen": {
       "path": "cz-conventional-changelog"

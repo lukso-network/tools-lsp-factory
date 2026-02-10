@@ -1,7 +1,5 @@
 import {
-  AssetBuffer,
   AssetMetadata,
-  ImageBuffer,
   ImageMetadata,
   LinkMetadata,
   Verification,
@@ -17,18 +15,6 @@ export interface LSP4DigitalAsset {
   images: ImageMetadata[][];
   assets: AssetMetadata[];
   icon: ImageMetadata[];
-}
-
-export interface LSP4MetadataContentBeforeUpload {
-  description: string;
-  links?: LinkMetadata[];
-  icon?: File | ImageBuffer | ImageMetadata[];
-  images?: (File | ImageBuffer | ImageMetadata[])[];
-  assets?: (File | AssetBuffer | AssetMetadata)[];
-}
-
-export interface LSP4MetadataBeforeUpload {
-  LSP4Metadata: LSP4MetadataContentBeforeUpload;
 }
 
 export interface LSP4MetadataUrlForEncoding {

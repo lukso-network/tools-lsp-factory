@@ -1,93 +1,60 @@
-import { of } from 'rxjs';
+import { isAddress, getProxyByteCode, convertContractDeploymentOptionsVersion } from './deployment.helper';
 
-import { defaultDeploymentEvents } from '../../../test/deployment-events.mock';
-import { DeploymentStatus, DeploymentType } from '../interfaces';
+describe('deployment.helper', () => {
+  describe('isAddress', () => {
+    it('should return true for a valid checksummed address', () => {
+      expect(isAddress('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045')).toBe(true);
+    });
 
-import { waitForReceipt } from './deployment.helper';
+    it('should return true for a valid lowercase address', () => {
+      expect(isAddress('0xd8da6bf26964af9d7eed9e03e53415d37aa96045')).toBe(true);
+    });
 
-describe('waitForReceipt', () => {
-  beforeEach(() => {
-    jest.useRealTimers();
+    it('should return false for an invalid address', () => {
+      expect(isAddress('0xinvalid')).toBe(false);
+    });
+
+    it('should return false for a non-hex string', () => {
+      expect(isAddress('hello world')).toBe(false);
+    });
+
+    it('should return false for empty string', () => {
+      expect(isAddress('')).toBe(false);
+    });
   });
-  describe('with type PROXY', () => {
-    it('should return a new deployment event with the receipt', (done) => {
-      const expectedDeploymentEvent =
-        defaultDeploymentEvents[DeploymentType.PROXY].LSP0ERC725Account.deployment;
-      const deploymentEvent$ = of(expectedDeploymentEvent);
-      const receipt$ = waitForReceipt(deploymentEvent$);
 
-      const { type, status, contractName } = expectedDeploymentEvent;
-      receipt$.subscribe((deploymentEvent) => {
-        expect(deploymentEvent).toEqual({
-          type,
-          status,
-          contractName,
-          receipt: 'fake receipt',
-        });
-        done();
-      });
+  describe('getProxyByteCode', () => {
+    it('should return EIP-1167 minimal proxy bytecode for a given address', () => {
+      const address = '0x1234567890AbcDef1234567890AbCdEf12345678';
+      const result = getProxyByteCode(address);
+
+      expect(result).toContain('1234567890AbcDef1234567890AbCdEf12345678');
+      expect(result.startsWith('0x3d602d80600a3d3981f3363d3d373d3d3d363d73')).toBe(true);
+      expect(result.endsWith('5af43d82803e903d91602b57fd5bf3')).toBe(true);
+    });
+  });
+
+  describe('convertContractDeploymentOptionsVersion', () => {
+    it('should return version string for non-hex input', () => {
+      const result = convertContractDeploymentOptionsVersion('0.14.0');
+      expect(result).toEqual({ version: '0.14.0', byteCode: undefined, libAddress: undefined });
     });
 
-    it('should return a new deployment event with the receipt, functionName', (done) => {
-      const expectedDeploymentEvent =
-        defaultDeploymentEvents[DeploymentType.PROXY].LSP0ERC725Account.initialize;
-      const expectedDeploymentEvent$ = of(expectedDeploymentEvent);
-      const receipt$ = waitForReceipt(expectedDeploymentEvent$);
-
-      const { type, contractName, functionName } = expectedDeploymentEvent;
-      receipt$.subscribe((deploymentEvent) => {
-        expect(deploymentEvent).toEqual({
-          type,
-          status: DeploymentStatus.COMPLETE,
-          functionName,
-          contractName,
-          receipt: 'fake receipt',
-        });
-        done();
-      });
+    it('should return libAddress for a valid 0x-prefixed address', () => {
+      const address = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
+      const result = convertContractDeploymentOptionsVersion(address);
+      expect(result).toEqual({ version: undefined, byteCode: undefined, libAddress: address });
     });
 
-    it('should throw an error incase transaction.wait() fails/errors', (done) => {
-      const expectedDeploymentEvent$ = of(
-        defaultDeploymentEvents[DeploymentType.PROXY].LSP0ERC725Account.error
-      );
-      const receipt$ = waitForReceipt(expectedDeploymentEvent$);
+    it('should return byteCode for a 0x-prefixed non-address hex', () => {
+      const bytecode = '0x6080604052';
+      const result = convertContractDeploymentOptionsVersion(bytecode);
+      expect(result).toEqual({ version: undefined, byteCode: bytecode, libAddress: undefined });
+    });
 
-      receipt$.subscribe({
-        error: (deploymentEvent) => {
-          expect(deploymentEvent.message).toContain(
-            'Error when waiting for the transaction receipt: '
-          );
-          done();
-        },
-      });
+    it('should return all undefined when no version provided', () => {
+      const result = convertContractDeploymentOptionsVersion();
+      expect(result).toEqual({ version: undefined, byteCode: undefined, libAddress: undefined });
     });
   });
 });
-
-// describe('initialize', () => {
-//   it('should initialize the deployed proxy contract', (done) => {
-//     const deploymentEvent = defaultDeploymentEvents.PROXY.LSP3Account.deploymentReceipt;
-//     testScheduler.run((helpers) => {
-//       const { cold } = helpers;
-//       const deploymentEvents = {
-//         a: deploymentEvent as unknown as DeploymentEvent,
-//       };
-//       const deploymentEvent$: Observable<DeploymentEvent> = cold('a|', deploymentEvents);
-
-//       const factory = new LSP3AccountInit__factory();
-//       jest.spyOn(factory, 'attach').mockImplementation(() => {
-//         return {} as LSP3AccountInit;
-//       });
-//       const initialize$ = initialize(deploymentEvent$, factory, () => [false]);
-
-//       initialize$.subscribe({
-//         next: (deploymentEvent) => {
-//           expect(factory.attach).toHaveBeenCalled();
-//           expect(deploymentEvent).toEqual(2);
-//           done();
-//         },
-//       });
-//     });
-//   });
-// });

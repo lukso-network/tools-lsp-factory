@@ -1,13 +1,7 @@
-import { ContractOptions, DeployedContract } from '../..';
+import { Hex } from 'viem';
 
-import {
-  LSP3ProfileBeforeUpload,
-  LSP3ProfileDataForEncoding,
-  ProfileDataBeforeUpload,
-} from './lsp3-profile';
-import { IPFSGateway, UploadOptions } from './profile-upload-options';
-
-import { DeploymentEventCallbacks } from '.';
+import { ContractOptions } from './contract-options';
+import { DeployedContract, DeploymentEventCallbacks } from './deployment-events';
 
 export enum ContractNames {
   ERC725_Account = 'LSP0ERC725Account',
@@ -16,58 +10,26 @@ export enum ContractNames {
 }
 
 export interface ControllerOptions {
-  address: string;
-  permissions?: string;
+  address: Hex;
+  permissions?: Hex;
 }
 
-/**
- * TBD
- */
 export interface ProfileDeploymentOptions {
-  controllerAddresses: (string | ControllerOptions)[];
-  lsp3Profile?:
-    | ProfileDataBeforeUpload
-    | LSP3ProfileBeforeUpload
-    | LSP3ProfileDataForEncoding
-    | string;
+  controllerAddresses: (Hex | ControllerOptions)[];
+  lsp3DataValue?: Hex;
 }
 
 export interface DeployedUniversalProfileContracts {
   LSP0ERC725Account: DeployedContract;
-  LSP0ERC725AccountBaseContract?: DeployedContract;
   LSP6KeyManager: DeployedContract;
-  LSP6KeyManagerBaseContract: DeployedContract;
-  LSP1UniversalReceiverDelegate: DeployedContract;
-  LSP1UniversalReceiverDelegateBaseContract: DeployedContract;
-}
-
-export interface BaseContractAddresses {
-  [ContractNames.ERC725_Account]?: string;
-  [ContractNames.KEY_MANAGER]?: string;
-  [ContractNames.UNIVERSAL_RECEIVER]?: string;
+  LSP1UniversalReceiverDelegate?: DeployedContract;
 }
 
 export interface ContractDeploymentOptions {
   version?: string;
-  ipfsGateway?: IPFSGateway;
+  salt?: Hex;
   LSP0ERC725Account?: ContractOptions;
-  ERC725Account?: ContractOptions;
   LSP6KeyManager?: ContractOptions;
   LSP1UniversalReceiverDelegate?: ContractOptions;
   onDeployEvents?: DeploymentEventCallbacks<DeployedUniversalProfileContracts>;
-}
-
-interface ContractConfiguration {
-  version?: string;
-  byteCode?: string;
-  libAddress?: string;
-  deployProxy?: boolean;
-}
-
-export interface UniversalProfileDeploymentConfiguration {
-  version?: string;
-  uploadOptions?: UploadOptions;
-  LSP0ERC725Account?: ContractConfiguration;
-  LSP6KeyManager?: ContractConfiguration;
-  LSP1UniversalReceiverDelegate?: ContractConfiguration;
 }

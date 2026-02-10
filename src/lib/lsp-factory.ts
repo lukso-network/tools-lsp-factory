@@ -1,84 +1,27 @@
-import { ethers, providers, Signer } from 'ethers';
+import { PublicClient, WalletClient } from 'viem';
 
-import { LSP4DigitalAssetMetadata } from './classes/lsp4-digital-asset-metadata';
 import { LSP7DigitalAsset } from './classes/lsp7-digital-asset';
 import { LSP8IdentifiableDigitalAsset } from './classes/lsp8-identifiable-digital-asset';
-import { ProxyDeployer } from './classes/proxy-deployer';
 import { UniversalProfile } from './classes/universal-profile';
-import { EthersExternalProvider, LSPFactoryOptions } from './interfaces';
-import { SignerOptions } from './interfaces/lsp-factory-options';
+import { LSPFactoryOptions } from './interfaces';
 
-/**
- * Factory for creating UniversalProfiles and Digital Assets
- */
 export class LSPFactory {
   options: LSPFactoryOptions;
   UniversalProfile: UniversalProfile;
-  LSP4DigitalAssetMetadata: LSP4DigitalAssetMetadata;
   LSP7DigitalAsset: LSP7DigitalAsset;
   LSP8IdentifiableDigitalAsset: LSP8IdentifiableDigitalAsset;
-  ProxyDeployer: ProxyDeployer;
-  /**
-   *
-   * @param {string | providers.Web3Provider | providers.JsonRpcProvider | EthersExternalProvider } rpcUrlOrProvider
-   * @param {string | Signer | SignerOptions} privateKeyOrSigner
-   * @param {number} [chainId=4201] Lukso Testnet - 4201 (0x1069)
-   */
-  constructor(
-    rpcUrlOrProvider:
-      | string
-      | providers.Web3Provider
-      | providers.JsonRpcProvider
-      | EthersExternalProvider,
-    privateKeyOrSigner?: string | Signer | SignerOptions
-  ) {
-    let signer: Signer;
-    let provider: providers.Web3Provider | providers.JsonRpcProvider;
-    let ipfsGateway;
-    let chainId;
 
-    if (typeof rpcUrlOrProvider === 'string') {
-      provider = new ethers.providers.JsonRpcProvider(rpcUrlOrProvider);
-    } else if ('chainId' in rpcUrlOrProvider) {
-      provider = new ethers.providers.Web3Provider(rpcUrlOrProvider);
-      chainId = parseInt(rpcUrlOrProvider.chainId || '42');
-    } else if (typeof rpcUrlOrProvider !== 'string') {
-      provider = rpcUrlOrProvider as providers.Web3Provider | providers.JsonRpcProvider;
-    } else {
-      throw new Error('Invalid rpcUrlOrProvider');
-    }
-
-    if (privateKeyOrSigner instanceof Signer) {
-      signer = privateKeyOrSigner;
-    } else if (typeof privateKeyOrSigner === 'string') {
-      signer = new ethers.Wallet(privateKeyOrSigner, provider);
-    } else {
-      if (privateKeyOrSigner?.deployKey instanceof Signer) {
-        signer = privateKeyOrSigner.deployKey;
-      } else if (typeof privateKeyOrSigner?.deployKey === 'string') {
-        signer = new ethers.Wallet(privateKeyOrSigner.deployKey, provider);
-      } else {
-        signer = provider.getSigner();
-      }
-
-      if (privateKeyOrSigner?.chainId) {
-        chainId = privateKeyOrSigner?.chainId;
-      }
-
-      ipfsGateway = privateKeyOrSigner?.ipfsGateway;
-    }
+  constructor(publicClient: PublicClient, walletClient: WalletClient) {
+    const chainId = publicClient.chain?.id ?? 4201;
 
     this.options = {
-      signer,
-      provider,
-      chainId: chainId || 4201,
-      uploadOptions: ipfsGateway ? { ipfsGateway } : undefined,
+      publicClient,
+      walletClient,
+      chainId,
     };
 
     this.UniversalProfile = new UniversalProfile(this.options);
-    this.LSP4DigitalAssetMetadata = new LSP4DigitalAssetMetadata(this.options);
     this.LSP7DigitalAsset = new LSP7DigitalAsset(this.options);
     this.LSP8IdentifiableDigitalAsset = new LSP8IdentifiableDigitalAsset(this.options);
-    this.ProxyDeployer = new ProxyDeployer(this.options.signer);
   }
 }

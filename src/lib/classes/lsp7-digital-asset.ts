@@ -1,142 +1,208 @@
-import { NonceManager } from '@ethersproject/experimental';
-import { concat, concatAll, EMPTY, shareReplay, switchMap } from 'rxjs';
+import { Hex, getAddress } from 'viem';
+import { ERC725YDataKeys, INTERFACE_IDS, LSP4_TOKEN_TYPES } from '@lukso/lsp-smart-contracts';
 
-import versions from '../../versions.json';
+import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
-import { resolveContractDeployment, waitForContractDeployment } from '../helpers/deployment.helper';
-import { LSPFactoryOptions } from '../interfaces';
+import { getDeployedByteCode, getProxyByteCode } from '../helpers/deployment.helper';
+import { erc725EncodeData } from '../helpers/erc725.helper';
+import { UP_ABI } from '../helpers/lsp23.helper';
+import {
+  LSPFactoryOptions,
+  DeploymentEvent,
+  DeploymentStatus,
+  DeploymentType,
+} from '../interfaces';
 import {
   ContractNames,
   DeployedLSP7DigitalAsset,
   LSP7ContractDeploymentOptions,
   LSP7DigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
-import {
-  lsp7BaseContractDeployment$,
-  shouldDeployBaseContract$,
-  waitForBaseContractAddress$,
-} from '../services/base-contract.service';
-import {
-  convertDigitalAssetConfigurationObject,
-  lsp4MetadataUpload$,
-  lsp7DigitalAssetDeployment$,
-  setMetadataAndTransferOwnership$,
-} from '../services/digital-asset.service';
-import { isSignerUniversalProfile$ } from '../services/universal-profile.service';
+import { LSP4MetadataForEncoding } from '../interfaces/lsp4-digital-asset';
 
-/**
- * Class responsible for deploying LSP7 Digital Assets
- *
- * @property {LSPFactoryOptions} options
- * @property {NonceManager} signer
- * @memberof LSPFactory
- */
+// Minimal ABIs for LSP7
+const LSP7_MINTABLE_ABI = [
+  {
+    inputs: [
+      { name: 'name_', type: 'string' },
+      { name: 'symbol_', type: 'string' },
+      { name: 'newOwner_', type: 'address' },
+      { name: 'lsp4TokenType_', type: 'uint256' },
+      { name: 'isNonDivisible_', type: 'bool' },
+    ],
+    name: 'initialize',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { name: 'dataKeys', type: 'bytes32[]' },
+      { name: 'dataValues', type: 'bytes[]' },
+    ],
+    name: 'setDataBatch',
+    outputs: [],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+  {
+    inputs: [{ name: 'newOwner', type: 'address' }],
+    name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [{ name: 'interfaceId', type: 'bytes4' }],
+    name: 'supportsInterface',
+    outputs: [{ name: '', type: 'bool' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+] as const;
+
 export class LSP7DigitalAsset {
   options: LSPFactoryOptions;
-  signer: NonceManager;
+
   constructor(options: LSPFactoryOptions) {
     this.options = options;
-    this.signer = new NonceManager(options.signer);
   }
 
-  /**
-   * Deploys a mintable LSP7 Digital Asset
-   *
-   * Returns a Promise with deployed contract details
-   *
-   * @param {LSP7DigitalAssetDeploymentOptions} digitalAssetDeploymentOptions
-   * @param {ContractDeploymentOptions} contractDeploymentOptions
-   * @return {*}  Promise<Deployed<LSP7DigitalAsset>
-   * @memberof LSP7DigitalAsset
-   *
-   * @example
-   * ```javascript
-   *lspFactory.LSP7DigitalAsset.deploy({
-   *  name: "My token",
-   *  symbol: "TKN",
-   *  ownerAddress: "0xb74a88C43BCf691bd7A851f6603cb1868f6fc147",
-   *  isNFT: true,
-   *})
-   *```
-   */
   async deploy(
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
     contractDeploymentOptions?: LSP7ContractDeploymentOptions
   ): Promise<DeployedLSP7DigitalAsset> {
-    const digitalAssetConfiguration = contractDeploymentOptions
-      ? convertDigitalAssetConfigurationObject(contractDeploymentOptions)
-      : null;
+    const { publicClient, walletClient, chainId } = this.options;
+    const onDeployEvents = contractDeploymentOptions?.onDeployEvents;
 
-    const lsp4Metadata$ = lsp4MetadataUpload$(
-      digitalAssetDeploymentOptions.digitalAssetMetadata,
-      digitalAssetConfiguration?.uploadOptions ?? this.options.uploadOptions
-    );
+    const emitEvent = (event: DeploymentEvent) => {
+      onDeployEvents?.next?.(event);
+    };
 
-    const defaultBaseContractAddress: string | undefined =
-      digitalAssetConfiguration?.libAddress ??
-      versions[this.options.chainId]?.contracts.LSP7Mintable?.versions[
-        digitalAssetConfiguration?.version ?? DEFAULT_CONTRACT_VERSION
-      ];
+    const account = walletClient.account;
+    if (!account) throw new Error('WalletClient must have an account');
 
-    const deployBaseContract$ = shouldDeployBaseContract$(
-      this.options.provider,
-      versions[this.options.chainId]?.contracts.LSP7Mintable?.baseContract,
-      digitalAssetConfiguration?.deployProxy,
-      defaultBaseContractAddress,
-      digitalAssetConfiguration?.libAddress,
-      digitalAssetConfiguration?.byteCode
-    );
+    const signerAddress = getAddress(account.address) as Hex;
 
-    const baseContractDeployment$ = deployBaseContract$.pipe(
-      switchMap((shouldDeployBaseContract) => {
-        return shouldDeployBaseContract ? lsp7BaseContractDeployment$(this.options.signer) : EMPTY;
-      }),
-      shareReplay()
-    );
+    const chainConfig = contractVersions[String(chainId) as keyof typeof contractVersions];
+    const defaultVersion = DEFAULT_CONTRACT_VERSION;
 
-    const baseContractAddress$ = waitForBaseContractAddress$(
-      baseContractDeployment$,
-      defaultBaseContractAddress,
-      digitalAssetConfiguration?.deployProxy,
-      digitalAssetConfiguration?.byteCode
-    );
+    const baseContractAddress = chainConfig?.contracts?.LSP7Mintable?.versions?.[
+      (contractDeploymentOptions?.LSP7DigitalAsset?.version ?? defaultVersion) as keyof typeof chainConfig.contracts.LSP7Mintable.versions
+    ] as Hex | undefined;
 
-    const digitalAsset$ = lsp7DigitalAssetDeployment$(
-      this.signer,
-      digitalAssetDeploymentOptions,
-      baseContractAddress$,
-      digitalAssetConfiguration?.byteCode
-    );
+    const shouldDeployProxy =
+      contractDeploymentOptions?.LSP7DigitalAsset?.deployProxy !== false &&
+      baseContractAddress;
 
-    const signerIsUniversalProfile$ = isSignerUniversalProfile$(this.signer);
+    const lsp4TokenType =
+      typeof digitalAssetDeploymentOptions.tokenType === 'string'
+        ? LSP4_TOKEN_TYPES[digitalAssetDeploymentOptions.tokenType]
+        : digitalAssetDeploymentOptions.tokenType;
 
-    const setLSP4AndTransferOwnership$ = setMetadataAndTransferOwnership$(
-      this.signer,
-      digitalAsset$,
-      lsp4Metadata$,
-      digitalAssetDeploymentOptions,
-      ContractNames.LSP7_DIGITAL_ASSET,
-      signerIsUniversalProfile$
-    );
+    emitEvent({
+      type: shouldDeployProxy ? DeploymentType.PROXY : DeploymentType.DEPLOYMENT,
+      status: DeploymentStatus.PENDING,
+      contractName: ContractNames.LSP7_DIGITAL_ASSET,
+    });
 
-    const deployment$ = concat([
-      baseContractDeployment$,
-      digitalAsset$,
-      setLSP4AndTransferOwnership$,
-    ]).pipe(concatAll(), shareReplay());
+    let contractAddress: Hex;
+    let deployTxHash: Hex;
 
-    if (
-      contractDeploymentOptions?.onDeployEvents?.next ||
-      contractDeploymentOptions?.onDeployEvents?.error
-    ) {
-      deployment$.subscribe({
-        next: contractDeploymentOptions?.onDeployEvents?.next,
-        error: contractDeploymentOptions?.onDeployEvents?.error || (() => null),
+    if (shouldDeployProxy) {
+      // Deploy minimal proxy
+      const proxyBytecode = getProxyByteCode(baseContractAddress);
+      deployTxHash = await walletClient.sendTransaction({
+        data: proxyBytecode,
+        account,
+        chain: walletClient.chain,
+      } as any);
+      const proxyReceipt = await publicClient.waitForTransactionReceipt({ hash: deployTxHash });
+      contractAddress = proxyReceipt.contractAddress as Hex;
+
+      // Initialize proxy
+      const initHash = await walletClient.writeContract({
+        address: contractAddress,
+        abi: LSP7_MINTABLE_ABI,
+        functionName: 'initialize',
+        args: [
+          digitalAssetDeploymentOptions.name,
+          digitalAssetDeploymentOptions.symbol,
+          signerAddress,
+          BigInt(lsp4TokenType),
+          digitalAssetDeploymentOptions.isNFT,
+        ],
+        account,
+        chain: walletClient.chain,
       });
+      await publicClient.waitForTransactionReceipt({ hash: initHash });
+    } else {
+      throw new Error(
+        'Direct deployment (non-proxy) for LSP7 is not yet supported in v4. Use deployProxy: true.'
+      );
     }
 
-    const contractsPromise = waitForContractDeployment<DeployedLSP7DigitalAsset>(deployment$);
+    const deployReceipt = await publicClient.getTransactionReceipt({ hash: deployTxHash });
 
-    return resolveContractDeployment(contractsPromise, contractDeploymentOptions?.onDeployEvents);
+    emitEvent({
+      type: shouldDeployProxy ? DeploymentType.PROXY : DeploymentType.DEPLOYMENT,
+      status: DeploymentStatus.COMPLETE,
+      contractName: ContractNames.LSP7_DIGITAL_ASSET,
+      txHash: deployTxHash,
+      receipt: deployReceipt,
+    });
+
+    // Set metadata if provided
+    if (digitalAssetDeploymentOptions.digitalAssetMetadata) {
+      const metadata = digitalAssetDeploymentOptions.digitalAssetMetadata;
+      let encodedMetadata: string | undefined;
+
+      if (typeof metadata === 'string') {
+        encodedMetadata = metadata;
+      } else {
+        const encoded = erc725EncodeData(metadata as LSP4MetadataForEncoding, 'LSP4Metadata');
+        encodedMetadata = encoded.values[0];
+      }
+
+      if (encodedMetadata) {
+        const keysToSet: Hex[] = [ERC725YDataKeys.LSP4.LSP4Metadata as Hex];
+        const valuesToSet: Hex[] = [encodedMetadata as Hex];
+
+        await walletClient.writeContract({
+          address: contractAddress,
+          abi: LSP7_MINTABLE_ABI,
+          functionName: 'setDataBatch',
+          args: [keysToSet, valuesToSet],
+          account,
+          chain: walletClient.chain,
+        });
+      }
+    }
+
+    // Transfer ownership if controller is different from signer
+    if (
+      getAddress(digitalAssetDeploymentOptions.controllerAddress) !== signerAddress
+    ) {
+      const transferHash = await walletClient.writeContract({
+        address: contractAddress,
+        abi: LSP7_MINTABLE_ABI,
+        functionName: 'transferOwnership',
+        args: [digitalAssetDeploymentOptions.controllerAddress],
+        account,
+        chain: walletClient.chain,
+      });
+      await publicClient.waitForTransactionReceipt({ hash: transferHash });
+    }
+
+    const contracts: DeployedLSP7DigitalAsset = {
+      LSP7DigitalAsset: {
+        address: contractAddress,
+        receipt: deployReceipt,
+      },
+    };
+
+    onDeployEvents?.complete?.(contracts);
+
+    return contracts;
   }
 }
