@@ -20,6 +20,7 @@ module.exports = async () => {
     coverageDirectory: '<rootDir>/coverage/',
     logHeapUsage: true,
     testEnvironment: 'node',
+    setupFiles: ['<rootDir>/jest.setup.js'],
     resetMocks: true,
     maxWorkers: '50%',
     maxConcurrency: 10,

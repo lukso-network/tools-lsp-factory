@@ -1,8 +1,12 @@
-import { zeroAddress, encodeFunctionData } from 'viem';
+import type { Hex, PublicClient, WalletClient } from 'viem';
+import { zeroAddress, encodeFunctionData, getAddress } from 'viem';
 
 import {
   buildLSP23Args,
   buildSetDataParams,
+  deployViaLSP23,
+  computeAddressesViaLSP23,
+  setDataAndTransferOwnership,
   LSP23DeployParams,
   UP_INIT_ABI,
   KM_INIT_ABI,
@@ -126,6 +130,225 @@ describe('lsp23.helper', () => {
       const result = buildSetDataParams([controller1], urdAddress, signerAddress);
       const lsp3Key = '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5';
       expect(result.keysToSet).not.toContain(lsp3Key);
+    });
+
+    it('should handle multiple controllers', () => {
+      const controller2 = '0x2222222222222222222222222222222222222222' as Hex;
+      const result = buildSetDataParams([controller1, controller2], urdAddress, signerAddress);
+
+      // Should have permission keys for both controllers
+      const ctrl1Key = result.keysToSet.find((k) =>
+        k.toLowerCase().includes(controller1.substring(2).toLowerCase())
+      );
+      const ctrl2Key = result.keysToSet.find((k) =>
+        k.toLowerCase().includes(controller2.substring(2).toLowerCase())
+      );
+      expect(ctrl1Key).toBeDefined();
+      expect(ctrl2Key).toBeDefined();
+    });
+
+    it('should override signer permissions when signer is a controller', () => {
+      const result = buildSetDataParams([signerAddress], urdAddress, signerAddress);
+
+      // Signer is in the controller list, so permissions should be CHANGEOWNER + EDITPERMISSIONS
+      const signerPermKey = result.keysToSet.find((key) =>
+        key.toLowerCase().includes(signerAddress.substring(2).toLowerCase())
+      );
+      expect(signerPermKey).toBeDefined();
+    });
+  });
+
+  describe('deployViaLSP23', () => {
+    const MOCK_UP = '0x1111111111111111111111111111111111111111' as Hex;
+    const MOCK_KM = '0x2222222222222222222222222222222222222222' as Hex;
+    const MOCK_TX = ('0x' + 'ab'.repeat(32)) as Hex;
+    const MOCK_SIGNER = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' as Hex;
+
+    it('should simulate and write the deployERC1167Proxies contract call', async () => {
+      const publicClient = {
+        simulateContract: jest.fn().mockResolvedValue({
+          result: [MOCK_UP, MOCK_KM],
+          request: { mock: 'request' },
+        }),
+      } as unknown as PublicClient;
+
+      const walletClient = {
+        account: { address: MOCK_SIGNER },
+        writeContract: jest.fn().mockResolvedValue(MOCK_TX),
+      } as unknown as WalletClient;
+
+      const result = await deployViaLSP23(publicClient, walletClient, mockParams);
+
+      expect(publicClient.simulateContract).toHaveBeenCalledTimes(1);
+      expect(walletClient.writeContract).toHaveBeenCalledWith({ mock: 'request' });
+      expect(result.upAddress).toBe(getAddress(MOCK_UP));
+      expect(result.kmAddress).toBe(getAddress(MOCK_KM));
+      expect(result.txHash).toBe(MOCK_TX);
+    });
+
+    it('should throw when walletClient has no account', async () => {
+      const publicClient = {} as unknown as PublicClient;
+      const walletClient = {
+        account: undefined,
+      } as unknown as WalletClient;
+
+      await expect(
+        deployViaLSP23(publicClient, walletClient, mockParams)
+      ).rejects.toThrow('WalletClient must have an account');
+    });
+  });
+
+  describe('computeAddressesViaLSP23', () => {
+    const MOCK_UP = '0x1111111111111111111111111111111111111111' as Hex;
+    const MOCK_KM = '0x2222222222222222222222222222222222222222' as Hex;
+
+    it('should call readContract with computeERC1167Addresses', async () => {
+      const publicClient = {
+        readContract: jest.fn().mockResolvedValue([MOCK_UP, MOCK_KM]),
+      } as unknown as PublicClient;
+
+      const result = await computeAddressesViaLSP23(publicClient, mockParams);
+
+      expect(publicClient.readContract).toHaveBeenCalledTimes(1);
+      expect(result.upAddress).toBe(getAddress(MOCK_UP));
+      expect(result.kmAddress).toBe(getAddress(MOCK_KM));
+    });
+  });
+
+  describe('setDataAndTransferOwnership', () => {
+    const MOCK_UP = '0x1111111111111111111111111111111111111111' as Hex;
+    const MOCK_KM = '0x2222222222222222222222222222222222222222' as Hex;
+    const MOCK_TX = ('0x' + 'ab'.repeat(32)) as Hex;
+    const MOCK_SIGNER = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' as Hex;
+    const controller1 = '0x3333333333333333333333333333333333333333' as Hex;
+    const urdAddress = '0x7870C5B8BC9572A8001C3f96f7ff59961B23500D' as Hex;
+
+    let publicClient: PublicClient;
+    let walletClient: WalletClient;
+
+    beforeEach(() => {
+      publicClient = {
+        waitForTransactionReceipt: jest.fn().mockResolvedValue({}),
+      } as unknown as PublicClient;
+
+      walletClient = {
+        account: { address: MOCK_SIGNER },
+        chain: { id: 4201 },
+        writeContract: jest.fn().mockResolvedValue(MOCK_TX),
+      } as unknown as WalletClient;
+    });
+
+    it('should execute 4 transactions: setData, transferOwnership, acceptOwnership, revokePermissions', async () => {
+      const txHashes = await setDataAndTransferOwnership(
+        publicClient,
+        walletClient,
+        MOCK_UP,
+        MOCK_KM,
+        [controller1],
+        urdAddress
+      );
+
+      expect(txHashes).toHaveLength(4);
+      expect(walletClient.writeContract).toHaveBeenCalledTimes(4);
+      expect(publicClient.waitForTransactionReceipt).toHaveBeenCalledTimes(4);
+    });
+
+    it('should call setDataBatch on UP address first', async () => {
+      await setDataAndTransferOwnership(
+        publicClient,
+        walletClient,
+        MOCK_UP,
+        MOCK_KM,
+        [controller1],
+        urdAddress
+      );
+
+      const firstCall = (walletClient.writeContract as jest.Mock).mock.calls[0][0];
+      expect(firstCall.address).toBe(MOCK_UP);
+      expect(firstCall.functionName).toBe('setDataBatch');
+    });
+
+    it('should call transferOwnership to KM on UP address', async () => {
+      await setDataAndTransferOwnership(
+        publicClient,
+        walletClient,
+        MOCK_UP,
+        MOCK_KM,
+        [controller1],
+        urdAddress
+      );
+
+      const secondCall = (walletClient.writeContract as jest.Mock).mock.calls[1][0];
+      expect(secondCall.address).toBe(MOCK_UP);
+      expect(secondCall.functionName).toBe('transferOwnership');
+      expect(secondCall.args).toEqual([MOCK_KM]);
+    });
+
+    it('should call acceptOwnership via KM.execute', async () => {
+      await setDataAndTransferOwnership(
+        publicClient,
+        walletClient,
+        MOCK_UP,
+        MOCK_KM,
+        [controller1],
+        urdAddress
+      );
+
+      const thirdCall = (walletClient.writeContract as jest.Mock).mock.calls[2][0];
+      expect(thirdCall.address).toBe(MOCK_KM);
+      expect(thirdCall.functionName).toBe('execute');
+    });
+
+    it('should revoke signer permissions via KM.execute', async () => {
+      await setDataAndTransferOwnership(
+        publicClient,
+        walletClient,
+        MOCK_UP,
+        MOCK_KM,
+        [controller1],
+        urdAddress
+      );
+
+      const fourthCall = (walletClient.writeContract as jest.Mock).mock.calls[3][0];
+      expect(fourthCall.address).toBe(MOCK_KM);
+      expect(fourthCall.functionName).toBe('execute');
+    });
+
+    it('should throw when walletClient has no account', async () => {
+      const noAccountClient = {
+        account: undefined,
+        chain: { id: 4201 },
+      } as unknown as WalletClient;
+
+      await expect(
+        setDataAndTransferOwnership(
+          publicClient,
+          noAccountClient,
+          MOCK_UP,
+          MOCK_KM,
+          [controller1],
+          urdAddress
+        )
+      ).rejects.toThrow('WalletClient must have an account');
+    });
+
+    it('should pass lsp3DataValue to setDataBatch when provided', async () => {
+      const lsp3Data = '0xdeadbeef' as Hex;
+
+      await setDataAndTransferOwnership(
+        publicClient,
+        walletClient,
+        MOCK_UP,
+        MOCK_KM,
+        [controller1],
+        urdAddress,
+        lsp3Data
+      );
+
+      const firstCall = (walletClient.writeContract as jest.Mock).mock.calls[0][0];
+      expect(firstCall.functionName).toBe('setDataBatch');
+      // The valuesToSet should contain the lsp3DataValue
+      expect(firstCall.args[1]).toContain(lsp3Data);
     });
   });
 });

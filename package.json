@@ -29,6 +29,7 @@
     "viem": "^2.0.0"
   },
   "devDependencies": {
+    "@babel/preset-typescript": "^7.28.5",
     "@types/jest": "^27.0.2",
     "@types/node": "^18.13.0",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
