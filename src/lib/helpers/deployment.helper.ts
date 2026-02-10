@@ -31,7 +31,7 @@ export async function getDeployedByteCode(
   contractAddress: Hex,
   publicClient: PublicClient
 ): Promise<Hex> {
-  return publicClient.getCode({ address: contractAddress }) ?? '0x';
+  return (await publicClient.getCode({ address: contractAddress })) ?? '0x';
 }
 
 export function getProxyByteCode(address: Hex): Hex {

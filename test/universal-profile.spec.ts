@@ -275,6 +275,18 @@ describe('UniversalProfile', () => {
       expect(params.lsp23FactoryAddress).toBe('0x2300000A84D25dF63081feAa37ba6b62C4c89a30');
     });
 
+    it('should fallback to last known version when requested version does not exist', async () => {
+      await up.deploy(
+        { controllerAddresses: [MOCK_CONTROLLER] },
+        { version: '0.99.0', salt: MOCK_SALT }
+      );
+
+      // Should still call deployViaLSP23 using the last version in the list (0.14.0 addresses)
+      const params = mockedDeployViaLSP23.mock.calls[0][2];
+      expect(params.upBaseContractAddress).toBe('0x3024D38EA2434BA6635003Dc1BDC0daB5882ED4F');
+      expect(params.kmBaseContractAddress).toBe('0x2Fe3AeD98684E7351aD2D408A43cE09a738BF8a4');
+    });
+
     it('should pass signer address as upInitOwner', async () => {
       await up.deploy({ controllerAddresses: [MOCK_CONTROLLER] }, { salt: MOCK_SALT });
 
@@ -332,6 +344,17 @@ describe('UniversalProfile', () => {
       );
 
       expect(result1).toEqual(result2);
+    });
+
+    it('should fallback to last known version when requested version does not exist', async () => {
+      await up.computeAddress(
+        { controllerAddresses: [MOCK_CONTROLLER] },
+        { version: '0.99.0', salt: MOCK_SALT }
+      );
+
+      const params = mockedCompute.mock.calls[0][1];
+      expect(params.upBaseContractAddress).toBe('0x3024D38EA2434BA6635003Dc1BDC0daB5882ED4F');
+      expect(params.kmBaseContractAddress).toBe('0x2Fe3AeD98684E7351aD2D408A43cE09a738BF8a4');
     });
 
     it('should use a random salt when none is provided', async () => {

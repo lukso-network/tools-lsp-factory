@@ -335,6 +335,58 @@ describe('lsp23.helper', () => {
       ).rejects.toThrow('WalletClient must have an account');
     });
 
+    it('should set ALL_PERMISSIONS for signer when signer is a string controller', async () => {
+      const txHashes = await setDataAndTransferOwnership(
+        publicClient,
+        walletClient,
+        MOCK_UP,
+        MOCK_KM,
+        [MOCK_SIGNER],
+        urdAddress
+      );
+
+      expect(txHashes).toHaveLength(4);
+      // The 4th call revokes signer permissions via KM.execute
+      // When signer IS a controller (string), signerPermission = ALL_PERMISSIONS
+      const fourthCall = (walletClient.writeContract as jest.Mock).mock.calls[3][0];
+      expect(fourthCall.address).toBe(MOCK_KM);
+      expect(fourthCall.functionName).toBe('execute');
+    });
+
+    it('should use custom permissions when signer is a ControllerOptions controller', async () => {
+      const customPermission =
+        '0x0000000000000000000000000000000000000000000000000000000000000010' as Hex;
+      const txHashes = await setDataAndTransferOwnership(
+        publicClient,
+        walletClient,
+        MOCK_UP,
+        MOCK_KM,
+        [{ address: MOCK_SIGNER, permissions: customPermission }],
+        urdAddress
+      );
+
+      expect(txHashes).toHaveLength(4);
+      const fourthCall = (walletClient.writeContract as jest.Mock).mock.calls[3][0];
+      expect(fourthCall.address).toBe(MOCK_KM);
+      expect(fourthCall.functionName).toBe('execute');
+    });
+
+    it('should fallback to ALL_PERMISSIONS when signer is ControllerOptions without permissions', async () => {
+      const txHashes = await setDataAndTransferOwnership(
+        publicClient,
+        walletClient,
+        MOCK_UP,
+        MOCK_KM,
+        [{ address: MOCK_SIGNER } as any],
+        urdAddress
+      );
+
+      expect(txHashes).toHaveLength(4);
+      const fourthCall = (walletClient.writeContract as jest.Mock).mock.calls[3][0];
+      expect(fourthCall.address).toBe(MOCK_KM);
+      expect(fourthCall.functionName).toBe('execute');
+    });
+
     it('should pass lsp3DataValue to setDataBatch when provided', async () => {
       const lsp3Data = '0xdeadbeef' as Hex;
 

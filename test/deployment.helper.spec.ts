@@ -66,6 +66,19 @@ describe('deployment.helper', () => {
   });
 
   describe('getDeployedByteCode', () => {
+    it('should return 0x when publicClient.getCode() returns undefined', async () => {
+      const publicClient = {
+        getCode: jest.fn().mockResolvedValue(undefined),
+      } as unknown as PublicClient;
+
+      const result = await getDeployedByteCode(
+        '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' as Hex,
+        publicClient
+      );
+
+      expect(result).toBe('0x');
+    });
+
     it('should return bytecode from publicClient.getCode()', async () => {
       const mockBytecode = '0x6080604052' as Hex;
       const publicClient = {

@@ -1,6 +1,6 @@
 <p align="center">
- <h1 align="center"><strong>@lukso/lsp-factory.js<br>Deprecated: The development of this library is currently put on hold, please use the <a href="https://github.com/lukso-network/lsp-smart-contracts">LSP-smart-contracts</a> directly</strong></h1>
- <p align="center">Helper library to allow simple deployments of <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-0-ERC725Account.md">UniversalProfiles</a> and <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-4-DigitalCertificate.md">LSP7</a> and <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-8-IdentifiableDigitalAsset.md">LSP8 </a>Digital Assets.</p>
+ <h1 align="center"><strong>@lukso/lsp-factory.js</strong></h1>
+ <p align="center">Helper library to allow simple deployments of <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-0-ERC725Account.md">Universal Profiles</a>, <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-7-DigitalAsset.md">LSP7 Digital Assets</a>, and <a href="https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-8-IdentifiableDigitalAsset.md">LSP8 Identifiable Digital Assets</a> on LUKSO.</p>
 </p>
 
 <p align="center">
@@ -24,7 +24,7 @@
   </a>
 </p>
 
-<p align="center">For more information see <a href="https://docs.lukso.tech/tools/lsp-factoryjs/getting-started">Documentation</a>.</p>
+<p align="center">For more information see the <a href="https://docs.lukso.tech/tools/lsp-factoryjs/getting-started">LUKSO Documentation</a>.</p>
 
 ## Install
 
@@ -34,89 +34,189 @@ npm install @lukso/lsp-factory.js
 
 ## Setup
 
-```javascript
+`@lukso/lsp-factory.js` v4 uses [viem](https://viem.sh/) for blockchain interactions. You need a `PublicClient` (for reading) and a `WalletClient` (for signing transactions).
+
+```typescript
+import { createPublicClient, createWalletClient, http } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { luksoTestnet } from 'viem/chains';
 import { LSPFactory } from '@lukso/lsp-factory.js';
 
-const provider = 'https://rpc.testnet.lukso.network'; // RPC url used to connect to the network
+const account = privateKeyToAccount('0x...');
 
-const lspFactory = new LSPFactory(provider, {
-  deployKey: '0x...'; // Private key of the account which will deploy UPs
-  chainId: 2828, // Chain Id of the network you want to connect to
+const publicClient = createPublicClient({
+  chain: luksoTestnet,
+  transport: http(),
 });
+
+const walletClient = createWalletClient({
+  account,
+  chain: luksoTestnet,
+  transport: http(),
+});
+
+const factory = new LSPFactory(publicClient, walletClient);
 ```
 
 ## Usage
 
-### Deploying an ERC725Account (Universal Profile)
+### Deploying a Universal Profile
 
-```javascript
-// Deploy LSP3 Account
-const myContracts = await lspFactory.UniversalProfile.deploy({
-  controllerAddresses: ['0x...'], // Address which will controll the UP
-  lsp3Profile: {
-    name: 'My Universal Profile',
-    description: 'My cool Universal Profile',
-    profileImage: [
-      {
-        width: 500,
-        height: 500,
-        verification: {
-          method: 'keccak256(bytes)',
-          data: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
-        },
-        url: 'ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp',
-      },
-    ],
-    backgroundImage: [
-      {
-        width: 500,
-        height: 500,
-        verification: {
-          method: 'keccak256(bytes)',
-          data: '0xfdafad027ecfe57eb4ad047b938805d1dec209d6e9f960fc320d7b9b11cbed14',
-        },
-        url: 'ipfs://QmPLqMFHxiUgYAom3Zg4SiwoxDaFcZpHXpCmiDzxrtjSGp',
-      },
-    ],
-    tags: ['Fashion', 'Design'],
-    links: [{ title: 'My Website', url: 'www.my-website.com' }],
-  },
+Deploys a Universal Profile (LSP0) and KeyManager (LSP6) atomically via [LSP23LinkedContractsFactory](https://docs.lukso.tech/standards/accounts/lsp23-linked-contracts-factory), then configures controller permissions and a Universal Receiver Delegate.
+
+```typescript
+const contracts = await factory.UniversalProfile.deploy({
+  controllerAddresses: ['0x...'], // Addresses that will control the UP
 });
 
-const myUPAddress = myContracts.LSP0ERC725Account.address;
+console.log('UP Address:', contracts.LSP0ERC725Account.address);
+console.log('KeyManager Address:', contracts.LSP6KeyManager.address);
 ```
 
-### Using Deployment events
+#### With LSP3 metadata and a deterministic salt
 
-The `onDeployEvents` option can be used to for real-time frontend updates.
-
-```javascript
-const profileDeploymentEvents = [];
-
-const myContracts = await lspFactory.UniversalProfile.deploy(
+```typescript
+const contracts = await factory.UniversalProfile.deploy(
   {
-    controllerAddresses: ['0x...'], // Address which will controll the UP
+    controllerAddresses: ['0x...'],
+    lsp3DataValue: '0x...', // Pre-encoded LSP3Profile data (VerifiableURI)
   },
   {
+    salt: '0x...', // bytes32 salt for deterministic address generation
+  }
+);
+```
+
+#### With custom controller permissions
+
+```typescript
+const contracts = await factory.UniversalProfile.deploy({
+  controllerAddresses: [
+    '0xFullPermissionsAddress', // Gets ALL_PERMISSIONS by default
+    {
+      address: '0xLimitedAddress',
+      permissions: '0x0000000000000000000000000000000000000000000000000000000000000010',
+    },
+  ],
+});
+```
+
+### Pre-computing Addresses
+
+Compute the UP and KeyManager addresses before deploying:
+
+```typescript
+const { upAddress, keyManagerAddress } = await factory.UniversalProfile.computeAddress(
+  { controllerAddresses: ['0x...'] },
+  { salt: '0x...' } // Use the same salt you will deploy with
+);
+```
+
+### Deploying an LSP7 Digital Asset
+
+Deploys an [LSP7 Digital Asset](https://docs.lukso.tech/standards/tokens/LSP7-Digital-Asset) (fungible token) as a minimal proxy:
+
+```typescript
+const contracts = await factory.LSP7DigitalAsset.deploy({
+  name: 'My Token',
+  symbol: 'MTK',
+  controllerAddress: '0x...', // Owner of the token contract
+  tokenType: 0, // 0 = Token, 1 = NFT, 2 = Collection
+  isNFT: false, // Whether the token is non-divisible
+});
+
+console.log('LSP7 Address:', contracts.LSP7DigitalAsset.address);
+```
+
+#### With metadata
+
+```typescript
+const contracts = await factory.LSP7DigitalAsset.deploy({
+  name: 'My Token',
+  symbol: 'MTK',
+  controllerAddress: '0x...',
+  tokenType: 0,
+  isNFT: false,
+  digitalAssetMetadata: {
+    verification: {
+      method: 'keccak256(utf8)',
+      data: '0x...',
+    },
+    url: 'ipfs://Qm...',
+  },
+});
+```
+
+### Deploying an LSP8 Identifiable Digital Asset
+
+Deploys an [LSP8 Identifiable Digital Asset](https://docs.lukso.tech/standards/tokens/LSP8-Identifiable-Digital-Asset) (NFT) as a minimal proxy:
+
+```typescript
+const contracts = await factory.LSP8IdentifiableDigitalAsset.deploy({
+  name: 'My NFT Collection',
+  symbol: 'MNFT',
+  controllerAddress: '0x...',
+  tokenType: 1, // 0 = Token, 1 = NFT, 2 = Collection
+  tokenIdFormat: 1, // Token ID format (e.g., 1 = Number)
+});
+
+console.log('LSP8 Address:', contracts.LSP8IdentifiableDigitalAsset.address);
+```
+
+### Deployment Events
+
+All `deploy` methods accept an `onDeployEvents` callback for tracking deployment progress:
+
+```typescript
+const contracts = await factory.UniversalProfile.deploy(
+  { controllerAddresses: ['0x...'] },
+  {
     onDeployEvents: {
-      next: (deploymentEvent: DeploymentEvent) => {
-        profileDeploymentEvents.push(deploymentEvent);
+      next: (event) => {
+        console.log(event.status, event.contractName, event.functionName);
       },
       error: (error) => {
-        console.error(error);
+        console.error('Deployment error:', error);
       },
-      complete: () => {
-        console.log(profileDeploymentEvents);
+      complete: (deployedContracts) => {
+        console.log('Deployment complete:', deployedContracts);
       },
     },
   }
 );
 ```
 
+## Development
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Lint
+
+```bash
+npm run lint
+npm run lint:fix  # auto-fix
+```
+
+### Build
+
+```bash
+npm run build
+```
+
+### Test
+
+```bash
+npm test
+```
+
 ## Contributing
 
 Please check [CONTRIBUTING](./CONTRIBUTING.md).
 
-### License
+## License
 
 lsp-factory.js is [Apache 2.0 licensed](./LICENSE).
