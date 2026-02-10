@@ -4,14 +4,14 @@ import {
   computeAddressesViaLSP23,
   deployViaLSP23,
   setDataAndTransferOwnership,
-} from '../helpers/lsp23.helper';
-import type { DeploymentEvent, LSPFactoryOptions } from '../interfaces';
-import { DeploymentStatus, DeploymentType } from '../interfaces';
-import { ContractNames } from '../interfaces/profile-deployment';
+} from '../src/lib/helpers/lsp23.helper';
+import type { DeploymentEvent, LSPFactoryOptions } from '../src/lib/interfaces';
+import { DeploymentStatus, DeploymentType } from '../src/lib/interfaces';
+import { ContractNames } from '../src/lib/interfaces/profile-deployment';
 
-import { UniversalProfile } from './universal-profile';
+import { UniversalProfile } from '../src/lib/classes/universal-profile';
 
-jest.mock('../helpers/lsp23.helper');
+jest.mock('../src/lib/helpers/lsp23.helper');
 const mockedDeployViaLSP23 = jest.mocked(deployViaLSP23);
 const mockedSetData = jest.mocked(setDataAndTransferOwnership);
 const mockedCompute = jest.mocked(computeAddressesViaLSP23);

@@ -5,7 +5,7 @@ import {
   getDeployedByteCode,
   getProxyByteCode,
   isAddress,
-} from './deployment.helper';
+} from '../src/lib/helpers/deployment.helper';
 
 describe('deployment.helper', () => {
   describe('isAddress', () => {

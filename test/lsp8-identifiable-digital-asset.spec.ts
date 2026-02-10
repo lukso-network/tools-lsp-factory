@@ -1,15 +1,15 @@
 import { PublicClient, TransactionReceipt, WalletClient } from 'viem';
 
-import { erc725EncodeData } from '../helpers/erc725.helper';
-import { DeploymentEvent, DeploymentStatus, DeploymentType } from '../interfaces';
+import { erc725EncodeData } from '../src/lib/helpers/erc725.helper';
+import { DeploymentEvent, DeploymentStatus, DeploymentType } from '../src/lib/interfaces';
 import {
   ContractNames,
-  LSP7DigitalAssetDeploymentOptions,
-} from '../interfaces/digital-asset-deployment';
+  LSP8IdentifiableDigitalAssetDeploymentOptions,
+} from '../src/lib/interfaces/digital-asset-deployment';
 
-import { LSP7DigitalAsset } from './lsp7-digital-asset';
+import { LSP8IdentifiableDigitalAsset } from '../src/lib/classes/lsp8-identifiable-digital-asset';
 
-jest.mock('../helpers/erc725.helper');
+jest.mock('../src/lib/helpers/erc725.helper');
 const mockErc725EncodeData = jest.mocked(erc725EncodeData);
 
 const MOCK_SIGNER = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' as `0x${string}`;
@@ -17,19 +17,19 @@ const MOCK_CONTROLLER = '0x3333333333333333333333333333333333333333' as `0x${str
 const MOCK_TX = ('0x' + 'ab'.repeat(32)) as `0x${string}`;
 const MOCK_CONTRACT = '0x4444444444444444444444444444444444444444' as `0x${string}`;
 
-describe('LSP7DigitalAsset', () => {
-  let lsp7: LSP7DigitalAsset;
+describe('LSP8IdentifiableDigitalAsset', () => {
+  let lsp8: LSP8IdentifiableDigitalAsset;
   let publicClient: PublicClient;
   let walletClient: WalletClient;
   let mockDeployReceipt: TransactionReceipt;
   let mockProxyReceipt: TransactionReceipt;
 
-  const defaultOptions: LSP7DigitalAssetDeploymentOptions = {
-    name: 'TestToken',
-    symbol: 'TST',
+  const defaultOptions: LSP8IdentifiableDigitalAssetDeploymentOptions = {
+    name: 'TestNFT',
+    symbol: 'TNFT',
     controllerAddress: MOCK_SIGNER,
-    tokenType: 0,
-    isNFT: false,
+    tokenType: 1,
+    tokenIdFormat: 1,
   };
 
   beforeEach(() => {
@@ -59,7 +59,7 @@ describe('LSP7DigitalAsset', () => {
       writeContract: jest.fn().mockResolvedValue(MOCK_TX),
     } as unknown as WalletClient;
 
-    lsp7 = new LSP7DigitalAsset({
+    lsp8 = new LSP8IdentifiableDigitalAsset({
       publicClient,
       walletClient,
       chainId: 4201,
@@ -77,60 +77,60 @@ describe('LSP7DigitalAsset', () => {
 
   describe('deploy', () => {
     it('should deploy a proxy and initialize the contract', async () => {
-      const result = await lsp7.deploy(defaultOptions);
+      const result = await lsp8.deploy(defaultOptions);
 
       expect(walletClient.sendTransaction).toHaveBeenCalledTimes(1);
       expect(walletClient.writeContract).toHaveBeenCalledTimes(1);
-      expect(result.LSP7DigitalAsset.address).toBe(MOCK_CONTRACT);
-      expect(result.LSP7DigitalAsset.receipt).toBeDefined();
+      expect(result.LSP8IdentifiableDigitalAsset.address).toBe(MOCK_CONTRACT);
+      expect(result.LSP8IdentifiableDigitalAsset.receipt).toBeDefined();
     });
 
     it('should send proxy bytecode via sendTransaction', async () => {
-      await lsp7.deploy(defaultOptions);
+      await lsp8.deploy(defaultOptions);
 
       const sendTxCall = (walletClient.sendTransaction as jest.Mock).mock.calls[0][0];
       expect(sendTxCall.data).toMatch(/^0x3d602d80600a3d3981f3363d3d373d3d3d363d73/);
     });
 
     it('should initialize with correct parameters', async () => {
-      await lsp7.deploy(defaultOptions);
+      await lsp8.deploy(defaultOptions);
 
       expect(walletClient.writeContract).toHaveBeenCalledWith(
         expect.objectContaining({
           address: MOCK_CONTRACT,
           functionName: 'initialize',
-          args: ['TestToken', 'TST', expect.any(String), 0n, false],
+          args: ['TestNFT', 'TNFT', expect.any(String), 1n, 1n],
         })
       );
     });
 
-    it('should initialize with isNFT true', async () => {
-      await lsp7.deploy({ ...defaultOptions, isNFT: true });
+    it('should handle numeric tokenIdFormat', async () => {
+      await lsp8.deploy({ ...defaultOptions, tokenIdFormat: 2 });
 
       expect(walletClient.writeContract).toHaveBeenCalledWith(
         expect.objectContaining({
           functionName: 'initialize',
-          args: expect.arrayContaining([true]),
+          args: expect.arrayContaining([2n]),
+        })
+      );
+    });
+
+    it('should handle string tokenIdFormat by parsing to int', async () => {
+      await lsp8.deploy({ ...defaultOptions, tokenIdFormat: '3' });
+
+      expect(walletClient.writeContract).toHaveBeenCalledWith(
+        expect.objectContaining({
+          functionName: 'initialize',
+          args: expect.arrayContaining([3n]),
         })
       );
     });
 
     it('should handle string tokenType names', async () => {
-      await lsp7.deploy({
+      await lsp8.deploy({
         ...defaultOptions,
-        tokenType: 'TOKEN' as any,
+        tokenType: 'NFT' as any,
       });
-
-      expect(walletClient.writeContract).toHaveBeenCalledWith(
-        expect.objectContaining({
-          functionName: 'initialize',
-          args: expect.arrayContaining([0n]),
-        })
-      );
-    });
-
-    it('should handle numeric tokenType values', async () => {
-      await lsp7.deploy({ ...defaultOptions, tokenType: 1 });
 
       expect(walletClient.writeContract).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -140,8 +140,19 @@ describe('LSP7DigitalAsset', () => {
       );
     });
 
+    it('should handle numeric tokenType values', async () => {
+      await lsp8.deploy({ ...defaultOptions, tokenType: 2 });
+
+      expect(walletClient.writeContract).toHaveBeenCalledWith(
+        expect.objectContaining({
+          functionName: 'initialize',
+          args: expect.arrayContaining([2n]),
+        })
+      );
+    });
+
     it('should set metadata when digitalAssetMetadata is a string', async () => {
-      await lsp7.deploy({
+      await lsp8.deploy({
         ...defaultOptions,
         digitalAssetMetadata: '0xdeadbeef',
       });
@@ -161,7 +172,7 @@ describe('LSP7DigitalAsset', () => {
         url: 'ipfs://QmTest',
       };
 
-      await lsp7.deploy({
+      await lsp8.deploy({
         ...defaultOptions,
         digitalAssetMetadata: metadata,
       });
@@ -172,7 +183,7 @@ describe('LSP7DigitalAsset', () => {
     });
 
     it('should not set metadata when digitalAssetMetadata is omitted', async () => {
-      await lsp7.deploy(defaultOptions);
+      await lsp8.deploy(defaultOptions);
 
       // initialize only
       expect(walletClient.writeContract).toHaveBeenCalledTimes(1);
@@ -182,7 +193,7 @@ describe('LSP7DigitalAsset', () => {
     });
 
     it('should transfer ownership when controller differs from signer', async () => {
-      await lsp7.deploy({
+      await lsp8.deploy({
         ...defaultOptions,
         controllerAddress: MOCK_CONTROLLER,
       });
@@ -196,7 +207,7 @@ describe('LSP7DigitalAsset', () => {
     });
 
     it('should NOT transfer ownership when controller is the signer', async () => {
-      await lsp7.deploy({
+      await lsp8.deploy({
         ...defaultOptions,
         controllerAddress: MOCK_SIGNER,
       });
@@ -210,7 +221,7 @@ describe('LSP7DigitalAsset', () => {
       const events: DeploymentEvent[] = [];
       const next = jest.fn((e: DeploymentEvent) => events.push(e));
 
-      await lsp7.deploy(defaultOptions, {
+      await lsp8.deploy(defaultOptions, {
         onDeployEvents: { next },
       });
 
@@ -218,12 +229,12 @@ describe('LSP7DigitalAsset', () => {
       expect(events[0]).toMatchObject({
         type: DeploymentType.PROXY,
         status: DeploymentStatus.PENDING,
-        contractName: ContractNames.LSP7_DIGITAL_ASSET,
+        contractName: ContractNames.LSP8_DIGITAL_ASSET,
       });
       expect(events[1]).toMatchObject({
         type: DeploymentType.PROXY,
         status: DeploymentStatus.COMPLETE,
-        contractName: ContractNames.LSP7_DIGITAL_ASSET,
+        contractName: ContractNames.LSP8_DIGITAL_ASSET,
         txHash: MOCK_TX,
       });
     });
@@ -231,13 +242,13 @@ describe('LSP7DigitalAsset', () => {
     it('should call complete callback with deployed contract', async () => {
       const complete = jest.fn();
 
-      await lsp7.deploy(defaultOptions, {
+      await lsp8.deploy(defaultOptions, {
         onDeployEvents: { complete },
       });
 
       expect(complete).toHaveBeenCalledTimes(1);
       expect(complete).toHaveBeenCalledWith({
-        LSP7DigitalAsset: {
+        LSP8IdentifiableDigitalAsset: {
           address: MOCK_CONTRACT,
           receipt: mockDeployReceipt,
         },
@@ -245,7 +256,7 @@ describe('LSP7DigitalAsset', () => {
     });
 
     it('should throw when walletClient has no account', async () => {
-      lsp7 = new LSP7DigitalAsset({
+      lsp8 = new LSP8IdentifiableDigitalAsset({
         publicClient,
         walletClient: {
           account: undefined,
@@ -254,21 +265,21 @@ describe('LSP7DigitalAsset', () => {
         chainId: 4201,
       });
 
-      await expect(lsp7.deploy(defaultOptions)).rejects.toThrow(
+      await expect(lsp8.deploy(defaultOptions)).rejects.toThrow(
         'WalletClient must have an account'
       );
     });
 
     it('should throw when deployProxy is explicitly false', async () => {
       await expect(
-        lsp7.deploy(defaultOptions, {
-          LSP7DigitalAsset: { deployProxy: false },
+        lsp8.deploy(defaultOptions, {
+          LSP8IdentifiableDigitalAsset: { deployProxy: false },
         })
-      ).rejects.toThrow('Direct deployment (non-proxy) for LSP7 is not yet supported in v4');
+      ).rejects.toThrow('Direct deployment (non-proxy) for LSP8 is not yet supported in v4');
     });
 
     it('should wait for proxy deployment receipt', async () => {
-      await lsp7.deploy(defaultOptions);
+      await lsp8.deploy(defaultOptions);
 
       expect(publicClient.waitForTransactionReceipt).toHaveBeenCalledWith({
         hash: MOCK_TX,

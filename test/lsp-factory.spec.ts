@@ -1,9 +1,9 @@
 import { PublicClient, WalletClient } from 'viem';
 
-import { LSP7DigitalAsset } from './classes/lsp7-digital-asset';
-import { LSP8IdentifiableDigitalAsset } from './classes/lsp8-identifiable-digital-asset';
-import { UniversalProfile } from './classes/universal-profile';
-import { LSPFactory } from './lsp-factory';
+import { LSP7DigitalAsset } from '../src/lib/classes/lsp7-digital-asset';
+import { LSP8IdentifiableDigitalAsset } from '../src/lib/classes/lsp8-identifiable-digital-asset';
+import { UniversalProfile } from '../src/lib/classes/universal-profile';
+import { LSPFactory } from '../src/lib/lsp-factory';
 
 describe('LSPFactory', () => {
   it('should create an instance with all sub-classes', () => {

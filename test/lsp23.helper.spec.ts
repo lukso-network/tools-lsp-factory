@@ -10,7 +10,7 @@ import {
   LSP23DeployParams,
   setDataAndTransferOwnership,
   UP_INIT_ABI,
-} from './lsp23.helper';
+} from '../src/lib/helpers/lsp23.helper';
 
 describe('lsp23.helper', () => {
   const mockParams: LSP23DeployParams = {
