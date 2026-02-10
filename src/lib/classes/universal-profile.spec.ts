@@ -1,20 +1,15 @@
 import type { PublicClient, TransactionReceipt, WalletClient } from 'viem';
 
-import { UniversalProfile } from './universal-profile';
-import type {
-  DeploymentEvent,
-  LSPFactoryOptions,
-} from '../interfaces';
 import {
-  DeploymentStatus,
-  DeploymentType,
-} from '../interfaces';
-import { ContractNames } from '../interfaces/profile-deployment';
-import {
+  computeAddressesViaLSP23,
   deployViaLSP23,
   setDataAndTransferOwnership,
-  computeAddressesViaLSP23,
 } from '../helpers/lsp23.helper';
+import type { DeploymentEvent, LSPFactoryOptions } from '../interfaces';
+import { DeploymentStatus, DeploymentType } from '../interfaces';
+import { ContractNames } from '../interfaces/profile-deployment';
+
+import { UniversalProfile } from './universal-profile';
 
 jest.mock('../helpers/lsp23.helper');
 const mockedDeployViaLSP23 = jest.mocked(deployViaLSP23);
@@ -92,10 +87,7 @@ describe('UniversalProfile', () => {
     });
 
     it('should deploy with an explicit salt', async () => {
-      await up.deploy(
-        { controllerAddresses: [MOCK_CONTROLLER] },
-        { salt: MOCK_SALT }
-      );
+      await up.deploy({ controllerAddresses: [MOCK_CONTROLLER] }, { salt: MOCK_SALT });
 
       const params = mockedDeployViaLSP23.mock.calls[0][2];
       expect(params.salt).toBe(MOCK_SALT);
@@ -176,10 +168,7 @@ describe('UniversalProfile', () => {
       const events: DeploymentEvent[] = [];
       const next = jest.fn((e: DeploymentEvent) => events.push(e));
 
-      await up.deploy(
-        { controllerAddresses: [MOCK_CONTROLLER] },
-        { onDeployEvents: { next } }
-      );
+      await up.deploy({ controllerAddresses: [MOCK_CONTROLLER] }, { onDeployEvents: { next } });
 
       expect(events).toHaveLength(4);
       expect(events[0]).toMatchObject({
@@ -211,10 +200,7 @@ describe('UniversalProfile', () => {
     it('should call complete callback with deployed contracts', async () => {
       const complete = jest.fn();
 
-      await up.deploy(
-        { controllerAddresses: [MOCK_CONTROLLER] },
-        { onDeployEvents: { complete } }
-      );
+      await up.deploy({ controllerAddresses: [MOCK_CONTROLLER] }, { onDeployEvents: { complete } });
 
       expect(complete).toHaveBeenCalledTimes(1);
       expect(complete).toHaveBeenCalledWith({
@@ -263,9 +249,9 @@ describe('UniversalProfile', () => {
         chainId: 4201,
       });
 
-      await expect(
-        up.deploy({ controllerAddresses: [MOCK_CONTROLLER] })
-      ).rejects.toThrow('WalletClient must have an account');
+      await expect(up.deploy({ controllerAddresses: [MOCK_CONTROLLER] })).rejects.toThrow(
+        'WalletClient must have an account'
+      );
     });
 
     it('should throw for unknown chain ID', async () => {
@@ -275,39 +261,25 @@ describe('UniversalProfile', () => {
         chainId: 9999,
       });
 
-      await expect(
-        up.deploy({ controllerAddresses: [MOCK_CONTROLLER] })
-      ).rejects.toThrow('No contract configuration found for chain 9999');
+      await expect(up.deploy({ controllerAddresses: [MOCK_CONTROLLER] })).rejects.toThrow(
+        'No contract configuration found for chain 9999'
+      );
     });
 
     it('should pass correct base contract addresses from chain config', async () => {
-      await up.deploy(
-        { controllerAddresses: [MOCK_CONTROLLER] },
-        { salt: MOCK_SALT }
-      );
+      await up.deploy({ controllerAddresses: [MOCK_CONTROLLER] }, { salt: MOCK_SALT });
 
       const params = mockedDeployViaLSP23.mock.calls[0][2];
-      expect(params.upBaseContractAddress).toBe(
-        '0x3024D38EA2434BA6635003Dc1BDC0daB5882ED4F'
-      );
-      expect(params.kmBaseContractAddress).toBe(
-        '0x2Fe3AeD98684E7351aD2D408A43cE09a738BF8a4'
-      );
-      expect(params.lsp23FactoryAddress).toBe(
-        '0x2300000A84D25dF63081feAa37ba6b62C4c89a30'
-      );
+      expect(params.upBaseContractAddress).toBe('0x3024D38EA2434BA6635003Dc1BDC0daB5882ED4F');
+      expect(params.kmBaseContractAddress).toBe('0x2Fe3AeD98684E7351aD2D408A43cE09a738BF8a4');
+      expect(params.lsp23FactoryAddress).toBe('0x2300000A84D25dF63081feAa37ba6b62C4c89a30');
     });
 
     it('should pass signer address as upInitOwner', async () => {
-      await up.deploy(
-        { controllerAddresses: [MOCK_CONTROLLER] },
-        { salt: MOCK_SALT }
-      );
+      await up.deploy({ controllerAddresses: [MOCK_CONTROLLER] }, { salt: MOCK_SALT });
 
       const params = mockedDeployViaLSP23.mock.calls[0][2];
-      expect(params.upInitOwner.toLowerCase()).toBe(
-        MOCK_SIGNER.toLowerCase()
-      );
+      expect(params.upInitOwner.toLowerCase()).toBe(MOCK_SIGNER.toLowerCase());
     });
 
     it('should pass the URD address to setDataAndTransferOwnership', async () => {
@@ -340,18 +312,13 @@ describe('UniversalProfile', () => {
     });
 
     it('should call computeAddressesViaLSP23 with correct params', async () => {
-      await up.computeAddress(
-        { controllerAddresses: [MOCK_CONTROLLER] },
-        { salt: MOCK_SALT }
-      );
+      await up.computeAddress({ controllerAddresses: [MOCK_CONTROLLER] }, { salt: MOCK_SALT });
 
       expect(mockedCompute).toHaveBeenCalledTimes(1);
       const call = mockedCompute.mock.calls[0];
       expect(call[0]).toBe(publicClient);
       expect(call[1].salt).toBe(MOCK_SALT);
-      expect(call[1].lsp23FactoryAddress).toBe(
-        '0x2300000A84D25dF63081feAa37ba6b62C4c89a30'
-      );
+      expect(call[1].lsp23FactoryAddress).toBe('0x2300000A84D25dF63081feAa37ba6b62C4c89a30');
     });
 
     it('should produce consistent results with the same salt', async () => {
@@ -387,10 +354,7 @@ describe('UniversalProfile', () => {
       });
 
       await expect(
-        up.computeAddress(
-          { controllerAddresses: [MOCK_CONTROLLER] },
-          { salt: MOCK_SALT }
-        )
+        up.computeAddress({ controllerAddresses: [MOCK_CONTROLLER] }, { salt: MOCK_SALT })
       ).rejects.toThrow('WalletClient must have an account');
     });
 
@@ -402,10 +366,7 @@ describe('UniversalProfile', () => {
       });
 
       await expect(
-        up.computeAddress(
-          { controllerAddresses: [MOCK_CONTROLLER] },
-          { salt: MOCK_SALT }
-        )
+        up.computeAddress({ controllerAddresses: [MOCK_CONTROLLER] }, { salt: MOCK_SALT })
       ).rejects.toThrow('No contract configuration found for chain 9999');
     });
   });

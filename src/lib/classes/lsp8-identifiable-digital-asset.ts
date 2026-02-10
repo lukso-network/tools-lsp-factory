@@ -1,15 +1,15 @@
-import { Hex, getAddress } from 'viem';
 import { ERC725YDataKeys, LSP4_TOKEN_TYPES } from '@lukso/lsp-smart-contracts';
+import { getAddress, Hex } from 'viem';
 
 import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
 import { getProxyByteCode } from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
 import {
-  LSPFactoryOptions,
   DeploymentEvent,
   DeploymentStatus,
   DeploymentType,
+  LSPFactoryOptions,
 } from '../interfaces';
 import {
   ContractNames,
@@ -79,7 +79,8 @@ export class LSP8IdentifiableDigitalAsset {
     const defaultVersion = DEFAULT_CONTRACT_VERSION;
 
     const baseContractAddress = chainConfig?.contracts?.LSP8Mintable?.versions?.[
-      (contractDeploymentOptions?.LSP8IdentifiableDigitalAsset?.version ?? defaultVersion) as keyof typeof chainConfig.contracts.LSP8Mintable.versions
+      (contractDeploymentOptions?.LSP8IdentifiableDigitalAsset?.version ??
+        defaultVersion) as keyof typeof chainConfig.contracts.LSP8Mintable.versions
     ] as Hex | undefined;
 
     const shouldDeployProxy =
@@ -174,9 +175,7 @@ export class LSP8IdentifiableDigitalAsset {
     }
 
     // Transfer ownership if controller is different from signer
-    if (
-      getAddress(digitalAssetDeploymentOptions.controllerAddress) !== signerAddress
-    ) {
+    if (getAddress(digitalAssetDeploymentOptions.controllerAddress) !== signerAddress) {
       const transferHash = await walletClient.writeContract({
         address: contractAddress,
         abi: LSP8_MINTABLE_ABI,

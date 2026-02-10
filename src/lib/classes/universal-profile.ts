@@ -1,4 +1,4 @@
-import { Hex, getAddress, toHex } from 'viem';
+import { getAddress, Hex, toHex } from 'viem';
 
 import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
@@ -9,10 +9,10 @@ import {
   setDataAndTransferOwnership,
 } from '../helpers/lsp23.helper';
 import {
-  LSPFactoryOptions,
   DeploymentEvent,
   DeploymentStatus,
   DeploymentType,
+  LSPFactoryOptions,
 } from '../interfaces';
 import {
   ContractDeploymentOptions,
@@ -43,8 +43,7 @@ export class UniversalProfile {
       onDeployEvents?.next?.(event);
     };
 
-    const defaultContractVersion =
-      contractDeploymentOptions?.version ?? DEFAULT_CONTRACT_VERSION;
+    const defaultContractVersion = contractDeploymentOptions?.version ?? DEFAULT_CONTRACT_VERSION;
 
     const chainConfig = contractVersions[String(chainId) as keyof typeof contractVersions];
     if (!chainConfig) {
@@ -66,8 +65,7 @@ export class UniversalProfile {
     const lsp23FactoryAddress = chainConfig.lsp23FactoryAddress as Hex;
 
     const salt =
-      contractDeploymentOptions?.salt ??
-      toHex(crypto.getRandomValues(new Uint8Array(32)));
+      contractDeploymentOptions?.salt ?? toHex(crypto.getRandomValues(new Uint8Array(32)));
 
     const account = walletClient.account;
     if (!account) throw new Error('WalletClient must have an account');
@@ -173,8 +171,7 @@ export class UniversalProfile {
   ): Promise<{ upAddress: Hex; keyManagerAddress: Hex }> {
     const { publicClient, walletClient, chainId } = this.options;
 
-    const defaultContractVersion =
-      contractDeploymentOptions?.version ?? DEFAULT_CONTRACT_VERSION;
+    const defaultContractVersion = contractDeploymentOptions?.version ?? DEFAULT_CONTRACT_VERSION;
 
     const chainConfig = contractVersions[String(chainId) as keyof typeof contractVersions];
     if (!chainConfig) {
@@ -192,8 +189,7 @@ export class UniversalProfile {
     const lsp23FactoryAddress = chainConfig.lsp23FactoryAddress as Hex;
 
     const salt =
-      contractDeploymentOptions?.salt ??
-      toHex(crypto.getRandomValues(new Uint8Array(32)));
+      contractDeploymentOptions?.salt ?? toHex(crypto.getRandomValues(new Uint8Array(32)));
 
     const account = walletClient.account;
     if (!account) throw new Error('WalletClient must have an account');
@@ -208,10 +204,7 @@ export class UniversalProfile {
       upInitOwner: signerAddress,
     };
 
-    const { upAddress, kmAddress } = await computeAddressesViaLSP23(
-      publicClient,
-      lsp23Params
-    );
+    const { upAddress, kmAddress } = await computeAddressesViaLSP23(publicClient, lsp23Params);
 
     return { upAddress, keyManagerAddress: kmAddress };
   }

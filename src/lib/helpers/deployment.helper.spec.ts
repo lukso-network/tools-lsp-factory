@@ -1,10 +1,10 @@
 import type { Hex, PublicClient } from 'viem';
 
 import {
-  isAddress,
-  getProxyByteCode,
-  getDeployedByteCode,
   convertContractDeploymentOptionsVersion,
+  getDeployedByteCode,
+  getProxyByteCode,
+  isAddress,
 } from './deployment.helper';
 
 describe('deployment.helper', () => {

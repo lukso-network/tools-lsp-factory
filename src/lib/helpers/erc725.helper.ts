@@ -24,10 +24,7 @@ export function getERC725() {
   return new ERC725(schema);
 }
 
-export function erc725EncodeData(
-  data: LSP4MetadataForEncoding,
-  keyName: string
-) {
+export function erc725EncodeData(data: LSP4MetadataForEncoding, keyName: string) {
   const myERC725 = getERC725();
   return myERC725.encodeData([{ keyName, value: data }]);
 }

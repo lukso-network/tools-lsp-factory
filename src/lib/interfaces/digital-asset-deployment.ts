@@ -1,11 +1,9 @@
-import { Hex } from 'viem';
 import { LSP4_TOKEN_TYPES } from '@lukso/lsp-smart-contracts';
+import { Hex } from 'viem';
 
 import { ContractOptions } from './contract-options';
 import { DeployedContract, DeploymentEventCallbacks } from './deployment-events';
-import {
-  LSP4MetadataForEncoding,
-} from './lsp4-digital-asset';
+import { LSP4MetadataForEncoding } from './lsp4-digital-asset';
 
 export enum ContractNames {
   LSP7_DIGITAL_ASSET = 'LSP7DigitalAsset',

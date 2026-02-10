@@ -1,15 +1,13 @@
 import { ERC725 } from '@erc725/erc725.js';
 import { ALL_PERMISSIONS, ERC725YDataKeys } from '@lukso/lsp-smart-contracts';
 import {
+  encodeFunctionData,
+  getAddress,
   Hex,
   PublicClient,
-  WalletClient,
-  encodeAbiParameters,
-  encodeFunctionData,
-  pad,
   toHex,
+  WalletClient,
   zeroAddress,
-  getAddress,
 } from 'viem';
 
 import { ControllerOptions } from '../interfaces/profile-deployment';
@@ -325,16 +323,12 @@ export function buildSetDataParams(
   // Set CHANGEOWNER + EDITPERMISSIONS for deploy key (revoked after transfer)
   if (!controllerAddresses.includes(signerAddress)) {
     keysToSet.push(
-      (ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] +
-        signerAddress.substring(2)) as Hex
+      (ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signerAddress.substring(2)) as Hex
     );
-    valuesToSet.push(
-      ERC725.encodePermissions({ CHANGEOWNER: true, EDITPERMISSIONS: true }) as Hex
-    );
+    valuesToSet.push(ERC725.encodePermissions({ CHANGEOWNER: true, EDITPERMISSIONS: true }) as Hex);
   } else {
     const signerKeyIndex = keysToSet.indexOf(
-      (ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] +
-        signerAddress.substring(2)) as Hex
+      (ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signerAddress.substring(2)) as Hex
     );
     if (signerKeyIndex >= 0) {
       valuesToSet[signerKeyIndex] = ERC725.encodePermissions({
@@ -420,9 +414,7 @@ export async function setDataAndTransferOwnership(
   await publicClient.waitForTransactionReceipt({ hash: acceptHash });
 
   // 4. Revoke signer permissions (set to final permission or empty)
-  const controllerAddressList = controllers.map((c) =>
-    typeof c === 'string' ? c : c.address
-  );
+  const controllerAddressList = controllers.map((c) => (typeof c === 'string' ? c : c.address));
 
   let signerPermission: Hex;
   if (controllerAddressList.includes(signerAddress)) {
@@ -430,7 +422,7 @@ export async function setDataAndTransferOwnership(
     signerPermission =
       typeof controller === 'string'
         ? (ALL_PERMISSIONS as Hex)
-        : (controller.permissions ?? (ALL_PERMISSIONS as Hex));
+        : controller.permissions ?? (ALL_PERMISSIONS as Hex);
   } else {
     signerPermission = ERC725.encodePermissions({}) as Hex;
   }
@@ -439,8 +431,7 @@ export async function setDataAndTransferOwnership(
     abi: UP_ABI,
     functionName: 'setData',
     args: [
-      (ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] +
-        signerAddress.substring(2)) as Hex,
+      (ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signerAddress.substring(2)) as Hex,
       signerPermission,
     ],
   });

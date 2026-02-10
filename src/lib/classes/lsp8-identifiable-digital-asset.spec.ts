@@ -1,16 +1,13 @@
 import { PublicClient, TransactionReceipt, WalletClient } from 'viem';
 
-import { LSP8IdentifiableDigitalAsset } from './lsp8-identifiable-digital-asset';
-import {
-  DeploymentEvent,
-  DeploymentStatus,
-  DeploymentType,
-} from '../interfaces';
+import { erc725EncodeData } from '../helpers/erc725.helper';
+import { DeploymentEvent, DeploymentStatus, DeploymentType } from '../interfaces';
 import {
   ContractNames,
   LSP8IdentifiableDigitalAssetDeploymentOptions,
 } from '../interfaces/digital-asset-deployment';
-import { erc725EncodeData } from '../helpers/erc725.helper';
+
+import { LSP8IdentifiableDigitalAsset } from './lsp8-identifiable-digital-asset';
 
 jest.mock('../helpers/erc725.helper');
 const mockErc725EncodeData = jest.mocked(erc725EncodeData);
@@ -180,10 +177,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         digitalAssetMetadata: metadata,
       });
 
-      expect(mockErc725EncodeData).toHaveBeenCalledWith(
-        metadata,
-        'LSP4Metadata'
-      );
+      expect(mockErc725EncodeData).toHaveBeenCalledWith(metadata, 'LSP4Metadata');
       // initialize + setDataBatch
       expect(walletClient.writeContract).toHaveBeenCalledTimes(2);
     });
@@ -194,9 +188,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       // initialize only
       expect(walletClient.writeContract).toHaveBeenCalledTimes(1);
       const calls = (walletClient.writeContract as jest.Mock).mock.calls;
-      const setDataCalls = calls.filter(
-        (c: any) => c[0].functionName === 'setDataBatch'
-      );
+      const setDataCalls = calls.filter((c: any) => c[0].functionName === 'setDataBatch');
       expect(setDataCalls).toHaveLength(0);
     });
 
@@ -221,9 +213,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       });
 
       const calls = (walletClient.writeContract as jest.Mock).mock.calls;
-      const transferCalls = calls.filter(
-        (c: any) => c[0].functionName === 'transferOwnership'
-      );
+      const transferCalls = calls.filter((c: any) => c[0].functionName === 'transferOwnership');
       expect(transferCalls).toHaveLength(0);
     });
 
@@ -285,9 +275,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         lsp8.deploy(defaultOptions, {
           LSP8IdentifiableDigitalAsset: { deployProxy: false },
         })
-      ).rejects.toThrow(
-        'Direct deployment (non-proxy) for LSP8 is not yet supported in v4'
-      );
+      ).rejects.toThrow('Direct deployment (non-proxy) for LSP8 is not yet supported in v4');
     });
 
     it('should wait for proxy deployment receipt', async () => {

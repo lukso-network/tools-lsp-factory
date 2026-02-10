@@ -1,4 +1,4 @@
-import { Hex, PublicClient, WalletClient, getAddress } from 'viem';
+import { getAddress, Hex, PublicClient } from 'viem';
 
 export function isAddress(testAddress: string): boolean {
   try {
@@ -35,5 +35,7 @@ export async function getDeployedByteCode(
 }
 
 export function getProxyByteCode(address: Hex): Hex {
-  return `0x3d602d80600a3d3981f3363d3d373d3d3d363d73${address.slice(2)}5af43d82803e903d91602b57fd5bf3`;
+  return `0x3d602d80600a3d3981f3363d3d373d3d3d363d73${address.slice(
+    2
+  )}5af43d82803e903d91602b57fd5bf3`;
 }

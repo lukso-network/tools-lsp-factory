@@ -1,20 +1,20 @@
 import type { Hex, PublicClient, WalletClient } from 'viem';
-import { zeroAddress, encodeFunctionData, getAddress } from 'viem';
+import { encodeFunctionData, getAddress, zeroAddress } from 'viem';
 
 import {
   buildLSP23Args,
   buildSetDataParams,
-  deployViaLSP23,
   computeAddressesViaLSP23,
-  setDataAndTransferOwnership,
-  LSP23DeployParams,
-  UP_INIT_ABI,
+  deployViaLSP23,
   KM_INIT_ABI,
+  LSP23DeployParams,
+  setDataAndTransferOwnership,
+  UP_INIT_ABI,
 } from './lsp23.helper';
 
 describe('lsp23.helper', () => {
   const mockParams: LSP23DeployParams = {
-    salt: '0x' + '00'.repeat(32) as `0x${string}`,
+    salt: ('0x' + '00'.repeat(32)) as `0x${string}`,
     upBaseContractAddress: '0x3024D38EA2434BA6635003Dc1BDC0daB5882ED4F',
     kmBaseContractAddress: '0x2Fe3AeD98684E7351aD2D408A43cE09a738BF8a4',
     lsp23FactoryAddress: '0x2300000A84D25dF63081feAa37ba6b62C4c89a30',
@@ -51,7 +51,7 @@ describe('lsp23.helper', () => {
     });
 
     it('should use the provided salt', () => {
-      const customSalt = '0x' + 'ab'.repeat(32) as `0x${string}`;
+      const customSalt = ('0x' + 'ab'.repeat(32)) as `0x${string}`;
       const result = buildLSP23Args({ ...mockParams, salt: customSalt });
       expect(result.primaryContractDeploymentInit.salt).toBe(customSalt);
     });
@@ -98,7 +98,9 @@ describe('lsp23.helper', () => {
     it('should include URD address in keysToSet', () => {
       const result = buildSetDataParams([controller1], urdAddress, signerAddress);
       // Should contain the LSP1UniversalReceiverDelegate key
-      expect(result.keysToSet.some((key) => key.startsWith('0x0cfc51aec37c55a4d0b1a65c6255c4bf'))).toBe(true);
+      expect(
+        result.keysToSet.some((key) => key.startsWith('0x0cfc51aec37c55a4d0b1a65c6255c4bf'))
+      ).toBe(true);
     });
 
     it('should include signer permissions when signer is not a controller', () => {
@@ -113,7 +115,8 @@ describe('lsp23.helper', () => {
     it('should handle controller as ControllerOptions object', () => {
       const controllerOpts = {
         address: controller1,
-        permissions: '0x0000000000000000000000000000000000000000000000000000000000000010' as `0x${string}`,
+        permissions:
+          '0x0000000000000000000000000000000000000000000000000000000000000010' as `0x${string}`,
       };
       const result = buildSetDataParams([controllerOpts], urdAddress, signerAddress);
       expect(result.keysToSet.length).toBeGreaterThan(0);
@@ -192,9 +195,9 @@ describe('lsp23.helper', () => {
         account: undefined,
       } as unknown as WalletClient;
 
-      await expect(
-        deployViaLSP23(publicClient, walletClient, mockParams)
-      ).rejects.toThrow('WalletClient must have an account');
+      await expect(deployViaLSP23(publicClient, walletClient, mockParams)).rejects.toThrow(
+        'WalletClient must have an account'
+      );
     });
   });
 

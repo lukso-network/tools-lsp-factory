@@ -1,16 +1,15 @@
-import { Hex, getAddress } from 'viem';
-import { ERC725YDataKeys, INTERFACE_IDS, LSP4_TOKEN_TYPES } from '@lukso/lsp-smart-contracts';
+import { ERC725YDataKeys, LSP4_TOKEN_TYPES } from '@lukso/lsp-smart-contracts';
+import { getAddress, Hex } from 'viem';
 
 import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
-import { getDeployedByteCode, getProxyByteCode } from '../helpers/deployment.helper';
+import { getProxyByteCode } from '../helpers/deployment.helper';
 import { erc725EncodeData } from '../helpers/erc725.helper';
-import { UP_ABI } from '../helpers/lsp23.helper';
 import {
-  LSPFactoryOptions,
   DeploymentEvent,
   DeploymentStatus,
   DeploymentType,
+  LSPFactoryOptions,
 } from '../interfaces';
 import {
   ContractNames,
@@ -88,12 +87,12 @@ export class LSP7DigitalAsset {
     const defaultVersion = DEFAULT_CONTRACT_VERSION;
 
     const baseContractAddress = chainConfig?.contracts?.LSP7Mintable?.versions?.[
-      (contractDeploymentOptions?.LSP7DigitalAsset?.version ?? defaultVersion) as keyof typeof chainConfig.contracts.LSP7Mintable.versions
+      (contractDeploymentOptions?.LSP7DigitalAsset?.version ??
+        defaultVersion) as keyof typeof chainConfig.contracts.LSP7Mintable.versions
     ] as Hex | undefined;
 
     const shouldDeployProxy =
-      contractDeploymentOptions?.LSP7DigitalAsset?.deployProxy !== false &&
-      baseContractAddress;
+      contractDeploymentOptions?.LSP7DigitalAsset?.deployProxy !== false && baseContractAddress;
 
     const lsp4TokenType =
       typeof digitalAssetDeploymentOptions.tokenType === 'string'
@@ -180,9 +179,7 @@ export class LSP7DigitalAsset {
     }
 
     // Transfer ownership if controller is different from signer
-    if (
-      getAddress(digitalAssetDeploymentOptions.controllerAddress) !== signerAddress
-    ) {
+    if (getAddress(digitalAssetDeploymentOptions.controllerAddress) !== signerAddress) {
       const transferHash = await walletClient.writeContract({
         address: contractAddress,
         abi: LSP7_MINTABLE_ABI,
