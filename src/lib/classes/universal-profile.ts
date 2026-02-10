@@ -1,4 +1,4 @@
-import { Hex, getAddress } from 'viem';
+import { Hex, getAddress, toHex } from 'viem';
 
 import contractVersions from '../../versions.json';
 import { DEFAULT_CONTRACT_VERSION } from '../helpers/config.helper';
@@ -67,7 +67,7 @@ export class UniversalProfile {
 
     const salt =
       contractDeploymentOptions?.salt ??
-      ('0x' + '00'.repeat(32)) as Hex;
+      toHex(crypto.getRandomValues(new Uint8Array(32)));
 
     const account = walletClient.account;
     if (!account) throw new Error('WalletClient must have an account');
@@ -193,7 +193,7 @@ export class UniversalProfile {
 
     const salt =
       contractDeploymentOptions?.salt ??
-      ('0x' + '00'.repeat(32)) as Hex;
+      toHex(crypto.getRandomValues(new Uint8Array(32)));
 
     const account = walletClient.account;
     if (!account) throw new Error('WalletClient must have an account');
