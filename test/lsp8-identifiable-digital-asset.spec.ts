@@ -250,7 +250,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
       expect(complete).toHaveBeenCalledWith({
         LSP8IdentifiableDigitalAsset: {
           address: MOCK_CONTRACT,
-          receipt: mockDeployReceipt,
+          receipt: mockProxyReceipt,
         },
       });
     });
@@ -275,7 +275,7 @@ describe('LSP8IdentifiableDigitalAsset', () => {
         lsp8.deploy(defaultOptions, {
           LSP8IdentifiableDigitalAsset: { deployProxy: false },
         })
-      ).rejects.toThrow('Direct deployment (non-proxy) for LSP8 is not yet supported in v4');
+      ).rejects.toThrow('Direct deployment (non-proxy) for LSP8IdentifiableDigitalAsset is not yet supported in v4');
     });
 
     it('should wait for proxy deployment receipt', async () => {

@@ -239,7 +239,7 @@ describe('LSP7DigitalAsset', () => {
       expect(complete).toHaveBeenCalledWith({
         LSP7DigitalAsset: {
           address: MOCK_CONTRACT,
-          receipt: mockDeployReceipt,
+          receipt: mockProxyReceipt,
         },
       });
     });
@@ -264,7 +264,7 @@ describe('LSP7DigitalAsset', () => {
         lsp7.deploy(defaultOptions, {
           LSP7DigitalAsset: { deployProxy: false },
         })
-      ).rejects.toThrow('Direct deployment (non-proxy) for LSP7 is not yet supported in v4');
+      ).rejects.toThrow('Direct deployment (non-proxy) for LSP7DigitalAsset is not yet supported in v4');
     });
 
     it('should wait for proxy deployment receipt', async () => {

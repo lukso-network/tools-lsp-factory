@@ -29,19 +29,16 @@ export class UniversalProfile {
   }
 
   /**
-   * Deploys a Universal Profile (UP + KeyManager) via LSP23 and configures
-   * controller permissions and Universal Receiver Delegate.
+   * Resolve chain config, validate wallet, and build LSP23 deploy params.
+   * Shared by deploy() and computeAddress().
    */
-  async deploy(
-    profileDeploymentOptions: ProfileDeploymentOptions,
-    contractDeploymentOptions?: ContractDeploymentOptions
-  ): Promise<DeployedUniversalProfileContracts> {
-    const { publicClient, walletClient, chainId } = this.options;
-    const onDeployEvents = contractDeploymentOptions?.onDeployEvents;
-
-    const emitEvent = (event: DeploymentEvent) => {
-      onDeployEvents?.next?.(event);
-    };
+  private buildDeployParams(
+    contractDeploymentOptions?: Pick<ContractDeploymentOptions, 'version' | 'salt'>
+  ): {
+    lsp23Params: LSP23DeployParams;
+    urdAddress: Hex;
+  } {
+    const { walletClient, chainId } = this.options;
 
     const defaultContractVersion = contractDeploymentOptions?.version ?? DEFAULT_CONTRACT_VERSION;
 
@@ -72,13 +69,34 @@ export class UniversalProfile {
 
     const signerAddress = getAddress(account.address) as Hex;
 
-    const lsp23Params: LSP23DeployParams = {
-      salt,
-      upBaseContractAddress: upBaseAddress,
-      kmBaseContractAddress: kmBaseAddress,
-      lsp23FactoryAddress,
-      upInitOwner: signerAddress,
+    return {
+      lsp23Params: {
+        salt,
+        upBaseContractAddress: upBaseAddress,
+        kmBaseContractAddress: kmBaseAddress,
+        lsp23FactoryAddress,
+        upInitOwner: signerAddress,
+      },
+      urdAddress,
     };
+  }
+
+  /**
+   * Deploys a Universal Profile (UP + KeyManager) via LSP23 and configures
+   * controller permissions and Universal Receiver Delegate.
+   */
+  async deploy(
+    profileDeploymentOptions: ProfileDeploymentOptions,
+    contractDeploymentOptions?: ContractDeploymentOptions
+  ): Promise<DeployedUniversalProfileContracts> {
+    const { publicClient, walletClient } = this.options;
+    const onDeployEvents = contractDeploymentOptions?.onDeployEvents;
+
+    const emitEvent = (event: DeploymentEvent) => {
+      onDeployEvents?.next?.(event);
+    };
+
+    const { lsp23Params, urdAddress } = this.buildDeployParams(contractDeploymentOptions);
 
     // Step 1: Deploy UP + KM via LSP23
     emitEvent({
@@ -166,43 +184,11 @@ export class UniversalProfile {
    * a deployment with the given parameters.
    */
   async computeAddress(
-    profileDeploymentOptions: Pick<ProfileDeploymentOptions, 'controllerAddresses'>,
+    _profileDeploymentOptions: Pick<ProfileDeploymentOptions, 'controllerAddresses'>,
     contractDeploymentOptions?: Pick<ContractDeploymentOptions, 'version' | 'salt'>
   ): Promise<{ upAddress: Hex; keyManagerAddress: Hex }> {
-    const { publicClient, walletClient, chainId } = this.options;
-
-    const defaultContractVersion = contractDeploymentOptions?.version ?? DEFAULT_CONTRACT_VERSION;
-
-    const chainConfig = contractVersions[String(chainId) as keyof typeof contractVersions];
-    if (!chainConfig) {
-      throw new Error(`No contract configuration found for chain ${chainId}`);
-    }
-
-    const upBaseAddress = (chainConfig.contracts.ERC725Account.versions[
-      defaultContractVersion as keyof typeof chainConfig.contracts.ERC725Account.versions
-    ] ?? Object.values(chainConfig.contracts.ERC725Account.versions).at(-1)) as Hex;
-
-    const kmBaseAddress = (chainConfig.contracts.KeyManager.versions[
-      defaultContractVersion as keyof typeof chainConfig.contracts.KeyManager.versions
-    ] ?? Object.values(chainConfig.contracts.KeyManager.versions).at(-1)) as Hex;
-
-    const lsp23FactoryAddress = chainConfig.lsp23FactoryAddress as Hex;
-
-    const salt =
-      contractDeploymentOptions?.salt ?? toHex(crypto.getRandomValues(new Uint8Array(32)));
-
-    const account = walletClient.account;
-    if (!account) throw new Error('WalletClient must have an account');
-
-    const signerAddress = getAddress(account.address) as Hex;
-
-    const lsp23Params: LSP23DeployParams = {
-      salt,
-      upBaseContractAddress: upBaseAddress,
-      kmBaseContractAddress: kmBaseAddress,
-      lsp23FactoryAddress,
-      upInitOwner: signerAddress,
-    };
+    const { publicClient } = this.options;
+    const { lsp23Params } = this.buildDeployParams(contractDeploymentOptions);
 
     const { upAddress, kmAddress } = await computeAddressesViaLSP23(publicClient, lsp23Params);
 

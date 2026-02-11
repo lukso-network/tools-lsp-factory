@@ -1,43 +1,16 @@
-import type { Hex, PublicClient } from 'viem';
+import type { Hex, PublicClient, TransactionReceipt, WalletClient } from 'viem';
 
 import {
-  convertContractDeploymentOptionsVersion,
-  getDeployedByteCode,
+  deployDigitalAssetProxy,
   getProxyByteCode,
-  isAddress,
+  resolveTokenType,
 } from '../src/lib/helpers/deployment.helper';
 
+const MOCK_SIGNER = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' as Hex;
+const MOCK_TX = ('0x' + 'ab'.repeat(32)) as Hex;
+const MOCK_CONTRACT = '0x4444444444444444444444444444444444444444' as Hex;
+
 describe('deployment.helper', () => {
-  describe('isAddress', () => {
-    it('should return true for a valid checksummed address', () => {
-      expect(isAddress('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045')).toBe(true);
-    });
-
-    it('should return true for a valid lowercase address', () => {
-      expect(isAddress('0xd8da6bf26964af9d7eed9e03e53415d37aa96045')).toBe(true);
-    });
-
-    it('should return false for an invalid address', () => {
-      expect(isAddress('0xinvalid')).toBe(false);
-    });
-
-    it('should return false for a non-hex string', () => {
-      expect(isAddress('hello world')).toBe(false);
-    });
-
-    it('should return false for empty string', () => {
-      expect(isAddress('')).toBe(false);
-    });
-
-    it('should return false for address with wrong length', () => {
-      expect(isAddress('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA960')).toBe(false);
-    });
-
-    it('should return true for zero address', () => {
-      expect(isAddress('0x0000000000000000000000000000000000000000')).toBe(true);
-    });
-  });
-
   describe('getProxyByteCode', () => {
     it('should return EIP-1167 minimal proxy bytecode for a given address', () => {
       const address = '0x1234567890AbcDef1234567890AbCdEf12345678';
@@ -59,65 +32,202 @@ describe('deployment.helper', () => {
       const addr = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' as Hex;
       const result = getProxyByteCode(addr);
 
-      // EIP-1167 proxy bytecode is always the same length: 0x prefix + 2*(20+20) hex chars
-      // Full: 0x + 20 bytes prefix + 20 bytes address + 15 bytes suffix = 55 bytes = 110 hex + 2
+      // EIP-1167 proxy bytecode is always the same length: 0x prefix + 110 hex chars
       expect(result.length).toBe(2 + 110);
     });
   });
 
-  describe('getDeployedByteCode', () => {
-    it('should return 0x when publicClient.getCode() returns undefined', async () => {
-      const publicClient = {
-        getCode: jest.fn().mockResolvedValue(undefined),
-      } as unknown as PublicClient;
-
-      const result = await getDeployedByteCode(
-        '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' as Hex,
-        publicClient
-      );
-
-      expect(result).toBe('0x');
+  describe('resolveTokenType', () => {
+    it('should return numeric value for string token type names', () => {
+      expect(resolveTokenType('TOKEN')).toBe(0);
+      expect(resolveTokenType('NFT')).toBe(1);
+      expect(resolveTokenType('COLLECTION')).toBe(2);
     });
 
-    it('should return bytecode from publicClient.getCode()', async () => {
-      const mockBytecode = '0x6080604052' as Hex;
-      const publicClient = {
-        getCode: jest.fn().mockResolvedValue(mockBytecode),
-      } as unknown as PublicClient;
-
-      const result = await getDeployedByteCode(
-        '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' as Hex,
-        publicClient
-      );
-
-      expect(result).toBe(mockBytecode);
-      expect(publicClient.getCode).toHaveBeenCalledWith({
-        address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-      });
+    it('should pass through numeric values', () => {
+      expect(resolveTokenType(0)).toBe(0);
+      expect(resolveTokenType(1)).toBe(1);
+      expect(resolveTokenType(2)).toBe(2);
     });
   });
 
-  describe('convertContractDeploymentOptionsVersion', () => {
-    it('should return version string for non-hex input', () => {
-      const result = convertContractDeploymentOptionsVersion('0.14.0');
-      expect(result).toEqual({ version: '0.14.0', byteCode: undefined, libAddress: undefined });
+  describe('deployDigitalAssetProxy', () => {
+    let publicClient: PublicClient;
+    let walletClient: WalletClient;
+    let mockProxyReceipt: TransactionReceipt;
+
+    const initAbi = [
+      {
+        inputs: [
+          { name: 'name_', type: 'string' },
+          { name: 'symbol_', type: 'string' },
+          { name: 'newOwner_', type: 'address' },
+          { name: 'lsp4TokenType_', type: 'uint256' },
+          { name: 'isNonDivisible_', type: 'bool' },
+        ],
+        name: 'initialize',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+    ] as const;
+
+    beforeEach(() => {
+      mockProxyReceipt = {
+        transactionHash: MOCK_TX,
+        blockHash: ('0x' + '00'.repeat(32)) as Hex,
+        blockNumber: 1n,
+        status: 'success',
+        contractAddress: MOCK_CONTRACT,
+      } as unknown as TransactionReceipt;
+
+      publicClient = {
+        chain: { id: 4201 },
+        waitForTransactionReceipt: jest.fn().mockResolvedValue(mockProxyReceipt),
+      } as unknown as PublicClient;
+
+      walletClient = {
+        account: { address: MOCK_SIGNER },
+        chain: { id: 4201 },
+        sendTransaction: jest.fn().mockResolvedValue(MOCK_TX),
+        writeContract: jest.fn().mockResolvedValue(MOCK_TX),
+      } as unknown as WalletClient;
     });
 
-    it('should return libAddress for a valid 0x-prefixed address', () => {
-      const address = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
-      const result = convertContractDeploymentOptionsVersion(address);
-      expect(result).toEqual({ version: undefined, byteCode: undefined, libAddress: address });
+    afterEach(() => {
+      jest.restoreAllMocks();
     });
 
-    it('should return byteCode for a 0x-prefixed non-address hex', () => {
-      const bytecode = '0x6080604052';
-      const result = convertContractDeploymentOptionsVersion(bytecode);
-      expect(result).toEqual({ version: undefined, byteCode: bytecode, libAddress: undefined });
+    it('should deploy proxy, initialize, and return deployed contract', async () => {
+      const result = await deployDigitalAssetProxy(
+        { publicClient, walletClient, chainId: 4201 },
+        MOCK_SIGNER,
+        undefined,
+        {
+          contractKey: 'LSP7Mintable',
+          contractName: 'LSP7DigitalAsset',
+          initAbi,
+          initArgs: ['Test', 'TST', MOCK_SIGNER, 0n, false],
+        }
+      );
+
+      expect(result.address).toBe(MOCK_CONTRACT);
+      expect(result.receipt).toBe(mockProxyReceipt);
     });
 
-    it('should return all undefined when no version provided', () => {
-      const result = convertContractDeploymentOptionsVersion();
-      expect(result).toEqual({ version: undefined, byteCode: undefined, libAddress: undefined });
+    it('should throw when walletClient has no account', async () => {
+      await expect(
+        deployDigitalAssetProxy(
+          {
+            publicClient,
+            walletClient: { account: undefined } as unknown as WalletClient,
+            chainId: 4201,
+          },
+          MOCK_SIGNER,
+          undefined,
+          {
+            contractKey: 'LSP7Mintable',
+            contractName: 'LSP7DigitalAsset',
+            initAbi,
+            initArgs: ['Test', 'TST', MOCK_SIGNER, 0n, false],
+          }
+        )
+      ).rejects.toThrow('WalletClient must have an account');
+    });
+
+    it('should throw when deployProxy is explicitly false', async () => {
+      await expect(
+        deployDigitalAssetProxy(
+          { publicClient, walletClient, chainId: 4201 },
+          MOCK_SIGNER,
+          undefined,
+          {
+            contractKey: 'LSP7Mintable',
+            contractName: 'LSP7DigitalAsset',
+            initAbi,
+            initArgs: ['Test', 'TST', MOCK_SIGNER, 0n, false],
+            deployProxy: false,
+          }
+        )
+      ).rejects.toThrow('Direct deployment (non-proxy) for LSP7DigitalAsset is not yet supported');
+    });
+
+    it('should emit PENDING and COMPLETE events', async () => {
+      const events: any[] = [];
+      const next = jest.fn((e: any) => events.push(e));
+
+      await deployDigitalAssetProxy(
+        { publicClient, walletClient, chainId: 4201 },
+        MOCK_SIGNER,
+        undefined,
+        {
+          contractKey: 'LSP7Mintable',
+          contractName: 'LSP7DigitalAsset',
+          initAbi,
+          initArgs: ['Test', 'TST', MOCK_SIGNER, 0n, false],
+        },
+        { next }
+      );
+
+      expect(events).toHaveLength(2);
+      expect(events[0].status).toBe('PENDING');
+      expect(events[1].status).toBe('COMPLETE');
+    });
+
+    it('should set metadata when digitalAssetMetadata is a string', async () => {
+      await deployDigitalAssetProxy(
+        { publicClient, walletClient, chainId: 4201 },
+        MOCK_SIGNER,
+        '0xdeadbeef',
+        {
+          contractKey: 'LSP7Mintable',
+          contractName: 'LSP7DigitalAsset',
+          initAbi,
+          initArgs: ['Test', 'TST', MOCK_SIGNER, 0n, false],
+        }
+      );
+
+      // initialize + setDataBatch
+      expect(walletClient.writeContract).toHaveBeenCalledTimes(2);
+    });
+
+    it('should transfer ownership when controller differs from signer', async () => {
+      const controller = '0x3333333333333333333333333333333333333333' as Hex;
+
+      await deployDigitalAssetProxy(
+        { publicClient, walletClient, chainId: 4201 },
+        controller,
+        undefined,
+        {
+          contractKey: 'LSP7Mintable',
+          contractName: 'LSP7DigitalAsset',
+          initAbi,
+          initArgs: ['Test', 'TST', MOCK_SIGNER, 0n, false],
+        }
+      );
+
+      // initialize + transferOwnership
+      expect(walletClient.writeContract).toHaveBeenCalledTimes(2);
+      const lastCall = (walletClient.writeContract as jest.Mock).mock.calls[1][0];
+      expect(lastCall.functionName).toBe('transferOwnership');
+      expect(lastCall.args).toEqual([controller]);
+    });
+
+    it('should NOT transfer ownership when controller is the signer', async () => {
+      await deployDigitalAssetProxy(
+        { publicClient, walletClient, chainId: 4201 },
+        MOCK_SIGNER,
+        undefined,
+        {
+          contractKey: 'LSP7Mintable',
+          contractName: 'LSP7DigitalAsset',
+          initAbi,
+          initArgs: ['Test', 'TST', MOCK_SIGNER, 0n, false],
+        }
+      );
+
+      // initialize only — no transferOwnership
+      expect(walletClient.writeContract).toHaveBeenCalledTimes(1);
     });
   });
 });
