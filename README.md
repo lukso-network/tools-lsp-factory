@@ -26,6 +26,21 @@
 
 <p align="center">For more information see the <a href="https://docs.lukso.tech/tools/lsp-factoryjs/getting-started">LUKSO Documentation</a>.</p>
 
+## Supported Networks
+
+This library deploys contracts via [LSP23LinkedContractsFactory](https://docs.lukso.tech/standards/accounts/lsp23-linked-contracts-factory), which is deployed at the same address on all supported chains via the [Nick Factory](https://eips.ethereum.org/EIPS/eip-2470) for deterministic addresses:
+
+**LSP23 Factory Address:** `0x2300000A84D25dF63081feAa37ba6b62C4c89a30`
+
+| Network | Chain ID |
+|---|---|
+| LUKSO Mainnet | 42 |
+| LUKSO Testnet | 4201 |
+| Ethereum Mainnet | 1 |
+| BASE | 8453 |
+
+All base contract implementations (ERC725Account, KeyManager, UniversalReceiverDelegate, LSP7, LSP8) are also deployed at the same addresses across chains via the Nick Factory.
+
 ## Install
 
 ```bash
