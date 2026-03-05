@@ -1,16 +1,7 @@
-import { providers, Signer } from 'ethers';
-
-import { IPFSGateway, UploadOptions } from './profile-upload-options';
+import { PublicClient, WalletClient } from 'viem';
 
 export interface LSPFactoryOptions {
-  provider: providers.Web3Provider | providers.JsonRpcProvider;
+  publicClient: PublicClient;
+  walletClient: WalletClient;
   chainId: number;
-  signer: Signer;
-  uploadOptions: UploadOptions;
-}
-
-export interface SignerOptions {
-  deployKey?: string | Signer;
-  chainId?: number;
-  ipfsGateway?: IPFSGateway;
 }

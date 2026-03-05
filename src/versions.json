@@ -3,6 +3,7 @@
     "name": "LUKSO Testnet",
     "chainId": 4201,
     "networkId": 4201,
+    "lsp23FactoryAddress": "0x2300000A84D25dF63081feAa37ba6b62C4c89a30",
     "contracts": {
       "ERC725Account": {
         "versions": {
@@ -65,6 +66,7 @@
     "name": "LUKSO Mainnet",
     "chainId": 42,
     "networkId": 42,
+    "lsp23FactoryAddress": "0x2300000A84D25dF63081feAa37ba6b62C4c89a30",
     "contracts": {
       "ERC725Account": {
         "versions": {
@@ -102,6 +104,82 @@
         "versions": {
           "0.12.0": "0x1B7799CB9bEDF8CcB6e8C3F992F35d35c9AC9823",
           "0.12.1": "0x894cD1D8Fd0e9d07609ea4a69ab0Cc118166BC7e",
+          "0.14.0": "0xd787a2f6B14d4dcC2fb897f40b87f2Ff63a07997"
+        },
+        "baseContract": true
+      }
+    }
+  },
+  "1": {
+    "name": "Ethereum Mainnet",
+    "chainId": 1,
+    "networkId": 1,
+    "lsp23FactoryAddress": "0x2300000A84D25dF63081feAa37ba6b62C4c89a30",
+    "contracts": {
+      "ERC725Account": {
+        "versions": {
+          "0.14.0": "0x3024D38EA2434BA6635003Dc1BDC0daB5882ED4F"
+        },
+        "baseContract": true
+      },
+      "KeyManager": {
+        "versions": {
+          "0.14.0": "0x2Fe3AeD98684E7351aD2D408A43cE09a738BF8a4"
+        },
+        "baseContract": true
+      },
+      "UniversalReceiverDelegate": {
+        "versions": {
+          "0.14.0": "0x7870C5B8BC9572A8001C3f96f7ff59961B23500D"
+        },
+        "baseContract": false
+      },
+      "LSP7Mintable": {
+        "versions": {
+          "0.14.0": "0x28B7CcdaD1E15cCbDf380c439Cc1F2EBe7f5B2d8"
+        },
+        "baseContract": true
+      },
+      "LSP8Mintable": {
+        "versions": {
+          "0.14.0": "0xd787a2f6B14d4dcC2fb897f40b87f2Ff63a07997"
+        },
+        "baseContract": true
+      }
+    }
+  },
+  "8453": {
+    "name": "BASE",
+    "chainId": 8453,
+    "networkId": 8453,
+    "lsp23FactoryAddress": "0x2300000A84D25dF63081feAa37ba6b62C4c89a30",
+    "contracts": {
+      "ERC725Account": {
+        "versions": {
+          "0.14.0": "0x3024D38EA2434BA6635003Dc1BDC0daB5882ED4F"
+        },
+        "baseContract": true
+      },
+      "KeyManager": {
+        "versions": {
+          "0.14.0": "0x2Fe3AeD98684E7351aD2D408A43cE09a738BF8a4"
+        },
+        "baseContract": true
+      },
+      "UniversalReceiverDelegate": {
+        "versions": {
+          "0.14.0": "0x7870C5B8BC9572A8001C3f96f7ff59961B23500D"
+        },
+        "baseContract": false
+      },
+      "LSP7Mintable": {
+        "versions": {
+          "0.14.0": "0x28B7CcdaD1E15cCbDf380c439Cc1F2EBe7f5B2d8"
+        },
+        "baseContract": true
+      },
+      "LSP8Mintable": {
+        "versions": {
           "0.14.0": "0xd787a2f6B14d4dcC2fb897f40b87f2Ff63a07997"
         },
         "baseContract": true

@@ -1,8 +1,6 @@
 import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
 import { ERC725YDataKeys } from '@lukso/lsp-smart-contracts';
-import { providers } from 'ethers';
 
-import { LSP3ProfileDataForEncoding } from '../interfaces/lsp3-profile';
 import { LSP4MetadataForEncoding } from '../interfaces/lsp4-digital-asset';
 
 export const schema: ERC725JSONSchema[] = [
@@ -22,18 +20,11 @@ export const schema: ERC725JSONSchema[] = [
   },
 ];
 
-export function getERC725(address?: string, provider?: providers.Web3Provider) {
-  if (address) {
-    return new ERC725(schema, address, provider);
-  }
-
+export function getERC725() {
   return new ERC725(schema);
 }
 
-export function erc725EncodeData(
-  data: LSP4MetadataForEncoding | LSP3ProfileDataForEncoding,
-  keyName: string
-) {
+export function erc725EncodeData(data: LSP4MetadataForEncoding, keyName: string) {
   const myERC725 = getERC725();
   return myERC725.encodeData([{ keyName, value: data }]);
 }

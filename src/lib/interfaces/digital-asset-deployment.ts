@@ -1,13 +1,9 @@
 import { LSP4_TOKEN_TYPES } from '@lukso/lsp-smart-contracts';
+import { Hex } from 'viem';
 
-import {
-  LSP4MetadataBeforeUpload,
-  LSP4MetadataContentBeforeUpload,
-  LSP4MetadataForEncoding,
-} from './lsp4-digital-asset';
-import { IPFSGateway, UploadOptions } from './profile-upload-options';
-
-import { ContractOptions, DeployedContract, DeploymentEventCallbacks } from '.';
+import { ContractOptions } from './contract-options';
+import { DeployedContract, DeploymentEventCallbacks } from './deployment-events';
+import { LSP4MetadataForEncoding } from './lsp4-digital-asset';
 
 export enum ContractNames {
   LSP7_DIGITAL_ASSET = 'LSP7DigitalAsset',
@@ -18,16 +14,12 @@ export type LSP4TokenTypeNames = keyof typeof LSP4_TOKEN_TYPES;
 export type LSP4TokenTypeValues = (typeof LSP4_TOKEN_TYPES)[LSP4TokenTypeNames];
 
 export interface DigitalAssetDeploymentOptions {
-  controllerAddress: string;
+  controllerAddress: Hex;
   name: string;
   symbol: string;
   tokenType: LSP4TokenTypeNames | LSP4TokenTypeValues;
-  digitalAssetMetadata?:
-    | LSP4MetadataBeforeUpload
-    | LSP4MetadataContentBeforeUpload
-    | LSP4MetadataForEncoding
-    | string;
-  creators?: string[];
+  digitalAssetMetadata?: LSP4MetadataForEncoding | string;
+  creators?: Hex[];
 }
 
 export interface LSP7DigitalAssetDeploymentOptions extends DigitalAssetDeploymentOptions {
@@ -47,16 +39,12 @@ export interface DeployedLSP7DigitalAsset {
   LSP7DigitalAsset: DeployedContract;
 }
 
-interface ContractDeploymentOptionsBase {
-  ipfsGateway?: IPFSGateway;
-}
-
-export interface LSP7ContractDeploymentOptions extends ContractDeploymentOptionsBase {
+export interface LSP7ContractDeploymentOptions {
   LSP7DigitalAsset?: ContractOptions;
   onDeployEvents?: DeploymentEventCallbacks<DeployedLSP7DigitalAsset>;
 }
 
-export interface LSP8ContractDeploymentOptions extends ContractDeploymentOptionsBase {
+export interface LSP8ContractDeploymentOptions {
   LSP8IdentifiableDigitalAsset?: ContractOptions;
   onDeployEvents?: DeploymentEventCallbacks<DeployedLSP8IdentifiableDigitalAsset>;
 }
@@ -67,8 +55,7 @@ export type DigitalAssetContractDeploymentOptions =
 
 export interface DigitalAssetConfiguration {
   version?: string;
-  byteCode?: string;
-  libAddress?: string;
+  byteCode?: Hex;
+  libAddress?: Hex;
   deployProxy?: boolean;
-  uploadOptions?: UploadOptions;
 }
