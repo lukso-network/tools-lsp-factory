@@ -21,7 +21,7 @@
     "version": "standard-version"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "dependencies": {
     "@erc725/erc725.js": "^0.22.0",
