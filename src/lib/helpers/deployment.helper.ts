@@ -37,7 +37,7 @@ const DIGITAL_ASSET_ABI = [
 
 export function getProxyByteCode(address: Hex): Hex {
   return `0x3d602d80600a3d3981f3363d3d373d3d3d363d73${address.slice(
-    2
+    2,
   )}5af43d82803e903d91602b57fd5bf3`;
 }
 
@@ -72,7 +72,7 @@ export async function deployDigitalAssetProxy(
   config: DigitalAssetDeployConfig,
   onDeployEvents?: {
     next?: (value: DeploymentEvent) => void;
-  }
+  },
 ): Promise<DeployedContract> {
   const { publicClient, walletClient, chainId } = options;
 
@@ -93,7 +93,7 @@ export async function deployDigitalAssetProxy(
 
   if (config.deployProxy === false || !baseContractAddress) {
     throw new Error(
-      `Direct deployment (non-proxy) for ${config.contractName} is not yet supported in v4. Use deployProxy: true.`
+      `Direct deployment (non-proxy) for ${config.contractName} is not yet supported in v4. Use deployProxy: true.`,
     );
   }
 

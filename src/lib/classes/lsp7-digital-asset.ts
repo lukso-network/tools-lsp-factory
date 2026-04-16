@@ -34,7 +34,7 @@ export class LSP7DigitalAsset {
 
   async deploy(
     digitalAssetDeploymentOptions: LSP7DigitalAssetDeploymentOptions,
-    contractDeploymentOptions?: LSP7ContractDeploymentOptions
+    contractDeploymentOptions?: LSP7ContractDeploymentOptions,
   ): Promise<DeployedLSP7DigitalAsset> {
     const account = this.options.walletClient.account;
     if (!account) throw new Error('WalletClient must have an account');
@@ -62,7 +62,7 @@ export class LSP7DigitalAsset {
         deployProxy: contractDeploymentOptions?.LSP7DigitalAsset?.deployProxy,
         version: contractDeploymentOptions?.LSP7DigitalAsset?.version,
       },
-      onDeployEvents
+      onDeployEvents,
     );
 
     const contracts: DeployedLSP7DigitalAsset = {
