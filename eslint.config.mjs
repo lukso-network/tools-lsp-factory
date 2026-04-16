@@ -1,6 +1,6 @@
 import js from "@eslint/js";
 import eslintComments from "@eslint-community/eslint-plugin-eslint-comments";
-import importPlugin from "eslint-plugin-import";
+import importPlugin from "eslint-plugin-import-x";
 import prettierRecommended from "eslint-plugin-prettier/recommended";
 import tseslint from "typescript-eslint";
 
@@ -20,7 +20,7 @@ export default tseslint.config(
 	...tseslint.configs.recommended,
 	{
 		plugins: {
-			import: importPlugin,
+			"import-x": importPlugin,
 			"@eslint-community/eslint-comments": eslintComments,
 		},
 		languageOptions: {
@@ -33,7 +33,7 @@ export default tseslint.config(
 			},
 		},
 		settings: {
-			"import/resolver": {
+			"import-x/resolver": {
 				typescript: true,
 				node: true,
 			},
@@ -49,7 +49,7 @@ export default tseslint.config(
 			"no-unused-vars": "off",
 			"@typescript-eslint/no-unused-vars": ["error"],
 			"@typescript-eslint/no-explicit-any": "off",
-			"import/order": [
+			"import-x/order": [
 				"error",
 				{ "newlines-between": "always", alphabetize: { order: "asc" } },
 			],
