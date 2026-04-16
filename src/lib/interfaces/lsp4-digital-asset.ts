@@ -1,4 +1,4 @@
-import { AssetMetadata, ImageMetadata, LinkMetadata, Verification } from './metadata';
+import type { AssetMetadata, ImageMetadata, LinkMetadata, Verification } from './metadata';
 
 export interface LSP4DigitalAssetJSON {
   LSP4Metadata: LSP4DigitalAsset;
