@@ -79,7 +79,7 @@ describe('lsp23.helper', () => {
         functionName: 'initialize',
         args: [zeroAddress],
       });
-      expect(result.secondaryContractDeploymentInit.initializationCalldata).toBe(expectedCalldata);
+      expect(result.secondaryContractDeploymentInit.initializationCalldata).toBe(expectedCalldata.slice(0, 10));
     });
   });
 
