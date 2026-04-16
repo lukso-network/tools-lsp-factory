@@ -1,5 +1,5 @@
 import js from "@eslint/js";
-import eslintComments from "eslint-plugin-eslint-comments";
+import eslintComments from "@eslint-community/eslint-plugin-eslint-comments";
 import importPlugin from "eslint-plugin-import";
 import prettierRecommended from "eslint-plugin-prettier/recommended";
 import tseslint from "typescript-eslint";
@@ -21,7 +21,7 @@ export default tseslint.config(
 	{
 		plugins: {
 			import: importPlugin,
-			"eslint-comments": eslintComments,
+			"@eslint-community/eslint-comments": eslintComments,
 		},
 		languageOptions: {
 			ecmaVersion: 2020,
@@ -41,11 +41,11 @@ export default tseslint.config(
 		rules: {
 			...eslintComments.configs.recommended.rules,
 			"@typescript-eslint/explicit-module-boundary-types": "off",
-			"eslint-comments/disable-enable-pair": [
+			"@eslint-community/eslint-comments/disable-enable-pair": [
 				"error",
 				{ allowWholeFile: true },
 			],
-			"eslint-comments/no-unused-disable": "error",
+			"@eslint-community/eslint-comments/no-unused-disable": "error",
 			"no-unused-vars": "off",
 			"@typescript-eslint/no-unused-vars": ["error"],
 			"@typescript-eslint/no-explicit-any": "off",

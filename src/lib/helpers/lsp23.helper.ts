@@ -243,7 +243,7 @@ export async function computeAddressesViaLSP23(
 ): Promise<{ upAddress: Hex; kmAddress: Hex }> {
   const args = buildLSP23Args(params);
 
-  const result = await publicClient.readContract({
+  const result = (await publicClient.readContract({
     address: params.lsp23FactoryAddress,
     abi: LSP23_ABI,
     functionName: 'computeERC1167Addresses',
@@ -253,7 +253,7 @@ export async function computeAddressesViaLSP23(
       args.postDeploymentModule,
       args.postDeploymentModuleCalldata,
     ],
-  } as any);
+  } as any)) as readonly [Hex, Hex];
 
   return {
     upAddress: getAddress(result[0]) as Hex,
