@@ -179,8 +179,8 @@ export function buildLSP23Args(params: LSP23DeployParams) {
   const kmInitCalldata = encodeFunctionData({
     abi: KM_INIT_ABI,
     functionName: 'initialize',
-    args: [zeroAddress], // placeholder; LSP23 appends UP address via addPrimaryContractAddress
-  });
+    args: [zeroAddress], 
+  }).slice(0, 10) as Hex; // placeholder; LSP23 appends UP address via addPrimaryContractAddress
 
   const primaryContractDeploymentInit = {
     salt: params.salt,
