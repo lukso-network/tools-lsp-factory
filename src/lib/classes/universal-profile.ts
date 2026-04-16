@@ -33,7 +33,7 @@ export class UniversalProfile {
    * Shared by deploy() and computeAddress().
    */
   private buildDeployParams(
-    contractDeploymentOptions?: Pick<ContractDeploymentOptions, 'version' | 'salt'>
+    contractDeploymentOptions?: Pick<ContractDeploymentOptions, 'version' | 'salt'>,
   ): {
     lsp23Params: LSP23DeployParams;
     urdAddress: Hex;
@@ -87,7 +87,7 @@ export class UniversalProfile {
    */
   async deploy(
     profileDeploymentOptions: ProfileDeploymentOptions,
-    contractDeploymentOptions?: ContractDeploymentOptions
+    contractDeploymentOptions?: ContractDeploymentOptions,
   ): Promise<DeployedUniversalProfileContracts> {
     const { publicClient, walletClient } = this.options;
     const onDeployEvents = contractDeploymentOptions?.onDeployEvents;
@@ -149,7 +149,7 @@ export class UniversalProfile {
         kmAddress,
         profileDeploymentOptions.controllerAddresses,
         urdAddress,
-        profileDeploymentOptions.lsp3DataValue
+        profileDeploymentOptions.lsp3DataValue,
       );
     } catch (error) {
       onDeployEvents?.error?.(error);
@@ -185,7 +185,7 @@ export class UniversalProfile {
    */
   async computeAddress(
     _profileDeploymentOptions: Pick<ProfileDeploymentOptions, 'controllerAddresses'>,
-    contractDeploymentOptions?: Pick<ContractDeploymentOptions, 'version' | 'salt'>
+    contractDeploymentOptions?: Pick<ContractDeploymentOptions, 'version' | 'salt'>,
   ): Promise<{ upAddress: Hex; keyManagerAddress: Hex }> {
     const { publicClient } = this.options;
     const { lsp23Params } = this.buildDeployParams(contractDeploymentOptions);

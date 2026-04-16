@@ -34,7 +34,7 @@ export class LSP8IdentifiableDigitalAsset {
 
   async deploy(
     digitalAssetDeploymentOptions: LSP8IdentifiableDigitalAssetDeploymentOptions,
-    contractDeploymentOptions?: LSP8ContractDeploymentOptions
+    contractDeploymentOptions?: LSP8ContractDeploymentOptions,
   ): Promise<DeployedLSP8IdentifiableDigitalAsset> {
     const account = this.options.walletClient.account;
     if (!account) throw new Error('WalletClient must have an account');
@@ -66,7 +66,7 @@ export class LSP8IdentifiableDigitalAsset {
         deployProxy: contractDeploymentOptions?.LSP8IdentifiableDigitalAsset?.deployProxy,
         version: contractDeploymentOptions?.LSP8IdentifiableDigitalAsset?.version,
       },
-      onDeployEvents
+      onDeployEvents,
     );
 
     const contracts: DeployedLSP8IdentifiableDigitalAsset = {

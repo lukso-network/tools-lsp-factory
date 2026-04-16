@@ -3,10 +3,16 @@ module.exports = async () => {
     roots: ['<rootDir>'],
     transform: {
       '^.+\\.tsx?$': [
-        'esbuild-jest',
+        '@swc/jest',
         {
-          sourcemap: true,
-          target: 'es2020',
+          sourceMaps: true,
+          jsc: {
+            parser: {
+              syntax: 'typescript',
+              tsx: false,
+            },
+            target: 'es2020',
+          },
         },
       ],
     },
