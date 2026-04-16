@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.3.3](https://github.com/lukso-network/tools-lsp-factory/compare/lsp-factory.js-v3.3.2...lsp-factory.js-v3.3.3) (2026-04-16)
+
+
+### Bug Fixes
+
+* Attempt npx npm@latest ([6559874](https://github.com/lukso-network/tools-lsp-factory/commit/65598742ba3681f297b3e60d0b57db49f747b9bb))
+
 ## [3.3.2](https://github.com/lukso-network/tools-lsp-factory/compare/lsp-factory.js-v3.3.1...lsp-factory.js-v3.3.2) (2026-04-16)
 
 
