@@ -11,14 +11,31 @@ permissions:
 
 jobs:
   release-please:
-    name: release
+    name: Release Please
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+
+    steps:
+      - uses: google-github-actions/release-please-action@v4
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    name: Publish to NPM
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
     runs-on: ubuntu-latest
     environment: publish
+    permissions:
+      contents: read
+      id-token: write # Required for npm provenance (OIDC)
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: ⚙️ Setup Node.js v20
         uses: actions/setup-node@v4
@@ -38,26 +55,9 @@ jobs:
         run: npm run build
 
       - name: 🎯 Test
-        run: npm run generate-types && npm run test
+        run: npm test
 
-      - uses: google-github-actions/release-please-action@v4
-        id: release
-        with:
-          release-type: node
-          package-name: '@lukso/lsp-factory.js'
-          bump-minor-pre-major: true
-          default-branch: main
-
-      - name: 🔍 Check if version changed
-        uses: EndBug/version-check@v2
-        if: github.event_name == 'push'
-        id: check
-
-      - name: 🔄 Check if should release
-        run: echo "SHOULD_RELEASE=${{ steps.check.outputs.changed == 'true' }}" >> $GITHUB_ENV
-
-      - name: 📦 Publish to NPM
-        if: env.SHOULD_RELEASE == 'true'
-        run: npm publish --access public
+      - name: 📦 Publish to NPM with provenance
+        run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
