@@ -45,6 +45,9 @@ jobs:
           scope: '@lukso'
           cache: 'npm'
 
+      - name: ⬆️ Upgrade npm (trusted publishing requires ≥ 11.5.1)
+        run: npm install -g npm@latest
+
       - name: 🧰 Install
         run: npm ci
 
@@ -59,5 +62,3 @@ jobs:
 
       - name: 📦 Publish to NPM with provenance
         run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
