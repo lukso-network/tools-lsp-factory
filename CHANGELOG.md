@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.3.1](https://github.com/lukso-network/tools-lsp-factory/compare/lsp-factory.js-v3.3.0...lsp-factory.js-v3.3.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* Cleanup lint ([7eabcf4](https://github.com/lukso-network/tools-lsp-factory/commit/7eabcf47364c9fc23fbe9f4269cb20e8d4d91910))
+* swap eslint-plugin-import for eslint-plugin-import-x ([62a9b96](https://github.com/lukso-network/tools-lsp-factory/commit/62a9b965a48f23ee945562b34bc38ec5d61394c0))
+
 ## [3.3.0](https://github.com/lukso-network/tools-lsp-factory/compare/lsp-factory.js-v4.0.0...lsp-factory.js-v3.3.0) (2026-04-16)
 
 
