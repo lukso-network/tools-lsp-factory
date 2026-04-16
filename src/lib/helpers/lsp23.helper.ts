@@ -208,7 +208,7 @@ export function buildLSP23Args(params: LSP23DeployParams) {
 export async function deployViaLSP23(
   publicClient: PublicClient,
   walletClient: WalletClient,
-  params: LSP23DeployParams
+  params: LSP23DeployParams,
 ): Promise<{ upAddress: Hex; kmAddress: Hex; txHash: Hex }> {
   const args = buildLSP23Args(params);
 
@@ -239,7 +239,7 @@ export async function deployViaLSP23(
 
 export async function computeAddressesViaLSP23(
   publicClient: PublicClient,
-  params: LSP23DeployParams
+  params: LSP23DeployParams,
 ): Promise<{ upAddress: Hex; kmAddress: Hex }> {
   const args = buildLSP23Args(params);
 
@@ -269,7 +269,7 @@ export function buildSetDataParams(
   controllers: (Hex | ControllerOptions)[],
   universalReceiverDelegateAddress: Hex,
   signerAddress: Hex,
-  lsp3DataValue?: Hex
+  lsp3DataValue?: Hex,
 ): { keysToSet: Hex[]; valuesToSet: Hex[] } {
   const controllerAddresses: Hex[] = [];
   const controllerPermissions: Hex[] = [];
@@ -287,7 +287,7 @@ export function buildSetDataParams(
   // AddressPermissions:Permissions:<address> keys
   const addressPermissionsKeys: Hex[] = controllerAddresses.map(
     (address) =>
-      (ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + address.substring(2)) as Hex
+      (ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + address.substring(2)) as Hex,
   );
 
   // AddressPermissions[index] keys
@@ -323,12 +323,12 @@ export function buildSetDataParams(
   // Set CHANGEOWNER + EDITPERMISSIONS for deploy key (revoked after transfer)
   if (!controllerAddresses.includes(signerAddress)) {
     keysToSet.push(
-      (ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signerAddress.substring(2)) as Hex
+      (ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signerAddress.substring(2)) as Hex,
     );
     valuesToSet.push(ERC725.encodePermissions({ CHANGEOWNER: true, EDITPERMISSIONS: true }) as Hex);
   } else {
     const signerKeyIndex = keysToSet.indexOf(
-      (ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signerAddress.substring(2)) as Hex
+      (ERC725YDataKeys.LSP6['AddressPermissions:Permissions'] + signerAddress.substring(2)) as Hex,
     );
     if (signerKeyIndex >= 0) {
       valuesToSet[signerKeyIndex] = ERC725.encodePermissions({
@@ -357,7 +357,7 @@ export async function setDataAndTransferOwnership(
   kmAddress: Hex,
   controllers: (Hex | ControllerOptions)[],
   universalReceiverDelegateAddress: Hex,
-  lsp3DataValue?: Hex
+  lsp3DataValue?: Hex,
 ): Promise<Hex[]> {
   const account = walletClient.account;
   if (!account) throw new Error('WalletClient must have an account');
@@ -367,7 +367,7 @@ export async function setDataAndTransferOwnership(
     controllers,
     universalReceiverDelegateAddress,
     signerAddress,
-    lsp3DataValue
+    lsp3DataValue,
   );
 
   const txHashes: Hex[] = [];
@@ -422,7 +422,7 @@ export async function setDataAndTransferOwnership(
     signerPermission =
       typeof controller === 'string'
         ? (ALL_PERMISSIONS as Hex)
-        : controller.permissions ?? (ALL_PERMISSIONS as Hex);
+        : (controller.permissions ?? (ALL_PERMISSIONS as Hex));
   } else {
     signerPermission = ERC725.encodePermissions({}) as Hex;
   }
