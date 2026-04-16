@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@erc725/erc725.js": "^0.22.0",
-    "@lukso/lsp-smart-contracts": "^0.14.0",
+    "@lukso/lsp-smart-contracts": "^0.16.7",
     "viem": "^2.0.0"
   },
   "devDependencies": {
