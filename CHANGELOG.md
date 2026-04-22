@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.3.4](https://github.com/lukso-network/tools-lsp-factory/compare/lsp-factory.js-v3.3.3...lsp-factory.js-v3.3.4) (2026-04-22)
+
+
+### Documentation
+
+* overhaul README — clear intro, Universal Profiles + LSP7 + LSP8 all covered ([9cdf15d](https://github.com/lukso-network/tools-lsp-factory/commit/9cdf15df6821095600192514aa9f34d7d9f4f66e))
+
 ## [3.3.3](https://github.com/lukso-network/tools-lsp-factory/compare/lsp-factory.js-v3.3.2...lsp-factory.js-v3.3.3) (2026-04-16)
 
 
